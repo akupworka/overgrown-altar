@@ -1,0 +1,29 @@
+---
+// The frame around every page: the <head>, the shared styles and the footer.
+// A page uses it like:  <BaseLayout title="About"> ...page content... </BaseLayout>
+import '../styles/global.css';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props { title?: string; description?: string }
+const {
+  title,
+  description = 'An independent journal of craft, discernment and the reclaimed hearth.',
+} = Astro.props;
+const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
+  </head>
+  <body>
+    <main>
+      <slot />  <!-- the page's own content goes here -->
+    </main>
+    <SiteFooter />
+  </body>
+</html>

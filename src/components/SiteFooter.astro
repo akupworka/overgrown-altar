@@ -1,0 +1,64 @@
+---
+// The footer at the bottom of every page.
+import Wordmark from './Wordmark.astro';
+
+const left = [
+  { href: '/start-here', label: 'Start Here' },
+  { href: '/watchtower', label: 'The Watchtower' },
+  { href: '/hearth', label: 'The Hearth' },
+  { href: '/perimeter', label: 'The Perimeter' },
+  { href: '/folios', label: 'Folios' },
+  { href: '/archive', label: 'Archive' },
+];
+const right = [
+  { href: '/about', label: 'About' },
+  { href: '/manifesto', label: 'Manifesto' },
+  { href: '/beliefs', label: 'What We Believe' },
+  { href: '/guild', label: 'Join the Guild' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/legal', label: 'Disclaimer · Privacy · Terms' },
+];
+---
+<footer class="foot night">
+  <div class="foot-g">
+    <nav class="lab foot-col" aria-label="Footer: journal">
+      {left.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <div class="center foot-mid">
+      <Wordmark width={420} />
+      <span class="it" style="font-size:22px">We light the signal fires on the perimeter.</span>
+    </div>
+    <nav class="lab foot-col foot-right" aria-label="Footer: the house">
+      {right.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+  </div>
+  <div class="foot-b">
+    <span>Est. MMXXVI · Independent Guild</span>
+    <span>overgrownaltar.com</span>
+    <span>A journal by Ainslie Willson</span>
+  </div>
+</footer>
+
+<style>
+  .foot { padding: 100px 120px 50px; }
+  .foot-g { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 40px; }
+  .foot-col { display: flex; flex-direction: column; gap: 14px; color: var(--muted-dark); }
+  .foot-col a:hover { color: var(--ember); }
+  .foot-right { justify-self: end; text-align: right; }
+  .foot-mid { gap: 24px; }
+  .foot-b {
+    margin-top: 80px; padding-top: 24px; border-top: 1px solid rgba(243,236,220,.2);
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: #8C8679;
+  }
+  @media (max-width: 960px) {
+    .foot { padding: 64px 22px 36px; }
+    .foot-g { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+    .foot-mid { order: -1; }
+    .foot-col, .foot-right { justify-self: center; text-align: center; align-items: center; }
+    .foot-b { flex-direction: column; gap: 10px; align-items: center; }
+  }
+  @media (max-width: 700px) {
+    .foot-mid :global(.wordmark) { width: 300px !important; }
+  }
+</style>
