@@ -20,6 +20,7 @@ Start by reading this file, then `README.md`.
 ## Latest polish
 - `src/lib/catalog.ts`: one list of real pieces (2 complete design pieces + published Guild pieces) used by Home,
   The Watchtower, The Perimeter, Archive, Start Here and "More to read". Sample-only pieces were retired.
+- Writing sheet is styled as you write (TipTap, `components/desk/RichBody.tsx`); it still saves the simple writing marks (`## > + * **`) that `lib/marks.tsx` reads.
 - Menu: `components/MenuPanel.astro` opens over the page from the header (the `/menu` page is the no-JavaScript fallback). Phones: while writing in the Desk the site header hides and a slim top bar (back, saved state, Save, Publish) takes over. On phones writing is three pages: Write (`#write`) → Label it (`#write-label`: pillar, medium, photo) → Review (`#write-review`: preview, Publish/Send); desktop keeps one screen. `/guild/desk/#write` opens a fresh sheet (menu "Write" button); writing has its own history entry so Back returns to My pieces and the draft saves on the way out.
 - Forms (Guild application, Contact, newsletter `Subscribe`) use the doorway look: `components/DoorwayFrame.astro` + `styles/doorway.css`. Netlify form names unchanged.
 - BaseLayout: Open Graph/Twitter previews (`image` prop), OA favicon + apple-touch-icon, Share/Print, first-visit

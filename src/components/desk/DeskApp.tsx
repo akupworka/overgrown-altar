@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import type { Session } from '@supabase/supabase-js';
 import { Body } from '../../lib/marks';
 import { Doorway, Line, Arrow } from './Doorway';
+import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -322,14 +323,6 @@ function Pieces({ name, pieces, waiting = 0, onReview, onOpen, onChanged }: { na
   );
 }
 
-const TOOLS: { label: string; wrap?: string; prefix?: string; hint: string }[] = [
-  { label: 'Section heading', prefix: '## ', hint: 'Starts a new section with a small heading' },
-  { label: 'Pull quote', prefix: '> ', hint: 'A line set large, in italics' },
-  { label: 'Scripture', prefix: '+ ', hint: 'A verse; end it with — and the reference' },
-  { label: 'Italic', wrap: '*', hint: 'Slanted words' },
-  { label: 'Bold', wrap: '**', hint: 'Strong words' },
-];
-
 function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string; piece: Piece | null; isEditor?: boolean; onSaved: (p: Piece) => void; onDone: () => void }) {
   const phone = useMedia('(max-width: 700px)');
   const [form, setForm] = useState({
@@ -342,6 +335,8 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   const [msg, setMsg] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  // The piece itself, styled as you write (bold, italic, headings, pull quotes, verses).
+  const rich = useRichBody(piece?.body ?? '', (marks) => set('body', marks));
   const timer = useRef<number | undefined>(undefined);
   const set = (k: keyof typeof form, v: any) => { setForm((f) => ({ ...f, [k]: v })); setState('idle'); };
   // The sheet grows with the writing, like paper, instead of scrolling inside a box.
@@ -385,23 +380,6 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     const warn = (e: BeforeUnloadEvent) => { if (state === 'idle' || state === 'saving') { e.preventDefault(); } };
     addEventListener('beforeunload', warn); return () => removeEventListener('beforeunload', warn);
   }, [state]);
-
-  function tool(t: (typeof TOOLS)[number]) {
-    const el = bodyRef.current; if (!el) return;
-    const { selectionStart: a, selectionEnd: b, value } = el;
-    let next: string, caret: number;
-    if (t.wrap) {
-      const sel = value.slice(a, b) || 'words';
-      next = value.slice(0, a) + t.wrap + sel + t.wrap + value.slice(b);
-      caret = a + t.wrap.length + sel.length + t.wrap.length;
-    } else {
-      const lineStart = value.lastIndexOf('\n', a - 1) + 1;
-      next = value.slice(0, lineStart) + t.prefix + value.slice(lineStart);
-      caret = b + t.prefix!.length;
-    }
-    set('body', next);
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(caret, caret); });
-  }
 
   async function upload(file: File) {
     if (file.size > 4 * 1024 * 1024) return setMsg('Please choose a photograph under 4 MB.');
@@ -452,10 +430,12 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
       <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
       <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
       <div className="d-paper-tools" role="toolbar" aria-label="Formatting">
-        {TOOLS.map((t) => <button key={t.label} type="button" title={t.hint} onClick={() => tool(t)}>{t.label}</button>)}
+        {TOOL_LABELS.map((t) => (
+          <button key={t.tool} type="button" title={t.hint} className={isOn(rich, t.tool) ? 'on' : ''} aria-pressed={isOn(rich, t.tool)}
+            onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(rich, t.tool)}>{t.label}</button>
+        ))}
       </div>
-      <textarea ref={bodyRef} className="d-paper-body" aria-label="The piece" value={form.body} onChange={(e) => set('body', e.target.value)}
-        placeholder={'Begin here. Leave a blank line between paragraphs.'} />
+      <RichBody editor={rich} />
       <span className="d-paper-count">{words(form.body)} words</span>
     </article>
   );
@@ -581,11 +561,11 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
             <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
           </label>
           <details className="d-guide">
-            <summary className="lab">Writing marks</summary>
-            <p><code>##</code> starts a section heading</p>
-            <p><code>&gt;</code> sets a line large, as a pull quote</p>
-            <p><code>+</code> marks a verse; end it with — and the reference</p>
-            <p><code>*words*</code> italic · <code>**words**</code> bold</p>
+            <summary className="lab">Typing shortcuts</summary>
+            <p><code>##</code> then a space starts a section heading</p>
+            <p><code>&gt;</code> then a space makes a pull quote</p>
+            <p><code>+</code> then a space makes a Scripture verse; end it with — and the reference</p>
+            <p><code>*words*</code> italic · <code>**words**</code> bold · or select words and use the buttons</p>
           </details>
           </div>
         </details>
