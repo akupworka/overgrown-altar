@@ -163,45 +163,51 @@ function Desk({ session }: { session: Session }) {
   useEffect(() => { load(); }, [load]);
 
   const name = profile?.display_name || session.user.email || '';
+  const go = (t: Tab) => { if (t === 'write' && tab !== 'write') setEditing(null); setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const open = (p: Piece | null) => { setEditing(p); setTab('write'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const items: [Tab, string, number?][] = [
+    ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
+    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number]] : []),
+    ['profile', 'My page'],
+  ];
 
   return (
-    <Glass className="d-wide">
-      <div className="d-desk">
-        <header className="d-head">
-          <div className="d-me">
-            <Initials name={name} size={46} />
-            <div>
-              <span className="eb">{isEditor ? 'Editor' : 'Member of the Guild'}</span>
-              <h1 className="h2 d-hello">Welcome, {name.split(' ')[0]}</h1>
-            </div>
+    <div className="d-room">
+      <aside className="d-side">
+        <div className="d-me">
+          <Initials name={name} size={44} />
+          <div className="d-me-text">
+            <span className="d-me-name">{name}</span>
+            <span className="lab mut">{isEditor ? 'Editor' : 'Member of the Guild'}</span>
           </div>
-          <button type="button" className="lab d-textbtn" onClick={() => supabase.auth.signOut()}>Sign out</button>
-        </header>
-
-        <nav className="d-tabs" aria-label="Desk">
-          {([['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'], ...(isEditor ? [['review', `Waiting for you${queue.length ? ` (${queue.length})` : ''}`]] : []), ['profile', 'My page']] as [Tab, string][]).map(([t, label]) => (
-            <button key={t} type="button" className={`d-tab ${tab === t ? 'on' : ''}`} aria-current={tab === t ? 'page' : undefined}
-              onClick={() => { if (t === 'write' && tab !== 'write') setEditing(null); setTab(t); setReading(null); }}>{label}</button>
+        </div>
+        <nav className="d-nav" aria-label="Desk">
+          {items.map(([t, label, n]) => (
+            <button key={t} type="button" className={`d-nav-item ${tab === t ? 'on' : ''}`} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
+              <span>{label}</span>{n ? <span className="d-count">{n}</span> : null}
+            </button>
           ))}
         </nav>
+        <button type="button" className="lab d-textbtn d-signout" onClick={() => supabase.auth.signOut()}>Sign out</button>
+      </aside>
 
-        {tab === 'pieces' && <Pieces pieces={pieces} onOpen={open} onChanged={load} />}
-        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} onSaved={() => load()} onDone={() => { setTab('pieces'); load(); }} />}
+      <div className="d-main">
+        {tab === 'pieces' && <Pieces name={name} pieces={pieces} onOpen={open} onChanged={load} />}
+        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} />
           : <Queue queue={queue} onRead={setReading} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
       </div>
-    </Glass>
+    </div>
   );
 }
 
 function StatusChip({ status }: { status: Piece['status'] }) {
-  return <span className={`d-status s-${status}`}>{STATUS_LABEL[status]}</span>;
+  return <span className={`d-status s-${status}`}><i aria-hidden="true" />{STATUS_LABEL[status]}</span>;
 }
 
-function Pieces({ pieces, onOpen, onChanged }: { pieces: Piece[]; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
+function Pieces({ name, pieces, onOpen, onChanged }: { name: string; pieces: Piece[]; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -216,6 +222,11 @@ function Pieces({ pieces, onOpen, onChanged }: { pieces: Piece[]; onOpen: (p: Pi
   }
   return (
     <section className="d-section">
+      <header className="d-page-head">
+        <span className="eb">The Guild Desk</span>
+        <h1 className="h1 d-hello">Welcome, {name.split(' ')[0]}</h1>
+        <p className="it mut d-sub">Write, sharpen, discern. Everything you send comes to the editor’s table before it is published.</p>
+      </header>
       <div className="d-stats">
         <div><b>{counts.published}</b><span className="lab mut">Published</span></div>
         <div><b>{counts.waiting}</b><span className="lab mut">With the editor</span></div>
@@ -223,7 +234,7 @@ function Pieces({ pieces, onOpen, onChanged }: { pieces: Piece[]; onOpen: (p: Pi
       </div>
       <div className="d-row-head">
         <h2 className="eb">My pieces</h2>
-        <button type="button" className="btn" onClick={() => onOpen(null)}>Begin a new piece</button>
+        <button type="button" className="btn d-btn" onClick={() => onOpen(null)}>Begin a new piece</button>
       </div>
       {pieces.length === 0 ? (
         <p className="it mut d-empty">Nothing here yet. Your first piece begins with a title.</p>
@@ -232,14 +243,13 @@ function Pieces({ pieces, onOpen, onChanged }: { pieces: Piece[]; onOpen: (p: Pi
           {pieces.map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
-                <StatusChip status={p.status} />
                 <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
-                <span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} words · updated {fmt(p.updated_at)}</span>
+                <span className="d-meta"><StatusChip status={p.status} /><span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} words · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="ghost" onClick={() => onOpen(p)}>Edit</button>}
-                {p.status === 'submitted' && <button type="button" className="ghost" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
+                {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
             </li>
@@ -337,60 +347,66 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
   }
 
   return (
-    <section className="d-section d-editor">
-      <div className="d-row-head">
-        <h2 className="eb">{id ? 'Editing' : 'A new piece'}</h2>
+    <section className="d-write">
+      <div className="d-write-bar">
         <span className="lab mut" role="status" aria-live="polite">
-          {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved changes' : ''}
+          {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved changes' : (id ? '' : 'A new piece')}
         </span>
+        <div className="d-write-actions">
+          <button type="button" className="d-link" onClick={onDone}>Close</button>
+          <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}>Save draft</button>
+          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}>Send to the editor</button>
+        </div>
       </div>
       {piece?.status === 'returned' && piece.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p>}
-
-      <label className="visually-hidden" htmlFor="d-title">Title</label>
-      <input id="d-title" className="field d-big" placeholder="Title" maxLength={200} value={form.title} onChange={(e) => set('title', e.target.value)} />
-      <div className="d-two">
-        <label className="d-lbl"><span className="lab">Pillar</span>
-          <select className="field" value={form.pillar} onChange={(e) => set('pillar', e.target.value)}>
-            {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
-        </label>
-        <label className="d-lbl"><span className="lab">Medium</span>
-          <select className="field" value={form.medium} onChange={(e) => set('medium', e.target.value)}>
-            {MEDIUMS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </label>
-      </div>
-      <label className="d-lbl"><span className="lab">Standfirst · one sentence: what this piece is</span>
-        <input className="field" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
-      </label>
-
-      <div className="d-lbl">
-        <span className="lab">The piece</span>
-        <div className="filters d-tools" role="toolbar" aria-label="Formatting">
-          {TOOLS.map((t) => <button key={t.label} type="button" className="chip" title={t.hint} onClick={() => tool(t)}>{t.label}</button>)}
-        </div>
-        <textarea ref={bodyRef} className="field d-body" aria-label="The piece" value={form.body} onChange={(e) => set('body', e.target.value)}
-          placeholder={'Write here. Leave a blank line between paragraphs.\n\n## A section heading\n> A line to set large\n+ A verse of Scripture — Reference'} />
-        <span className="lab mut">{words(form.body)} words</span>
-      </div>
-
-      <div className="d-photo">
-        <div className="d-photo-frame">{preview ? <img src={preview} alt="" /> : <span className="lab mut">No photograph</span>}</div>
-        <div className="d-photo-fields">
-          <label className="d-lbl"><span className="lab">Featured photograph · JPG, PNG or WebP, under 4 MB</span>
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
-          </label>
-          <label className="d-lbl"><span className="lab">Describe the photograph, for readers who can’t see it</span>
-            <input className="field" maxLength={200} value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
-          </label>
-        </div>
-      </div>
-
       <p className="it d-notice" role="alert">{msg}</p>
-      <div className="d-actions">
-        <button type="button" className="ghost" onClick={() => save('draft')} disabled={state === 'saving'}>Save draft</button>
-        <button type="button" className="btn" onClick={submit} disabled={state === 'saving'}>Send to the editor</button>
-        <button type="button" className="lab d-textbtn" onClick={onDone}>Back to my pieces</button>
+
+      <div className="d-write-grid">
+        <article className="d-paper">
+          <label className="visually-hidden" htmlFor="d-title">Title</label>
+          <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
+            onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
+          <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
+          <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+          <div className="d-paper-tools" role="toolbar" aria-label="Formatting">
+            {TOOLS.map((t) => <button key={t.label} type="button" title={t.hint} onClick={() => tool(t)}>{t.label}</button>)}
+          </div>
+          <textarea ref={bodyRef} className="d-paper-body" aria-label="The piece" value={form.body} onChange={(e) => set('body', e.target.value)}
+            placeholder={'Begin here. Leave a blank line between paragraphs.'} />
+          <span className="d-paper-count">{words(form.body)} words</span>
+        </article>
+
+        <aside className="d-details" aria-label="Details">
+          <h2 className="eb">Details</h2>
+          <label className="d-lbl"><span className="lab">Pillar</span>
+            <select className="field" value={form.pillar} onChange={(e) => set('pillar', e.target.value)}>
+              {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label.split(' · ')[0]}</option>)}
+            </select>
+          </label>
+          <label className="d-lbl"><span className="lab">Medium</span>
+            <select className="field" value={form.medium} onChange={(e) => set('medium', e.target.value)}>
+              {MEDIUMS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </label>
+          <div className="d-lbl">
+            <span className="lab">Featured photograph</span>
+            <label className="d-photo-frame">
+              {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
+              <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+            </label>
+            <span className="d-hint">JPG, PNG or WebP, under 4 MB</span>
+          </div>
+          <label className="d-lbl"><span className="lab">Describe the photograph</span>
+            <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
+          </label>
+          <div className="d-guide">
+            <span className="lab">Writing marks</span>
+            <p><code>##</code> starts a section heading</p>
+            <p><code>&gt;</code> sets a line large, as a pull quote</p>
+            <p><code>+</code> marks a verse; end it with — and the reference</p>
+            <p><code>*words*</code> italic · <code>**words**</code> bold</p>
+          </div>
+        </aside>
       </div>
     </section>
   );
@@ -399,7 +415,7 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
 function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name: string } })[]; onRead: (p: Piece) => void }) {
   return (
     <section className="d-section">
-      <div className="d-row-head"><h2 className="eb">Waiting for you</h2><span className="lab mut">oldest first</span></div>
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces members have sent to your table, oldest first.</p></header>
       {queue.length === 0 ? <p className="it mut d-empty">Nothing is waiting. The table is quiet.</p> : (
         <ul className="d-list">
           {queue.map((p) => (
@@ -409,7 +425,7 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
                 <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
                 {p.standfirst && <span className="it mut">{p.standfirst}</span>}
               </div>
-              <div className="d-item-actions"><button type="button" className="ghost" onClick={() => onRead(p)}>Read</button></div>
+              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>Read</button></div>
             </li>
           ))}
         </ul>
@@ -420,8 +436,8 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
 
 function Reader({ piece, onBack }: { piece: Piece; onBack: () => void }) {
   return (
-    <section className="d-section d-reader">
-      <button type="button" className="lab d-textbtn" onClick={onBack}>← Waiting for you</button>
+    <section className="d-section d-reader d-paper">
+      <button type="button" className="d-link" onClick={onBack}>← Waiting for you</button>
       <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label}</span>
       <h2 className="h2">{piece.title}</h2>
       {piece.standfirst && <p className="it mut" style={{ fontSize: 22 }}>{piece.standfirst}</p>}
@@ -440,13 +456,13 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     setMsg(error ? error.message : 'Saved.'); if (!error) onSaved();
   }
   return (
-    <form className="d-section d-editor" onSubmit={save}>
-      <div className="d-row-head"><h2 className="eb">My page</h2><span className="lab mut">What readers see beside your work</span></div>
+    <form className="d-section d-form-page" onSubmit={save}>
+      <header className="d-page-head"><span className="eb">My page</span><h1 className="h1 d-hello">About the author</h1><p className="it mut d-sub">What readers see beside your work.</p></header>
       <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">Your craft · e.g. Essayist, Photographer</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 160 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
       <p className="it d-notice" role="status">{msg}</p>
-      <div className="d-actions"><button className="btn" type="submit">Save my page</button></div>
+      <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
     </form>
   );
 }
