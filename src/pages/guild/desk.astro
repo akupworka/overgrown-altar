@@ -1,0 +1,125 @@
+---
+// The Guild Desk sign-in. Members will sign in here to write, submit and keep their profile.
+// The sign-in itself is connected in a later step; until then the form explains that the desk opens soon.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import Monogram from '../../components/Monogram.astro';
+import GlassLight from '../../components/GlassLight.astro';
+---
+<BaseLayout title="Sign in · The Guild Desk" description="Members of the Guild sign in to their desk." footer={false}>
+  <section class="hero desk">
+    <img src="/images/format-guild.jpg" srcset="/images/format-guild-1200.jpg 1200w, /images/format-guild.jpg 2576w" sizes="100vw"
+      alt="" style="object-position:center 40%;filter:brightness(.32) saturate(.9)" fetchpriority="high" />
+    <div class="veil"></div>
+    <GlassLight prism beams size={760} style="left:50%;top:-14%;translate:-50% 0" />
+    <GlassLight size={520} intensity={0.55} style="left:-12%;bottom:-18%" />
+    <SiteNav />
+
+    <div class="desk-in">
+      <div class="card-wrap">
+        <div class="card">
+          <div class="mark"><Monogram size={54} color="#F3ECDC" /></div>
+          <span class="eb">Members of the Guild</span>
+          <h1 class="h1 title">The Guild Desk</h1>
+          <p class="it mut lead">Your drafts, your pieces with the editor, the work you have saved, and the page readers see when they meet you.</p>
+
+          <form id="signin" class="signin" novalidate>
+            <label class="lab" for="email">Email</label>
+            <input id="email" class="field" type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+            <label class="lab" for="password">Password</label>
+            <input id="password" class="field" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+            <button class="btn submit" type="submit">Sign in</button>
+            <p class="it notice" role="status" aria-live="polite"></p>
+          </form>
+
+          <div class="foot-links">
+            <a class="lab" href="/contact">Forgot your password?</a>
+            <span class="rule-line" aria-hidden="true"></span>
+            <span class="it mut">Not yet at the table?</span>
+            <a class="ghost" href="/guild">Apply to the Guild</a>
+          </div>
+        </div>
+      </div>
+      <a class="lab back" href="/">← Return to the journal</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Until member accounts are switched on, say so plainly instead of pretending to sign in.
+  const form = document.querySelector<HTMLFormElement>('#signin')!;
+  const notice = form.querySelector<HTMLElement>('.notice')!;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      notice.textContent = 'Please enter your email and password.';
+      (form.querySelector(':invalid') as HTMLElement | null)?.focus();
+      return;
+    }
+    notice.textContent = 'The Guild Desk opens soon. When it does, your invitation will arrive by email.';
+  });
+</script>
+
+<style>
+  /* An angle the browser can animate, for the slowly turning glass-light border. */
+  @property --edge { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+  .desk { min-height: 100vh; min-height: 100svh; display: flex; }
+  .desk-in {
+    position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 28px; padding: 140px 20px 60px;
+  }
+
+  /* The card glows: a turning ring of the five glass colours, blurred behind a dark pane. */
+  .card-wrap { position: relative; width: 100%; max-width: 500px; border-radius: 22px; padding: 1px; }
+  .card-wrap::before, .card-wrap::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background: conic-gradient(from var(--edge), #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
+    animation: edge 10s linear infinite;
+  }
+  .card-wrap::before { opacity: .55; }                              /* the thin bright edge */
+  .card-wrap::after { inset: -14px; filter: blur(34px); opacity: .32; z-index: -1; } /* its glow */
+  @keyframes edge { to { --edge: 360deg; } }
+
+  .card {
+    position: relative; border-radius: 21px; padding: 46px 44px 38px;
+    background: linear-gradient(180deg, rgba(18, 22, 15, .86), rgba(8, 10, 8, .92));
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255, 227, 163, .12), 0 40px 90px rgba(0, 0, 0, .55);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .mark { width: 36px; height: 54px; margin-bottom: 22px; }
+  .title { margin-top: 14px; font-size: 56px; }
+  .lead { margin: 16px 0 0; font-size: 19px; line-height: 1.45; max-width: 380px; }
+
+  .signin { width: 100%; margin-top: 30px; display: flex; flex-direction: column; text-align: left; }
+  .signin .lab { color: var(--muted-dark); margin: 0 0 8px; }
+  .signin .field { width: 100%; font-size: 19px; padding: 15px 18px; border-radius: 6px; margin-bottom: 18px;
+    background: rgba(243, 236, 220, .04); border-color: rgba(243, 236, 220, .28);
+    transition: border-color .3s, box-shadow .4s, background .3s; }
+  .signin .field:focus { border-color: var(--ember); background: rgba(243, 236, 220, .06); box-shadow: 0 0 0 4px rgba(255, 227, 163, .1), 0 0 26px rgba(255, 214, 140, .18); }
+  .submit { margin-top: 6px; width: 100%; padding: 18px; border-radius: 6px; font-size: 12px; }
+  .notice { min-height: 1.4em; margin: 16px 0 0; font-size: 18px; line-height: 1.4; color: var(--ember); text-align: center; }
+
+  .foot-links { width: 100%; margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .foot-links > a.lab { color: var(--muted-dark); border-bottom: 1px solid rgba(207, 200, 184, .4); padding-bottom: 3px; }
+  .foot-links > a.lab:hover { color: var(--ember); border-color: var(--ember); }
+  .rule-line { width: 60px; height: 1px; background: var(--brass); margin: 8px 0 2px; }
+  .foot-links .it { font-size: 18px; }
+  .foot-links .ghost { border-radius: 6px; }
+  .back { color: var(--muted-dark); }
+  .back:hover { color: var(--ember); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card-wrap { animation: rise 1.3s .25s cubic-bezier(.2, .7, .2, 1) both; }
+    .back { animation: fade 1.4s 1s both; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-wrap::before, .card-wrap::after { animation: none; }
+  }
+  @media (max-width: 700px) {
+    .desk-in { padding: 110px 16px 40px; }
+    .card { padding: 36px 24px 30px; }
+    .title { font-size: 40px; }
+  }
+</style>

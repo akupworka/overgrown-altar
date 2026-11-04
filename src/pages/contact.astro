@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 ---
 <BaseLayout title="Contact">
-<section class="hero" style="height:620px"><img src="/images/watchtower-photo.jpg" alt="Write to Us" style="object-position:30% 50%;filter:brightness(.5)" fetchpriority="high" /><div class="veil"></div><SiteNav />
+<section class="hero" style="height:620px"><img src="/images/watchtower-photo.jpg" srcset="/images/watchtower-photo-1200.jpg 1200w, /images/watchtower-photo.jpg 2576w" sizes="100vw" alt="Write to Us" style="object-position:30% 50%;filter:brightness(.5)" fetchpriority="high" /><div class="veil"></div><SiteNav />
 <div class="hero-c" style="top:223px;padding:0 24px"><span class="eb">Contact</span><h1 class="h1" style="margin-top:22px">Write to Us</h1><p class="it" style="margin:24px 0 0;max-width:680px;font-size:26px;line-height:1.4;color:#E6DFD0">Letters, submissions and press. Every letter is read.</p></div></section>
 <section class="sec dark"><div class="side"><div style="display:flex;flex-direction:column;gap:18px" class="rv"><span class="eb">Directly</span><span class="h3">hello@overgrownaltar.com</span><span class="lab mut" style="margin-top:20px">Instagram · @overgrownaltar</span><p class="it mut" style="font-size:18px;margin:20px 0 0">For Guild applications, use the <a href="/guild" style="border-bottom:1px solid">Guild page</a>.</p></div>
 <!-- data-netlify="true": Netlify collects each letter and can email it to you (Netlify > Forms > Notifications). -->

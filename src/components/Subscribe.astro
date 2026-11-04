@@ -3,9 +3,11 @@
 // data-netlify="true" means Netlify collects these sign-ups for you once the site is live
 // (you'll find them in Netlify under Forms).
 import Cross from './Cross.astro';
+import GlassLight from './GlassLight.astro';
 ---
 <section class="sec dark center" style="overflow:hidden">
   <div class="glow" aria-hidden="true"></div>
+  <GlassLight size={360} intensity={0.7} style="left:50%;top:22%;translate:-50% 0" />
   <div class="hin center">
     <Cross width={27} color="#FFE3A3" />
     <h2 class="h2" style="margin-top:26px">Receive the Dispatches</h2>

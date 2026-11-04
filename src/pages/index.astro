@@ -35,14 +35,16 @@ const formats = [
   { href: '/folios', img: '/images/format-folios.jpg', mono: true, name: 'Folios', text: 'Archival print issues' },
   { href: '/guild', img: '/images/format-guild.jpg', mono: false, name: 'The Guild', text: 'A structured round-table guild for creative believers' },
 ];
+import GlassLight from '../components/GlassLight.astro';
 ---
 <BaseLayout>
 
   <!-- 1. Hero: full-bleed photo, wordmark, tagline, two buttons -->
   <section class="hero home-hero">
-    <img src="/images/hero-nave.jpg" alt="Candlelit chandelier and rose window in a dark nave"
+    <img src="/images/hero-nave.jpg" srcset="/images/hero-nave-1200.jpg 1200w, /images/hero-nave.jpg 2880w" sizes="100vw" alt="Candlelit chandelier and rose window in a dark nave"
       style="object-position:center 38%;filter:brightness(.6) saturate(.9)" fetchpriority="high" />
     <div class="veil"></div>
+    <GlassLight prism beams size={620} style="right:4%;top:-6%" />
     <SiteNav />
     <div class="hero-c">
       <h1 class="visually-hidden">Overgrown Altar</h1>
@@ -73,7 +75,7 @@ const formats = [
         <span class="eb">The Launch Manifesto</span>
         <h2 class="h2 manifesto-h">Four articles of the altar</h2>
         <div class="arch hide-m" style="width:300px;height:430px;margin-top:16px">
-          <img src="/images/four-lancet-window.jpg" alt="Four-lancet window" style="object-position:center 55%" loading="lazy" />
+          <img src="/images/four-lancet-window.jpg" srcset="/images/four-lancet-window-1200.jpg 1200w, /images/four-lancet-window.jpg 1563w" sizes="(max-width: 700px) 100vw, 50vw" alt="Four-lancet window" style="object-position:center 55%" loading="lazy" />
         </div>
         <p class="it mut" style="margin:0;max-width:300px;font-size:18px;line-height:1.45">And if thou make an altar of stone unto me, thou shalt not build it of hewn stones; for if thou lift up a tool upon it, it shall be defiled.</p>
         <span class="eb" style="font-size:11px">Exodus xx · xxv</span>
@@ -95,8 +97,8 @@ const formats = [
 
   <!-- 4. The Core Thesis: photo with text on the left -->
   <section class="hero thesis">
-    <img src="/images/ruined-chapel.jpg" alt="Ruined chapel wall with ivy and a tracery window"
-      class="mono" style="object-position:center 45%;filter:grayscale(1) contrast(1.12) brightness(.8)" loading="lazy" />
+    <img src="/images/cathedral-facade-and-rose-window.jpg" srcset="/images/cathedral-facade-and-rose-window-1200.jpg 1200w, /images/cathedral-facade-and-rose-window.jpg 2400w" sizes="100vw" alt="Gothic cathedral facade with a rose window, half hidden by a flowering tree"
+      class="mono" style="object-position:70% 40%;filter:grayscale(1) contrast(1.12) brightness(.8)" loading="lazy" />
     <div class="veil-l"></div>
     <div class="hin sec thesis-in">
       <span class="eb">The Core Thesis</span>
@@ -118,7 +120,7 @@ const formats = [
       {pillars.map((p) => (
         <a href={p.href} class="pillar">
           <div class="arch pillar-arch">
-            <img src={p.img} alt="" class={p.mono ? 'mono' : undefined} style={`object-position:${p.pos}`} loading="lazy" />
+            <img src={p.img} srcset={`${p.img.replace('.jpg', '-1200.jpg')} 1200w, ${p.img} 2576w`} sizes="(max-width: 700px) 100vw, 33vw" alt="" class={p.mono ? 'mono' : undefined} style={`object-position:${p.pos}`} loading="lazy" />
           </div>
           <span class="eb" style="margin-top:28px;font-size:12px">{p.kicker}</span>
           <span class="cg pillar-name">{p.name}</span>
@@ -165,7 +167,7 @@ const formats = [
       {formats.map((f) => (
         <a href={f.href} class="center" style="gap:16px">
           <div class="arch format-arch">
-            <img src={f.img} alt="" class={f.mono ? 'mono' : undefined} loading="lazy" />
+            <img src={f.img.replace('.jpg', '-1200.jpg')} alt="" class={f.mono ? 'mono' : undefined} loading="lazy" />
           </div>
           <span class="cg format-name">{f.name}</span>
           <span class="it mut" style="font-size:21px;line-height:1.4;max-width:300px">{f.text}</span>
