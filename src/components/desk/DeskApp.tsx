@@ -5,6 +5,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import type { Session } from '@supabase/supabase-js';
 import { Body } from '../../lib/marks';
 import { Doorway, Line, Arrow } from './Doorway';
+import { shrinkImage, TooSmall } from '../../lib/shrink';
+// Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
+const MIN_PHOTO_WIDTH = 1600;
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -333,6 +336,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
   const [msg, setMsg] = useState('');
+  const [photoMsg, setPhotoMsg] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   // The piece itself, styled as you write (bold, italic, headings, pull quotes, verses).
@@ -381,14 +385,20 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     addEventListener('beforeunload', warn); return () => removeEventListener('beforeunload', warn);
   }, [state]);
 
+  // The featured photograph: shrunk in the browser first (any phone photo works), then uploaded.
   async function upload(file: File) {
-    if (file.size > 4 * 1024 * 1024) return setMsg('Please choose a photograph under 4 MB.');
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = `${uid}/${crypto.randomUUID()}.${ext}`;
-    setMsg('Uploading the photograph…');
-    const { error } = await supabase.storage.from('guild').upload(path, file, { contentType: file.type, upsert: false });
-    if (error) return setMsg(error.message);
-    setMsg(''); set('image_path', path);
+    setPhotoMsg('Preparing the photograph…');
+    let blob: Blob;
+    try { blob = await shrinkImage(file, 2560, 0.88, MIN_PHOTO_WIDTH); }
+    catch (e) {
+      if (e instanceof TooSmall) return setPhotoMsg(`This photo is ${e.width} × ${e.height} pixels, too small to look sharp across the page. Please choose one at least ${MIN_PHOTO_WIDTH} pixels wide. A photo straight from your phone’s camera works.`);
+      return setPhotoMsg('This photograph couldn’t be opened. Try a JPG or PNG.');
+    }
+    const path = `${uid}/${crypto.randomUUID()}.jpg`;
+    setPhotoMsg('Uploading the photograph…');
+    const { error } = await supabase.storage.from('guild').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) return setPhotoMsg('The photograph didn’t upload. Please try again. (' + error.message + ')');
+    setPhotoMsg(''); set('image_path', path);
   }
 
   async function submit() {
@@ -440,10 +450,13 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     </article>
   );
   const photo = (
-    <label className="d-photo-frame">
-      {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
-      <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
-    </label>
+    <>
+      <label className="d-photo-frame">
+        {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
+        <input type="file" className="visually-hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f); }} />
+      </label>
+      {photoMsg && <p className="d-photo-msg" role="status">{photoMsg}</p>}
+    </>
   );
 
   if (phone) {
@@ -489,7 +502,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
             </div>
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
             {photo}
-            <span className="d-hint">JPG, PNG or WebP, under 4 MB</span>
+            <span className="d-hint">At least 1600 pixels wide, so it looks sharp on the site. Photos from a phone camera are perfect; large ones are resized automatically.</span>
             {form.image_path && (
               <label className="d-lbl"><span className="lab">Describe the photograph</span>
                 <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
@@ -555,7 +568,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           <div className="d-lbl">
             <span className="lab">Featured photograph</span>
             {photo}
-            <span className="d-hint">JPG, PNG or WebP, under 4 MB</span>
+            <span className="d-hint">At least 1600 pixels wide, so it looks sharp on the site. Photos from a phone camera are perfect; large ones are resized automatically.</span>
           </div>
           <label className="d-lbl"><span className="lab">Describe the photograph</span>
             <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
@@ -647,14 +660,18 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     portrait_path: profile.portrait_path,
   });
   const [msg, setMsg] = useState('');
+  // The portrait: shrunk in the browser first (any phone photo works), then uploaded. Its messages show right under it.
+  const [portraitMsg, setPortraitMsg] = useState('');
   async function uploadPortrait(file: File) {
-    if (file.size > 2 * 1024 * 1024) return setMsg('Please choose a portrait under 2 MB.');
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = `${profile.id}/portrait-${Date.now()}.${ext}`;
-    setMsg('Uploading your portrait…');
-    const { error } = await supabase.storage.from('portraits').upload(path, file, { contentType: file.type });
-    if (error) return setMsg(error.message);
-    setF((x) => ({ ...x, portrait_path: path })); setMsg('Portrait ready. Save your page to keep it.');
+    setPortraitMsg('Preparing your portrait…');
+    let blob: Blob;
+    try { blob = await shrinkImage(file, 800); }
+    catch { return setPortraitMsg('This photo couldn’t be opened. Try a JPG or PNG.'); }
+    const path = `${profile.id}/portrait-${Date.now()}.jpg`;
+    setPortraitMsg('Uploading your portrait…');
+    const { error } = await supabase.storage.from('portraits').upload(path, blob, { contentType: 'image/jpeg' });
+    if (error) return setPortraitMsg('Your portrait didn’t upload. Please try again. (' + error.message + ')');
+    setF((x) => ({ ...x, portrait_path: path })); setPortraitMsg('Portrait ready. Tap “Save my page” to keep it.');
   }
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -673,11 +690,12 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       <div className="d-portrait-row">
         <label className="d-portrait" title="Choose a portrait">
           <Initials name={f.display_name} size={112} src={portraitUrl(f.portrait_path)} />
-          <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && uploadPortrait(e.target.files[0])} />
+          <input type="file" className="visually-hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadPortrait(f); }} />
           <span className="d-link">{f.portrait_path ? 'Change portrait' : 'Add a portrait'}</span>
         </label>
-        <span className="d-hint">A photograph of you, or of your work. Square works best. JPG, PNG or WebP, under 2 MB.</span>
+        <span className="d-hint">A photograph of you, or of your work. Square works best. Any photo works; it’s resized automatically.</span>
       </div>
+      {portraitMsg && <p className="d-photo-msg" role="status">{portraitMsg}</p>}
       <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">Your craft · e.g. Essayist, Photographer</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
