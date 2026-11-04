@@ -1,0 +1,34 @@
+/* A published Guild piece (page src/pages/guild/[slug].astro and the live fallback on the 404 page). */
+.gp-hero { height: 680px; }
+.gp-hero-c { top: 230px; padding: 0 40px; }
+.gp-hero-c .eb a:hover { color: var(--bone); }
+.gp-title { margin-top: 22px; max-width: 980px; font-size: 68px; }
+.gp-by { margin-top: 26px; display: inline-flex; align-items: center; gap: 12px; }
+.gp-flow { display: flex; flex-direction: column; gap: 26px; }
+.gp-flow p.body { font-size: 22px; margin: 0; }
+.gp-flow h2.eb { margin: 14px 0 0; }
+.gp-flow > p.lede + p.body::first-letter, .gp-flow > p.body:first-child::first-letter { float: left; font-family: var(--serif); font-weight: 500; font-size: 96px; line-height: .78; margin: 8px 14px 0 0; color: var(--oxblood); }
+.gp-standfirst { font-size: 30px; font-style: italic; color: var(--muted-paper); }
+.gp-sign { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.gp-sign span { font-family: var(--script); font-size: 52px; color: var(--oxblood); line-height: 1.2; }
+.gp-author { margin-top: 30px; padding-top: 36px; border-top: 1px solid rgba(42, 32, 23, .2); display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 32px; align-items: start; }
+.gp-arch { width: 140px; height: 184px; border-radius: 999px 999px 0 0; overflow: hidden; box-shadow: 0 0 0 1px var(--brass);
+  display: flex; align-items: center; justify-content: center; background: #E3DCCD; color: var(--oxblood); font-family: var(--serif); font-size: 44px; }
+.gp-arch img { width: 100%; height: 100%; object-fit: cover; }
+.gp-author-text { display: flex; flex-direction: column; gap: 10px; }
+.gp-author-text .h3 { font-size: 32px; }
+.gp-author-text .body { font-size: 19px !important; }
+.gp-links { display: flex; gap: 22px; }
+.gp-links a { border-bottom: 1px solid rgba(42, 32, 23, .35); padding-bottom: 3px; }
+.gp-more { padding-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+.gp-more:hover .h3 { color: var(--ember); }
+@media (max-width: 700px) {
+  .gp-hero { height: 560px; }
+  .gp-hero-c { top: 140px; padding: 0 22px; }
+  .gp-title { font-size: 36px !important; }
+  .gp-by .lab { font-size: 9px; letter-spacing: .14em; }
+  .gp-standfirst { font-size: 21px !important; }
+  .gp-flow p.body { font-size: 18px !important; }
+  .gp-author { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+  .gp-links { justify-content: center; }
+}
