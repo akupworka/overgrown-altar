@@ -5,6 +5,7 @@ import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import Cross from '../../components/Cross.astro';
+import AuthorLinks from '../../components/AuthorLinks.astro';
 import { Body } from '../../lib/marks';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
 import '../../styles/desk.css';
@@ -49,14 +50,11 @@ const aUrl = authorUrl(a);
         <a class="gp-arch" href={aUrl} aria-hidden="true" tabindex="-1" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt="" loading="lazy" /> : a.display_name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')}</a>
         <div class="gp-author-text">
           <span class="eb">About the author</span>
-          <a class="h3 gp-author-name" href={aUrl}>{a.display_name}</a>
-          {a.craft && <span class="lab mut">{a.craft}</span>}
-          {a.bio && <p class="body">{a.bio}</p>}
-          <span class="gp-links">
-            {a.website && <a class="lab" href={a.website} target="_blank" rel="noopener noreferrer">Website ↗</a>}
-            {insta && <a class="lab" href={insta} target="_blank" rel="noopener noreferrer">Instagram ↗</a>}
-          </span>
-          <a class="lab gp-all" href={aUrl}>All of {first}’s work →</a>
+          <a class="gp-author-name" href={aUrl}>{a.display_name}</a>
+          {a.craft && <span class="gp-craft">{a.craft}</span>}
+          {a.bio && <p class="gp-bio">{a.bio}</p>}
+          <AuthorLinks website={a.website} instagram={a.instagram} />
+          <a class="gp-all" href={aUrl}>All of {first}’s work <span aria-hidden="true">→</span></a>
         </div>
       </aside>
     </div>

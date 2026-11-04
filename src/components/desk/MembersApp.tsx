@@ -109,8 +109,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="it mut m-bio">No words of introduction yet.</p>}
         {(person.website || insta) && (
           <div className="m-links">
-            {person.website && <a className="lab" href={person.website} target="_blank" rel="noopener noreferrer">Website ↗</a>}
-            {insta && <a className="lab" href={insta} target="_blank" rel="noopener noreferrer">Instagram · @{person.instagram} ↗</a>}
+            {person.website && <a className="lab" href={person.website} target="_blank" rel="noopener noreferrer">Website ↗︎</a>}
+            {insta && <a className="lab" href={insta} target="_blank" rel="noopener noreferrer">Instagram · @{person.instagram} ↗︎</a>}
           </div>
         )}
         {person.id === me && <a className="d-link" href="/guild/desk/">Edit my page at the Desk</a>}

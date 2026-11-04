@@ -43,3 +43,29 @@ a.gp-arch:hover { box-shadow: 0 0 0 1px var(--oxblood), 0 16px 40px -20px rgba(4
 .gp-author-name:hover { color: var(--oxblood); }
 .gp-all { align-self: flex-start; margin-top: 6px; color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .4); padding-bottom: 3px; }
 @media (max-width: 700px) { .gp-all { align-self: center; } }
+
+/* ---- About the author: a framed card ---- */
+.gp-author { margin-top: 44px; padding: 40px 44px; border-top: 0; border-radius: 4px; position: relative;
+  background: linear-gradient(180deg, #F1ECE2, #EDE6D9); box-shadow: inset 0 0 0 1px rgba(159, 148, 94, .45), 0 30px 60px -40px rgba(42, 32, 23, .35);
+  grid-template-columns: 132px minmax(0, 1fr); gap: 36px; align-items: center; }
+.gp-author::before { content: ''; position: absolute; inset: 6px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(159, 148, 94, .18); pointer-events: none; }
+.gp-arch { width: 132px; height: 172px; box-shadow: 0 0 0 1px var(--brass), 0 0 0 5px #F1ECE2, 0 0 0 6px rgba(159, 148, 94, .35); }
+.gp-author-text { gap: 0; align-items: flex-start; }
+.gp-author-text .eb { font-size: 11px; }
+.gp-author-name { margin-top: 10px; font-family: var(--serif); font-weight: 500; font-size: 36px; line-height: 1.05; color: var(--ink); }
+.gp-craft { margin-top: 6px; font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--muted-paper); }
+.gp-bio { margin: 14px 0 0; font-family: var(--serif); font-size: 19px; line-height: 1.55; color: #3A2F25; max-width: 520px; }
+.gp-author-text .al { margin-top: 18px; }
+.gp-all { margin-top: 18px; display: inline-flex; gap: 10px; align-items: center; font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); padding-bottom: 4px; transition: gap .4s var(--ease, ease), border-color .3s; }
+.gp-all:hover { gap: 16px; border-color: var(--oxblood); }
+@media (max-width: 700px) {
+  .gp-author { margin-top: 30px; padding: 34px 22px 30px; grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 22px; }
+  .gp-arch { width: 104px; height: 136px; font-size: 34px; }
+  .gp-author-text { align-items: center; }
+  .gp-author-name { font-size: 30px; }
+  .gp-craft { font-size: 17px; }
+  .gp-bio { font-size: 17px; }
+  .gp-author-text .al { justify-content: center; }
+  .gp-all { align-self: center; }
+}

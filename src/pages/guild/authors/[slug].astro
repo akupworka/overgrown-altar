@@ -6,6 +6,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SiteNav from '../../../components/SiteNav.astro';
 import DispatchList, { type DispatchItem } from '../../../components/DispatchList.astro';
 import Subscribe from '../../../components/Subscribe.astro';
+import AuthorLinks from '../../../components/AuthorLinks.astro';
 import { getAuthors, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildAuthor, type GuildPiece } from '../../../lib/guild';
 import '../../../styles/guild-piece.css';
 
@@ -32,12 +33,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
       {a.bio && <p class="au-bio">{a.bio}</p>}
-      {(site || insta) && (
-        <span class="au-links">
-          {site && <a class="lab" href={a.website} target="_blank" rel="noopener noreferrer">{site} ↗</a>}
-          {insta && <a class="lab" href={insta} target="_blank" rel="noopener noreferrer">@{a.instagram} ↗</a>}
-        </span>
-      )}
+      <span class="au-links"><AuthorLinks website={a.website} instagram={a.instagram} tone="dark" /></span>
     </div>
   </section>
   <section class="sec paper">
@@ -58,7 +54,8 @@ const items: DispatchItem[] = pieces.map((g) => ({
   .au-name { margin: 6px 0 0; }
   .au-craft { color: var(--ember); }
   .au-bio { margin: 10px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.5; color: #E6DFD0; }
-  .au-links { margin-top: 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; }
+  .au-links { margin-top: 12px; display: flex; justify-content: center; }
+  .au-links :global(.al) { justify-content: center; }
   .au-links a { border-bottom: 1px solid rgba(243, 236, 220, .35); padding-bottom: 3px; }
   .au-links a:hover { color: var(--ember); border-color: var(--ember); }
   .au-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 24px; }
