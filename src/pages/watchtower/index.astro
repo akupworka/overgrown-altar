@@ -16,7 +16,7 @@ const featured = [...dispatches].sort((a, b) => (b.publishedAt ?? '').localeComp
 const archive = dispatches.filter((d) => !d.inMatrix);
 ---
 <BaseLayout title="The Watchtower">
-<section class="hero pill-h"><img src="/images/pillar-watchtower.jpg" srcset="/images/pillar-watchtower-1200.jpg 1200w, /images/pillar-watchtower.jpg 2576w" sizes="100vw" alt="The Watchtower" style="object-position:20% 30%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
+<section class="hero pill-h"><img src="/images/duomo-pigeons.jpg" srcset="/images/duomo-pigeons-1200.jpg 1200w, /images/duomo-pigeons.jpg 2000w" sizes="100vw" alt="Pigeons rising in front of a Gothic cathedral facade" style="object-position:center 35%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
 <div class="pill-in"><span class="eb">01 · Prophetic Audits</span><h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Watchtower</h1><p class="body" style="color:#E6DFD0;max-width:720px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and Leviathan structures in art and philosophy.</p></div></section>
 {featured && (
 <section class="sec paper"><div class="g2" style="align-items:center"><a href={articleUrl(featured)} class="arch" style="height:640px;display:block"><img src={imgSrc(featured.image, 1200)} alt={featured.image?.alt ?? ''} style={`object-position:${imgPos(featured.image, '45% 40%')}`} loading="lazy" /></a>
