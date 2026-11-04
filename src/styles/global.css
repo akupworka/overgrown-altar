@@ -41,6 +41,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;
   background: var(--night);
   color: var(--bone);
   font-family: var(--sans);
@@ -85,6 +86,10 @@ img { max-width: 100%; }
 .body   { font-family: var(--serif); font-weight: 500; font-size: 21px; line-height: 1.6;  margin: 0; }
 .big-it { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 92px; line-height: .98; margin: 0; }
 .num    { font-family: var(--serif); font-weight: 300; font-size: 72px; line-height: .8; color: var(--brass); }
+
+/* Clean lines: headings balance their lines; paragraphs never end on a lonely word. */
+h1, h2, h3, .h1, .h2, .h3, .big-it, .lede, .eb, .lab, .it { text-wrap: balance; }
+p, .body { text-wrap: pretty; }
 
 /* ---------- 6. Layout helpers --------------------------------------------- */
 .sec    { padding: 130px 120px; position: relative; }
@@ -185,30 +190,44 @@ textarea.field { resize: vertical; }
 }
 /* !important here lets these phone sizes win over sizes written directly on an element. */
 @media (max-width: 700px) {
-  .sec { padding: 64px 20px; }
-  .h1 { font-size: 38px !important; line-height: 1.02; }
-  .h2 { font-size: 31px !important; line-height: 1.05; }
-  .h3 { font-size: 23px !important; }
-  .lede { font-size: 21px !important; line-height: 1.35; }
-  .body { font-size: 17px !important; }
-  .big-it { font-size: 38px !important; line-height: 1.02; }
+  .sec { padding: 72px 24px; }
+  .h1 { font-size: 38px !important; line-height: 1.04; }
+  .h2 { font-size: 31px !important; line-height: 1.08; }
+  .h3 { font-size: 23px !important; line-height: 1.18; }
+  .lede { font-size: 21px !important; line-height: 1.38; }
+  .body { font-size: 17px !important; line-height: 1.62; }
+  .big-it { font-size: 38px !important; line-height: 1.04; }
   .num { font-size: 40px !important; }
-  .g2, .g3, .g4, .side { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .lab { letter-spacing: .22em; }
+  .g2, .g3, .g4, .side { grid-template-columns: minmax(0, 1fr); gap: 44px; }
   .row { flex-direction: column; align-items: flex-start; gap: 14px; }
   .d-only { display: none !important; }
   .m-only { display: block; }
   .hide-m { display: none !important; }
-  .hero-c { top: 130px; padding: 0 20px; }
+  .hero-c { top: 128px; padding: 0 24px; }
   .pill-h { height: 600px; }
-  .pill-in { left: 20px; right: 20px; width: auto; bottom: 48px; }
+  .pill-in { left: 24px; right: 24px; width: auto; bottom: 48px; }
   /* Header text sits at the bottom on phones, so shade from the bottom up. */
   .veil-l { background: linear-gradient(180deg, rgba(8,10,8,.45) 0%, rgba(8,10,8,.5) 35%, rgba(8,10,8,.94) 100%); }
   .veil { background: radial-gradient(ellipse 90% 70% at 50% 50%, rgba(6,8,6,.45) 0%, rgba(6,8,6,.88) 100%); }
-  .mx { grid-template-columns: 40px minmax(0, 1fr); gap: 14px; }
-  .mx3 { font-size: 15px; }
+
+  /* The Editorial Matrix becomes a labelled list instead of three cramped columns. */
+  .mx { grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 32px 0; }
+  .mx .mx3 { grid-column: 1 / -1; margin-top: 6px; }
+  .mx3 { grid-template-columns: minmax(0, 1fr); font-size: 17px; }
+  .mx3 > div {
+    display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px; align-items: baseline;
+    padding: 11px 0 !important; border-left: 0 !important; border-top: 1px solid rgba(243, 236, 220, .12);
+  }
+  .paper .mx3 > div { border-top-color: rgba(42, 32, 23, .15); }
+  .mx3 > div::before { font-family: var(--sans); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: #8C8679; }
+  .mx3 > div:nth-child(1)::before { content: 'Thinker' / ''; }
+  .mx3 > div:nth-child(2)::before { content: 'Fracture' / ''; }
+  .mx3 > div:nth-child(3)::before { content: 'Anchor' / ''; }
+
   .drop { font-size: 64px; }
   .mlink { font-size: 26px; }
   .fl { width: 100%; }
-  .menu-in { padding: 24px 20px 40px !important; }
-  .btn, .ghost { padding-left: 24px; padding-right: 24px; }
+  .menu-in { padding: 24px 24px 40px !important; }
+  .btn, .ghost { padding-left: 24px; padding-right: 24px; text-align: center; }
 }

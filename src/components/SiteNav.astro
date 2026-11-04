@@ -34,13 +34,7 @@ const current = Astro.url.pathname;
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
       <a href="/guild" class="join">Join the Guild</a>
-      <a href="/guild/desk" class="signin" aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
-        <span class="signin-edge" aria-hidden="true"><span></span></span>
-        <span class="signin-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-          Sign in
-        </span>
-      </a>
+      <a href="/guild/desk" class="signin" aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
       <a href="/menu" class="menu-link" aria-label="Menu">
         <span class="menu-word">Menu</span>
         <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -106,29 +100,23 @@ const current = Astro.url.pathname;
   .burger { display: none; flex-direction: column; gap: 6px; width: 24px; }
   .burger span { display: block; height: 1.5px; background: currentColor; }
 
-  /* The glowing Sign in: a dark pill with a slowly turning edge of glass colours. */
+  /* Sign in: the brand's own outlined button, with a single sliver of glass light
+     along its threshold. Colour enters only through glass. */
   .signin {
-    position: relative; display: inline-flex; border-radius: 999px; isolation: isolate;
-    box-shadow: 0 0 22px rgba(255, 196, 77, .26), 0 0 30px rgba(62, 123, 255, .2), 0 0 26px rgba(255, 59, 78, .12);
-    transition: box-shadow .4s, transform .3s cubic-bezier(.16, 1, .3, 1);
+    position: relative; display: inline-flex; align-items: center; height: 40px; padding: 0 20px;
+    border: 1px solid rgba(243, 236, 220, .38); color: var(--bone);
+    transition: border-color .35s, color .35s, box-shadow .5s, background-color .35s;
   }
-  .signin-edge { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: -1; }
-  .signin-edge span {
-    position: absolute; left: 50%; top: 50%; width: 220%; aspect-ratio: 1; translate: -50% -50%;
-    background: conic-gradient(#FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
-    will-change: transform; animation: signin-turn 8s linear infinite;
+  .signin::after {
+    content: ''; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, rgba(62,123,255,0), #3E7BFF 15%, #B05BFF 32%, #FF3B4E 50%, #FFC44D 68%, #3DE0A0 85%, rgba(61,224,160,0));
+    opacity: .85; transition: opacity .35s, left .5s var(--ease), right .5s var(--ease);
   }
-  .signin-label {
-    margin: 1.5px; padding: 11px 20px 11px 17px; min-height: 42px; border-radius: inherit;
-    display: inline-flex; align-items: center; gap: 9px;
-    background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,0) 45%), rgba(12, 15, 11, .62);
-    -webkit-backdrop-filter: blur(12px) saturate(160%); backdrop-filter: blur(12px) saturate(160%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
-    color: var(--bone);
+  .signin:hover, .signin[aria-current='page'] {
+    border-color: rgba(255, 227, 163, .7); color: var(--ember); background-color: rgba(255, 227, 163, .04);
+    box-shadow: 0 6px 24px -10px rgba(255, 214, 140, .45);
   }
-  .signin:hover { box-shadow: 0 0 30px rgba(255, 196, 77, .35), 0 0 34px rgba(62, 123, 255, .22); transform: translateY(-1px); }
-  .signin:hover .signin-label { color: var(--ember); }
-  @keyframes signin-turn { to { transform: rotate(360deg); } }
+  .signin:hover::after { left: 0; right: 0; opacity: 1; }
 
   /* Medium screens: sections move into the Menu. */
   @media (max-width: 1320px) {
@@ -141,10 +129,9 @@ const current = Astro.url.pathname;
     .nav-right { gap: 6px; }
     .join, .menu-word, .icon-link { display: none; }
     .burger { display: flex; }
-    .signin-label { padding: 9px 15px 9px 13px; min-height: 40px; font-size: 10px; }
+    .signin { height: 38px; padding: 0 15px; font-size: 10px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .signin-edge span { animation: none; }
     .site-header { transition: none; }
   }
 </style>
