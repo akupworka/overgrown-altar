@@ -9,7 +9,7 @@ import { getArticles, articleUrl, imgSrc, imgPos, PILLAR_NAMES, MEDIUM_NAMES } f
 const articles = await getArticles();
 ---
 <BaseLayout title="Archive">
-<section class="hero" style="height:560px"><img src="/images/the-archive.jpg" alt="The Archive" style="object-position:center 30%;filter:grayscale(1) brightness(.45)" class="mono" fetchpriority="high" /><div class="veil"></div><SiteNav />
+<section class="hero" style="height:560px"><img src="/images/the-archive.jpg" srcset="/images/the-archive-1200.jpg 1200w, /images/the-archive.jpg 2880w" sizes="100vw" alt="The Archive" style="object-position:center 30%;filter:grayscale(1) brightness(.45)" class="mono" fetchpriority="high" /><div class="veil"></div><SiteNav />
 <div class="hero-c" style="top:202px;padding:0 24px"><span class="eb">Everything, in one place</span><h1 class="h1" style="margin-top:22px">The Archive</h1></div></section>
 <section class="sec paper" style="padding-top:80px"><div style="display:flex;flex-direction:column;gap:26px">
 <input class="field search" type="search" placeholder="Search dispatches, protocols, photographs, thinkers…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />

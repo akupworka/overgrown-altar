@@ -1,0 +1,50 @@
+/* ==========================================================================
+   Motion. Slow, candle-paced, never bouncy.
+   Everything here is skipped for visitors whose device asks for reduced motion.
+   ========================================================================== */
+
+/* Pages cross-fade into each other (supported in Chrome, Edge and Safari). */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .5s; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 1. The header photo settles in, then drifts slower than the page as you scroll
+        (the script sets --py). */
+  .hero > img { animation: settle 2.6s cubic-bezier(.2, .7, .2, 1) both; translate: 0 var(--py, 0px); }
+  @keyframes settle { from { scale: 1.12; opacity: 0; } to { scale: 1; opacity: 1; } }
+
+  /* 2. Header words rise in, one line after another. */
+  .hero-c > *, .pill-in > * { animation: rise 1.2s cubic-bezier(.2, .7, .2, 1) both; }
+  .hero-c > :nth-child(1), .pill-in > :nth-child(1) { animation-delay: .35s; }
+  .hero-c > :nth-child(2), .pill-in > :nth-child(2) { animation-delay: .5s; }
+  .hero-c > :nth-child(3), .pill-in > :nth-child(3) { animation-delay: .65s; }
+  .hero-c > :nth-child(4), .pill-in > :nth-child(4) { animation-delay: .8s; }
+  .hero-c > :nth-child(5), .pill-in > :nth-child(5) { animation-delay: .95s; }
+  .hero-c > :nth-child(n+6) { animation-delay: 1.1s; }
+  .nav { animation: fade 1.4s .2s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* 3. Sections fade up as they scroll into view (the script adds .reveal and .in). */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 1.1s cubic-bezier(.2, .7, .2, 1), transform 1.1s cubic-bezier(.2, .7, .2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* 4. Photos breathe when you point at them. */
+  .arch img, .tile img, .plate img { transition: transform 1.4s cubic-bezier(.2, .7, .2, 1); }
+  a:hover .arch img, a:hover .tile img, a.arch:hover img, .tile:hover img { transform: scale(1.05); }
+
+  /* 5. Buttons and rows answer with a little candlelight. */
+  .btn, .ghost { transition: background .35s, color .35s, border-color .35s, box-shadow .5s; }
+  .btn:hover { box-shadow: 0 0 30px rgba(255, 214, 140, .45); }
+  .ghost:hover { box-shadow: 0 0 24px rgba(255, 214, 140, .22), inset 0 0 18px rgba(255, 214, 140, .08); }
+  .mx { transition: background .6s; }
+  .mx:hover { background: linear-gradient(90deg, rgba(255, 227, 163, .05), rgba(255, 227, 163, 0) 70%); }
+
+  /* 6. Warm glows flicker like a candle. */
+  .glow { animation: candle 6s ease-in-out infinite; }
+  @keyframes candle { 0%, 100% { opacity: .82; } 40% { opacity: 1; } 55% { opacity: .9; } 70% { opacity: .97; } }
+}

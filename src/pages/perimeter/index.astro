@@ -10,7 +10,7 @@ import { getArticles, articleUrl, roman } from '../../lib/sanity';
 const protocols = await getArticles('perimeter');
 ---
 <BaseLayout title="The Perimeter">
-<section class="hero pill-h"><img src="/images/the-perimeter.jpg" alt="The Perimeter" style="object-position:center 50%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
+<section class="hero pill-h"><img src="/images/the-perimeter.jpg" srcset="/images/the-perimeter-1200.jpg 1200w, /images/the-perimeter.jpg 2880w" sizes="100vw" alt="The Perimeter" style="object-position:center 50%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
 <div class="pill-in"><span class="eb">03 · Deliverance Protocols</span><h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Perimeter</h1><p class="body" style="color:#E6DFD0;max-width:720px">Actionable recovery manuals for legal audits, breaking soul ties, untangling mental strongholds, and establishing firm personal and spiritual boundaries.</p></div></section>
 <section class="sec paper"><div class="row" style="padding-bottom:34px;border-bottom:1px solid #2A2017"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Recovery Manuals</span><h2 class="h2">The protocols</h2></div><span class="it mut" style="font-size:20px">Actionable, step by step, kept in order.</span></div>
 <div class="g2" style="margin-top:56px">{protocols.map((a) => (

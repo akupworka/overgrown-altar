@@ -2,6 +2,7 @@
 // The frame around every page: the <head>, the shared styles and the footer.
 // A page uses it like:  <BaseLayout title="About"> ...page content... </BaseLayout>
 import '../styles/global.css';
+import '../styles/motion.css';
 import SiteFooter from '../components/SiteFooter.astro';
 
 interface Props { title?: string; description?: string; footer?: boolean }
@@ -26,5 +27,42 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
       <slot />  <!-- the page's own content goes here -->
     </main>
     {footer && <SiteFooter />}
+
+    <script>
+      // Motion that needs to know where things are on screen. Styles live in src/styles/motion.css.
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!calm) {
+        // Sections fade up as they scroll into view. Only things below the fold are hidden first,
+        // so nothing you can already see ever blinks.
+        const picks = document.querySelectorAll(
+          'main .sec > :not(.g2, .g3, .g4, .side, .hin, .glass-light, .glow, .narrow), main .g2 > *, main .g3 > *, main .g4 > *, main .side > *, main .narrow > *, main .hin > *, main .mx'
+        );
+        const seen = new IntersectionObserver((entries) => {
+          for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); seen.unobserve(e.target); }
+        }, { rootMargin: '0px 0px -8% 0px' });
+        picks.forEach((el) => {
+          if (el.getBoundingClientRect().top < innerHeight || el.closest('.reveal')) return;
+          const i = [...el.parentElement!.children].indexOf(el);
+          (el as HTMLElement).style.setProperty('--d', `${(i % 4) * 110}ms`);
+          el.classList.add('reveal');
+          seen.observe(el);
+        });
+
+        // The first header photo drifts slower than the page.
+        const hero = document.querySelector<HTMLElement>('main .hero > img');
+        if (hero) {
+          let ticking = false;
+          addEventListener('scroll', () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+              const y = Math.min(scrollY, innerHeight * 1.2);
+              hero.style.setProperty('--py', `${y * 0.3}px`);
+              ticking = false;
+            });
+          }, { passive: true });
+        }
+      }
+    </script>
   </body>
 </html>
