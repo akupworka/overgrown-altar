@@ -225,6 +225,11 @@ textarea.field { resize: vertical; }
   .mx3 > div:nth-child(2)::before { content: 'Fracture' / ''; }
   .mx3 > div:nth-child(3)::before { content: 'Anchor' / ''; }
 
+  /* Photos on phones: present, not overwhelming. */
+  .arch { max-height: 300px; }
+  .tile { max-height: 240px; }
+  [style*="aspect-ratio:3/4"] { width: min(100%, 225px); margin-inline: auto; }
+
   .drop { font-size: 64px; }
   .mlink { font-size: 26px; }
   .fl { width: 100%; }
