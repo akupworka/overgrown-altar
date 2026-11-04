@@ -1,0 +1,48 @@
+---
+// The glowing card from the Guild Desk sign-in, ready to use anywhere:
+//   <GlassCard> ...anything... </GlassCard>
+// A dark pane with a thin, slowly turning edge of the five glass colours and a soft glow.
+//
+// Built for smoothness: the colour ring is drawn once and only rotated (a job the
+// graphics card does on its own); the glow only fades in and out.
+interface Props { class?: string; style?: string; as?: string }
+const { class: cls = '', style = '' } = Astro.props;
+---
+<div class:list={['glass-card', cls]} style={style}>
+  <div class="gc-glow" aria-hidden="true"></div>
+  <div class="gc-edge" aria-hidden="true"><span></span></div>
+  <div class="gc-pane"><slot /></div>
+</div>
+
+<style>
+  .glass-card { position: relative; border-radius: 20px; isolation: isolate; }
+
+  /* The glow: four soft colours around the card, breathing slowly. */
+  .gc-glow {
+    position: absolute; inset: 0; border-radius: inherit; z-index: -1; will-change: opacity;
+    box-shadow:
+      -18px -14px 60px rgba(62, 123, 255, .22), 18px -14px 60px rgba(255, 59, 78, .2),
+      18px 18px 70px rgba(255, 196, 77, .2), -18px 18px 70px rgba(61, 224, 160, .16);
+    animation: gc-breathe 8s ease-in-out infinite;
+  }
+  /* The edge: a ring of glass colours, seen through a 1px gap around the pane. */
+  .gc-edge { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
+  .gc-edge span {
+    position: absolute; left: 50%; top: 50%; width: 300%; aspect-ratio: 1;
+    translate: -50% -50%; will-change: transform;
+    background: conic-gradient(#FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
+    opacity: .6;
+    animation: gc-turn 12s linear infinite;
+  }
+  .gc-pane {
+    position: relative; margin: 1px; border-radius: 19px;
+    background: linear-gradient(180deg, #12160F, #080A08);
+    box-shadow: inset 0 1px 0 rgba(255, 227, 163, .1), 0 40px 90px rgba(0, 0, 0, .45);
+  }
+
+  @keyframes gc-turn { to { transform: rotate(360deg); } }
+  @keyframes gc-breathe { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .gc-glow, .gc-edge span { animation: none; }
+  }
+</style>

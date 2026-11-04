@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import Monogram from '../../components/Monogram.astro';
 import GlassLight from '../../components/GlassLight.astro';
+import GlassCard from '../../components/GlassCard.astro';
 ---
 <BaseLayout title="Sign in · The Guild Desk" description="Members of the Guild sign in to their desk." footer={false}>
   <section class="hero desk">
@@ -16,7 +17,7 @@ import GlassLight from '../../components/GlassLight.astro';
     <SiteNav />
 
     <div class="desk-in">
-      <div class="card-wrap">
+      <GlassCard class="card-wrap">
         <div class="card">
           <div class="mark"><Monogram size={54} color="#F3ECDC" /></div>
           <span class="eb">Members of the Guild</span>
@@ -39,7 +40,7 @@ import GlassLight from '../../components/GlassLight.astro';
             <a class="ghost" href="/guild">Apply to the Guild</a>
           </div>
         </div>
-      </div>
+      </GlassCard>
       <a class="lab back" href="/">← Return to the journal</a>
     </div>
   </section>
@@ -61,31 +62,16 @@ import GlassLight from '../../components/GlassLight.astro';
 </script>
 
 <style>
-  /* An angle the browser can animate, for the slowly turning glass-light border. */
-  @property --edge { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-
   .desk { min-height: 100vh; min-height: 100svh; display: flex; }
   .desk-in {
     position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 28px; padding: 140px 20px 60px;
   }
 
-  /* The card glows: a turning ring of the five glass colours, blurred behind a dark pane. */
-  .card-wrap { position: relative; width: 100%; max-width: 500px; border-radius: 22px; padding: 1px; }
-  .card-wrap::before, .card-wrap::after {
-    content: ''; position: absolute; inset: 0; border-radius: inherit;
-    background: conic-gradient(from var(--edge), #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
-    animation: edge 10s linear infinite;
-  }
-  .card-wrap::before { opacity: .55; }                              /* the thin bright edge */
-  .card-wrap::after { inset: -14px; filter: blur(34px); opacity: .32; z-index: -1; } /* its glow */
-  @keyframes edge { to { --edge: 360deg; } }
+  .desk-in :global(.card-wrap) { width: 100%; max-width: 500px; }
 
   .card {
-    position: relative; border-radius: 21px; padding: 46px 44px 38px;
-    background: linear-gradient(180deg, rgba(18, 22, 15, .86), rgba(8, 10, 8, .92));
-    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    box-shadow: inset 0 1px 0 rgba(255, 227, 163, .12), 0 40px 90px rgba(0, 0, 0, .55);
+    padding: 46px 44px 38px;
     display: flex; flex-direction: column; align-items: center; text-align: center;
   }
   .mark { width: 36px; height: 54px; margin-bottom: 22px; }
@@ -111,11 +97,8 @@ import GlassLight from '../../components/GlassLight.astro';
   .back:hover { color: var(--ember); }
 
   @media (prefers-reduced-motion: no-preference) {
-    .card-wrap { animation: rise 1.3s .25s cubic-bezier(.2, .7, .2, 1) both; }
+    .desk-in :global(.card-wrap) { animation: rise 1.1s .2s cubic-bezier(.16, 1, .3, 1) both; }
     .back { animation: fade 1.4s 1s both; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .card-wrap::before, .card-wrap::after { animation: none; }
   }
   @media (max-width: 700px) {
     .desk-in { padding: 110px 16px 40px; }
