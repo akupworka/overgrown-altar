@@ -34,7 +34,7 @@ const groups = [
 
       <div class="mp-guild">
         <a href="/guild/desk/" class="mp-desk" data-member hidden><span class="member-av mp-av" aria-hidden="true"></span><span><span class="lab">The Guild</span><span class="mp-desk-t">My Desk</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
-        <a href="/guild/members/" class="mp-chip lab" data-member hidden>Members</a>
+        <a href="/guild/desk/#write" class="mp-chip mp-write lab" data-member hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>Write</a>
         <a href="/guild/desk" class="mp-desk" data-guest><span><span class="lab">Guild members</span><span class="mp-desk-t">Sign in</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
       </div>
 
@@ -49,6 +49,7 @@ const groups = [
           <section class="mp-group">
             <span class="eb">{g.title}</span>
             {g.links.map(([href, label]) => <a href={href} class="mp-link" aria-current={on(href)}>{label}</a>)}
+            {g.title === 'The Publication' && <a href="/guild/members/" class="mp-link" data-member hidden aria-current={on('/guild/members')}>Guild members</a>}
           </section>
         ))}
       </nav>
@@ -147,6 +148,7 @@ const groups = [
     background: #14180F; box-shadow: 0 0 0 1px rgba(159,148,94,.8); color: var(--ember); font-family: var(--serif); font-size: 13px; letter-spacing: .04em; }
   .mp-av :global(img) { width: 100%; height: 100%; object-fit: cover; }
   .mp-chip { display: inline-flex; align-items: center; padding: 0 18px; box-shadow: inset 0 0 0 1px rgba(243,236,220,.18); transition: box-shadow .3s, color .3s; }
+  .mp-write { gap: 8px; color: var(--ember); }
   .mp-chip:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.6); }
   .mp [hidden] { display: none !important; }
 

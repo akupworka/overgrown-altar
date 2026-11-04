@@ -146,7 +146,10 @@ function Desk({ session }: { session: Session }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [queue, setQueue] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
-  const [tab, setTab] = useState<Tab>('pieces');
+  // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
+  const [tab, setTab] = useState<Tab>(startHash === '#write' ? 'write' : 'pieces');
+  const after = useRef<Tab | null>(null);
+  const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = profile?.role === 'editor';
@@ -167,8 +170,36 @@ function Desk({ session }: { session: Session }) {
   useEffect(() => { load(); }, [load]);
 
   const name = profile?.display_name || session.user.email || '';
-  const go = (t: Tab) => { if (t === 'write' && tab !== 'write') setEditing(null); setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const open = (p: Piece | null) => { setEditing(p); setTab('write'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  // Writing gets its own place in the browser's history, so the phone's Back gesture returns to your pieces
+  // (the sheet saves itself on the way out) instead of leaving the Desk.
+  const leavingWrite = (t: Tab) => {
+    if (history.state?.desk === 'write') { after.current = t; history.back(); return true; }
+    if (location.hash === '#write') history.replaceState(null, '', location.pathname + location.search);
+    return false;
+  };
+  const go = (t: Tab) => {
+    if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
+    if (t === 'write' && tab !== 'write') { setEditing(null); history.pushState({ desk: 'write' }, '', '#write'); }
+    setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const open = (p: Piece | null) => {
+    if (tab !== 'write') history.pushState({ desk: 'write' }, '', '#write');
+    setEditing(p); setTab('write'); window.scrollTo({ top: 0 });
+  };
+  // Arrived straight at the sheet: put "my pieces" underneath it, so Back lands there.
+  useEffect(() => {
+    if (startHash === '#write' && history.state?.desk !== 'write') {
+      history.replaceState(null, '', location.pathname + location.search);
+      history.pushState({ desk: 'write' }, '', '#write');
+    }
+  }, []);
+  useEffect(() => {
+    const onPop = () => {
+      if (location.hash === '#write') { if (tabNow.current !== 'write') setEditing(null); setTab('write'); return; }
+      setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
+    };
+    addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
+  }, [load]);
   const items: [Tab, string, number?][] = [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number]] : []),
@@ -340,6 +371,11 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     return () => window.clearTimeout(timer.current);
   }, [form, state, save]);
 
+  // Leaving the sheet (Back, or another tab) with unsaved words: save them as a draft on the way out.
+  const latest = useRef({ state, save, has: false });
+  latest.current = { state, save, has: !!(form.title.trim() || form.body.trim()) };
+  useEffect(() => () => { const l = latest.current; if (l.state === 'idle' && l.has) l.save('draft'); }, []);
+
   // Warn before leaving with unsaved words.
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => { if (state === 'idle' || state === 'saving') { e.preventDefault(); } };
@@ -392,7 +428,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     <section className="d-write">
       <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
       <div className="d-write-bar">
-        <button type="button" className="d-link d-close" onClick={onDone}>← My pieces</button>
+        <button type="button" className="d-link d-close" onClick={onDone} aria-label="Back to my pieces"><span aria-hidden="true">←</span><span className="d-long"> My pieces</span></button>
         <span className="lab mut d-state" role="status" aria-live="polite">
           {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved changes' : (id ? '' : 'A new piece')}
         </span>

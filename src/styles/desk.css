@@ -462,3 +462,23 @@
   body:has(.d-room.writing) .site-header, body:has(.d-room.writing) .nav-shade { transform: translateY(-110%); opacity: 0; pointer-events: none; }
   .d-room.writing .d-paper-tools { position: sticky; top: 0; z-index: 4; background: #F1ECE2; box-shadow: 0 1px 0 rgba(42,32,23,.08); }
 }
+
+/* Phones, writing: one slim bar pinned to the top, like a writing app. Back on the left, whether it's saved
+   in the middle, Save and Publish on the right. The formatting tools sit just beneath it. */
+@media (max-width: 700px) {
+  .d-room.writing .d-back { display: none !important; }
+  .d-room.writing .d-write-bar {
+    top: 0 !important; bottom: auto !important; left: 0; right: 0; border-radius: 0; gap: 10px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px 6px; min-height: 52px;
+    background: rgba(10, 12, 10, .96); box-shadow: 0 1px 0 rgba(243, 236, 220, .08);
+  }
+  .d-room.writing .d-write-bar .d-close { display: inline-flex !important; align-items: center; justify-content: center; flex: none;
+    width: 40px; height: 40px; border: 0; padding: 0; color: var(--bone); font-size: 20px; }
+  .d-room.writing .d-write-bar .d-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 8.5px; letter-spacing: .2em; }
+  .d-room.writing .d-write-actions { gap: 4px !important; }
+  .d-room.writing .d-write-actions .ghost { border: 0 !important; padding: 9px 10px !important; color: var(--muted-dark); }
+  .d-room.writing .d-write-actions .btn { padding: 9px 14px !important; font-size: 9.5px; border-radius: 999px; }
+  .d-room.writing .d-paper-tools { top: calc(52px + env(safe-area-inset-top)); gap: 16px; padding: 10px 20px; }
+  .d-room.writing .d-paper-tools button { font-size: 9px; }
+  .desk-in:has(.d-room.writing) { padding-top: 64px; padding-bottom: 60px; }
+}
