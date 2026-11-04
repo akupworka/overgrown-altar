@@ -35,6 +35,10 @@ Start by reading this file, then `README.md`.
   Storage bucket `guild` (private; each member writes only in their own folder).
 - Front end: `src/pages/guild/desk.astro` + `src/components/desk/DeskApp.tsx` (React, client-only),
   client config `src/lib/supabase.ts`. The site gate exempts `/guild/desk`.
+- Member pages: `/guild/members/` (directory, `?m=<id>` a member's page with portrait, craft, bio, links and
+  collected work = approved pieces, `?p=<id>` reading a piece), `src/components/desk/MembersApp.tsx`; signed-in
+  members only. Portraits in the public `portraits` bucket. Writing marks rendered by `src/lib/marks.tsx`.
+- The header shows the member's portrait/initials and "My Desk" when signed in (reads localStorage only).
 - Part 2 still to build: editor Approve / Send back / Decline, publishing approved pieces to Sanity
   (Netlify Function + `SANITY_WRITE_TOKEN`, already set in Netlify), email on submission, rebuild hook.
 

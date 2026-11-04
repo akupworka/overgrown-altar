@@ -19,6 +19,20 @@ export interface Piece {
 }
 export interface Profile {
   id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor';
+  website: string; instagram: string; listed: boolean; created_at?: string;
+}
+
+/** A member's portrait, from the public "portraits" store. */
+export const portraitUrl = (path?: string | null) =>
+  path ? supabase.storage.from('portraits').getPublicUrl(path).data.publicUrl : '';
+
+/** Remembers, on this device, who is signed in, so the site header can greet them without loading anything. */
+export const MEMBER_KEY = 'oa_member';
+export function rememberMember(p: Pick<Profile, 'display_name' | 'portrait_path'> | null) {
+  try {
+    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path) }));
+    else localStorage.removeItem(MEMBER_KEY);
+  } catch {}
 }
 
 export const STATUS_LABEL: Record<Status, string> = {

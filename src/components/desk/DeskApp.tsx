@@ -3,7 +3,7 @@
 // this screen only makes it pleasant to use.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
+import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
 const startHash = typeof window !== 'undefined' ? window.location.hash : '';
@@ -21,9 +21,13 @@ function Glass({ children, className = '' }: { children: ReactNode; className?: 
   );
 }
 
-function Initials({ name, size = 40 }: { name: string; size?: number }) {
+export function Initials({ name, size = 40, src }: { name: string; size?: number; src?: string }) {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
-  return <span className="d-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }} aria-hidden="true">{initials}</span>;
+  return (
+    <span className="d-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }} aria-hidden="true">
+      {src ? <img src={src} alt="" /> : initials}
+    </span>
+  );
 }
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
@@ -154,6 +158,7 @@ function Desk({ session }: { session: Session }) {
       supabase.from('pieces').select('*').eq('author_id', uid).order('updated_at', { ascending: false }),
     ]);
     setProfile(p as Profile);
+    rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
     if ((p as Profile)?.role === 'editor') {
       const { data: q } = await supabase.from('pieces').select('*, profiles(display_name)').eq('status', 'submitted').order('submitted_at', { ascending: true });
@@ -175,7 +180,7 @@ function Desk({ session }: { session: Session }) {
     <div className="d-room">
       <aside className="d-side">
         <div className="d-me">
-          <Initials name={name} size={44} />
+          <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
             <span className="lab mut">{isEditor ? 'Editor' : 'Member of the Guild'}</span>
@@ -188,7 +193,11 @@ function Desk({ session }: { session: Session }) {
             </button>
           ))}
         </nav>
-        <button type="button" className="lab d-textbtn d-signout" onClick={() => supabase.auth.signOut()}>Sign out</button>
+        <div className="d-side-links">
+          <a className="d-side-link" href={`/guild/members/?m=${uid}`}>View my page</a>
+          <a className="d-side-link" href="/guild/members/">The Guild</a>
+        </div>
+        <button type="button" className="lab d-textbtn d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>Sign out</button>
       </aside>
 
       <div className="d-main">
@@ -448,19 +457,51 @@ function Reader({ piece, onBack }: { piece: Piece; onBack: () => void }) {
 }
 
 function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => void }) {
-  const [f, setF] = useState({ display_name: profile.display_name, craft: profile.craft, bio: profile.bio });
+  const [f, setF] = useState({
+    display_name: profile.display_name, craft: profile.craft, bio: profile.bio,
+    website: profile.website ?? '', instagram: profile.instagram ?? '', listed: profile.listed ?? true,
+    portrait_path: profile.portrait_path,
+  });
   const [msg, setMsg] = useState('');
+  async function uploadPortrait(file: File) {
+    if (file.size > 2 * 1024 * 1024) return setMsg('Please choose a portrait under 2 MB.');
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${profile.id}/portrait-${Date.now()}.${ext}`;
+    setMsg('Uploading your portrait…');
+    const { error } = await supabase.storage.from('portraits').upload(path, file, { contentType: file.type });
+    if (error) return setMsg(error.message);
+    setF((x) => ({ ...x, portrait_path: path })); setMsg('Portrait ready. Save your page to keep it.');
+  }
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const { error } = await supabase.from('profiles').update(f).eq('id', profile.id);
-    setMsg(error ? error.message : 'Saved.'); if (!error) onSaved();
+    const clean = { ...f, instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim() };
+    if (clean.website && !/^https?:\/\//.test(clean.website)) clean.website = 'https://' + clean.website;
+    const { error } = await supabase.from('profiles').update(clean).eq('id', profile.id);
+    setMsg(error ? error.message : 'Saved. Members now see this on your page.'); if (!error) onSaved();
   }
   return (
     <form className="d-section d-form-page" onSubmit={save}>
-      <header className="d-page-head"><span className="eb">My page</span><h1 className="h1 d-hello">About the author</h1><p className="it mut d-sub">What readers see beside your work.</p></header>
+      <header className="d-page-head">
+        <span className="eb">My page</span>
+        <h1 className="h1 d-hello">About the author</h1>
+        <p className="it mut d-sub">What members see on your page, beside your collected work. <a className="d-inline-link" href={`/guild/members/?m=${profile.id}`}>View my page</a></p>
+      </header>
+      <div className="d-portrait-row">
+        <label className="d-portrait" title="Choose a portrait">
+          <Initials name={f.display_name} size={112} src={portraitUrl(f.portrait_path)} />
+          <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && uploadPortrait(e.target.files[0])} />
+          <span className="d-link">{f.portrait_path ? 'Change portrait' : 'Add a portrait'}</span>
+        </label>
+        <span className="d-hint">A photograph of you, or of your work. Square works best. JPG, PNG or WebP, under 2 MB.</span>
+      </div>
       <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">Your craft · e.g. Essayist, Photographer</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
-      <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 160 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
+      <div className="d-two">
+        <label className="d-lbl"><span className="lab">Website</span><input className="field" inputMode="url" placeholder="yoursite.com" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></label>
+        <label className="d-lbl"><span className="lab">Instagram</span><input className="field" placeholder="@yourname" value={f.instagram} onChange={(e) => setF({ ...f, instagram: e.target.value })} /></label>
+      </div>
+      <label className="d-check"><input type="checkbox" checked={f.listed} onChange={(e) => setF({ ...f, listed: e.target.checked })} /><span>Show me in the Guild directory</span></label>
       <p className="it d-notice" role="status">{msg}</p>
       <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
     </form>
@@ -477,6 +518,7 @@ export default function DeskApp() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'SIGNED_OUT') rememberMember(null);
       setSession(s);
       if (event === 'PASSWORD_RECOVERY') setSetting('recovery');
     });

@@ -33,8 +33,12 @@ const current = Astro.url.pathname;
       <a href="/archive" class="icon-link" aria-label="Search the archive">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
-      <a href="/guild" class="join">Join the Guild</a>
-      <a href="/guild/desk" class="signin" aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
+      <a href="/guild" class="join" data-guest>Join the Guild</a>
+      <a href="/guild/members/" class="join" data-member hidden aria-current={current.startsWith('/guild/members') ? 'page' : undefined}>The Guild</a>
+      <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
+      <a href="/guild/desk/" class="member" data-member hidden aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
+        <span class="member-av" aria-hidden="true"></span><span class="member-label">My Desk</span>
+      </a>
       <a href="/menu" class="menu-link" aria-label="Menu">
         <span class="menu-word">Menu</span>
         <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -44,6 +48,24 @@ const current = Astro.url.pathname;
 </header>
 
 <script>
+  // Signed in to the Guild? Show the member's portrait (or initials) and "My Desk" instead of
+  // "Sign in". Reads only what this device already remembers, so nothing extra is loaded.
+  try {
+    const token = localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token');
+    if (token && JSON.parse(token)?.refresh_token) {
+      const me = JSON.parse(localStorage.getItem('oa_member') || '{}');
+      const name: string = me.name || '';
+      document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = true));
+      document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = false));
+      const av = document.querySelector<HTMLElement>('.member-av');
+      if (av) {
+        if (me.portrait) { const img = new Image(); img.src = me.portrait; img.alt = ''; av.append(img); }
+        else av.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+      }
+      document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
+    }
+  } catch {}
+
   // Turns the header into a dark bar after you scroll, and tucks it away while you
   // scroll down. Only flips a class when something changes, so scrolling stays smooth.
   const header = document.querySelector<HTMLElement>('[data-header]');
@@ -117,6 +139,15 @@ const current = Astro.url.pathname;
     box-shadow: 0 6px 24px -10px rgba(255, 214, 140, .45);
   }
   .signin:hover::after { left: 0; right: 0; opacity: 1; }
+  [data-member][hidden], [data-guest][hidden] { display: none !important; }
+
+  /* Signed in: the member's portrait and "My Desk". */
+  .member { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px 0 5px; border-radius: 999px;
+    border: 1px solid rgba(243, 236, 220, .25); transition: border-color .35s, color .35s, background-color .35s; }
+  .member:hover, .member[aria-current='page'] { border-color: rgba(255, 227, 163, .6); color: var(--ember); background-color: rgba(255, 227, 163, .04); }
+  .member-av { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center;
+    background: #14180F; box-shadow: 0 0 0 1px rgba(159, 148, 94, .8); color: var(--ember); font-family: var(--serif); font-size: 12px; letter-spacing: .04em; text-transform: none; }
+  .member-av img { width: 100%; height: 100%; object-fit: cover; }
 
   /* Medium screens: sections move into the Menu. */
   @media (max-width: 1320px) {
@@ -130,6 +161,8 @@ const current = Astro.url.pathname;
     .join, .menu-word, .icon-link { display: none; }
     .burger { display: flex; }
     .signin { height: 38px; padding: 0 15px; font-size: 10px; }
+    .member { height: 38px; padding: 0 13px 0 4px; font-size: 10px; gap: 8px; }
+    .member-av { width: 28px; height: 28px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .site-header { transition: none; }

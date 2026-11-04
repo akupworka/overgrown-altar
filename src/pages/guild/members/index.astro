@@ -1,0 +1,21 @@
+---
+// The Guild's members area: the directory, each member's page, and reading their published work.
+// For signed-in members only; the interactive part is components/desk/MembersApp.tsx.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteNav from '../../../components/SiteNav.astro';
+import MembersApp from '../../../components/desk/MembersApp.tsx';
+import '../../../styles/glass.css';
+import '../../../styles/desk.css';
+---
+<BaseLayout title="The Guild" description="The members of the Overgrown Altar Guild." noindex>
+  <section class="desk night">
+    <div class="desk-memory" aria-hidden="true">
+      <img src="/images/tall-windows-dark-vault-1200.jpg" alt="" fetchpriority="high" />
+    </div>
+    <SiteNav />
+    <div class="desk-in">
+      <MembersApp client:only="react" />
+      <noscript><p class="it" style="font-size:20px">The Guild’s pages need JavaScript switched on.</p></noscript>
+    </div>
+  </section>
+</BaseLayout>
