@@ -29,12 +29,23 @@ const inlineHtml = (s: string) => esc(s)
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   .replace(/\*(.+?)\*/g, '<em>$1</em>')
   .replace(/\n/g, '<br>');
+// In the sheet, each line is its own line (Enter), and an empty line separates paragraphs or stanzas,
+// exactly as the writer sees it. Saved, a paragraph's lines are joined by one line break and paragraphs by a blank line.
 export function marksToHtml(body: string): string {
-  return parseBody(body).map((b) =>
-    b.type === 'h' ? `<h2>${inlineHtml(b.text)}</h2>`
-    : b.type === 'quote' ? `<blockquote class="m-quote">${inlineHtml(b.text)}</blockquote>`
-    : b.type === 'verse' ? `<blockquote class="m-verse">${inlineHtml(b.text + (b.reference ? ` — ${b.reference}` : ''))}</blockquote>`
-    : `<p>${inlineHtml(b.text)}</p>`).join('') || '<p></p>';
+  const out: string[] = [];
+  let lastWasP = false;
+  for (const b of parseBody(body)) {
+    if (b.type === 'p') {
+      if (lastWasP) out.push('<p></p>');
+      out.push(...b.text.split('\n').map((line) => `<p>${inlineHtml(line)}</p>`));
+      lastWasP = true; continue;
+    }
+    lastWasP = false;
+    out.push(b.type === 'h' ? `<h2>${inlineHtml(b.text)}</h2>`
+      : b.type === 'quote' ? `<blockquote class="m-quote">${inlineHtml(b.text)}</blockquote>`
+      : `<blockquote class="m-verse">${inlineHtml(b.text + (b.reference ? ` — ${b.reference}` : ''))}</blockquote>`);
+  }
+  return out.join('') || '<p></p>';
 }
 function inlineMarks(node: PMNode): string {
   let out = '';
@@ -50,13 +61,18 @@ function inlineMarks(node: PMNode): string {
   return out.trim();
 }
 export function docToMarks(doc: PMNode): string {
-  const parts: string[] = [];
+  const chunks: string[] = [];
+  let lines: string[] = [];
+  const flush = () => { if (lines.length) chunks.push(lines.join('\n')); lines = []; };
   doc.forEach((n) => {
     const text = inlineMarks(n);
+    if (n.type.name === 'paragraph') { if (text) lines.push(text); else flush(); return; }   // an empty line ends the paragraph
+    flush();
     if (!text) return;
-    parts.push(n.type.name === 'heading' ? `## ${text}` : n.type.name === 'pullquote' ? `> ${text}` : n.type.name === 'verse' ? `+ ${text}` : text);
+    chunks.push(n.type.name === 'heading' ? `## ${text}` : n.type.name === 'pullquote' ? `> ${text}` : n.type.name === 'verse' ? `+ ${text}` : text);
   });
-  return parts.join('\n\n');
+  flush();
+  return chunks.join('\n\n');
 }
 
 export type Tool = 'heading' | 'pullquote' | 'verse' | 'italic' | 'bold';
@@ -86,7 +102,7 @@ export function useRichBody(initial: string, onChange: (marks: string) => void) 
         code: false, codeBlock: false, horizontalRule: false, strike: false,
       }),
       PullQuote, Verse,
-      Placeholder.configure({ placeholder: 'Begin here.' }),
+      Placeholder.configure({ placeholder: 'Begin here. Enter starts a new line; leave an empty line between paragraphs or stanzas.' }),
     ],
     content: marksToHtml(initial),
     editorProps: { attributes: { class: 'd-rich-in', 'aria-label': 'The piece', 'aria-multiline': 'true', role: 'textbox' } },

@@ -30,14 +30,18 @@ export function parseBody(body: string): Block[] {
     });
 }
 
-/** *italic* and **bold** inside a line. */
+/** *italic* and **bold** inside a paragraph; a single line break inside a paragraph stays a line break (poems). */
 export function inline(text: string): ReactNode[] {
+  if (text.includes('\n')) return text.split('\n').flatMap((line, i) => (i ? [<br key={`br${i}`} />, ...inlineLine(line, i)] : inlineLine(line, i)));
+  return inlineLine(text, 0);
+}
+function inlineLine(text: string, line: number): ReactNode[] {
   const out: ReactNode[] = [];
   const re = /\*\*(.+?)\*\*|\*(.+?)\*/g;
   let last = 0, m: RegExpExecArray | null, i = 0;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
-    out.push(m[1] ? <strong key={i++}>{m[1]}</strong> : <em key={i++}>{m[2]}</em>);
+    out.push(m[1] ? <strong key={`${line}-${i++}`}>{m[1]}</strong> : <em key={`${line}-${i++}`}>{m[2]}</em>);
     last = m.index + m[0].length;
   }
   if (last < text.length) out.push(text.slice(last));
@@ -51,8 +55,14 @@ export function Body({ body }: { body: string }) {
         b.type === 'h' ? <h2 key={i} className="eb">{inline(b.text)}</h2>
         : b.type === 'quote' ? <blockquote key={i} className="m-quote">{inline(b.text)}</blockquote>
         : b.type === 'verse' ? <blockquote key={i} className="m-verse">{inline(b.text)}{b.reference && <cite>{b.reference}</cite>}</blockquote>
-        : <p key={i} className="body">{inline(b.text)}</p>,
+        : <p key={i} className={b.text.includes('\n') ? 'body lines' : 'body'}>{inline(b.text)}</p>,
       )}
     </>
   );
+}
+
+/** The large opening letter is for longer essay-style pieces only: never poems, prose, or short pieces. */
+export function wantsDropCap(medium: string, body: string): boolean {
+  const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+  return !['poetry', 'prose'].includes(medium) && words >= 400;
 }

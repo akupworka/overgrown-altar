@@ -581,6 +581,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           </label>
           <details className="d-guide">
             <summary className="lab">Typing shortcuts</summary>
+            <p><b>Enter</b> starts a new line; an <b>empty line</b> starts a new paragraph or stanza</p>
             <p><code>##</code> then a space starts a section heading</p>
             <p><code>&gt;</code> then a space makes a pull quote</p>
             <p><code>+</code> then a space makes a Scripture verse; end it with — and the reference</p>

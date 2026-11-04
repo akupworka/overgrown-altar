@@ -3,10 +3,10 @@
 // so a piece is readable the moment it is approved; the next rebuild makes it a permanent page.
 import { useEffect, useState } from 'react';
 import { supabase, portraitUrl } from '../../lib/supabase';
-import { Body } from '../../lib/marks';
+import { Body, wantsDropCap } from '../../lib/marks';
 
 const PILLAR = { watchtower: 'The Watchtower', hearth: 'The Hearth', perimeter: 'The Perimeter' } as Record<string, string>;
-const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photographs', study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol' };
+const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photographs', study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol', recovery: 'Recovery story', testimony: 'Testimony', deliverance: 'Deliverance story', personal: 'Personal' };
 
 export default function LivePiece() {
   const [piece, setPiece] = useState<any>(null);
@@ -50,7 +50,7 @@ export default function LivePiece() {
         </div>
       </section>
       <article className="sec paper gp-article">
-        <div className="narrow gp-flow">
+        <div className={`narrow gp-flow${wantsDropCap(piece.medium, piece.body) ? ' gp-drop' : ''}`}>
           {piece.standfirst && <p className="lede gp-standfirst">{piece.standfirst}</p>}
           <Body body={piece.body} />
           <div className="gp-sign"><span>{(a.display_name || '').split(' ')[0]}</span></div>

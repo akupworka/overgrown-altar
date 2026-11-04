@@ -6,7 +6,7 @@ import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import Cross from '../../components/Cross.astro';
 import AuthorLinks from '../../components/AuthorLinks.astro';
-import { Body } from '../../lib/marks';
+import { Body, wantsDropCap } from '../../lib/marks';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
 import '../../styles/desk.css';
 import '../../styles/guild-piece.css';
@@ -41,7 +41,7 @@ const aUrl = authorUrl(a);
   </section>
 
   <article class="sec paper gp-article">
-    <div class="narrow gp-flow">
+    <div class:list={['narrow gp-flow', { 'gp-drop': wantsDropCap(p.medium, p.body) }]}>
       {p.standfirst && <p class="lede gp-standfirst">{p.standfirst}</p>}
       <Body body={p.body} />
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>

@@ -7,7 +7,8 @@
 .gp-flow { display: flex; flex-direction: column; gap: 26px; }
 .gp-flow p.body { font-size: 22px; margin: 0; }
 .gp-flow h2.eb { margin: 14px 0 0; }
-.gp-flow > p.lede + p.body::first-letter, .gp-flow > p.body:first-child::first-letter { float: left; font-family: var(--serif); font-weight: 500; font-size: 96px; line-height: .78; margin: 8px 14px 0 0; color: var(--oxblood); }
+/* No drop cap when the opening is a poem's lines: it would bend them out of shape. */
+.gp-drop > p.lede + p.body:not(.lines)::first-letter, .gp-drop > p.body:not(.lines):first-child::first-letter { float: left; font-family: var(--serif); font-weight: 500; font-size: 96px; line-height: .78; margin: 8px 14px 0 0; color: var(--oxblood); }
 .gp-standfirst { font-size: 30px; font-style: italic; color: var(--muted-paper); }
 .gp-sign { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 .gp-sign span { font-family: var(--script); font-size: 52px; color: var(--oxblood); line-height: 1.2; }
