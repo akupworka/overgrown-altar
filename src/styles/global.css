@@ -72,7 +72,7 @@ img { max-width: 100%; }
 /* ---------- 5. Type styles ------------------------------------------------ */
 .cg  { font-family: var(--serif); font-weight: 500; }
 .it  { font-family: var(--serif); font-style: italic; font-weight: 400; }
-.lab { font-size: 11px; letter-spacing: .26em; text-transform: uppercase; }
+.lab { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
 .eb  { font-family: var(--serif); font-weight: 600; font-size: 13px; letter-spacing: .24em; text-transform: uppercase; }
 .paper .eb { color: var(--oxblood); }
 .dark .eb, .night .eb, .hero .eb { color: var(--ember); }
@@ -235,4 +235,19 @@ textarea.field { resize: vertical; }
   .fl { width: 100%; }
   .menu-in { padding: 24px 24px 40px !important; }
   .btn, .ghost { padding-left: 24px; padding-right: 24px; text-align: center; }
+}
+
+/* Share / Print buttons inside a line of small capitals. */
+.share-btn { background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; border-bottom: 1px solid transparent; }
+.share-btn:hover { color: var(--oxblood); border-color: currentColor; }
+
+/* Printing an article: just the writing. */
+@media print {
+  .site-header, .nav-shade, .foot, .glass-light, .glow, .skip, form, .more-sec, .sub-card, .dark:not(.hero) { display: none !important; }
+  .hero { height: auto !important; min-height: 0 !important; background: none !important; color: #000 !important; }
+  .hero > img, .veil, .veil-l { display: none !important; }
+  .hero-c, .pill-in { position: static !important; color: #000 !important; padding: 0 0 24px !important; }
+  .paper, body { background: #fff !important; }
+  .sec { padding: 0 !important; }
+  * { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
 }

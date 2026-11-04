@@ -9,45 +9,15 @@ import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
-import { guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../../lib/guild';
+import { inPillar } from '../../lib/catalog';
 
-// Every dispatch. Sample content from the design, with placeholder dates,
-// until Sanity supplies the real ones (then this list comes from your Studio).
-const author = { name: 'Ainslie Willson' };
-const all: (DispatchItem & { n: number })[] = [
-  { n: 1, title: 'Nietzsche Surrendered: The Übermensch at the Foot of the Cross', date: '2026-09-22', minutes: 12, image: 'format-dispatches', imagePos: '45% 40%',
-    standfirst: 'Nietzsche correctly diagnosed the spiritual rot of modern society, but his solution was an exercise in human pride that collapsed into madness.' },
-  { n: 2, title: 'Jung vs. Tolkien: The Counterfeit Unconscious vs. Myth Realized', date: '2026-09-29', image: 'window-of-the-ascension-and', imagePos: 'center 40%',
-    standfirst: 'Jung found the old myths in the depths of the psyche. Tolkien knew the True Myth had stepped into history.' },
-  { n: 3, title: 'Newtonian Determinism: The Missing Anchor', date: '2026-10-06', image: 'folios-photo-2',
-    standfirst: 'A universe of perfect laws, and no Lawgiver to keep them. Where the clockwork worldview runs down.' },
-  { n: 4, title: 'The Resurrection as the Primary Quantum Law', date: '2026-10-13', image: 'folios-photo',
-    standfirst: 'Decay is not the deepest law of the universe. The empty tomb is.' },
-  { n: 5, title: 'Freud’s Couch and the Confessional', date: '2026-10-20', image: 'watchtower-photo',
-    standfirst: 'The talking cure found the wound. It could not pronounce the absolution.' },
-  { n: 6, title: 'Bukowski and the Liturgy of Despair', date: '2026-10-27', image: 'what-we-believe',
-    standfirst: 'A poet who worshipped his own ruin, and the grace he kept walking past.' },
-  { n: 7, title: 'The Algorithm as Idol', date: '2026-11-03', image: 'watchtower-photo-2',
-    standfirst: 'Digital posturing, the curated self, and the God who sees in secret.' },
-].map((d: any) => ({ ...d, href: '/watchtower/nietzsche-surrendered', kicker: `Dispatch ${d.n}`, author, image: `/images/${d.image}-1200.jpg` }));
-
-// Dispatches published from the Guild Desk join the list.
-const fromGuild: DispatchItem[] = (await guildPillar('watchtower')).map((g) => ({
-  href: guildUrl(g), title: g.title, kicker: MEDIUM_LABEL[g.medium] ?? 'Dispatch', standfirst: g.standfirst,
-  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
-  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/watchtower-photo-1200.jpg',
-}));
-const newestFirst = [...all, ...fromGuild].sort((a, b) => b.date.localeCompare(a.date));
+// Every dispatch: real pieces only (the design's complete essay, plus pieces published at the Guild Desk).
+const newestFirst: DispatchItem[] = await inPillar('watchtower');
 const latest = newestFirst[0];
 const rest = newestFirst.slice(1);
 
-// "Start here": the four foundational dispatches of the Editorial Matrix.
-const foundations = [
-  { n: 1, title: 'Nietzsche Surrendered', thinker: 'Will to Power', anchor: 'Surrender & Divine Authority' },
-  { n: 2, title: 'Jung vs. Tolkien', thinker: 'The Archetypal Psyche', anchor: 'The True Myth Made Flesh' },
-  { n: 3, title: 'Newtonian Determinism', thinker: 'Newtonian Mechanics', anchor: 'Colossians 1:17 Coherence' },
-  { n: 4, title: 'The Resurrection as the Primary Quantum Law', thinker: 'Quantum Paradox', anchor: 'Resurrection Re-encryption' },
-];
+// "Start here": the foundational dispatch.
+const foundations = [{ n: 1, title: 'Nietzsche Surrendered', thinker: 'Will to Power', anchor: 'Surrender & Divine Authority', href: '/watchtower/nietzsche-surrendered' }];
 const thinkers = ['Nietzsche', 'Jung', 'Freud', 'Bukowski', 'Newton', 'Quantum'];
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
@@ -83,11 +53,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
         </article>
 
         <!-- Everything else, newest first -->
+        {rest.length > 0 && (<>
         <div class="list-head">
           <h2 class="eb">Earlier dispatches</h2>
-          <span class="lab mut">{rest.length} pieces · newest first</span>
+          <span class="lab mut">{rest.length} {rest.length === 1 ? 'piece' : 'pieces'} · newest first</span>
         </div>
         <DispatchList items={rest} />
+        </>)}
       </div>
 
       <aside class="blog-side" aria-label="Find more dispatches">
@@ -98,11 +70,11 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
 
         <div class="side-block">
           <h2 class="eb">Start here</h2>
-          <p class="it mut side-note">The four foundational dispatches: where each great mind fractured, and the anchor that holds.</p>
+          <p class="it mut side-note">The foundational dispatch: where a great mind fractured, and the anchor that holds.</p>
           <ol class="found">
             {foundations.map((f) => (
               <li>
-                <a href="/watchtower/nietzsche-surrendered">
+                <a href={f.href}>
                   <span class="num found-n">{f.n}</span>
                   <span class="found-t"><span class="found-title">{f.title}</span><span class="found-sub">{f.thinker} → {f.anchor}</span></span>
                 </a>

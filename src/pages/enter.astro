@@ -1,37 +1,58 @@
 ---
-// The password screen every visitor sees while the site is being finished.
+// The password screen every visitor sees while the site is being finished: a doorway.
+// A pointed arch draws itself in light around the name; the nave behind breathes slowly;
+// dust drifts in the light. Entering the word opens the doors.
 // The real check happens on Netlify's servers (netlify/edge-functions/site-gate.ts);
 // this page only collects the password.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Monogram from '../components/Monogram.astro';
+import Wordmark from '../components/Wordmark.astro';
 import GlassLight from '../components/GlassLight.astro';
-import GlassCard from '../components/GlassCard.astro';
+
+// Dust in the light: a fixed, gentle scatter.
+const motes = Array.from({ length: 18 }, (_, i) => {
+  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
+  return `left:${(18 + r(1) * 64).toFixed(1)}%;bottom:${(r(2) * 40).toFixed(1)}%;--s:${(1 + r(3) * 2.2).toFixed(1)}px;--t:${(14 + r(4) * 14).toFixed(1)}s;--d:-${(r(5) * 20).toFixed(1)}s;--x:${((r(6) - .5) * 60).toFixed(0)}px`;
+});
 ---
-<BaseLayout title="Opening soon" description="Overgrown Altar opens soon." footer={false} noindex>
-  <section class="hero gate">
-    <img src="/images/window-light-on-wall.jpg" srcset="/images/window-light-on-wall-1200.jpg 1200w, /images/window-light-on-wall.jpg 1326w" sizes="100vw"
-      alt="" style="object-position:center 45%;filter:brightness(.38) saturate(1.05)" fetchpriority="high" />
-    <div class="veil"></div>
-    <GlassLight prism size={640} intensity={0.8} style="left:50%;top:-10%;translate:-50% 0" />
-    <div class="gate-in">
-      <GlassCard class="gate-card">
-        <div class="card">
-          <div class="mark"><Monogram size={50} color="#F3ECDC" /></div>
-          <span class="eb kicker"><span>Overgrown Altar</span><span class="dot"> · </span><span>Opening soon</span></span>
-          <h1 class="h1 title">The doors are not yet open</h1>
-          <p class="it mut lead">The journal is being finished. If you have been given the word, enter it below.</p>
-          <form class="gate-form" method="POST" action="/unlock">
-            <input type="hidden" name="next" value="/" />
-            <label class="lab" for="pw">Password</label>
-            <input id="pw" class="field" type="password" name="password" autocomplete="current-password" required autofocus />
-            <button class="btn" type="submit">Enter</button>
-            <p class="it notice" role="alert" aria-live="assertive"></p>
-          </form>
-        </div>
-      </GlassCard>
-      <span class="lab back">Est. MMXXVI · overgrownaltar.com</span>
+<BaseLayout title="Opening soon" description="Overgrown Altar opens soon." footer={false} noindex arrival={false}>
+  <section class="door">
+    <div class="nave" aria-hidden="true">
+      <img src="/images/folios-photo-2.jpg" srcset="/images/folios-photo-2-1200.jpg 1200w, /images/folios-photo-2.jpg 2576w" sizes="100vw" alt="" fetchpriority="high" />
     </div>
+    <div class="vignette" aria-hidden="true"></div>
+    <GlassLight beams prism={false} size={760} intensity={0.42} style="left:50%;top:-6%;translate:-50% 0" />
+    <div class="motes" aria-hidden="true">{motes.map((s) => <i style={s}></i>)}</div>
+
+    <div class="arch-wrap">
+      <svg class="door-arch" viewBox="0 0 600 1000" preserveAspectRatio="none" aria-hidden="true">
+        <path class="arch-line" pathLength="1" d="M0,1000 L0,430 C0,190 150,60 300,0 C450,60 600,190 600,430 L600,1000" />
+        <path class="arch-line inner" pathLength="1" d="M18,1000 L18,436 C18,206 160,82 300,24 C440,82 582,206 582,436 L582,1000" />
+      </svg>
+      <div class="arch-glow" aria-hidden="true"></div>
+
+      <div class="threshold">
+        <div class="mark"><Wordmark width={380} mobileWidth={250} /></div>
+        <span class="eb kicker">Opening soon</span>
+        <h1 class="title">The doors are not yet open</h1>
+        <p class="lead">The journal is being finished. If you have been given the word, speak it at the door.</p>
+
+        <form class="word" method="POST" action="/unlock">
+          <input type="hidden" name="next" value="/" />
+          <label class="visually-hidden" for="pw">The word</label>
+          <input id="pw" type="password" name="password" autocomplete="current-password" placeholder="The word" required autofocus />
+          <button type="submit" aria-label="Enter"><span>Enter</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></button>
+        </form>
+        <p class="notice" role="alert" aria-live="assertive"></p>
+      </div>
+    </div>
+
+    <footer class="door-foot">
+      <span class="verse">Knock, and it shall be opened unto you. <span class="ref">Matthew vii · vii</span></span>
+      <span class="lab small">Est. MMXXVI · <a href="/guild/desk/">Members of the Guild</a></span>
+    </footer>
+    <div class="opening" aria-hidden="true"></div>
   </section>
+
   <!-- Hidden: lets Netlify email the editor when a piece is sent to them (see netlify/functions/notify-submission.mts). -->
   <form name="submission-alert" data-netlify="true" netlify-honeypot="company" hidden>
     <input name="title" /><input name="author" /><input name="standfirst" /><input name="review" /><input name="company" />
@@ -39,35 +60,115 @@ import GlassCard from '../components/GlassCard.astro';
 </BaseLayout>
 
 <script>
-  // Shows why the visitor was sent back here.
-  const reason = new URLSearchParams(location.search).get('error');
+  const q = new URLSearchParams(location.search);
   const notice = document.querySelector<HTMLElement>('.notice')!;
-  if (reason === 'wrong') notice.textContent = 'That is not the word. Please try again.';
-  if (reason === 'closed') notice.textContent = 'The doors are closed for now.';
-  // After entering, take the visitor to the page they were trying to reach.
-  const next = new URLSearchParams(location.search).get('next');
+  const door = document.querySelector<HTMLElement>('.door')!;
+  if (q.get('error') === 'wrong') { notice.textContent = 'That is not the word. Try again.'; door.classList.add('wrong'); }
+  if (q.get('error') === 'closed') notice.textContent = 'The doors are closed for now.';
+  // After entering, go to the page the visitor was trying to reach.
+  const next = q.get('next');
   if (next && next.startsWith('/') && !next.startsWith('//')) document.querySelector<HTMLInputElement>('input[name=next]')!.value = next;
+
+  // Speaking the word: the light swells through the doorway, then the form goes on its way.
+  const form = document.querySelector<HTMLFormElement>('form.word')!;
+  form.addEventListener('submit', (e) => {
+    if (form.dataset.going || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    e.preventDefault(); form.dataset.going = '1';
+    door.classList.remove('wrong'); door.classList.add('opening-now');
+    setTimeout(() => form.submit(), 700);
+  });
 </script>
 
 <style>
-  .gate { min-height: 100vh; min-height: 100svh; display: flex; }
-  .gate-in { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 60px 20px; }
-  .gate-in :global(.gate-card) { width: 100%; max-width: 460px; }
-  .card { padding: 44px 40px 36px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .mark { width: 34px; height: 50px; margin-bottom: 20px; }
-  .title { margin-top: 12px; font-size: 40px; }
-  .lead { margin: 14px 0 0; font-size: 19px; line-height: 1.45; }
-  .gate-form { width: 100%; margin-top: 28px; display: flex; flex-direction: column; text-align: left; }
-  .gate-form .lab { color: var(--muted-dark); margin-bottom: 8px; }
-  .gate-form .field { width: 100%; font-size: 19px; padding: 15px 18px; margin-bottom: 16px; }
-  .gate-form .btn { width: 100%; padding: 18px; }
-  .kicker span { white-space: nowrap; }
-  .notice { min-height: 1.4em; margin: 14px 0 0; font-size: 18px; color: var(--ember); text-align: center; }
-  .back { color: var(--muted-dark); }
+  .door { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; background: #040504; color: var(--bone);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px 120px; }
+
+  /* The nave, breathing very slowly. */
+  .nave { position: absolute; inset: -4%; }
+  .nave img { width: 100%; height: 100%; object-fit: cover; object-position: center 60%; filter: brightness(.34) saturate(.85);
+    animation: breathe-in 34s ease-in-out infinite alternate; will-change: transform; }
+  @keyframes breathe-in { from { transform: scale(1); } to { transform: scale(1.07); } }
+  .vignette { position: absolute; inset: 0; background:
+    radial-gradient(ellipse 46% 58% at 50% 46%, rgba(4, 5, 4, .05), rgba(4, 5, 4, .72) 70%, rgba(4, 5, 4, .96) 100%); }
+
+  /* Dust rising through the light. */
+  .motes i { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: rgba(255, 227, 163, .7);
+    box-shadow: 0 0 6px rgba(255, 214, 140, .6); opacity: 0; animation: mote var(--t) linear infinite; animation-delay: var(--d); will-change: transform, opacity; }
+  @keyframes mote {
+    0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .8; } 80% { opacity: .5; }
+    100% { transform: translate(var(--x), -60vh); opacity: 0; }
+  }
+
+  /* The doorway. */
+  .arch-wrap { position: relative; z-index: 2; width: min(560px, 88vw); min-height: min(820px, 84vh); display: flex; align-items: flex-end; justify-content: center; }
+  .door-arch { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .arch-line { fill: none; stroke: rgba(255, 227, 163, .55); stroke-width: 1; vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.6s .2s cubic-bezier(.65, 0, .35, 1) forwards; }
+  .arch-line.inner { stroke: rgba(159, 148, 94, .35); animation-delay: .55s; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .arch-glow { position: absolute; left: 50%; top: 6%; width: 70%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 214, 140, .16), rgba(255, 196, 77, 0)); animation: candle 7s ease-in-out infinite; }
+  @keyframes candle { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+
+  .threshold { position: relative; width: 100%; padding: 0 9% 9%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .threshold > * { opacity: 0; animation: rise 1.2s cubic-bezier(.16, 1, .3, 1) forwards; }
+  .threshold > :nth-child(1) { animation-delay: 1.1s; }
+  .threshold > :nth-child(2) { animation-delay: 1.5s; }
+  .threshold > :nth-child(3) { animation-delay: 1.65s; }
+  .threshold > :nth-child(4) { animation-delay: 1.8s; }
+  .threshold > :nth-child(5) { animation-delay: 2s; }
+  .threshold > :nth-child(6) { animation-delay: 2s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .mark { margin-bottom: 30px; }
+  .kicker { letter-spacing: .4em; }
+  .title { margin: 18px 0 0; font-family: var(--serif); font-weight: 500; font-size: 42px; line-height: 1.05; text-wrap: balance; }
+  .lead { margin: 16px 0 0; font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.5; color: var(--muted-dark); max-width: 340px; }
+
+  /* The word: a single line, like a threshold. */
+  .word { margin-top: 38px; width: 100%; max-width: 340px; display: flex; align-items: center; border-bottom: 1px solid rgba(243, 236, 220, .35);
+    transition: border-color .4s, box-shadow .6s; }
+  .word:focus-within { border-color: var(--ember); box-shadow: 0 14px 30px -18px rgba(255, 214, 140, .55); }
+  .word input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--bone); padding: 14px 4px;
+    font-family: var(--serif); font-size: 22px; text-align: center; letter-spacing: .08em; }
+  .word input::placeholder { color: #8C8679; font-style: italic; letter-spacing: .02em; }
+  .word button { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; cursor: pointer; color: var(--ember);
+    padding: 12px 2px 12px 12px; min-height: 44px; font-family: var(--sans); font-size: 11px; letter-spacing: .26em; text-transform: uppercase;
+    transition: gap .4s cubic-bezier(.16, 1, .3, 1), color .3s; }
+  .word button:hover { gap: 16px; color: var(--bone); }
+  .notice { min-height: 1.5em; margin: 14px 0 0; font-family: var(--serif); font-style: italic; font-size: 17px; color: #E6A99A; }
+  .wrong .word { animation: rise 1.2s cubic-bezier(.16, 1, .3, 1) 2s forwards, shake .5s cubic-bezier(.36, .07, .19, .97) 3.1s; border-color: rgba(230, 169, 154, .7); }
+  @keyframes shake { 15%, 85% { transform: translateX(-2px); } 30%, 70% { transform: translateX(4px); } 45%, 55% { transform: translateX(-6px); } }
+
+  .door-foot { position: absolute; z-index: 2; left: 0; right: 0; bottom: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 0 20px;
+    opacity: 0; animation: rise 1.4s 2.4s ease-out forwards; }
+  .verse { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--muted-dark); }
+  .ref { margin-left: 8px; font-style: normal; font-weight: 600; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255, 227, 163, .7); }
+  .small { font-size: 10px; color: #8C8679; }
+  .small a { border-bottom: 1px solid rgba(140, 134, 121, .5); }
+  .small a:hover { color: var(--ember); border-color: var(--ember); }
+
+  /* The doors opening: light swells from the threshold. */
+  .opening { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse 30% 45% at 50% 55%, rgba(255, 236, 196, .95), rgba(255, 214, 140, .35) 45%, rgba(4, 5, 4, 0) 75%); }
+  .opening-now .opening { animation: open-light .9s cubic-bezier(.4, 0, .2, 1) forwards; }
+  .opening-now .arch-line { stroke: rgba(255, 227, 163, .95); transition: stroke .4s; }
+  @keyframes open-light { 0% { opacity: 0; transform: scale(.6); } 100% { opacity: 1; transform: scale(2.4); } }
+
   @media (max-width: 700px) {
-    .card { padding: 34px 22px 28px; }
-    .title { font-size: 34px !important; }
-    .kicker { display: flex; flex-direction: column; gap: 6px; }
-    .kicker .dot { display: none; }
+    .door { padding: 24px 16px 130px; }
+    .arch-wrap { min-height: min(700px, 78vh); }
+    .threshold { padding: 0 8% 12%; }
+    .mark { margin-bottom: 22px; }
+    .title { font-size: 30px; }
+    .lead { font-size: 17px; }
+    .word input { font-size: 20px; }
+    .verse { font-size: 15px; }
+    .ref { display: block; margin: 6px 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nave img, .motes i, .arch-glow { animation: none; }
+    .motes { display: none; }
+    .arch-line { stroke-dashoffset: 0; animation: none; }
+    .threshold > *, .door-foot { opacity: 1; animation: none; }
   }
 </style>

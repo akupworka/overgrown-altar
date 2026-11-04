@@ -4,27 +4,58 @@
 import '../styles/global.css';
 import '../styles/motion.css';
 import SiteFooter from '../components/SiteFooter.astro';
+import Arrival from '../components/Arrival.astro';
 
-interface Props { title?: string; description?: string; footer?: boolean; noindex?: boolean }
+interface Props { title?: string; description?: string; footer?: boolean; noindex?: boolean; image?: string; arrival?: boolean }
 const {
   title,
   footer = true,
   noindex = false,
+  arrival = true,
+  image = '/images/folios-photo-2-1200.jpg',
   description = 'An independent journal of craft, discernment and the reclaimed hearth.',
 } = Astro.props;
 const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
+const site = Astro.site ?? new URL('https://overgrownaltar.com');
+const pageUrl = new URL(Astro.url.pathname, site).toString();
+const imageUrl = new URL(image, site).toString();
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={pageUrl} />
+
+    <!-- How the page looks when shared in messages and on social media -->
+    <meta property="og:site_name" content="Overgrown Altar" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title ?? 'Overgrown Altar'} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- The OA monogram in browser tabs and on phone home screens -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#060806" />
+
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
+    {arrival && (
+      <script is:inline>
+        try {
+          if (!localStorage.getItem('oa_arrived') && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.dataset.arrive = '1';
+        } catch (e) {}
+      </script>
+    )}
   </head>
   <body>
+    {arrival && <Arrival />}
     <a class="skip" href="#main">Skip to content</a>
     <main id="main">
       <slot />  <!-- the page's own content goes here -->
@@ -32,6 +63,15 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
     {footer && <SiteFooter />}
 
     <script>
+      // Share buttons: the phone's share sheet, or copy the link on a computer.
+      document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((b) => b.addEventListener('click', async () => {
+        const data = { title: document.title, url: location.href };
+        try {
+          if (navigator.share) await navigator.share(data);
+          else { await navigator.clipboard.writeText(location.href); const t = b.textContent; b.textContent = 'Link copied'; setTimeout(() => (b.textContent = t), 1800); }
+        } catch {}
+      }));
+
       // Motion that needs to know where things are on screen. Styles live in src/styles/motion.css.
       const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!calm) {
@@ -50,7 +90,6 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
           el.classList.add('reveal');
           seen.observe(el);
         });
-
       }
     </script>
   </body>

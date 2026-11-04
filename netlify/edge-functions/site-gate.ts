@@ -81,5 +81,5 @@ export const config = {
   path: '/*',
   // The Guild Desk and members' pages stay reachable so invited members can sign in; their contents are protected by
   // their own sign-in and the database's rules, not by the site password.
-  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/favicon.ico', '/favicon.svg', '/robots.txt'],
+  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/favicon.ico', '/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png', '/robots.txt'],
 };

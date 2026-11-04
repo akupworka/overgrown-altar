@@ -1,0 +1,19 @@
+---
+// "More to read": real pieces only, newest first, leaving out the one being read.
+import DispatchList from './DispatchList.astro';
+import { getCatalog } from '../lib/catalog';
+interface Props { exclude: string; pillar?: 'watchtower' | 'hearth' | 'perimeter'; title?: string }
+const { exclude, pillar, title = 'More to read' } = Astro.props;
+let items = (await getCatalog()).filter((x) => x.href !== exclude);
+const same = pillar ? items.filter((x) => x.pillar === pillar) : [];
+items = [...same, ...items.filter((x) => !same.includes(x))].slice(0, 3);
+---
+{items.length > 0 && (
+  <section class="sec dark more-sec">
+    <div class="more-in">
+      <span class="eb">{title}</span>
+      <div style="margin-top:22px"><DispatchList items={items} tone="dark" /></div>
+    </div>
+  </section>
+)}
+<style>.more-in { max-width: 1100px; margin: 0 auto; }</style>

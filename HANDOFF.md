@@ -17,6 +17,12 @@ Start by reading this file, then `README.md`.
   components `GlassCard`, `GlassLight` (stained light), `Avatar`, `DispatchList`, `SiteNav` (fixed header).
   Brand rules: colour enters only through glass; never glow or colour the marks; quiet, editorial.
 
+## Latest polish
+- `src/lib/catalog.ts`: one list of real pieces (2 complete design pieces + published Guild pieces) used by Home,
+  The Watchtower, The Perimeter, Archive, Start Here and "More to read". Sample-only pieces were retired.
+- BaseLayout: Open Graph/Twitter previews (`image` prop), OA favicon + apple-touch-icon, Share/Print, first-visit
+  "arrival" (cross draws itself, `components/Arrival.astro`, once per browser). `/enter/` is a drawn doorway.
+
 ## Branches
 
 NOTE (latest): Guild writing and publishing now live in **Supabase**, not Sanity. The `sanity` branch was
