@@ -1,48 +1,71 @@
 ---
-// The glowing card from the Guild Desk sign-in, ready to use anywhere:
+// The glowing glass card from the Guild Desk, ready to use anywhere:
 //   <GlassCard> ...anything... </GlassCard>
-// A dark pane with a thin, slowly turning edge of the five glass colours and a soft glow.
 //
-// Built for smoothness: the colour ring is drawn once and only rotated (a job the
-// graphics card does on its own); the glow only fades in and out.
-interface Props { class?: string; style?: string; as?: string }
+// Layers, back to front:
+//   1. a halo: a turning ring of the five glass colours, softly blurred around the card;
+//   2. the edge: the same ring, seen through a thin gap around the pane;
+//   3. the pane: frosted glass that blurs and lifts whatever is behind it,
+//      with a sheen across the top and a fine grain, like real glass.
+//
+// Smoothness: the colour rings are drawn once and only rotated, and the blur on the halo
+// is applied by the graphics card, so nothing is repainted while it moves.
+interface Props { class?: string; style?: string }
 const { class: cls = '', style = '' } = Astro.props;
 ---
 <div class:list={['glass-card', cls]} style={style}>
-  <div class="gc-glow" aria-hidden="true"></div>
+  <div class="gc-halo" aria-hidden="true"><div class="gc-clip"><span></span></div></div>
   <div class="gc-edge" aria-hidden="true"><span></span></div>
   <div class="gc-pane"><slot /></div>
 </div>
 
 <style>
-  .glass-card { position: relative; border-radius: 20px; isolation: isolate; }
+  .glass-card { --r: 22px; position: relative; border-radius: var(--r); isolation: isolate; }
 
-  /* The glow: four soft colours around the card, breathing slowly. */
-  .gc-glow {
-    position: absolute; inset: 0; border-radius: inherit; z-index: -1; will-change: opacity;
-    box-shadow:
-      -18px -14px 60px rgba(62, 123, 255, .22), 18px -14px 60px rgba(255, 59, 78, .2),
-      18px 18px 70px rgba(255, 196, 77, .2), -18px 18px 70px rgba(61, 224, 160, .16);
-    animation: gc-breathe 8s ease-in-out infinite;
+  /* 1. Halo: the colour ring, blurred into a glow just outside the card. */
+  .gc-halo {
+    position: absolute; inset: -6px; z-index: -1; border-radius: calc(var(--r) + 6px);
+    filter: blur(26px); opacity: .7; will-change: opacity;
+    animation: gc-breathe 7s ease-in-out infinite;
   }
-  /* The edge: a ring of glass colours, seen through a 1px gap around the pane. */
+  .gc-clip { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
+
+  /* 2. Edge: the ring, seen through a 1.5px gap around the pane. */
   .gc-edge { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
-  .gc-edge span {
-    position: absolute; left: 50%; top: 50%; width: 300%; aspect-ratio: 1;
-    translate: -50% -50%; will-change: transform;
-    background: conic-gradient(#FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
-    opacity: .6;
-    animation: gc-turn 12s linear infinite;
+
+  .gc-clip span, .gc-edge span {
+    position: absolute; left: 50%; top: 50%; width: 300%; aspect-ratio: 1; translate: -50% -50%;
+    background: conic-gradient(from 0deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
+    will-change: transform; animation: gc-turn 12s linear infinite;
   }
+  .gc-edge span { opacity: .95; }
+
+  /* 3. Pane: frosted glass. */
   .gc-pane {
-    position: relative; margin: 1px; border-radius: 19px;
-    background: linear-gradient(180deg, #12160F, #080A08);
-    box-shadow: inset 0 1px 0 rgba(255, 227, 163, .1), 0 40px 90px rgba(0, 0, 0, .45);
+    position: relative; margin: 1.5px; border-radius: calc(var(--r) - 1.5px); overflow: hidden;
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, .08) 0%, rgba(255, 255, 255, 0) 36%),
+      linear-gradient(180deg, rgba(18, 22, 17, .78), rgba(8, 10, 8, .88));
+    -webkit-backdrop-filter: blur(24px) saturate(125%);
+    backdrop-filter: blur(24px) saturate(125%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .14),
+      inset 0 0 0 1px rgba(243, 236, 220, .05),
+      inset 0 -30px 60px rgba(0, 0, 0, .25),
+      0 30px 80px rgba(0, 0, 0, .5);
   }
+  /* Fine grain, so the glass reads as a material rather than a flat colour. */
+  .gc-pane::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Keep the card's content above the grain. */
+  .gc-pane > :global(*) { position: relative; }
 
   @keyframes gc-turn { to { transform: rotate(360deg); } }
-  @keyframes gc-breathe { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  @keyframes gc-breathe { 0%, 100% { opacity: .55; } 50% { opacity: .8; } }
   @media (prefers-reduced-motion: reduce) {
-    .gc-glow, .gc-edge span { animation: none; }
+    .gc-halo, .gc-clip span, .gc-edge span { animation: none; }
   }
 </style>
