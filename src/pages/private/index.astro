@@ -1,0 +1,33 @@
+---
+// The private page. Only reachable with the password: Netlify checks it before sending this
+// (see netlify/edge-functions/private-gate.ts). Put whatever you like in here.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import GlassLight from '../../components/GlassLight.astro';
+---
+<BaseLayout title="The Upper Room" description="A private room of Overgrown Altar." noindex>
+  <section class="hero" style="height:520px">
+    <img src="/images/tall-windows-dark-vault.jpg" srcset="/images/tall-windows-dark-vault-1200.jpg 1200w, /images/tall-windows-dark-vault.jpg 1331w" sizes="100vw"
+      alt="" style="object-position:center 55%;filter:brightness(.42)" fetchpriority="high" />
+    <div class="veil"></div>
+    <GlassLight prism size={560} intensity={0.7} style="left:50%;top:-12%;translate:-50% 0" />
+    <SiteNav />
+    <div class="hero-c" style="top:210px;padding:0 24px">
+      <span class="eb">Private</span>
+      <h1 class="h1" style="margin-top:20px">The Upper Room</h1>
+      <p class="it" style="margin:20px 0 0;max-width:620px;font-size:24px;line-height:1.4;color:#E6DFD0">You are inside. What is kept here is for those who were given the word.</p>
+    </div>
+  </section>
+
+  <section class="sec paper">
+    <div class="narrow" style="display:flex;flex-direction:column;gap:24px">
+      <span class="eb">Welcome</span>
+      <p class="lede" style="font-size:30px">[What belongs in this room: drafts for the Guild, an early dispatch, notes for members.]</p>
+      <p class="body">This is a placeholder. Tell me what this page is for and I will fill it in.</p>
+      <div class="rule" style="padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <span class="lab mut">Unlocked on this device for 30 days</span>
+        <a class="lab" href="/private/lock" style="border-bottom:1px solid;padding-bottom:3px">Lock this page</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
