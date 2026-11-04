@@ -14,10 +14,13 @@ export const author = {
 const DATE = '2026-11-03T09:00:00Z';
 const a = (o) => ({ _type: 'article', publishedAt: DATE, signed: true, thinkers: [], inMatrix: false, ...o });
 
+// Sample dates a week apart (Dispatch 1 oldest). Change any date in the Studio.
+const weekly = (n) => new Date(Date.UTC(2026, 8, 22 + (n - 1) * 7, 9)).toISOString();
+
 export const articles = [
   // ---------------- The Watchtower ----------------
   a({
-    _id: 'article-nietzsche-surrendered', pillar: 'watchtower', medium: 'essay', number: 1,
+    _id: 'article-nietzsche-surrendered', pillar: 'watchtower', medium: 'essay', number: 1, publishedAt: weekly(1),
     title: 'Nietzsche Surrendered: The Übermensch at the Foot of the Cross', slug: 'nietzsche-surrendered',
     standfirst: 'Friedrich Nietzsche correctly diagnosed the spiritual rot and passive nihilism of modern society, but his solution—the Übermensch (Overman)—was an exercise in human pride that collapsed into madness.',
     image: ['format-dispatches.jpg', 'Stone cross wrapped in ivy'], thinkers: ['nietzsche'],
@@ -37,40 +40,40 @@ export const articles = [
     ],
   }),
   a({
-    _id: 'article-jung-vs-tolkien', pillar: 'watchtower', medium: 'essay', number: 2,
+    _id: 'article-jung-vs-tolkien', pillar: 'watchtower', medium: 'essay', number: 2, publishedAt: weekly(2),
     title: 'Jung vs. Tolkien: The Counterfeit Unconscious vs. Myth Realized', slug: 'jung-vs-tolkien',
     standfirst: 'Jung found the old myths in the depths of the psyche. Tolkien knew the True Myth had stepped into history.',
     image: ['window-of-the-ascension-and.jpg', 'Window of the Ascension and the Crucifixion'], thinkers: ['jung'],
     inMatrix: true, matrixThinker: 'Jung’s Archetypal Psyche', matrixFracture: 'God as a Mind-Projection', matrixAnchor: 'The True Myth Made Flesh',
   }),
   a({
-    _id: 'article-newtonian-determinism', pillar: 'watchtower', medium: 'essay', number: 3,
+    _id: 'article-newtonian-determinism', pillar: 'watchtower', medium: 'essay', number: 3, publishedAt: weekly(3),
     title: 'Newtonian Determinism: The Missing Anchor', slug: 'newtonian-determinism',
     standfirst: 'A universe of perfect laws, and no Lawgiver to keep them. Where the clockwork worldview runs down.',
     image: ['folios-photo-2.jpg', 'Vaulted nave with stained-glass windows'], thinkers: ['newton'],
     inMatrix: true, matrixThinker: 'Newtonian Mechanics', matrixFracture: 'Closed, Sterile Materialism', matrixAnchor: 'Colossians 1:17 Coherence',
   }),
   a({
-    _id: 'article-resurrection-quantum-law', pillar: 'watchtower', medium: 'essay', number: 4,
+    _id: 'article-resurrection-quantum-law', pillar: 'watchtower', medium: 'essay', number: 4, publishedAt: weekly(4),
     title: 'The Resurrection as the Primary Quantum Law', slug: 'resurrection-quantum-law',
     standfirst: 'Decay is not the deepest law of the universe. The empty tomb is.',
     image: ['folios-photo.jpg', 'Painted dome seen from below'], thinkers: ['quantum'],
     inMatrix: true, matrixThinker: 'Quantum Paradox & Entropy', matrixFracture: 'Absurd, Random Matter', matrixAnchor: 'Resurrection Re-encryption',
   }),
   a({
-    _id: 'article-freuds-couch', pillar: 'watchtower', medium: 'essay', number: 5,
+    _id: 'article-freuds-couch', pillar: 'watchtower', medium: 'essay', number: 5, publishedAt: weekly(5),
     title: 'Freud’s Couch and the Confessional', slug: 'freuds-couch-and-the-confessional',
     standfirst: 'The talking cure found the wound. It could not pronounce the absolution.',
     image: ['watchtower-photo.jpg', 'A dim side chapel with a crucifix'], thinkers: ['freud'],
   }),
   a({
-    _id: 'article-bukowski', pillar: 'watchtower', medium: 'essay', number: 6,
+    _id: 'article-bukowski', pillar: 'watchtower', medium: 'essay', number: 6, publishedAt: weekly(6),
     title: 'Bukowski and the Liturgy of Despair', slug: 'bukowski-and-the-liturgy-of-despair',
     standfirst: 'A poet who worshipped his own ruin, and the grace he kept walking past.',
     image: ['what-we-believe.jpg', 'A lone figure in the pews of a stone church'], thinkers: ['bukowski'],
   }),
   a({
-    _id: 'article-algorithm-as-idol', pillar: 'watchtower', medium: 'essay', number: 7,
+    _id: 'article-algorithm-as-idol', pillar: 'watchtower', medium: 'essay', number: 7, publishedAt: weekly(7),
     title: 'The Algorithm as Idol', slug: 'the-algorithm-as-idol',
     standfirst: 'Digital posturing, the curated self, and the God who sees in secret.',
     image: ['watchtower-photo-2.jpg', ''],

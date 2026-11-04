@@ -1,0 +1,70 @@
+---
+// A compact list of dispatches, newest first. Each row: a small photo, the title,
+// a short summary, and the writer's picture, name and date.
+// Sorting by date happens here, so whatever order the pieces arrive in, readers see the newest first.
+import Avatar from './Avatar.astro';
+
+export interface DispatchItem {
+  href: string; title: string; kicker?: string; standfirst?: string;
+  date: string;              // ISO date, e.g. "2026-11-03"
+  author: { name: string; portrait?: string };
+  image?: string; imagePos?: string; minutes?: number;
+}
+interface Props { items: DispatchItem[] }
+const items = [...Astro.props.items].sort((a, b) => b.date.localeCompare(a.date));
+const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+---
+<ol class="dispatches">
+  {items.map((d) => (
+    <li>
+      <a class="row-link" href={d.href}>
+        {d.image && (
+          <span class="thumb"><img src={d.image} alt="" style={d.imagePos ? `object-position:${d.imagePos}` : undefined} loading="lazy" /></span>
+        )}
+        <span class="text">
+          {d.kicker && <span class="lab kicker">{d.kicker}</span>}
+          <span class="h3 title">{d.title}</span>
+          {d.standfirst && <span class="it mut summary">{d.standfirst}</span>}
+          <span class="byline">
+            <Avatar name={d.author.name} src={d.author.portrait} size={26} />
+            <span class="lab mut by"><span class="who">{d.author.name}</span><span class="dot"> · </span><time datetime={d.date}><span class="long">{fmt(d.date)}</span><span class="short">{fmt(d.date, 'short')}</span></time>{d.minutes ? <span class="mins"> · {d.minutes} min</span> : null}</span>
+          </span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .dispatches { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(42, 32, 23, .25); }
+  .dispatches li { border-bottom: 1px solid rgba(42, 32, 23, .18); }
+  .row-link { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: center; padding: 28px 0; }
+  .thumb { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #DDD5C6; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s var(--ease, ease); }
+  .text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .kicker { color: var(--oxblood); }
+  .title { font-size: 30px; transition: color .3s; }
+  .summary {
+    font-size: 19px; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .byline { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .byline .lab { font-size: 10px; letter-spacing: .2em; }
+  .by { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .short { display: none; }
+  .row-link:hover .title { color: var(--oxblood); }
+  .row-link:hover .thumb img { transform: scale(1.05); }
+
+  /* Phones: text first, a small square photo on the right, one tidy row per dispatch. */
+  @media (max-width: 700px) {
+    .row-link { grid-template-columns: minmax(0, 1fr) 84px; gap: 16px; align-items: start; padding: 20px 0; }
+    .thumb { order: 2; aspect-ratio: 1; margin-top: 4px; }
+    .title { font-size: 21px !important; line-height: 1.2; }
+    .kicker { font-size: 9px; }
+    .summary { font-size: 16px; }
+    .byline { margin-top: 4px; gap: 8px; }
+    .byline .lab { font-size: 9px; letter-spacing: .14em; }
+    .long, .mins { display: none; }
+    .short { display: inline; }
+  }
+</style>

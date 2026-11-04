@@ -1,33 +1,170 @@
 ---
-// The Watchtower — converted from the design file Watchtower.dc.html
-// The page's shared look comes from src/styles/global.css.
+// The Watchtower: the dispatches, laid out like a journal's blog section.
+//   - a short header, so the writing starts right away
+//   - the latest dispatch, large
+//   - every other dispatch below it, newest first
+//   - a sidebar: search, where to start, browse by thinker, get the letter
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
-import MatrixRow from '../../components/MatrixRow.astro';
-import { getArticles, getMatrix, articleUrl, kind, imgSrc, imgPos, formatDate, readingTime } from '../../lib/sanity';
+import Avatar from '../../components/Avatar.astro';
+import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
 
-// Everything below comes from Sanity.
-const dispatches = await getArticles('watchtower');
-const matrix = await getMatrix();
-// Featured: the most recent dispatch.
-const featured = [...dispatches].sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))[0];
-// The archive: dispatches that aren't already in the matrix above it.
-const archive = dispatches.filter((d) => !d.inMatrix);
+// Every published dispatch, straight from your Studio.
+import { getArticles, getMatrix, articleUrl, kind, imgSrc, imgPos, readingTime } from '../../lib/sanity';
+const toItem = (a: any): DispatchItem => ({
+  href: articleUrl(a), title: a.title, kicker: kind(a), standfirst: a.standfirst,
+  date: (a.publishedAt ?? '').slice(0, 10), author: { name: a.author?.name ?? 'Overgrown Altar', portrait: a.author?.portrait ? `${a.author.portrait}?w=120&h=120&fit=crop&auto=format` : undefined },
+  image: imgSrc(a.image, 640), imagePos: imgPos(a.image),
+});
+const all = (await getArticles('watchtower')).map(toItem);
+const newestFirst = [...all].sort((a, b) => b.date.localeCompare(a.date));
+const latest = newestFirst[0];
+const rest = newestFirst.slice(1);
+
+// "Start here": the dispatches ticked "Show in the Editorial Matrix" in the Studio.
+const foundations = (await getMatrix()).map((m) => ({
+  n: m.number, title: m.title, thinker: m.matrixThinker, anchor: m.matrixAnchor, href: articleUrl(m),
+}));
+const thinkers = ['Nietzsche', 'Jung', 'Freud', 'Bukowski', 'Newton', 'Quantum'];
+const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-<BaseLayout title="The Watchtower">
-<section class="hero pill-h"><img src="/images/duomo-pigeons.jpg" srcset="/images/duomo-pigeons-1200.jpg 1200w, /images/duomo-pigeons.jpg 2000w" sizes="100vw" alt="Pigeons rising in front of a Gothic cathedral facade" style="object-position:center 35%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
-<div class="pill-in"><span class="eb">01 · Prophetic Audits</span><h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Watchtower</h1><p class="body" style="color:#E6DFD0;max-width:720px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and Leviathan structures in art and philosophy.</p></div></section>
-{featured && (
-<section class="sec paper"><div class="g2" style="align-items:center"><a href={articleUrl(featured)} class="arch" style="height:640px;display:block"><img src={imgSrc(featured.image, 1200)} alt={featured.image?.alt ?? ''} style={`object-position:${imgPos(featured.image, '45% 40%')}`} loading="lazy" /></a>
-<div style="display:flex;flex-direction:column;gap:22px"><span class="eb">Featured · {kind(featured)}</span><h2 class="h2" style="font-size:58px">{featured.title}</h2>
-<p class="body mut">{featured.standfirst}</p>
-<span class="lab mut">{formatDate(featured.publishedAt)}</span><a class="btn" href={articleUrl(featured)} style="align-self:flex-start">Read the dispatch</a></div></div></section>
-)}
-<section class="sec dark"><div class="row" style="padding-bottom:30px"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Foundational Dispatches</span><h2 class="h2">The Editorial Matrix</h2></div></div>{matrix.map((m) => <MatrixRow article={m} />)}</section>
-<section class="sec paper"><div class="row" style="padding-bottom:30px"><h2 class="h2">The archive</h2><div class="lab mut" style="display:flex;flex-wrap:wrap;gap:14px 28px"><span style="border-bottom:1px solid #2A2017">All</span><span>Philosophy</span><span>Psychology</span><span>Science</span><span>Art</span></div></div>
-<div class="g3">{archive.map((d) => (
-<a href={articleUrl(d)} class="card" style="display:flex;flex-direction:column;gap:14px"><div class="tile" style="height:300px"><img src={imgSrc(d.image, 900)} alt="" style={`object-position:${imgPos(d.image)}`} loading="lazy" /></div><span class="lab" style="color:#62372D">{kind(d)}</span><span class="h3" style="font-size:30px">{d.title}</span><span class="it mut" style="font-size:19px">{d.standfirst}</span></a>
-))}</div></section>
-<Subscribe />
+<BaseLayout title="The Watchtower" description="Long-form dispatches and cultural essays from Overgrown Altar.">
+  <section class="hero wt-hero">
+    <img src="/images/duomo-pigeons.jpg" srcset="/images/duomo-pigeons-1200.jpg 1200w, /images/duomo-pigeons.jpg 2000w" sizes="100vw"
+      alt="Pigeons rising in front of a Gothic cathedral facade" style="object-position:center 35%;" class="mono" fetchpriority="high" />
+    <div class="veil-l"></div>
+    <SiteNav />
+    <div class="pill-in wt-in">
+      <span class="eb">01 · Prophetic Audits</span>
+      <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Watchtower</h1>
+      <p class="body" style="color:#E6DFD0;max-width:640px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols, and Leviathan structures in art and philosophy.</p>
+    </div>
+  </section>
+
+  <section class="paper blog">
+    <div class="blog-grid">
+      <div class="blog-main">
+        {latest && (<!-- The latest dispatch -->
+        <article class="latest">
+          <a class="latest-img" href={latest.href}><img src={latest.image} alt="" style={latest.imagePos ? `object-position:${latest.imagePos}` : undefined} /></a>
+          <div class="latest-text">
+            <span class="eb">Latest · {latest.kicker}</span>
+            <h2 class="h2 latest-title"><a href={latest.href}>{latest.title}</a></h2>
+            <p class="body mut latest-sum">{latest.standfirst}</p>
+            <div class="latest-by">
+              <Avatar name={latest.author.name} src={latest.author.portrait} size={34} />
+              <span class="lab mut">{latest.author.name} · <time datetime={latest.date}>{fmt(latest.date)}</time></span>
+            </div>
+            <a class="btn" href={latest.href}>Read the dispatch</a>
+          </div>
+        </article>)}
+        {!latest && <p class="it mut" style="font-size:22px">The first dispatch is on its way.</p>}
+
+        <!-- Everything else, newest first -->
+        <div class="list-head">
+          <h2 class="eb">Earlier dispatches</h2>
+          <span class="lab mut">{rest.length} pieces · newest first</span>
+        </div>
+        <DispatchList items={rest} />
+      </div>
+
+      <aside class="blog-side" aria-label="Find more dispatches">
+        <form class="side-block" action="/archive" method="get" role="search">
+          <label class="eb" for="wt-search">Search the dispatches</label>
+          <input id="wt-search" class="field" type="search" name="q" placeholder="A thinker, a title, a word…" />
+        </form>
+
+        <div class="side-block">
+          <h2 class="eb">Start here</h2>
+          <p class="it mut side-note">The four foundational dispatches: where each great mind fractured, and the anchor that holds.</p>
+          <ol class="found">
+            {foundations.map((f) => (
+              <li>
+                <a href={f.href}>
+                  <span class="num found-n">{f.n}</span>
+                  <span class="found-t"><span class="found-title">{f.title}</span><span class="found-sub">{f.thinker} → {f.anchor}</span></span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div class="side-block">
+          <h2 class="eb">Browse by thinker</h2>
+          <div class="filters">
+            {thinkers.map((t) => <a class="chip" href={`/archive?q=${t.toLowerCase()}`}>{t}</a>)}
+          </div>
+        </div>
+
+        <a class="side-block side-letter" href="#letter">
+          <span class="eb">Receive the dispatches</span>
+          <span class="it">New essays delivered as a letter. →</span>
+        </a>
+      </aside>
+    </div>
+  </section>
+
+  <div id="letter"><Subscribe /></div>
 </BaseLayout>
+
+<style>
+  /* A shorter header, so the writing starts right away. */
+  .wt-hero { height: 560px; }
+  .wt-in { bottom: 80px; }
+
+  .blog { padding: 96px 120px 120px; }
+  .blog-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 80px; align-items: start; }
+
+  /* The latest dispatch */
+  .latest { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-bottom: 56px; }
+  .latest-img { display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 999px 999px 0 0; box-shadow: 0 0 0 1px var(--brass); }
+  .latest-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s var(--ease, ease); }
+  .latest-img:hover img { transform: scale(1.04); }
+  .latest-text { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+  .latest-title { font-size: 46px; line-height: 1.04; }
+  .latest-title a:hover { color: var(--oxblood); }
+  .latest-sum { font-size: 20px; }
+  .latest-by { display: flex; align-items: center; gap: 12px; }
+
+  .list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-bottom: 14px; }
+  .list-head > * { white-space: nowrap; }
+  .list-head .eb { margin: 0; }
+
+  /* Sidebar: stays in view on desktop */
+  .blog-side { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 36px; }
+  .side-block { display: flex; flex-direction: column; gap: 14px; }
+  .side-block .eb { margin: 0; }
+  .side-block .field { width: 100%; font-size: 18px; padding: 14px 16px; }
+  .side-note { margin: 0; font-size: 17px; line-height: 1.45; }
+  .found { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(42, 32, 23, .2); }
+  .found li { border-bottom: 1px solid rgba(42, 32, 23, .14); }
+  .found a { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 14px 0; }
+  .found-n { font-size: 30px !important; color: var(--oxblood); }
+  .found-t { display: flex; flex-direction: column; gap: 4px; }
+  .found-title { font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.2; transition: color .3s; }
+  .found-sub { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted-paper); line-height: 1.5; }
+  .found a:hover .found-title { color: var(--oxblood); }
+  .side-block .chip { display: inline-flex; align-items: center; text-decoration: none; }
+  .side-block .chip:hover { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+  .side-letter { padding: 22px 24px; background: #F1ECE2; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .15); transition: box-shadow .3s; }
+  .side-letter:hover { box-shadow: inset 0 0 0 1px var(--oxblood); }
+  .side-letter .it { font-size: 18px; }
+
+  @media (max-width: 1100px) {
+    .blog { padding: 80px 48px 100px; }
+    .blog-grid { grid-template-columns: minmax(0, 1fr); gap: 64px; }
+    .blog-side { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+  }
+  @media (max-width: 700px) {
+    .wt-hero { height: 460px; }
+    .wt-in { bottom: 40px; }
+    .blog { padding: 48px 24px 72px; }
+    .latest { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-bottom: 40px; }
+    .latest-img { aspect-ratio: 16 / 10; border-radius: 0; }
+    .latest-title { font-size: 30px !important; }
+    .latest-sum { font-size: 17px !important; }
+    .latest .btn { align-self: stretch; text-align: center; }
+    .blog-side { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  }
+</style>

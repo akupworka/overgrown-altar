@@ -22,17 +22,18 @@ export interface ArticleCard {
   _id: string; title: string; slug: string; pillar: Pillar; medium: string; number?: number;
   standfirst?: string; publishedAt?: string; thinkers?: string[]; image?: Img;
   inMatrix?: boolean; matrixThinker?: string; matrixFracture?: string; matrixAnchor?: string;
+  author?: { name: string; portrait?: string; craft?: string; bio?: string };
 }
 export interface Article extends ArticleCard {
   body?: any[]; signed?: boolean; seoDescription?: string;
-  author?: { name: string; craft?: string; bio?: string };
 }
 
 // ---- Queries ----
 const IMAGE = `{alt, hotspot, "url": asset->url}`;
 const CARD = `{
   _id, title, "slug": slug.current, pillar, medium, number, standfirst, publishedAt, thinkers,
-  inMatrix, matrixThinker, matrixFracture, matrixAnchor, "image": featuredImage${IMAGE}
+  inMatrix, matrixThinker, matrixFracture, matrixAnchor, "image": featuredImage${IMAGE},
+  "author": author->{name, "portrait": portrait.asset->url}
 }`;
 const PUBLISHED = `_type == "article" && defined(slug.current) && !(_id in path("drafts.**"))`;
 const ORDER = `order(coalesce(number, 999) asc, publishedAt desc)`;
