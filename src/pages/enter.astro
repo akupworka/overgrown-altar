@@ -32,6 +32,10 @@ import GlassCard from '../components/GlassCard.astro';
       <span class="lab back">Est. MMXXVI · overgrownaltar.com</span>
     </div>
   </section>
+  <!-- Hidden: lets Netlify email the editor when a piece is sent to them (see netlify/functions/notify-submission.mts). -->
+  <form name="submission-alert" data-netlify="true" netlify-honeypot="company" hidden>
+    <input name="title" /><input name="author" /><input name="standfirst" /><input name="review" /><input name="company" />
+  </form>
 </BaseLayout>
 
 <script>

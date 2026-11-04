@@ -4,10 +4,23 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Subscribe from '../components/Subscribe.astro';
+import DispatchList, { type DispatchItem } from '../components/DispatchList.astro';
+import { guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../lib/guild';
+const fromGuild: DispatchItem[] = (await guildPillar('hearth')).map((g) => ({
+  href: guildUrl(g), title: g.title, kicker: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,
+  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
+  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/glass-2-1200.jpg',
+}));
 ---
 <BaseLayout title="The Hearth">
 <section class="hero pill-h"><img src="/images/ascension-window-wide.jpg" srcset="/images/ascension-window-wide-1200.jpg 1200w, /images/ascension-window-wide.jpg 2880w" sizes="100vw" alt="Stained-glass window of the Ascension in a warm stone vault" style="object-position:center 45%;" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
 <div class="pill-in"><span class="eb">02 · Creative Guild</span><h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Hearth</h1><p class="body" style="color:#E6DFD0;max-width:720px">An Inklings-style fellowship space hosting dark atmospheric monochrome photography, original prose, architectural studies, design teardowns, and fiction.</p></div></section>
+{fromGuild.length > 0 && (
+<section class="sec paper">
+<div class="row" style="padding-bottom:26px"><div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Guild</span><h2 class="h2">Newest work</h2></div><span class="lab mut">{fromGuild.length} {fromGuild.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+<DispatchList items={fromGuild} />
+</section>
+)}
 <section class="sec paper center"><span class="eb">The Inklings’ Table</span><p class="lede" style="margin-top:28px;max-width:980px">We cultivate a guild—a gathering of sharp minds, soft hearts, and unyielding spirits who gather around the hearth to write, sharpen, and discern together.</p></section>
 <section class="sec dark"><div class="row" style="padding-bottom:30px"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Photographs</span><h2 class="h2">The gallery</h2></div><span class="it mut" style="font-size:20px">Stone in monochrome. Color only through glass.</span></div>
 <div class="g4"><div style="display:flex;flex-direction:column;gap:10px"><div class="tile" style="height:360px"><img src="/images/glass.jpg" alt="Glass" style="object-position:center;" loading="lazy" /></div><span class="lab mut" style="font-size:10px">Plate i · Glass</span></div><div style="display:flex;flex-direction:column;gap:10px"><div class="tile" style="height:280px"><img src="/images/ivy.jpg" alt="Ivy" style="object-position:center;" class="mono" loading="lazy" /></div><span class="lab mut" style="font-size:10px">Plate ii · Ivy</span></div><div style="display:flex;flex-direction:column;gap:10px"><div class="tile" style="height:360px"><img src="/images/glass-2.jpg" srcset="/images/glass-2-1200.jpg 1200w, /images/glass-2.jpg 1617w" sizes="(max-width: 700px) 100vw, 50vw" alt="Glass" style="object-position:center 30%;" loading="lazy" /></div><span class="lab mut" style="font-size:10px">Plate iii · Glass</span></div><div style="display:flex;flex-direction:column;gap:10px"><div class="tile" style="height:280px"><img src="/images/stone.jpg" alt="Stone" style="object-position:center;" class="mono" loading="lazy" /></div><span class="lab mut" style="font-size:10px">Plate iv · Stone</span></div></div></section>

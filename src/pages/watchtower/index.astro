@@ -9,6 +9,7 @@ import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
+import { guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../../lib/guild';
 
 // Every dispatch. Sample content from the design, with placeholder dates,
 // until Sanity supplies the real ones (then this list comes from your Studio).
@@ -30,7 +31,13 @@ const all: (DispatchItem & { n: number })[] = [
     standfirst: 'Digital posturing, the curated self, and the God who sees in secret.' },
 ].map((d: any) => ({ ...d, href: '/watchtower/nietzsche-surrendered', kicker: `Dispatch ${d.n}`, author, image: `/images/${d.image}-1200.jpg` }));
 
-const newestFirst = [...all].sort((a, b) => b.date.localeCompare(a.date));
+// Dispatches published from the Guild Desk join the list.
+const fromGuild: DispatchItem[] = (await guildPillar('watchtower')).map((g) => ({
+  href: guildUrl(g), title: g.title, kicker: MEDIUM_LABEL[g.medium] ?? 'Dispatch', standfirst: g.standfirst,
+  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
+  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/watchtower-photo-1200.jpg',
+}));
+const newestFirst = [...all, ...fromGuild].sort((a, b) => b.date.localeCompare(a.date));
 const latest = newestFirst[0];
 const rest = newestFirst.slice(1);
 
@@ -68,7 +75,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
             <h2 class="h2 latest-title"><a href={latest.href}>{latest.title}</a></h2>
             <p class="body mut latest-sum">{latest.standfirst}</p>
             <div class="latest-by">
-              <Avatar name={latest.author.name} size={34} />
+              <Avatar name={latest.author.name} src={latest.author.portrait} size={34} />
               <span class="lab mut">{latest.author.name} · <time datetime={latest.date}>{fmt(latest.date)}</time></span>
             </div>
             <a class="btn" href={latest.href}>Read the dispatch</a>

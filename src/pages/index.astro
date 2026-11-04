@@ -36,6 +36,23 @@ const formats = [
   { href: '/guild', img: '/images/format-guild.jpg', mono: false, name: 'The Guild', text: 'A structured round-table guild for creative believers' },
 ];
 import GlassLight from '../components/GlassLight.astro';
+import DispatchList, { type DispatchItem } from '../components/DispatchList.astro';
+import { getGuildPieces, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes } from '../lib/guild';
+
+// The Editorial Matrix: newest first. Pieces you approve at the Guild Desk arrive at the top;
+// the four foundational dispatches follow (each with its thinker → anchor line).
+const foundationImages = ['format-dispatches', 'window-of-the-ascension-and', 'folios-photo-2', 'folios-photo'];
+const foundationDates = ['2026-09-22', '2026-09-29', '2026-10-06', '2026-10-13'];
+const foundations: DispatchItem[] = matrix.map((m, i) => ({
+  href: '/watchtower/nietzsche-surrendered', title: m.title, kicker: `Dispatch ${i + 1} · ${m.thinker} → ${m.anchor}`,
+  date: foundationDates[i], author: { name: 'Ainslie Willson' }, image: `/images/${foundationImages[i]}-1200.jpg`,
+}));
+const approved: DispatchItem[] = (await getGuildPieces()).map((g) => ({
+  href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
+  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
+  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/tall-windows-dark-vault-1200.jpg',
+}));
+const matrixFeed = [...approved, ...foundations].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
 ---
 <BaseLayout>
 
@@ -131,31 +148,15 @@ import GlassLight from '../components/GlassLight.astro';
   </section>
 
   <!-- 6. The Editorial Matrix -->
-  <section class="sec dark">
-    <div class="row" style="padding-bottom:30px">
+  <section class="sec dark matrix-sec">
+    <div class="row" style="padding-bottom:28px">
       <div style="display:flex;flex-direction:column;gap:16px">
-        <span class="eb">Foundational Dispatches</span>
+        <span class="eb">The newest from the altar</span>
         <h2 class="h2">The Editorial Matrix</h2>
       </div>
-      <div class="mx3 mx3-head d-only" aria-hidden="true">
-        <div>Secular thinker / system</div><div>The fracture point</div><div>The biblical anchor</div>
-      </div>
+      <a class="lab mut matrix-all" href="/watchtower">All dispatches →</a>
     </div>
-    {matrix.map((m, i) => (
-      <a class="mx rule" href="/watchtower">
-        <span class="num">{i + 1}</span>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <span class="lab" style="color:var(--ember)">The Watchtower · Dispatch {i + 1}</span>
-          <span class="h3">{m.title}</span>
-        </div>
-        <div class="mx3">
-          <div style="color:var(--muted-dark)"><span class="visually-hidden">Secular thinker: </span>{m.thinker}</div>
-          <div style="color:var(--rose)"><span class="visually-hidden">Fracture point: </span>{m.fracture}</div>
-          <div style="color:var(--ember)"><span class="visually-hidden">Biblical anchor: </span>{m.anchor}</div>
-        </div>
-      </a>
-    ))}
-    <div class="center" style="margin-top:40px"><a class="ghost" href="/watchtower">All dispatches from The Watchtower</a></div>
+    <DispatchList items={matrixFeed} tone="dark" />
   </section>
 
   <!-- 7. The Format -->
@@ -220,6 +221,10 @@ import GlassLight from '../components/GlassLight.astro';
 
   /* Editorial matrix (the .mx and .mx3 rows are styled in global.css) */
   .mx:hover .h3 { color: var(--ember); }
+  .matrix-sec { max-width: 1440px; }
+  .matrix-sec > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
+  .matrix-all { border-bottom: 1px solid rgba(207,200,184,.35); padding-bottom: 3px; }
+  .matrix-all:hover { color: var(--ember); border-color: var(--ember); }
   .mx3-head { width: 520px; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #A9A294; }
 
   /* Format */

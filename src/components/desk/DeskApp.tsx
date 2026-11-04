@@ -3,6 +3,7 @@
 // this screen only makes it pleasant to use.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { Body } from '../../lib/marks';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -49,6 +50,7 @@ export function Initials({ name, size = 40, src }: { name: string; size?: number
   );
 }
 
+const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
 const words = (s: string) => (s.trim() ? s.trim().split(/\s+/).length : 0);
 
@@ -221,10 +223,10 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} pieces={pieces} onOpen={open} onChanged={load} />}
-        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
+        {tab === 'pieces' && <Pieces name={name} pieces={pieces} waiting={isEditor ? queue.length : 0} onReview={() => go('review')} onOpen={open} onChanged={load} />}
+        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
-          ? <Reader piece={reading} onBack={() => setReading(null)} />
+          ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
       </div>
@@ -246,7 +248,7 @@ function StatusChip({ status }: { status: Piece['status'] }) {
   return <span className={`d-status s-${status}`}><i aria-hidden="true" />{STATUS_LABEL[status]}</span>;
 }
 
-function Pieces({ name, pieces, onOpen, onChanged }: { name: string; pieces: Piece[]; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
+function Pieces({ name, pieces, waiting = 0, onReview, onOpen, onChanged }: { name: string; pieces: Piece[]; waiting?: number; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -260,23 +262,30 @@ function Pieces({ name, pieces, onOpen, onChanged }: { name: string; pieces: Pie
     await supabase.from('pieces').delete().eq('id', p.id); onChanged();
   }
   return (
-    <section className="d-section">
-      <header className="d-page-head">
-        <span className="eb">The Guild Desk</span>
-        <h1 className="h1 d-hello">Welcome, {name.split(' ')[0]}</h1>
-        <p className="it mut d-sub">Write, sharpen, discern. Everything you send comes to the editor’s table before it is published.</p>
+    <section className="d-section d-home">
+      <header className="d-home-head">
+        <div className="d-home-hello">
+          <span className="eb">The Guild Desk</span>
+          <h1 className="h1 d-hello">{greeting()}, {name.split(' ')[0]}</h1>
+          <p className="d-tally">
+            <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
+          </p>
+        </div>
+        <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
       </header>
-      <div className="d-stats">
-        <div><b>{counts.published}</b><span className="lab mut">Published</span></div>
-        <div><b>{counts.waiting}</b><span className="lab mut">With the editor</span></div>
-        <div><b>{counts.drafts}</b><span className="lab mut">Drafts</span></div>
-      </div>
-      <div className="d-row-head">
-        <h2 className="eb">My pieces</h2>
-        <button type="button" className="btn d-btn" onClick={() => onOpen(null)}>Begin a new piece</button>
-      </div>
+      {waiting > 0 && (
+        <button type="button" className="d-waiting" onClick={onReview}>
+          <span className="d-waiting-dot" aria-hidden="true" />
+          <span>{waiting === 1 ? 'One piece is' : `${waiting} pieces are`} waiting for your review</span>
+          <span className="lab">Review →</span>
+        </button>
+      )}
+      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{pieces.length} in all · newest first</span>}</div>
       {pieces.length === 0 ? (
-        <p className="it mut d-empty">Nothing here yet. Your first piece begins with a title.</p>
+        <button type="button" className="d-first" onClick={() => onOpen(null)}>
+          <span className="it">Every piece begins with a title.</span>
+          <span className="lab">Begin writing →</span>
+        </button>
       ) : (
         <ul className="d-list">
           {pieces.map((p) => (
@@ -289,6 +298,7 @@ function Pieces({ name, pieces, onOpen, onChanged }: { name: string; pieces: Pie
               <div className="d-item-actions">
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
                 {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                {p.status === 'approved' && (p as any).slug && <a className="d-link" href={`/guild/${(p as any).slug}/`}>View on the site</a>}
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
             </li>
@@ -307,7 +317,7 @@ const TOOLS: { label: string; wrap?: string; prefix?: string; hint: string }[] =
   { label: 'Bold', wrap: '**', hint: 'Strong words' },
 ];
 
-function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | null; onSaved: (p: Piece) => void; onDone: () => void }) {
+function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string; piece: Piece | null; isEditor?: boolean; onSaved: (p: Piece) => void; onDone: () => void }) {
   const phone = useMedia('(max-width: 700px)');
   const [form, setForm] = useState({
     title: piece?.title ?? '', standfirst: piece?.standfirst ?? '', body: piece?.body ?? '',
@@ -387,6 +397,14 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
 
   async function submit() {
     if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
+    if (isEditor) {
+      if (!confirm('Publish this piece to the site now?')) return;
+      const draft = await save('draft');
+      if (!draft) return;
+      const { error } = await supabase.from('pieces').update({ status: 'approved' }).eq('id', draft.id);
+      if (error) { setMsg(error.message); return; }
+      onDone(); return;
+    }
     if (!confirm('Send this piece to the editor? You can withdraw it later to keep editing.')) return;
     const p = await save('submitted');
     if (p) onDone();
@@ -402,7 +420,7 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
         </span>
         <div className="d-write-actions">
           <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}><span className="d-long">Save draft</span><span className="d-short">Save</span></button>
-          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">Send to the editor</span><span className="d-short">Send →</span></button>
+          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">{isEditor ? 'Publish' : 'Send to the editor'}</span><span className="d-short">{isEditor ? 'Publish' : 'Send →'}</span></button>
         </div>
       </div>
       {piece?.status === 'returned' && piece.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p>}
@@ -483,15 +501,46 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
   );
 }
 
-function Reader({ piece, onBack }: { piece: Piece; onBack: () => void }) {
+function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void; onDecided: () => void }) {
+  const [mode, setMode] = useState<'read' | 'return' | 'decline'>('read');
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  async function decide(status: 'approved' | 'returned' | 'declined') {
+    setBusy(true); setMsg('');
+    const { error } = await supabase.from('pieces').update({ status, editor_note: status === 'approved' ? '' : note.trim() }).eq('id', piece.id);
+    setBusy(false);
+    if (error) return setMsg(error.message);
+    onDecided();
+  }
   return (
-    <section className="d-section d-reader d-paper">
-      <button type="button" className="d-link" onClick={onBack}>← Waiting for you</button>
-      <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label}</span>
-      <h2 className="h2">{piece.title}</h2>
-      {piece.standfirst && <p className="it mut" style={{ fontSize: 22 }}>{piece.standfirst}</p>}
-      <div className="d-reading">{piece.body.split(/\n{2,}/).map((para, i) => <p key={i} className="body">{para}</p>)}</div>
-      <p className="it d-notice">Approving, returning with a note, and declining arrive in the next update.</p>
+    <section className="d-section d-reader">
+      <button type="button" className="d-back-link" onClick={onBack}>← Waiting for you</button>
+      <article className="d-paper">
+        <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === piece.medium)?.label}</span>
+        <h2 className="h1 d-reader-title">{piece.title}</h2>
+        {piece.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{piece.standfirst}</p>}
+        <div className="gp-body-in-desk"><Body body={piece.body} /></div>
+      </article>
+      <div className="d-decide">
+        {mode === 'read' && (<>
+          <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
+          <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
+          <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
+        </>)}
+        {mode !== 'read' && (
+          <div className="d-decide-note">
+            <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
+              <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}
+                placeholder={mode === 'return' ? 'What should they tighten, add, or rethink?' : 'Why this piece is not for the altar.'} /></label>
+            <div className="d-decide-row">
+              <button type="button" className="btn d-btn" disabled={busy || (mode === 'return' && !note.trim())} onClick={() => decide(mode === 'return' ? 'returned' : 'declined')}>{mode === 'return' ? 'Send back' : 'Decline'}</button>
+              <button type="button" className="d-link" onClick={() => setMode('read')}>Cancel</button>
+            </div>
+          </div>
+        )}
+        <p className="it d-notice" role="alert">{msg}</p>
+      </div>
     </section>
   );
 }

@@ -10,11 +10,12 @@ export interface DispatchItem {
   author: { name: string; portrait?: string };
   image?: string; imagePos?: string; minutes?: number;
 }
-interface Props { items: DispatchItem[] }
+interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark' }
+const tone = Astro.props.tone ?? 'paper';
 const items = [...Astro.props.items].sort((a, b) => b.date.localeCompare(a.date));
 const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-<ol class="dispatches">
+<ol class:list={['dispatches', { dark: tone === 'dark' }]}>
   {items.map((d) => (
     <li>
       <a class="row-link" href={d.href}>
@@ -54,6 +55,15 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
   .short { display: none; }
   .row-link:hover .title { color: var(--oxblood); }
   .row-link:hover .thumb img { transform: scale(1.05); }
+
+  /* Dark sections */
+  .dispatches.dark { border-top-color: rgba(243, 236, 220, .14); }
+  .dispatches.dark li { border-bottom-color: rgba(243, 236, 220, .1); }
+  .dark .kicker { color: var(--ember); }
+  .dark .summary { color: var(--muted-dark); }
+  .dark .byline .lab { color: #A9A294; }
+  .dark .thumb { background: #14180F; }
+  .dark .row-link:hover .title { color: var(--ember); }
 
   /* Phones: text first, a small square photo on the right, one tidy row per dispatch. */
   @media (max-width: 700px) {

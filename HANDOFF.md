@@ -39,7 +39,15 @@ Start by reading this file, then `README.md`.
   collected work = approved pieces, `?p=<id>` reading a piece), `src/components/desk/MembersApp.tsx`; signed-in
   members only. Portraits in the public `portraits` bucket. Writing marks rendered by `src/lib/marks.tsx`.
 - The header shows the member's portrait/initials and "My Desk" when signed in (reads localStorage only).
-- Part 2 still to build: editor Approve / Send back / Decline, publishing approved pieces to Sanity
+- Part 2 (publishing) is built: editor Approve & publish / Send back with a note / Decline on the review page;
+  the editor's own pieces publish directly. Approving sets `published_at` and a unique `slug` (DB trigger
+  `private.guard_piece`). Public pages `/guild/<slug>/` (`src/pages/guild/[slug].astro`), fed at build time by
+  `src/lib/guild.ts` (anon read of approved pieces; photos via 10-year signed URLs). Published pieces also show
+  on Home (dark Editorial Matrix, newest first), The Watchtower, The Hearth and The Perimeter.
+  Rebuild: `private.settings.build_hook_url` (Netlify build hook) is called by pg_net on publish/unpublish/edit.
+  Submission email: pg_net -> `netlify/functions/notify-submission.mts` -> Netlify form `submission-alert`
+  (hidden form on /enter/) -> Netlify form notification email.
+- Original Part 2 notes: editor Approve / Send back / Decline, publishing approved pieces to Sanity
   (Netlify Function + `SANITY_WRITE_TOKEN`, already set in Netlify), email on submission, rebuild hook.
 
 ## The original plan for the Guild Desk
