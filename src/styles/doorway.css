@@ -120,3 +120,22 @@
 .dw-field .dw-line-row:has(textarea) { align-items: stretch; }
 .dw-inline .dw-foot { max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6; }
 @media (max-width: 700px) { .dw-inline .dw-foot a { display: inline-block; margin: 10px 6px 0; } .dw-topic { padding: 9px 11px; letter-spacing: .14em; } }
+
+/* The header's sliver of glass light, carried into the doorway: under the buttons, along the field you're writing in,
+   and across the threshold of the arch. Colour enters only through glass, so it stays a thin line. */
+.dw-send, .dw-go { position: relative; }
+.dw-send { border-bottom-color: transparent; }
+.dw-send::after, .dw-go::after, .dw-line-row::after, .dw-arch-wrap::after {
+  content: ''; position: absolute; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(62,123,255,0), #3E7BFF 15%, #B05BFF 32%, #FF3B4E 50%, #FFC44D 68%, #3DE0A0 85%, rgba(61,224,160,0));
+}
+.dw-send::after { left: 6px; right: 6px; bottom: -1px; opacity: .85; transition: left .5s cubic-bezier(.16,1,.3,1), right .5s cubic-bezier(.16,1,.3,1), opacity .35s; }
+.dw-send:hover::after { left: -6px; right: -6px; opacity: 1; }
+.dw-go::after { left: 14px; right: 2px; bottom: 6px; opacity: 0; transform: scaleX(.4); transition: opacity .35s, transform .5s cubic-bezier(.16,1,.3,1); }
+.dw-go:hover::after, .dw-go:focus-visible::after { opacity: .9; transform: none; }
+.dw-line-row { position: relative; }
+.dw-line-row::after { left: 0; right: 0; bottom: -1px; opacity: 0; transform: scaleX(.2); transition: opacity .5s, transform .8s cubic-bezier(.16,1,.3,1); }
+.dw-field:focus-within .dw-line-row::after { opacity: .9; transform: none; }
+.dw-arch-wrap::after { left: 14%; right: 14%; bottom: 0; opacity: 0; animation: dw-rise 1.6s 2.2s ease-out forwards; }
+.dw-inline:not(.dw-in) .dw-arch-wrap::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .dw-arch-wrap::after { opacity: 1; animation: none; } }
