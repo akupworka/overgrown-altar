@@ -555,3 +555,55 @@
 .d-medium-only .it { font-size: 16px; color: #8C8679; }
 /* Lines sit directly under each other, as typed; an empty line is a visible gap between paragraphs or stanzas. */
 .d-rich .ProseMirror > p + p { margin-top: 0; }
+
+/* ---- A member's page, matched to the public writer page ---- */
+.m-page { display: flex !important; flex-direction: column; align-items: center; gap: 0 !important; max-width: 1100px; text-align: center !important; }
+.m-hero { width: 100%; max-width: 640px; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-bottom: 64px; }
+.m-back { align-self: center; margin-bottom: 18px; color: var(--muted-dark); border-bottom: 1px solid rgba(243, 236, 220, .25); padding-bottom: 4px; transition: color .3s, border-color .3s; }
+.m-back:hover { color: var(--ember); border-color: var(--ember); }
+.m-hero .g-arch { width: 150px !important; height: 196px !important; font-size: 44px !important; margin-bottom: 18px;
+  box-shadow: 0 0 0 1px var(--brass), 0 30px 60px -30px rgba(0, 0, 0, .8) !important; }
+.m-hero .g-arch:has(img) { background: #E9E2D4; }
+.m-hero .m-name { margin: 6px 0 0; font-size: 56px; }
+.m-craft { color: var(--ember); }
+.m-hero .m-bio { margin: 10px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.5; color: #E6DFD0; white-space: pre-wrap; }
+.m-bio-empty { color: var(--muted-dark) !important; }
+.m-pills { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.m-pills a { display: inline-flex; align-items: center; gap: 9px; max-width: 100%; padding: 9px 15px 9px 13px; border-radius: 999px; white-space: nowrap;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone);
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .25); transition: box-shadow .3s, color .3s, background-color .3s; }
+.m-pills a span { overflow: hidden; text-overflow: ellipsis; }
+.m-pills a svg { flex: none; color: var(--ember); }
+.m-pills a:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55); background: rgba(255, 227, 163, .04); }
+.m-edit { margin-top: 14px; color: var(--muted-dark); border-bottom: 1px solid rgba(243, 236, 220, .2); padding-bottom: 4px; transition: color .3s, border-color .3s; }
+.m-edit:hover { color: var(--ember); border-color: var(--ember); }
+
+.m-work { width: 100vw; margin: 0 calc(50% - 50vw); padding: 72px max(24px, calc(50vw - 550px)) 90px; background: var(--paper, #E9E2D6); color: var(--ink); text-align: left; display: block !important; }
+.m-work-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+.m-work-head .eb { color: var(--oxblood); }
+.m-work-head .lab { color: var(--muted-paper); }
+.m-none { font-size: 19px; color: var(--muted-paper); }
+.m-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(42, 32, 23, .25); }
+.m-list li { border-bottom: 1px solid rgba(42, 32, 23, .18); }
+.m-list .m-piece { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 32px; align-items: center; padding: 28px 0; width: 100%;
+  background: none; border: 0; border-bottom: 0; cursor: pointer; text-align: left; color: inherit; }
+.m-list .m-piece .h3 { font-size: 30px; font-style: italic; color: var(--ink); transition: color .3s; }
+.m-list .m-piece:hover .h3 { color: var(--oxblood); }
+.m-kicker { color: var(--oxblood); }
+.m-sf { font-size: 19px; line-height: 1.4; color: var(--muted-paper); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.m-date { font-size: 10px; color: var(--muted-paper); margin-top: 4px; }
+.m-list .m-thumb { aspect-ratio: 3 / 2; background: #DDD5C6; }
+.m-list .m-thumb:empty { visibility: hidden; }
+@media (max-width: 700px) {
+  .m-hero { padding-bottom: 48px; }
+  .m-hero .g-arch { width: 116px !important; height: 152px !important; font-size: 34px !important; }
+  .m-hero .m-name { font-size: 38px !important; }
+  .m-hero .m-bio { font-size: 18px; }
+  .m-work { padding: 48px 24px 64px; }
+  .m-work-head { flex-direction: column; gap: 6px; }
+  .m-list .m-piece { grid-template-columns: minmax(0, 1fr) 84px; gap: 16px; align-items: start; padding: 20px 0; }
+  .m-list .m-piece .h3 { font-size: 21px !important; line-height: 1.2; }
+  .m-sf { font-size: 16px; }
+  .m-list .m-thumb { aspect-ratio: 1; margin-top: 4px; }
+}
+.desk-in:has(.m-work) { padding-bottom: 0 !important; }

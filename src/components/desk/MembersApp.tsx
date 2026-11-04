@@ -98,40 +98,56 @@ function MemberPage({ id, me }: { id: string; me: string }) {
 
   if (person === undefined) return <p className="lab mut d-loading">Opening the page…</p>;
   if (person === null) return <div className="m-gate"><p className="it mut d-empty">This member’s page could not be found.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
-  const insta = person.instagram ? `https://instagram.com/${person.instagram}` : '';
+  const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+  const handle = (person.instagram ?? '').replace(/^@/, '');
+  // The same page as the public writer page (/guild/authors/<name>/): an arch, the name, craft, a few lines, two link pills, then the work.
   return (
     <div className="m-page">
-      <aside className="m-aside">
-        <Link className="d-link" to="/guild/members/">← The Guild</Link>
+      <header className="m-hero">
+        <Link className="m-back lab" to="/guild/members/">← The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{[person.role === 'editor' ? 'Editor' : '', person.craft].filter(Boolean).join(' · ') || 'Member of the Guild'}</span>
+        <span className="eb">{person.role === 'editor' ? 'Editor of the Guild' : 'Of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
-        {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="it mut m-bio">No words of introduction yet.</p>}
-        {(person.website || insta) && (
-          <div className="m-links">
-            {person.website && <a className="lab" href={person.website} target="_blank" rel="noopener noreferrer">Website ↗︎</a>}
-            {insta && <a className="lab" href={insta} target="_blank" rel="noopener noreferrer">Instagram · @{person.instagram} ↗︎</a>}
-          </div>
+        {person.craft && <span className="lab m-craft">{person.craft}</span>}
+        {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
+        {(site || handle) && (
+          <span className="m-pills">
+            {site && (
+              <a href={person.website!} target="_blank" rel="noopener noreferrer" aria-label={`Website: ${site} (opens in a new tab)`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.8 3.8 5.8 3.8 9s-1.2 6.2-3.8 9c-2.6-2.8-3.8-5.8-3.8-9S9.4 5.8 12 3z" /></svg>
+                <span>{site}</span>
+              </a>
+            )}
+            {handle && (
+              <a href={`https://instagram.com/${handle}`} target="_blank" rel="noopener noreferrer" aria-label={`Instagram: @${handle} (opens in a new tab)`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none" /></svg>
+                <span>@{handle}</span>
+              </a>
+            )}
+          </span>
         )}
-        {person.id === me && <a className="d-link" href="/guild/desk/">Edit my page at the Desk</a>}
-      </aside>
+        {person.id === me && <a className="m-edit lab" href="/guild/desk/">Edit my page at the Desk <span aria-hidden="true">→</span></a>}
+      </header>
       <section className="m-work">
-        <div className="d-row-head"><h2 className="eb">Collected work</h2><span className="lab mut">{work.length} {work.length === 1 ? 'piece' : 'pieces'}</span></div>
+        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{work.length} {work.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
         {work.length === 0 ? (
-          <p className="it mut d-empty">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
+          <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
         ) : (
-          <div className="d-list">
+          <ol className="m-list">
             {work.map((w) => (
-              <button key={w.id} type="button" className="m-piece" onClick={() => go(`/guild/members/?p=${w.id}`)}>
-                <span className="m-piece-text">
-                  <span className="lab mut">{pillarName(w.pillar)} · {mediumName(w.medium)}{w.published_at ? ` · ${fmt(w.published_at)}` : ''}</span>
-                  <span className="h3">{w.title}</span>
-                  {w.standfirst && <span className="it mut">{w.standfirst}</span>}
-                </span>
-                <span className="m-thumb">{w.image_path && thumbs[w.image_path] ? <img src={thumbs[w.image_path]} alt="" loading="lazy" /> : null}</span>
-              </button>
+              <li key={w.id}>
+                <button type="button" className="m-piece" onClick={() => go(`/guild/members/?p=${w.id}`)}>
+                  <span className="m-piece-text">
+                    <span className="lab m-kicker">{pillarName(w.pillar)} · {mediumName(w.medium)}</span>
+                    <span className="h3">{w.title}</span>
+                    {w.standfirst && <span className="it m-sf">{w.standfirst}</span>}
+                    {w.published_at && <span className="lab m-date">{fmt(w.published_at)}</span>}
+                  </span>
+                  <span className="m-thumb">{w.image_path && thumbs[w.image_path] ? <img src={thumbs[w.image_path]} alt="" loading="lazy" /> : null}</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ol>
         )}
       </section>
     </div>
