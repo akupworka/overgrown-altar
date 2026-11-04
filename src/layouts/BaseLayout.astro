@@ -4,9 +4,10 @@
 import '../styles/global.css';
 import SiteFooter from '../components/SiteFooter.astro';
 
-interface Props { title?: string; description?: string }
+interface Props { title?: string; description?: string; footer?: boolean }
 const {
   title,
+  footer = true,
   description = 'An independent journal of craft, discernment and the reclaimed hearth.',
 } = Astro.props;
 const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
@@ -24,6 +25,6 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
     <main>
       <slot />  <!-- the page's own content goes here -->
     </main>
-    <SiteFooter />
+    {footer && <SiteFooter />}
   </body>
 </html>

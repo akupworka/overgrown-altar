@@ -6,6 +6,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Wordmark from '../components/Wordmark.astro';
 import Cross from '../components/Cross.astro';
+import Subscribe from '../components/Subscribe.astro';
 
 // The content lives in lists like these for now.
 // In step 2 these will come from Sanity, so you can edit them without code.
@@ -45,7 +46,7 @@ const formats = [
     <SiteNav />
     <div class="hero-c">
       <h1 class="visually-hidden">Overgrown Altar</h1>
-      <Wordmark width={760} />
+      <Wordmark width={760} mobileWidth={330} />
       <p class="it hero-tag">Craft, Discernment &amp; The Reclaimed Hearth.</p>
       <span class="lab mut" style="margin-top:16px">An independent journal · Est. MMXXVI</span>
       <div class="hero-cta">
@@ -174,21 +175,7 @@ const formats = [
   </section>
 
   <!-- 8. Receive the Dispatches (newsletter sign-up) -->
-  <section class="sec dark center" style="overflow:hidden">
-    <div class="glow" aria-hidden="true"></div>
-    <div class="hin center">
-      <Cross width={27} color="#FFE3A3" />
-      <h2 class="h2" style="margin-top:26px">Receive the Dispatches</h2>
-      <p class="it mut" style="margin:20px 0 0;max-width:620px;font-size:23px;line-height:1.45">New essays from The Watchtower, work from The Hearth, and protocols from The Perimeter, delivered as a letter.</p>
-      <!-- data-netlify="true" means Netlify collects these sign-ups for you once the site is live. -->
-      <form class="subscribe" name="dispatches" method="POST" data-netlify="true">
-        <input type="hidden" name="form-name" value="dispatches" />
-        <label for="sub-email" class="visually-hidden">Your email</label>
-        <input id="sub-email" class="field" type="email" name="email" placeholder="Your email" required />
-        <button class="btn" type="submit">Subscribe</button>
-      </form>
-    </div>
-  </section>
+  <Subscribe />
 
 </BaseLayout>
 
@@ -225,47 +212,12 @@ const formats = [
   .pillar-link { margin-top: 20px; align-self: flex-start; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
   .pillar:hover .pillar-link { color: var(--oxblood); border-color: var(--oxblood); }
 
-  /* Editorial matrix */
-  .mx { display: grid; grid-template-columns: 90px minmax(0, 1fr) 520px; gap: 40px; align-items: start; padding: 38px 0; }
+  /* Editorial matrix (the .mx and .mx3 rows are styled in global.css) */
   .mx:hover .h3 { color: var(--ember); }
-  .mx3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); font-family: var(--serif); font-weight: 500; font-size: 17px; line-height: 1.3; }
-  .mx3 > div { padding: 4px 16px; }
-  .mx3 > div:first-child { padding-left: 0; }
-  .mx3 > div + div { border-left: 1px solid rgba(243,236,220,.25); }
   .mx3-head { width: 520px; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #A9A294; }
 
   /* Format */
   .format-arch { width: 180px; height: 240px; box-shadow: 0 0 0 1px var(--brass), 0 0 0 8px var(--paper), 0 0 0 9px rgba(159,148,94,.5); }
   .format-name { margin-top: 10px; font-size: 34px; letter-spacing: .06em; text-transform: uppercase; }
 
-  /* Newsletter */
-  .glow {
-    position: absolute; left: 50%; top: 50%; width: 1000px; height: 1000px; transform: translate(-50%, -50%);
-    border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,140,.14), rgba(255,196,77,0)); pointer-events: none;
-  }
-  .subscribe { margin-top: 40px; display: flex; width: 100%; max-width: 620px; border: 1px solid rgba(243,236,220,.55); }
-  .subscribe .field { flex: 1; min-width: 0; border: 0; text-align: left; }
-
-  /* Tablets */
-  @media (max-width: 1100px) {
-    .mx { grid-template-columns: 60px minmax(0, 1fr); }
-    .mx .mx3 { grid-column: 1 / -1; }
-  }
-
-  /* Phones */
-  @media (max-width: 700px) {
-    .home-hero { height: 760px; }
-    .hero-c { top: 150px; }
-    .hero-c :global(.wordmark) { width: 330px !important; }
-    .hero-tag { font-size: 24px; }
-    .manifesto-h { font-size: 40px; }
-    .thesis { min-height: 640px; }
-    .pillar-arch { height: 440px; }
-    .pillar-name { font-size: 30px; }
-    .mx { grid-template-columns: 44px minmax(0, 1fr); gap: 16px; }
-    .mx3 { font-size: 15px; }
-    .format-name { font-size: 28px; }
-    .subscribe { flex-direction: column; border: 0; gap: 10px; }
-    .subscribe .field { border: 1px solid rgba(243,236,220,.55); }
-  }
 </style>

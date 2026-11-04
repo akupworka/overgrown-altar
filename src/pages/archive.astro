@@ -1,0 +1,58 @@
+---
+// Archive — converted from the design file Archive.dc.html
+// The page's shared look comes from src/styles/global.css.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+---
+<BaseLayout title="Archive">
+<section class="hero" style="height:560px"><img src="/images/the-archive.jpg" alt="The Archive" style="object-position:center 30%;filter:grayscale(1) brightness(.45)" class="mono" fetchpriority="high" /><div class="veil"></div><SiteNav />
+<div class="hero-c" style="top:202px;padding:0 24px"><span class="eb">Everything, in one place</span><h1 class="h1" style="margin-top:22px">The Archive</h1></div></section>
+<section class="sec paper" style="padding-top:80px"><div style="display:flex;flex-direction:column;gap:26px">
+<input class="field search" type="search" placeholder="Search dispatches, protocols, photographs, thinkers…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />
+<div class="filters"><span class="lab mut fl">Pillar</span><button type="button" class="chip" aria-pressed="true" data-k="pillar" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="watchtower">The Watchtower</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="hearth">The Hearth</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="perimeter">The Perimeter</button></div>
+<div class="filters"><span class="lab mut fl">Medium</span><button type="button" class="chip" aria-pressed="true" data-k="medium" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="essay">Essays</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="photograph">Photographs</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="prose">Prose</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="fiction">Fiction</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="teardown">Teardowns</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="protocol">Protocols</button></div>
+<div class="filters"><span class="lab mut fl">Thinker</span><button type="button" class="chip" aria-pressed="true" data-k="thinker" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="nietzsche">Nietzsche</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="jung">Jung</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="freud">Freud</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="bukowski">Bukowski</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="newton">Newton</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="quantum">Quantum</button></div></div>
+<div class="g3 results" style="margin-top:60px"><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="nietzsche" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/format-dispatches.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">Nietzsche Surrendered: The Übermensch at the Foot of the Cross</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="jung" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/window-of-the-ascension-and.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">Jung vs. Tolkien: The Counterfeit Unconscious vs. Myth Realized</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="newton" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/folios-photo-2.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">Newtonian Determinism: The Missing Anchor</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="quantum" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/folios-photo.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">The Resurrection as the Primary Quantum Law</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="freud" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/watchtower-photo.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">Freud’s Couch and the Confessional</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="watchtower" data-medium="essay" data-thinker="bukowski" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/what-we-believe.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Watchtower · Essay</span><span class="h3" style="font-size:27px">Bukowski and the Liturgy of Despair</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="hearth" data-medium="photograph" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/four-lancet-window.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Hearth · Photographs</span><span class="h3" style="font-size:27px">Four Lancets at Dusk</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="hearth" data-medium="prose" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/pillar-perimeter.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Hearth · Prose</span><span class="h3" style="font-size:27px">Vespers in a Roofless Nave</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="hearth" data-medium="fiction" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/archive-photo.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Hearth · Fiction</span><span class="h3" style="font-size:27px">The Bellringer’s Daughter</span></a><a class="item rv" href="/watchtower/nietzsche-surrendered" data-pillar="hearth" data-medium="teardown" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/archive-photo-2.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Hearth · Design teardown</span><span class="h3" style="font-size:27px">The Book of Kells and the Discipline of the Margin</span></a><a class="item rv" href="/perimeter/untangling-mental-strongholds" data-pillar="perimeter" data-medium="protocol" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/untangling-mental-strongholds.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Perimeter · Protocol</span><span class="h3" style="font-size:27px">Untangling Mental Strongholds</span></a><a class="item rv" href="/perimeter/untangling-mental-strongholds" data-pillar="perimeter" data-medium="protocol" data-thinker="" style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src="/images/format-guild.jpg" alt="" style="object-position:center;" loading="lazy" /></div><span class="lab" style="color:#62372D">The Perimeter · Protocol</span><span class="h3" style="font-size:27px">Establishing Firm Personal and Spiritual Boundaries</span></a></div>
+<p class="it mut empty" style="display:none;margin-top:40px;font-size:22px">Nothing here yet. Try another filter.</p></section>
+<script>
+  // Archive search and filters. This runs in the visitor's browser.
+  // Each result card carries data-pillar, data-medium and data-thinker tags;
+  // we hide the cards that don't match the chosen chips and the search words.
+  const search = document.querySelector<HTMLInputElement>('#archive-search')!;
+  const items = [...document.querySelectorAll<HTMLElement>('.results .item')];
+  const chosen: Record<string, string> = { pillar: 'all', medium: 'all', thinker: 'all' };
+
+  const empty = document.createElement('p');
+  empty.className = 'it mut';
+  empty.style.cssText = 'font-size:22px;margin:40px 0 0;display:none';
+  empty.textContent = 'Nothing on the altar matches that yet.';
+  document.querySelector('.results')!.after(empty);
+
+  function update() {
+    const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const item of items) {
+      const text = (item.textContent + ' ' + Object.values(item.dataset).join(' ')).toLowerCase();
+      const ok = Object.entries(chosen).every(([k, v]) => v === 'all' || item.dataset[k] === v)
+        && words.every((w) => text.includes(w));
+      item.hidden = !ok;
+      if (ok) shown++;
+    }
+    empty.style.display = shown ? 'none' : 'block';
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.chip[data-k]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.k!;
+      chosen[key] = chip.dataset.v!;
+      document.querySelectorAll(`.chip[data-k="${key}"]`).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      update();
+    });
+  });
+  search.addEventListener('input', update);
+
+  // Arriving from the Menu's search box: /archive?q=jung
+  const q = new URLSearchParams(location.search).get('q');
+  if (q) { search.value = q; update(); }
+</script>
+</BaseLayout>

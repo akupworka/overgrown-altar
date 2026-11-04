@@ -1,0 +1,29 @@
+---
+// Where the newsletter, contact and Guild forms land after someone sends them.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import Cross from '../components/Cross.astro';
+---
+<BaseLayout title="Thank you">
+  <section class="hero" style="min-height:760px">
+    <div class="glow" aria-hidden="true"></div>
+    <SiteNav />
+    <div class="hero-c" style="top:240px;padding:0 24px">
+      <Cross width={30} color="#FFE3A3" />
+      <span class="eb" style="margin-top:30px">Received</span>
+      <h1 class="h1" style="margin-top:22px">Thank you.</h1>
+      <p class="it mut" style="margin:24px 0 0;max-width:620px;font-size:24px;line-height:1.45">Your words have reached the altar. Every letter is read, and every application is answered.</p>
+      <div style="margin-top:42px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
+        <a class="btn" href="/">Return home</a>
+        <a class="ghost" href="/watchtower">Read the Dispatches</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .glow {
+    position: absolute; left: 50%; top: 46%; width: 1000px; height: 1000px; transform: translate(-50%, -50%);
+    border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,140,.14), rgba(255,196,77,0)); pointer-events: none;
+  }
+</style>

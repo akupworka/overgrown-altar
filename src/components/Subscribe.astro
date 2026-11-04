@@ -1,0 +1,33 @@
+---
+// "Receive the Dispatches" newsletter sign-up, used at the foot of several pages.
+// data-netlify="true" means Netlify collects these sign-ups for you once the site is live
+// (you'll find them in Netlify under Forms).
+import Cross from './Cross.astro';
+---
+<section class="sec dark center" style="overflow:hidden">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="hin center">
+    <Cross width={27} color="#FFE3A3" />
+    <h2 class="h2" style="margin-top:26px">Receive the Dispatches</h2>
+    <p class="it mut" style="margin:20px 0 0;max-width:620px;font-size:23px;line-height:1.45">New essays from The Watchtower, work from The Hearth, and protocols from The Perimeter, delivered as a letter.</p>
+    <form class="subscribe" name="dispatches" method="POST" action="/thanks" data-netlify="true">
+      <input type="hidden" name="form-name" value="dispatches" />
+      <label for="sub-email" class="visually-hidden">Your email</label>
+      <input id="sub-email" class="field" type="email" name="email" placeholder="Your email" autocomplete="email" required />
+      <button class="btn" type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<style>
+  .glow {
+    position: absolute; left: 50%; top: 50%; width: 1000px; height: 1000px; transform: translate(-50%, -50%);
+    border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,140,.14), rgba(255,196,77,0)); pointer-events: none;
+  }
+  .subscribe { margin-top: 40px; display: flex; width: 100%; max-width: 620px; border: 1px solid rgba(243,236,220,.55); }
+  .subscribe .field { flex: 1; min-width: 0; border: 0; text-align: left; }
+  @media (max-width: 700px) {
+    .subscribe { flex-direction: column; border: 0; gap: 10px; }
+    .subscribe .field { border: 1px solid rgba(243,236,220,.55); }
+  }
+</style>
