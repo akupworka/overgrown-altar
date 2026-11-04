@@ -1,0 +1,85 @@
+/* The doorway (components/desk/Doorway.tsx): the way into the Guild. */
+.dw { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; min-height: calc(100svh - 220px); }
+.dw-backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #040504; }
+.dw-nave { position: absolute; inset: -4%; }
+.dw-nave img { width: 100%; height: 100%; object-fit: cover; object-position: center 60%; filter: brightness(.32) saturate(.85);
+  animation: dw-breathe 34s ease-in-out infinite alternate; will-change: transform; }
+@keyframes dw-breathe { from { transform: scale(1); } to { transform: scale(1.07); } }
+/* One soft shaft of glass light falling into the doorway. */
+.dw-shaft { position: absolute; left: 50%; top: -10%; width: min(560px, 90vw); height: 80%; translate: -50% 0; transform: skewX(-14deg); opacity: .5; filter: blur(30px);
+  background: linear-gradient(90deg, transparent 20%, rgba(62,123,255,.28) 34%, rgba(255,59,78,.26) 46%, rgba(255,196,77,.3) 58%, rgba(61,224,160,.22) 70%, transparent 82%);
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%); mask-image: linear-gradient(180deg, #000, transparent 85%);
+  animation: dw-shimmer 9s ease-in-out infinite alternate; }
+@keyframes dw-shimmer { from { opacity: .35; } to { opacity: .55; } }
+.dw-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse 46% 58% at 50% 46%, rgba(4,5,4,.05), rgba(4,5,4,.72) 70%, rgba(4,5,4,.96) 100%); }
+.dw-motes i { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: rgba(255,227,163,.7); box-shadow: 0 0 6px rgba(255,214,140,.6);
+  opacity: 0; animation: dw-mote var(--t) linear infinite; animation-delay: var(--d); will-change: transform, opacity; }
+@keyframes dw-mote { 0% { transform: translate(0,0); opacity: 0; } 15% { opacity: .8; } 80% { opacity: .5; } 100% { transform: translate(var(--x), -60vh); opacity: 0; } }
+
+.dw-arch-wrap { position: relative; width: min(540px, 92vw); min-height: min(800px, 82svh); display: flex; align-items: flex-end; justify-content: center; }
+.dw-arch { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dw-line { fill: none; stroke: rgba(255,227,163,.55); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: dw-draw 2.4s .15s cubic-bezier(.65,0,.35,1) forwards; }
+.dw-line.inner { stroke: rgba(159,148,94,.35); animation-delay: .45s; }
+@keyframes dw-draw { to { stroke-dashoffset: 0; } }
+.dw-glow { position: absolute; left: 50%; top: 6%; width: 70%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,214,140,.15), rgba(255,196,77,0)); animation: dw-candle 7s ease-in-out infinite; }
+@keyframes dw-candle { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+
+.dw-threshold { position: relative; width: 100%; padding: 0 11% 10%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.dw-threshold > * { opacity: 0; animation: dw-rise 1.1s cubic-bezier(.16,1,.3,1) forwards; }
+.dw-threshold > :nth-child(1) { animation-delay: .9s; }
+.dw-threshold > :nth-child(2) { animation-delay: 1.15s; }
+.dw-threshold > :nth-child(3) { animation-delay: 1.3s; }
+.dw-threshold > :nth-child(4) { animation-delay: 1.45s; }
+.dw-threshold > :nth-child(5) { animation-delay: 1.6s; }
+@keyframes dw-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.dw-cross { fill: #FFE3A3; margin-bottom: 22px; }
+.dw-kicker { letter-spacing: .4em; }
+.dw-title { margin: 16px 0 0; font-family: var(--serif); font-weight: 500; font-size: 46px; line-height: 1.04; text-wrap: balance; }
+.dw-lead { margin: 14px 0 0; font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.5; color: var(--muted-dark); max-width: 340px; }
+.dw-body { width: 100%; max-width: 340px; margin-top: 30px; display: flex; flex-direction: column; align-items: stretch; }
+
+.dw-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; text-align: left; }
+.dw-label { font-family: var(--sans); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #8C8679; }
+.dw-line-row { display: flex; align-items: center; border-bottom: 1px solid rgba(243,236,220,.32); transition: border-color .4s, box-shadow .6s; }
+.dw-field:focus-within .dw-line-row { border-color: var(--ember); box-shadow: 0 14px 30px -18px rgba(255,214,140,.55); }
+.dw-field:focus-within .dw-label { color: var(--ember); }
+.dw-line-row input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--bone); padding: 10px 2px 12px; font-family: var(--serif); font-size: 21px; }
+.dw-go { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; cursor: pointer; color: var(--ember); padding: 10px 0 10px 12px; min-height: 44px;
+  font-family: var(--sans); font-size: 11px; letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; transition: gap .4s cubic-bezier(.16,1,.3,1), color .3s; }
+.dw-go:hover { gap: 16px; color: var(--bone); }
+.dw-go:disabled { opacity: .5; cursor: default; }
+.dw-notice { min-height: 1.5em; margin: 4px 0 0; font-family: var(--serif); font-style: italic; font-size: 17px; color: #E6A99A; text-align: center; }
+.dw-notice.ok { color: var(--ember); }
+.dw-notice:empty { min-height: 0; }
+.dw-links { margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.dw-text { background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--muted-dark); font-family: var(--serif); font-style: italic; font-size: 17px;
+  border-bottom: 1px solid rgba(207,200,184,.3); }
+.dw-text:hover { color: var(--ember); border-color: var(--ember); }
+.dw-foot { margin-top: 26px; text-align: center; font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--muted-dark); opacity: 0; animation: dw-rise 1.2s 1.9s ease-out forwards; }
+.dw-foot a { color: var(--bone); border-bottom: 1px solid rgba(243,236,220,.35); font-style: normal; font-family: var(--sans); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; margin-left: 8px; }
+.dw-foot a:hover { color: var(--ember); border-color: var(--ember); }
+.dw-wrong .dw-line-row { border-color: rgba(230,169,154,.7); }
+.dw-shake-now { animation: dw-shake .5s cubic-bezier(.36,.07,.19,.97); }
+@keyframes dw-shake { 15%, 85% { transform: translateX(-2px); } 30%, 70% { transform: translateX(4px); } 45%, 55% { transform: translateX(-6px); } }
+
+@media (max-width: 700px) {
+  .dw-arch-wrap { min-height: min(720px, 80svh); }
+  .dw-threshold { padding: 0 9% 12%; }
+  .dw-title { font-size: 34px; }
+  .dw-lead { font-size: 17px; }
+  .dw-line-row input { font-size: 19px; }
+  .dw-foot a { display: block; margin: 8px 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dw-nave img, .dw-motes i, .dw-glow, .dw-shaft { animation: none; }
+  .dw-motes { display: none; }
+  .dw-line { stroke-dashoffset: 0; animation: none; }
+  .dw-threshold > *, .dw-foot { opacity: 1; animation: none; }
+}
+
+.dw-holder { width: 100%; display: flex; justify-content: center; }
+/* Inside the Desk page, the doorway sits a little higher. */
+.desk-in:has(.dw) { padding-top: 96px; }
+.desk:has(.dw) .desk-memory { display: none; }

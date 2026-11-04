@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Body } from '../../lib/marks';
+import { Doorway, Line, Arrow } from './Doorway';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -61,58 +62,44 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [msg, setMsg] = useState<{ text: string; ok?: boolean } | null>(null);
+  const [shake, setShake] = useState(0);
 
   async function signIn(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setMsg('');
+    e.preventDefault(); setBusy(true); setMsg(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) setMsg(error.message.includes('Invalid') ? 'That email and password do not match. Please try again.' : error.message);
+    if (error) { setMsg({ text: error.message.includes('Invalid') ? 'That email and password do not match.' : error.message }); setShake((n) => n + 1); }
   }
   async function sendReset(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setMsg('');
+    e.preventDefault(); setBusy(true); setMsg(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/guild/desk/` });
     setBusy(false);
-    setMsg(error ? error.message : 'If that email belongs to a member, a link to set a new password is on its way.');
+    setMsg(error ? { text: error.message } : { text: 'If that email belongs to a member, a link is on its way.', ok: true });
   }
 
-  return (
-    <Glass className="d-narrow">
-      <div className="d-card">
-        <span className="eb">Members of the Guild</span>
-        <h1 className="h1 d-title">The Guild Desk</h1>
-        {mode === 'signin' ? (
-          <>
-            <p className="it mut d-lead">Your drafts, your pieces with the editor, and the page readers see when they meet you.</p>
-            <form className="d-form" onSubmit={signIn}>
-              <label className="lab" htmlFor="d-email">Email</label>
-              <input id="d-email" className="field" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              <label className="lab" htmlFor="d-pw">Password</label>
-              <input id="d-pw" className="field" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button className="btn" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
-              <p className="it d-notice" role="status" aria-live="polite">{msg}</p>
-            </form>
-            <div className="d-links">
-              <button type="button" className="lab d-textbtn" onClick={() => { setMode('forgot'); setMsg(''); }}>Forgot your password?</button>
-              <span className="d-rule" aria-hidden="true" />
-              <span className="it mut">Not yet at the table?</span>
-              <a className="ghost" href="/guild">Apply to the Guild</a>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="it mut d-lead">Enter your email and we will send you a link to set a new password.</p>
-            <form className="d-form" onSubmit={sendReset}>
-              <label className="lab" htmlFor="d-email2">Email</label>
-              <input id="d-email2" className="field" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button className="btn" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send the link'}</button>
-              <p className="it d-notice" role="status" aria-live="polite">{msg}</p>
-            </form>
-            <div className="d-links"><button type="button" className="lab d-textbtn" onClick={() => { setMode('signin'); setMsg(''); }}>← Back to sign in</button></div>
-          </>
-        )}
-      </div>
-    </Glass>
+  return mode === 'signin' ? (
+    <div key={shake} className={`dw-holder ${msg && !msg.ok ? 'dw-wrong' : ''}`}>
+      <Doorway kicker="Members of the Guild" title="The Guild Desk" lead="Your drafts, your pieces with the editor, and the page readers see when they meet you."
+        foot={<>Not yet at the table? <a href="/guild">Apply to the Guild</a></>}>
+        <form onSubmit={signIn} className={shake ? 'dw-shake-now' : ''}>
+          <Line label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Line label="Password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)}
+            action={<button type="submit" className="dw-go" disabled={busy}>{busy ? 'Opening…' : 'Sign in'}<Arrow /></button>} />
+          <p className={`dw-notice ${msg?.ok ? 'ok' : ''}`} role="status" aria-live="polite">{msg?.text ?? ''}</p>
+        </form>
+        <div className="dw-links"><button type="button" className="dw-text" onClick={() => { setMode('forgot'); setMsg(null); }}>Forgot your password?</button></div>
+      </Doorway>
+    </div>
+  ) : (
+    <Doorway kicker="Members of the Guild" title="A new key" lead="Enter your email and we will send you a link to set a new password.">
+      <form onSubmit={sendReset}>
+        <Line label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+          action={<button type="submit" className="dw-go" disabled={busy}>{busy ? 'Sending…' : 'Send'}<Arrow /></button>} />
+        <p className={`dw-notice ${msg?.ok ? 'ok' : ''}`} role="status" aria-live="polite">{msg?.text ?? ''}</p>
+      </form>
+      <div className="dw-links"><button type="button" className="dw-text" onClick={() => { setMode('signin'); setMsg(null); }}>Back to sign in</button></div>
+    </Doorway>
   );
 }
 
@@ -137,25 +124,16 @@ function SetPassword({ onDone, invited }: { onDone: () => void; invited: boolean
     onDone();
   }
   return (
-    <Glass className="d-narrow">
-      <div className="d-card">
-        <span className="eb">{invited ? 'Welcome to the Guild' : 'A new password'}</span>
-        <h1 className="h1 d-title">{invited ? 'Take your seat' : 'Set your password'}</h1>
-        <p className="it mut d-lead">{invited ? 'Choose the name readers will see, and a password for your desk.' : 'Choose a new password for your desk.'}</p>
-        <form className="d-form" onSubmit={save}>
-          {invited && (<>
-            <label className="lab" htmlFor="d-name">Your name, as readers will see it</label>
-            <input id="d-name" className="field" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
-          </>)}
-          <label className="lab" htmlFor="d-new">New password</label>
-          <input id="d-new" className="field" type="password" autoComplete="new-password" required value={pw} onChange={(e) => setPw(e.target.value)} />
-          <label className="lab" htmlFor="d-new2">Once more</label>
-          <input id="d-new2" className="field" type="password" autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)} />
-          <button className="btn" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save and open my desk'}</button>
-          <p className="it d-notice" role="alert">{msg}</p>
-        </form>
-      </div>
-    </Glass>
+    <Doorway kicker={invited ? 'Welcome to the Guild' : 'Members of the Guild'} title={invited ? 'Take your seat' : 'Set a new password'}
+      lead={invited ? 'Choose the name readers will see, and a password for your desk.' : 'Choose a new password for your desk.'}>
+      <form onSubmit={save}>
+        {invited && <Line label="Your name, as readers will see it" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
+        <Line label="New password" type="password" autoComplete="new-password" required value={pw} onChange={(e) => setPw(e.target.value)} />
+        <Line label="Once more" type="password" autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)}
+          action={<button type="submit" className="dw-go" disabled={busy}>{busy ? 'Saving…' : 'Enter'}<Arrow /></button>} />
+        <p className="dw-notice" role="alert">{msg}</p>
+      </form>
+    </Doorway>
   );
 }
 
