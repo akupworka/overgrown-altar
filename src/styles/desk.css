@@ -370,3 +370,31 @@
   .d-details > summary { margin-bottom: 22px; }
 }
 @media (min-width: 701px) { .d-details[open] > summary { margin-bottom: 26px; } .d-photo-frame { aspect-ratio: 16 / 10; } }
+
+/* Desktop writing bar: no box. A full-width veil that fades into the room, one hairline below. */
+@media (min-width: 701px) {
+  .d-write-bar { background: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    border-bottom: 0 !important; top: 84px !important; isolation: isolate; }
+  .d-write-bar::before {
+    content: ''; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
+    background: linear-gradient(180deg, rgba(10, 12, 10, .94), rgba(10, 12, 10, .86));
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 rgba(243, 236, 220, .07);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .d-state { color: #8C8679; }
+}
+@media (min-width: 701px) {
+  .d-write-bar::before { opacity: 0; transition: opacity .4s ease; }
+  body:has(.site-header.solid) .d-write-bar::before { opacity: 1; }
+}
+/* "clip" keeps edges tidy without stopping the writing bar from sticking. */
+.desk { overflow: clip; }
+@media (min-width: 701px) {
+  .d-write-bar { transition: top .5s var(--ease, ease); }
+  body:has(.site-header.tucked) .d-write-bar { top: 0 !important; }
+}
+@media (min-width: 701px) {
+  .d-write-bar::before { background: rgba(10, 12, 10, .97); -webkit-backdrop-filter: none; backdrop-filter: none; -webkit-mask-image: none; mask-image: none; }
+}
