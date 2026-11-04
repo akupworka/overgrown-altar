@@ -5,10 +5,11 @@ import '../styles/global.css';
 import '../styles/motion.css';
 import SiteFooter from '../components/SiteFooter.astro';
 
-interface Props { title?: string; description?: string; footer?: boolean }
+interface Props { title?: string; description?: string; footer?: boolean; noindex?: boolean }
 const {
   title,
   footer = true,
+  noindex = false,
   description = 'An independent journal of craft, discernment and the reclaimed hearth.',
 } = Astro.props;
 const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
@@ -20,6 +21,7 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
   </head>
   <body>
