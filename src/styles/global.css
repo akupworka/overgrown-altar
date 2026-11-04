@@ -251,3 +251,25 @@ textarea.field { resize: vertical; }
   .sec { padding: 0 !important; }
   * { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
 }
+
+/* ---------- 12. Phones: sleeker controls -----------------------------------
+   Smaller buttons, chips and fields; filters become one swipeable row each. */
+@media (max-width: 700px) {
+  .btn, .ghost { font-size: 10px; letter-spacing: .22em; padding: 13px 20px; }
+  .ghost { padding: 12px 19px; }
+  .card-form .btn { padding-top: 14px; padding-bottom: 14px; }
+  .field { font-size: 17px; padding: 13px 16px; }
+  .field.search { font-size: 18px !important; padding: 14px 16px !important; }
+
+  .chip { font-size: 9.5px; letter-spacing: .16em; padding: 7px 13px; min-height: 34px; white-space: nowrap; flex: none; }
+  .filters { flex-wrap: nowrap; overflow-x: auto; gap: 8px; margin: 0 -24px; padding: 2px 24px; scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); }
+  .filters::-webkit-scrollbar { display: none; }
+  .filters .fl { width: auto; flex: none; font-size: 9px; margin-right: 4px; }
+
+  /* The boxed Thinker / Fracture / Anchor panel at the top of an essay. */
+  .mx3[style*="border"] { padding: 4px 16px !important; }
+  .mx3[style*="border"] > div { padding-left: 0 !important; }
+  .mx3[style*="border"] > div:first-child { border-top: 0; }
+}

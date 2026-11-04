@@ -157,13 +157,18 @@ const current = Astro.url.pathname;
   }
   /* Phones: monogram, Sign in, and the menu button. */
   @media (max-width: 760px) {
-    .nav { height: 68px; padding: 0 16px 0 20px; }
+    .nav { height: 60px; padding: 0 14px 0 20px; }
     .nav-right { gap: 6px; }
     .join, .menu-word, .icon-link { display: none; }
     .burger { display: flex; }
-    .signin { height: 38px; padding: 0 15px; font-size: 10px; }
-    .member { height: 38px; padding: 0 13px 0 4px; font-size: 10px; gap: 8px; }
-    .member-av { width: 28px; height: 28px; }
+    .signin { height: 32px; padding: 0 13px; font-size: 9px; letter-spacing: .2em; }
+    .signin::after { left: 8px; right: 8px; }
+    .member { height: 32px; padding: 0 12px 0 3px; font-size: 9px; letter-spacing: .2em; gap: 7px; }
+    .member-av { width: 24px; height: 24px; font-size: 10px; }
+    .burger { width: 20px; gap: 5px; }
+    .burger span { height: 1.25px; }
+    .nav-home { width: 24px; height: 36px; }
+    .nav-home :global(svg) { width: 24px; height: 36px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .site-header { transition: none; }
