@@ -1,40 +1,14 @@
 ---
-// "Receive the Dispatches" newsletter sign-up, used at the foot of several pages.
-// data-netlify="true" means Netlify collects these sign-ups for you once the site is live
-// (you'll find them in Netlify under Forms).
-import Cross from './Cross.astro';
-import GlassLight from './GlassLight.astro';
-import GlassCard from './GlassCard.astro';
+// "Receive the Dispatches" newsletter sign-up, used at the foot of several pages, drawn as the doorway.
+// data-netlify="true" means Netlify collects these sign-ups for you (Netlify > Forms > "dispatches").
+import DoorwayFrame from './DoorwayFrame.astro';
 ---
-<section class="sec dark center" style="overflow:hidden">
-  <div class="glow" aria-hidden="true"></div>
-  <GlassLight size={360} intensity={0.7} style="left:50%;top:22%;translate:-50% 0" />
-  <GlassCard class="sub-card">
-  <div class="hin center sub-in">
-    <Cross width={27} color="#FFE3A3" />
-    <h2 class="h2" style="margin-top:26px">Receive the Dispatches</h2>
-    <p class="it mut" style="margin:20px 0 0;max-width:620px;font-size:23px;line-height:1.45">New essays from The Watchtower, work from The Hearth, and protocols from The Perimeter, delivered as a letter.</p>
-    <form class="subscribe" name="dispatches" method="POST" action="/thanks" data-netlify="true">
-      <input type="hidden" name="form-name" value="dispatches" />
-      <label for="sub-email" class="visually-hidden">Your email</label>
-      <input id="sub-email" class="field" type="email" name="email" placeholder="Your email" autocomplete="email" required />
-      <button class="btn" type="submit">Subscribe</button>
-    </form>
-  </div>
-  </GlassCard>
-</section>
-
-<style>
-  .glow {
-    position: absolute; left: 50%; top: 50%; width: 1000px; height: 1000px; transform: translate(-50%, -50%);
-    border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,140,.14), rgba(255,196,77,0)); pointer-events: none;
-  }
-  :global(.sub-card) { width: 100%; max-width: 760px; margin: 0 auto; }
-  .sub-in { padding: 56px 48px 50px; }
-  .subscribe { margin-top: 36px; display: flex; gap: 10px; width: 100%; max-width: 560px; }
-  .subscribe .field { flex: 1; min-width: 0; text-align: left; }
-  @media (max-width: 700px) {
-    .sub-in { padding: 40px 22px 30px; }
-    .subscribe { flex-direction: column; }
-  }
-</style>
+<DoorwayFrame kicker="The letter" title="Receive the Dispatches" image="/images/four-lancet-window-1200.jpg"
+  lead="New essays from The Watchtower, work from The Hearth, and protocols from The Perimeter, delivered as a letter.">
+  <form name="dispatches" method="POST" action="/thanks" data-netlify="true" class="dw-form">
+    <input type="hidden" name="form-name" value="dispatches" />
+    <label class="dw-field" for="sub-email"><span class="dw-label">Your email</span>
+      <span class="dw-line-row"><input id="sub-email" type="email" name="email" autocomplete="email" required />
+        <button class="dw-go" type="submit">Subscribe <span aria-hidden="true">→</span></button></span></label>
+  </form>
+</DoorwayFrame>
