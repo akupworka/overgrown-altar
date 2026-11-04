@@ -25,7 +25,7 @@ const { class: cls = '', style = '' } = Astro.props;
   /* 1. Halo: the colour ring, blurred into a glow just outside the card. */
   .gc-halo {
     position: absolute; inset: -6px; z-index: -1; border-radius: calc(var(--r) + 6px);
-    filter: blur(26px); opacity: .7; will-change: opacity;
+    filter: blur(30px); opacity: .5; will-change: opacity;
     animation: gc-breathe 7s ease-in-out infinite;
   }
   .gc-clip { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
@@ -38,7 +38,7 @@ const { class: cls = '', style = '' } = Astro.props;
     background: conic-gradient(from 0deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E);
     will-change: transform; animation: gc-turn 12s linear infinite;
   }
-  .gc-edge span { opacity: .95; }
+  .gc-edge span { opacity: .72; }
 
   /* 3. Pane: frosted glass. */
   .gc-pane {
@@ -64,7 +64,7 @@ const { class: cls = '', style = '' } = Astro.props;
   .gc-pane > :global(*) { position: relative; }
 
   @keyframes gc-turn { to { transform: rotate(360deg); } }
-  @keyframes gc-breathe { 0%, 100% { opacity: .55; } 50% { opacity: .8; } }
+  @keyframes gc-breathe { 0%, 100% { opacity: .4; } 50% { opacity: .6; } }
   @media (prefers-reduced-motion: reduce) {
     .gc-halo, .gc-clip span, .gc-edge span { animation: none; }
   }

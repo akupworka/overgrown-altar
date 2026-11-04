@@ -44,7 +44,7 @@ import GlassLight from '../components/GlassLight.astro';
     <img src="/images/folios-photo-2.jpg" srcset="/images/folios-photo-2-1200.jpg 1200w, /images/folios-photo-2.jpg 2576w" sizes="100vw" alt="A Gothic nave rising to three stained-glass windows"
       style="object-position:center 62%;filter:brightness(.6) saturate(.9)" fetchpriority="high" />
     <div class="veil"></div>
-    <GlassLight prism beams size={620} style="right:4%;top:-6%" />
+    <GlassLight prism beams size={620} intensity={0.85} style="right:4%;top:-6%" />
     <SiteNav />
     <div class="hero-c">
       <h1 class="visually-hidden">Overgrown Altar</h1>
@@ -188,7 +188,11 @@ import GlassLight from '../components/GlassLight.astro';
     display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 20px;
   }
   .hero-tag { margin: 30px 0 0; font-size: 32px; line-height: 1.2; }
-  @media (max-width: 700px) { .hero-tag { margin-top: 22px; font-size: 23px; } }
+  @media (max-width: 700px) {
+    .hero-tag { margin-top: 22px; font-size: 22px; max-width: 300px; }
+    .hero-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); gap: 12px; margin-top: 36px; }
+    .hero-cta .btn, .hero-cta .ghost { padding-top: 17px; padding-bottom: 17px; }
+  }
   .hero-cta { margin-top: 42px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
 
   /* What this is */
