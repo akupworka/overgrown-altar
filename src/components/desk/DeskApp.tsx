@@ -496,7 +496,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
               })}
             </div>
             <h2 className="d-step-h">What kind of piece?</h2>
-            {kinds.length === 1 ? <p className="d-medium-only"><span className="d-medium on">{kinds[0].label}</span><span className="it">{PILLARS.find((x) => x.value === form.pillar)?.label.split(' · ')[0]} takes {kinds[0].value === 'essay' ? 'essays and dispatches' : 'deliverance stories'}.</span></p> :
+            {kinds.length === 1 ? <p className="d-medium-only"><span className="d-medium on">{kinds[0].label}</span><span className="it">{PILLARS.find((x) => x.value === form.pillar)?.label.split(' · ')[0]} takes essays and dispatches.</span></p> :
             <div className="d-mediums" role="radiogroup" aria-label="Medium">
               {kinds.map((m) => (
                 <label key={m.value} className={`d-medium ${form.medium === m.value ? 'on' : ''}`}>
