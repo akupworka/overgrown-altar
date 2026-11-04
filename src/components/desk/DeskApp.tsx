@@ -147,7 +147,7 @@ function Desk({ session }: { session: Session }) {
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [queue, setQueue] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
-  const [tab, setTab] = useState<Tab>(startHash === '#write' ? 'write' : 'pieces');
+  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : 'pieces');
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
@@ -173,8 +173,12 @@ function Desk({ session }: { session: Session }) {
   // Writing gets its own place in the browser's history, so the phone's Back gesture returns to your pieces
   // (the sheet saves itself on the way out) instead of leaving the Desk.
   const leavingWrite = (t: Tab) => {
-    if (history.state?.desk === 'write') { after.current = t; history.back(); return true; }
-    if (location.hash === '#write') history.replaceState(null, '', location.pathname + location.search);
+    if (history.state?.desk === 'write') {
+      // Step back past every writing page (Write, Label it, Review) to the page underneath.
+      const depth = Math.max(0, ['#write', '#write-label', '#write-review'].indexOf(location.hash)) + 1;
+      after.current = t; history.go(-depth); return true;
+    }
+    if (location.hash.startsWith('#write')) history.replaceState(null, '', location.pathname + location.search);
     return false;
   };
   const go = (t: Tab) => {
@@ -188,14 +192,14 @@ function Desk({ session }: { session: Session }) {
   };
   // Arrived straight at the sheet: put "my pieces" underneath it, so Back lands there.
   useEffect(() => {
-    if (startHash === '#write' && history.state?.desk !== 'write') {
+    if (startHash.startsWith('#write') && history.state?.desk !== 'write') {
       history.replaceState(null, '', location.pathname + location.search);
       history.pushState({ desk: 'write' }, '', '#write');
     }
   }, []);
   useEffect(() => {
     const onPop = () => {
-      if (location.hash === '#write') { if (tabNow.current !== 'write') setEditing(null); setTab('write'); return; }
+      if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') setEditing(null); setTab('write'); return; }
       setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
@@ -424,6 +428,119 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     if (p) onDone();
   }
 
+  // ---- Phones: three pages, one thing at a time. 1 Write · 2 Label it · 3 Review & publish.
+  // Each page has its own place in the browser history, so the Back gesture steps back a page.
+  const STEP_HASH = ['#write', '#write-label', '#write-review'];
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const onPop = () => { const i = STEP_HASH.indexOf(location.hash); if (i >= 0) { setStep(i); window.scrollTo({ top: 0 }); } };
+    addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
+  }, []);
+  const toStep = (i: number) => {
+    if (i > step) { history.pushState({ desk: 'write' }, '', STEP_HASH[i]); setStep(i); window.scrollTo({ top: 0 }); if (state === 'idle') save('draft'); }
+    else if (history.state?.desk === 'write' && location.hash === STEP_HASH[step] && step > 0) history.go(i - step);
+    else { setStep(i); window.scrollTo({ top: 0 }); }
+  };
+  const saved = state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved' : '';
+  const note = piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
+
+  const paper = (
+    <article className="d-paper">
+      <label className="visually-hidden" htmlFor="d-title">Title</label>
+      <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
+        onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
+      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
+      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+      <div className="d-paper-tools" role="toolbar" aria-label="Formatting">
+        {TOOLS.map((t) => <button key={t.label} type="button" title={t.hint} onClick={() => tool(t)}>{t.label}</button>)}
+      </div>
+      <textarea ref={bodyRef} className="d-paper-body" aria-label="The piece" value={form.body} onChange={(e) => set('body', e.target.value)}
+        placeholder={'Begin here. Leave a blank line between paragraphs.'} />
+      <span className="d-paper-count">{words(form.body)} words</span>
+    </article>
+  );
+  const photo = (
+    <label className="d-photo-frame">
+      {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
+      <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+    </label>
+  );
+
+  if (phone) {
+    const titles = ['Write', 'Label it', 'Review'];
+    const pillar = PILLARS.find((x) => x.value === form.pillar);
+    const firstPara = form.body.split(/\n\s*\n/).find((x) => x.trim() && !/^[#>+]/.test(x.trim())) ?? '';
+    return (
+      <section className={`d-write d-steps step-${step}`}>
+        <div className="d-write-bar">
+          <button type="button" className="d-link d-close" onClick={() => (step === 0 ? onDone() : toStep(step - 1))} aria-label={step === 0 ? 'Back to my pieces' : `Back to ${titles[step - 1]}`}><span aria-hidden="true">←</span></button>
+          <span className="d-step-title"><span className="d-step-n lab">{step + 1} of 3</span><span className="d-step-name">{titles[step]}</span></span>
+          <span className="lab mut d-state" role="status" aria-live="polite">{saved}</span>
+          {step < 2
+            ? <button type="button" className="btn d-btn d-next" onClick={() => toStep(step + 1)}>Next</button>
+            : <button type="button" className="btn d-btn d-next" onClick={submit} disabled={state === 'saving'}>{isEditor ? 'Publish' : 'Send'}</button>}
+          <span className="d-progress" aria-hidden="true"><i className="on" /><i className={step >= 1 ? 'on' : ''} /><i className={step >= 2 ? 'on' : ''} /></span>
+        </div>
+        <p className="it d-notice" role="alert">{msg}</p>
+
+        {step === 0 && <>{note}{paper}</>}
+
+        {step === 1 && (
+          <div className="d-step">
+            <h2 className="d-step-h">Where does it belong?</h2>
+            <div className="d-pillars" role="radiogroup" aria-label="Pillar">
+              {PILLARS.map((x) => {
+                const [name, sub] = x.label.split(' · ');
+                return (
+                  <label key={x.value} className={`d-pillar ${form.pillar === x.value ? 'on' : ''}`}>
+                    <input type="radio" name="pillar" value={x.value} checked={form.pillar === x.value} onChange={() => set('pillar', x.value)} />
+                    <span className="d-pillar-name">{name}</span><span className="d-pillar-sub">{sub}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <h2 className="d-step-h">What kind of piece?</h2>
+            <div className="d-mediums" role="radiogroup" aria-label="Medium">
+              {MEDIUMS.map((m) => (
+                <label key={m.value} className={`d-medium ${form.medium === m.value ? 'on' : ''}`}>
+                  <input type="radio" name="medium" value={m.value} checked={form.medium === m.value} onChange={() => set('medium', m.value)} />{m.label}
+                </label>
+              ))}
+            </div>
+            <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
+            {photo}
+            <span className="d-hint">JPG, PNG or WebP, under 4 MB</span>
+            {form.image_path && (
+              <label className="d-lbl"><span className="lab">Describe the photograph</span>
+                <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
+              </label>
+            )}
+            <button type="button" className="btn d-btn d-step-go" onClick={() => toStep(2)}>Next: review</button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="d-step">
+            <h2 className="d-step-h">How it will look</h2>
+            <article className="d-preview">
+              {preview && <img src={preview} alt="" className="d-preview-img" />}
+              <span className="lab d-preview-k">{pillar?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === form.medium)?.label}</span>
+              <h3 className="d-preview-t">{form.title || 'Untitled'}</h3>
+              {form.standfirst && <p className="d-preview-s">{form.standfirst}</p>}
+              {firstPara && <p className="d-preview-p">{firstPara.length > 220 ? firstPara.slice(0, 220).trim() + '…' : firstPara}</p>}
+              <span className="lab mut">{words(form.body)} words</span>
+            </article>
+            <button type="button" className="d-textbtn d-edit" onClick={() => toStep(0)}>Edit the writing</button>
+            <button type="button" className="d-textbtn d-edit" onClick={() => toStep(1)}>Change the labels or photograph</button>
+            <p className="d-step-note it">{isEditor ? 'Publishing puts it on the site straight away.' : 'The editor reads every piece before it goes on the site. You can withdraw it to keep editing.'}</p>
+            <button type="button" className="btn d-btn d-step-go" onClick={submit} disabled={state === 'saving'}>{isEditor ? 'Publish to the site' : 'Send to the editor'}</button>
+            <button type="button" className="d-textbtn d-later" onClick={async () => { if (await save('draft')) onDone(); }}>Save as a draft and finish later</button>
+          </div>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section className="d-write">
       <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
@@ -437,26 +554,13 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">{isEditor ? 'Publish' : 'Send to the editor'}</span><span className="d-short">{isEditor ? 'Publish' : 'Send →'}</span></button>
         </div>
       </div>
-      {piece?.status === 'returned' && piece.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p>}
+      {note}
       <p className="it d-notice" role="alert">{msg}</p>
 
       <div className="d-write-grid">
-        <article className="d-paper">
-          <label className="visually-hidden" htmlFor="d-title">Title</label>
-          <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
-            onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
-          <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
-          <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
-          <div className="d-paper-tools" role="toolbar" aria-label="Formatting">
-            {TOOLS.map((t) => <button key={t.label} type="button" title={t.hint} onClick={() => tool(t)}>{t.label}</button>)}
-          </div>
-          <textarea ref={bodyRef} className="d-paper-body" aria-label="The piece" value={form.body} onChange={(e) => set('body', e.target.value)}
-            placeholder={'Begin here. Leave a blank line between paragraphs.'} />
-          <span className="d-paper-count">{words(form.body)} words</span>
-        </article>
-
-        <details className="d-details" open={!phone} key={phone ? 'p' : 'd'}>
-          <summary><h2 className="eb">Details</h2><span className="lab mut d-details-sum">{PILLARS.find((p) => p.value === form.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === form.medium)?.label}</span></summary>
+        {paper}
+        <details className="d-details" open>
+          <summary><h2 className="eb">Details</h2></summary>
           <div className="d-details-in">
           <label className="d-lbl"><span className="lab">Pillar</span>
             <select className="field" value={form.pillar} onChange={(e) => set('pillar', e.target.value)}>
@@ -470,10 +574,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           </label>
           <div className="d-lbl">
             <span className="lab">Featured photograph</span>
-            <label className="d-photo-frame">
-              {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
-              <input type="file" className="visually-hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
-            </label>
+            {photo}
             <span className="d-hint">JPG, PNG or WebP, under 4 MB</span>
           </div>
           <label className="d-lbl"><span className="lab">Describe the photograph</span>

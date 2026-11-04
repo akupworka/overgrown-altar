@@ -482,3 +482,51 @@
   .d-room.writing .d-paper-tools button { font-size: 9px; }
   .desk-in:has(.d-room.writing) { padding-top: 64px; padding-bottom: 60px; }
 }
+
+/* ---- Phones: writing in three pages (Write · Label it · Review) ---- */
+@media (max-width: 700px) {
+  .d-steps .d-write-bar { gap: 8px !important; padding-right: 10px !important; }
+  .d-step-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+  .d-step-n { font-size: 8px; color: #8C8679; letter-spacing: .22em; }
+  .d-step-name { font-family: var(--serif); font-size: 19px; color: var(--bone); }
+  .d-steps .d-state { flex: none !important; font-size: 8px !important; }
+  .d-next { padding: 9px 16px !important; font-size: 9.5px !important; border-radius: 999px; flex: none; }
+  .d-progress { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; height: 2px; }
+  .d-progress i { background: rgba(243, 236, 220, .1); transition: background .5s; }
+  .d-progress i.on { background: linear-gradient(90deg, #3E7BFF, #B05BFF 35%, #FF3B4E 60%, #FFC44D 80%, #3DE0A0); opacity: .75; }
+  .d-progress i + i.on { background: linear-gradient(90deg, #FFC44D, #3DE0A0); }
+  .d-steps .d-notice:empty { display: none; }
+
+  .d-step { display: flex; flex-direction: column; gap: 12px; padding: 6px 4px 30px; }
+  .d-step-h { margin: 18px 0 2px; font-family: var(--serif); font-weight: 500; font-size: 24px; line-height: 1.15; color: var(--bone); }
+  .d-step-h:first-child { margin-top: 4px; }
+  .d-opt { font-family: var(--sans); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: #8C8679; margin-left: 6px; }
+  .d-pillars { display: flex; flex-direction: column; gap: 8px; }
+  .d-pillar, .d-medium { position: relative; cursor: pointer; transition: box-shadow .3s, color .3s, background-color .3s; }
+  .d-pillar input, .d-medium input { position: absolute; opacity: 0; pointer-events: none; }
+  .d-pillar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); }
+  .d-pillar-name { font-family: var(--serif); font-size: 20px; color: var(--bone); }
+  .d-pillar-sub { font-family: var(--serif); font-style: italic; font-size: 14px; color: #8C8679; text-align: right; }
+  .d-pillar.on { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .75); background: rgba(255, 227, 163, .05); }
+  .d-pillar.on .d-pillar-name { color: var(--ember); }
+  .d-mediums { display: flex; flex-wrap: wrap; gap: 8px; }
+  .d-medium { padding: 8px 14px; border-radius: 999px; font-family: var(--sans); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .18); }
+  .d-medium.on { color: #12160F; background: var(--bone); box-shadow: none; }
+  .d-pillar:has(input:focus-visible), .d-medium:has(input:focus-visible) { outline: 2px solid var(--ember); outline-offset: 2px; }
+  .d-step .d-photo-frame { aspect-ratio: 4 / 3; border-radius: 12px; }
+  .d-step-go { margin-top: 22px; width: 100%; padding: 15px 20px !important; border-radius: 999px; }
+
+  .d-preview { display: flex; flex-direction: column; gap: 10px; padding: 0 0 18px; border-bottom: 1px solid rgba(243, 236, 220, .1); }
+  .d-preview-img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; margin-bottom: 6px; }
+  .d-preview-k { font-size: 9px; color: var(--ember); }
+  .d-preview-t { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.08; color: var(--bone); }
+  .d-preview-s { margin: 0; font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1.45; color: var(--muted-dark); }
+  .d-preview-p { margin: 4px 0 0; font-family: var(--serif); font-size: 17px; line-height: 1.6; color: rgba(243, 236, 220, .8); }
+  .d-edit { align-self: flex-start; font-size: 10px; padding: 8px 0; }
+  .d-step-note { margin: 16px 0 0; font-size: 16px; color: #8C8679; }
+  .d-step .d-step-go + .d-later { align-self: center; margin-top: 6px; font-size: 10px; }
+  .d-step-0 .d-paper-tools, .step-0 .d-paper-tools { top: calc(52px + env(safe-area-inset-top)); }
+}
+@media (max-width: 700px) { .d-step .d-textbtn { font-family: var(--sans); letter-spacing: .2em; text-transform: uppercase; } }
