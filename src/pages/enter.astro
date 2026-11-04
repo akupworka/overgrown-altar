@@ -1,27 +1,27 @@
 ---
-// The sign-in screen for the private page. The real check happens on Netlify's servers
-// (netlify/edge-functions/private-gate.ts); this page only collects the password.
+// The password screen every visitor sees while the site is being finished.
+// The real check happens on Netlify's servers (netlify/edge-functions/site-gate.ts);
+// this page only collects the password.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SiteNav from '../components/SiteNav.astro';
 import Monogram from '../components/Monogram.astro';
 import GlassLight from '../components/GlassLight.astro';
 import GlassCard from '../components/GlassCard.astro';
 ---
-<BaseLayout title="Private" description="A private room of Overgrown Altar." footer={false} noindex>
+<BaseLayout title="Opening soon" description="Overgrown Altar opens soon." footer={false} noindex>
   <section class="hero gate">
     <img src="/images/window-light-on-wall.jpg" srcset="/images/window-light-on-wall-1200.jpg 1200w, /images/window-light-on-wall.jpg 1326w" sizes="100vw"
       alt="" style="object-position:center 45%;filter:brightness(.38) saturate(1.05)" fetchpriority="high" />
     <div class="veil"></div>
     <GlassLight prism size={640} intensity={0.8} style="left:50%;top:-10%;translate:-50% 0" />
-    <SiteNav />
     <div class="gate-in">
       <GlassCard class="gate-card">
         <div class="card">
           <div class="mark"><Monogram size={50} color="#F3ECDC" /></div>
-          <span class="eb">A private room</span>
-          <h1 class="h1 title">Enter the password</h1>
-          <p class="it mut lead">This page is kept for those who have been given the word.</p>
-          <form class="gate-form" method="POST" action="/private/unlock">
+          <span class="eb kicker"><span>Overgrown Altar</span><span class="dot"> · </span><span>Opening soon</span></span>
+          <h1 class="h1 title">The doors are not yet open</h1>
+          <p class="it mut lead">The journal is being finished. If you have been given the word, enter it below.</p>
+          <form class="gate-form" method="POST" action="/unlock">
+            <input type="hidden" name="next" value="/" />
             <label class="lab" for="pw">Password</label>
             <input id="pw" class="field" type="password" name="password" autocomplete="current-password" required autofocus />
             <button class="btn" type="submit">Enter</button>
@@ -29,7 +29,7 @@ import GlassCard from '../components/GlassCard.astro';
           </form>
         </div>
       </GlassCard>
-      <a class="lab back" href="/">← Return to the journal</a>
+      <span class="lab back">Est. MMXXVI · overgrownaltar.com</span>
     </div>
   </section>
 </BaseLayout>
@@ -39,26 +39,31 @@ import GlassCard from '../components/GlassCard.astro';
   const reason = new URLSearchParams(location.search).get('error');
   const notice = document.querySelector<HTMLElement>('.notice')!;
   if (reason === 'wrong') notice.textContent = 'That is not the word. Please try again.';
-  if (reason === 'closed') notice.textContent = 'This room is closed for now.';
+  if (reason === 'closed') notice.textContent = 'The doors are closed for now.';
+  // After entering, take the visitor to the page they were trying to reach.
+  const next = new URLSearchParams(location.search).get('next');
+  if (next && next.startsWith('/') && !next.startsWith('//')) document.querySelector<HTMLInputElement>('input[name=next]')!.value = next;
 </script>
 
 <style>
   .gate { min-height: 100vh; min-height: 100svh; display: flex; }
-  .gate-in { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 130px 20px 60px; }
+  .gate-in { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 60px 20px; }
   .gate-in :global(.gate-card) { width: 100%; max-width: 460px; }
   .card { padding: 44px 40px 36px; display: flex; flex-direction: column; align-items: center; text-align: center; }
   .mark { width: 34px; height: 50px; margin-bottom: 20px; }
-  .title { margin-top: 12px; font-size: 44px; }
+  .title { margin-top: 12px; font-size: 40px; }
   .lead { margin: 14px 0 0; font-size: 19px; line-height: 1.45; }
   .gate-form { width: 100%; margin-top: 28px; display: flex; flex-direction: column; text-align: left; }
   .gate-form .lab { color: var(--muted-dark); margin-bottom: 8px; }
   .gate-form .field { width: 100%; font-size: 19px; padding: 15px 18px; margin-bottom: 16px; }
   .gate-form .btn { width: 100%; padding: 18px; }
+  .kicker span { white-space: nowrap; }
   .notice { min-height: 1.4em; margin: 14px 0 0; font-size: 18px; color: var(--ember); text-align: center; }
   .back { color: var(--muted-dark); }
-  .back:hover { color: var(--ember); }
   @media (max-width: 700px) {
     .card { padding: 34px 22px 28px; }
     .title { font-size: 34px !important; }
+    .kicker { display: flex; flex-direction: column; gap: 6px; }
+    .kicker .dot { display: none; }
   }
 </style>

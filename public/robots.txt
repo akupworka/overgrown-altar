@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /
+# The site is being finished. When it opens, change this to "Allow: /".
