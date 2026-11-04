@@ -19,6 +19,11 @@ Start by reading this file, then `README.md`.
 
 ## Branches
 
+NOTE (latest): Guild writing and publishing now live in **Supabase**, not Sanity. The `sanity` branch was
+last merged before Guild Desk part 2 and now conflicts in index/watchtower/hearth/perimeter; it is likely
+obsolete. The Sanity Studio is still live at /studio on `main` (unused for now).
+
+
 - `main`: live. Pages still show the design's sample content (hard-coded); every dispatch link
   opens the one written essay (`/watchtower/nietzsche-surrendered`).
 - `sanity`: the same site, but every list and article page reads from Sanity
