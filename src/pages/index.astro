@@ -5,7 +5,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Wordmark from '../components/Wordmark.astro';
-import Cross from '../components/Cross.astro';
 import Subscribe from '../components/Subscribe.astro';
 
 // The content lives in lists like these for now.
@@ -20,40 +19,19 @@ const articles = [
 const pillars = [
   { href: '/watchtower', img: '/images/duomo-spires.jpg', pos: 'center 30%', mono: true, kicker: '01 · Prophetic Audits', name: 'The Watchtower', text: 'Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and Leviathan structures in art and philosophy.' },
   { href: '/hearth', img: '/images/window-of-the-ascension-and.jpg', pos: 'center 45%', mono: false, kicker: '02 · Creative Guild', name: 'The Hearth', text: 'An Inklings-style fellowship space hosting dark atmospheric monochrome photography, original prose, architectural studies, design teardowns, and fiction.' },
-  { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Deliverance Protocols', name: 'The Perimeter', text: 'Actionable recovery manuals for legal audits, breaking soul ties, untangling mental strongholds, and establishing firm personal and spiritual boundaries.' },
+  { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Testimony & the Unseen', name: 'The Perimeter', text: 'Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world, told honestly and anchored in Christ.' },
 ];
 
-const matrix = [
-  { title: 'Nietzsche Surrendered: The Übermensch at the Foot of the Cross', thinker: 'Nietzsche’s Will to Power', fracture: 'Self-Exaltation & Madness', anchor: 'Surrender & Divine Authority' },
-  { title: 'Jung vs. Tolkien: The Counterfeit Unconscious vs. Myth Realized', thinker: 'Jung’s Archetypal Psyche', fracture: 'God as a Mind-Projection', anchor: 'The True Myth Made Flesh' },
-  { title: 'Newtonian Determinism: The Missing Anchor', thinker: 'Newtonian Mechanics', fracture: 'Closed, Sterile Materialism', anchor: 'Colossians 1:17 Coherence' },
-  { title: 'The Resurrection as the Primary Quantum Law', thinker: 'Quantum Paradox & Entropy', fracture: 'Absurd, Random Matter', anchor: 'Resurrection Re-encryption' },
-];
 
-const formats = [
-  { href: '/watchtower', img: '/images/format-dispatches.jpg', mono: false, name: 'Dispatches', text: 'Long-form dispatches' },
-  { href: '/folios', img: '/images/format-folios.jpg', mono: true, name: 'Folios', text: 'Archival print issues' },
-  { href: '/guild', img: '/images/format-guild.jpg', mono: false, name: 'The Guild', text: 'A structured round-table guild for creative believers' },
-];
 import GlassLight from '../components/GlassLight.astro';
-import DispatchList, { type DispatchItem } from '../components/DispatchList.astro';
-import { authorUrl, getGuildPieces, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes } from '../lib/guild';
+import DispatchList from '../components/DispatchList.astro';
 
-// The Editorial Matrix: newest first. Pieces you approve at the Guild Desk arrive at the top;
-// the four foundational dispatches follow (each with its thinker → anchor line).
-const foundationImages = ['format-dispatches', 'window-of-the-ascension-and', 'folios-photo-2', 'folios-photo'];
-const foundationDates = ['2026-09-22', '2026-09-29', '2026-10-06', '2026-10-13'];
-const foundations: DispatchItem[] = matrix.map((m, i) => ({
-  href: '/watchtower/nietzsche-surrendered', title: m.title, kicker: `Dispatch ${i + 1} · ${m.thinker} → ${m.anchor}`,
-  date: foundationDates[i], author: { name: 'Ainslie Willson' }, image: `/images/${foundationImages[i]}-1200.jpg`,
-}));
-const approved: DispatchItem[] = (await getGuildPieces()).map((g) => ({
-  href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
-  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
-  author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id }, image: g.image || '/images/tall-windows-dark-vault-1200.jpg',
-}));
-const matrixFeed = (await getCatalog()).slice(0, 6);
-import { getCatalog } from '../lib/catalog';
+// The homepage shows writing from The Watchtower only: its four newest pieces, Guild and foundational alike.
+const watchtowerFeed = (await inPillar('watchtower')).slice(0, 4);
+// The Guild's writers, as arches (those with published work).
+const writers = (await getAuthors()).slice(0, 6).map(({ author }) => author);
+import { inPillar } from '../lib/catalog';
+import { getAuthors } from '../lib/guild';
 ---
 <BaseLayout>
 
@@ -68,7 +46,7 @@ import { getCatalog } from '../lib/catalog';
       <h1 class="visually-hidden">Overgrown Altar</h1>
       <Wordmark width={760} mobileWidth={330} />
       <p class="it hero-tag">Craft, Discernment &amp; The Reclaimed Hearth.</p>
-      <span class="lab mut" style="margin-top:16px">An independent journal · Est. MMXXVI</span>
+      <p class="hero-what">An independent journal, creative sanctuary and deliverance guild.</p>
       <div class="hero-cta">
         <a class="btn" href="/watchtower">Read the Dispatches</a>
         <a class="ghost" href="/start-here">Start Here</a>
@@ -76,55 +54,19 @@ import { getCatalog } from '../lib/catalog';
     </div>
   </section>
 
-  <!-- 2. What this is -->
-  <section class="sec paper center">
-    <span class="eb">What this is</span>
-    <p class="lede" style="margin-top:34px;max-width:1040px">Overgrown Altar is an independent digital journal, creative sanctuary, and deliverance guild designed to dismantle secular cynicism through the lens of aesthetic excellence, spiritual discernment, and unarmored truth.</p>
-    <p class="it mut what-sub">It stands as a modern, high-craft alternative to the detached, ironical posturing of secular subculture platforms and the low-craft sentimentality of mainstream religious media.</p>
-    <div class="cross-rule">
-      <span></span><Cross width={18} color="#9F945E" /><span></span>
-    </div>
-  </section>
-
-  <!-- 3. The Launch Manifesto: four articles -->
-  <section class="sec dark" style="overflow:hidden">
-    <div class="side">
-      <div class="manifesto-side">
-        <span class="eb">The Launch Manifesto</span>
-        <h2 class="h2 manifesto-h">Four articles of the altar</h2>
-        <div class="arch hide-m" style="width:300px;height:430px;margin-top:16px">
-          <img src="/images/four-lancet-window.jpg" srcset="/images/four-lancet-window-1200.jpg 1200w, /images/four-lancet-window.jpg 1563w" sizes="(max-width: 700px) 100vw, 50vw" alt="Four-lancet window" style="object-position:center 55%" loading="lazy" />
-        </div>
-        <p class="it mut" style="margin:0;max-width:300px;font-size:18px;line-height:1.45">And if thou make an altar of stone unto me, thou shalt not build it of hewn stones; for if thou lift up a tool upon it, it shall be defiled.</p>
-        <span class="eb" style="font-size:11px">Exodus xx · xxv</span>
+  <!-- 2. From The Watchtower: the newest pieces, straight after the hero -->
+  <section class="sec dark matrix-sec">
+    <div class="row" style="padding-bottom:28px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span class="eb">The newest from The Watchtower</span>
+        <h2 class="h2">Dispatches</h2>
       </div>
-      <div class="g2" style="column-gap:64px;row-gap:0">
-        {articles.map((a) => (
-          <div class="rule article">
-            <div class="article-head">
-              <span class="num" style="font-size:60px">{a.n}</span>
-              <h3 class="h3">{a.title}</h3>
-            </div>
-            <p class="body" style="color:var(--body-dark)">{a.text}</p>
-          </div>
-        ))}
-      </div>
+      <a class="lab mut matrix-all" href="/watchtower">All dispatches →</a>
     </div>
-    <div style="margin-top:30px"><a class="ghost" href="/manifesto">Read the full manifesto</a></div>
+    <DispatchList items={watchtowerFeed} tone="dark" />
   </section>
 
-  <!-- 4. The Core Thesis: photo with text on the left -->
-  <section class="hero thesis">
-    <img src="/images/labyrinth-stained-light.jpg" srcset="/images/labyrinth-stained-light-1200.jpg 1200w, /images/labyrinth-stained-light.jpg 2000w" sizes="100vw" alt="Stained-glass light falling across a stone labyrinth in a dark cathedral" style="object-position:60% 60%;filter:brightness(.85)" loading="lazy" />
-    <div class="veil-l"></div>
-    <div class="hin sec thesis-in">
-      <span class="eb">The Core Thesis</span>
-      <p class="big-it">Broken pieces of a mirror that Christ holds whole.</p>
-      <p class="body" style="font-size:24px;color:#E6DFD0">The great secular minds each held a piece of the truth. Overgrown Altar exposes where their insights fractured for lack of a divine keystone, and anchors them back in the resurrection of Christ: in essays and dispatches, photographs and prose, fiction, architecture and every craft the guild brings to the table.</p>
-    </div>
-  </section>
-
-  <!-- 5. The Three Core Pillars -->
+  <!-- 3. The Three Core Pillars -->
   <section class="sec paper">
     <div class="row pillars-head">
       <div style="display:flex;flex-direction:column;gap:16px">
@@ -148,36 +90,55 @@ import { getCatalog } from '../lib/catalog';
     </div>
   </section>
 
-  <!-- 6. The Editorial Matrix -->
-  <section class="sec dark matrix-sec">
-    <div class="row" style="padding-bottom:28px">
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <span class="eb">The newest from the altar</span>
-        <h2 class="h2">The Editorial Matrix</h2>
-      </div>
-      <a class="lab mut matrix-all" href="/watchtower">All dispatches →</a>
+  <!-- 4. The Core Thesis: photo with text on the left -->
+  <section class="hero thesis">
+    <img src="/images/labyrinth-stained-light.jpg" srcset="/images/labyrinth-stained-light-1200.jpg 1200w, /images/labyrinth-stained-light.jpg 2000w" sizes="100vw" alt="Stained-glass light falling across a stone labyrinth in a dark cathedral" style="object-position:60% 60%;filter:brightness(.85)" loading="lazy" />
+    <div class="veil-l"></div>
+    <div class="hin sec thesis-in">
+      <span class="eb">The Core Thesis</span>
+      <p class="big-it">Broken pieces of a mirror that Christ holds whole.</p>
+      <p class="body" style="font-size:24px;color:#E6DFD0">The great secular minds each held a piece of the truth. Overgrown Altar exposes where their insights fractured for lack of a divine keystone, and anchors them back in the resurrection of Christ.</p>
     </div>
-    <DispatchList items={matrixFeed} tone="dark" />
   </section>
 
-  <!-- 7. The Format -->
-  <section class="sec paper center">
-    <span class="eb">The Format</span>
-    <h2 class="h2" style="margin-top:16px">A publication, not a feed.</h2>
-    <div class="g3" style="margin-top:64px;width:100%">
-      {formats.map((f) => (
-        <a href={f.href} class="center" style="gap:16px">
-          <div class="arch format-arch">
-            <img src={f.img.replace('.jpg', '-1200.jpg')} alt="" class={f.mono ? 'mono' : undefined} loading="lazy" />
-          </div>
-          <span class="cg format-name">{f.name}</span>
-          <span class="it mut" style="font-size:21px;line-height:1.4;max-width:300px">{f.text}</span>
-        </a>
+  <!-- 5. The Manifesto, in brief: four articles, one line each -->
+  <section class="sec dark mani">
+    <div class="mani-head">
+      <span class="eb">The Launch Manifesto</span>
+      <h2 class="h2">Four articles of the altar</h2>
+    </div>
+    <ol class="mani-list">
+      {articles.map((a) => (
+        <li><span class="num">{a.n}</span><span class="mani-t">{a.title}</span><span class="it mani-s">{a.text.split('. ')[0]}.</span></li>
       ))}
+    </ol>
+    <a class="ghost mani-go" href="/manifesto">Read the full manifesto</a>
+  </section>
+
+  <!-- 6. The Guild: its writers, and an open chair -->
+  <section class="sec paper center guild-sec">
+    <span class="eb">The Inklings’ Table</span>
+    <h2 class="h2" style="margin-top:16px">Pull up a chair.</h2>
+    <p class="it mut guild-lead">A guild of writers, photographers and makers who write, sharpen and discern together. Everything here passes through their hands, and the editor’s.</p>
+    {writers.length > 0 && (
+      <div class="writers">
+        {writers.map((w) => (
+          <a class="writer" href={`/guild/authors/${w.slug}/`}>
+            <span class="writer-arch" data-author-id={w.id}>{w.portrait ? <img src={w.portrait} alt="" loading="lazy" /> : <span>{w.display_name.split(/\s+/).slice(0, 2).map((x) => x[0]).join('')}</span>}</span>
+            <span class="writer-name">{w.display_name}</span>
+            {w.craft && <span class="lab mut writer-craft">{w.craft}</span>}
+          </a>
+        ))}
+      </div>
+    )}
+    <div class="guild-cta">
+      <a class="btn" href="/guild" data-guest>Join the Guild</a>
+      <a class="btn" href="/guild/desk/#write" data-member hidden>Write a piece</a>
+      <a class="ghost" href="/hearth">Visit The Hearth</a>
     </div>
   </section>
 
-  <!-- 8. Receive the Dispatches (newsletter sign-up) -->
+  <!-- 7. Receive the Dispatches (newsletter sign-up) -->
   <Subscribe />
 
 </BaseLayout>
@@ -197,16 +158,34 @@ import { getCatalog } from '../lib/catalog';
   }
   .hero-cta { margin-top: 42px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
 
-  /* What this is */
-  .what-sub { margin: 34px 0 0; max-width: 760px; font-size: 25px; line-height: 1.45; }
-  .cross-rule { margin-top: 56px; display: flex; align-items: center; gap: 18px; justify-content: center; }
-  .cross-rule span { width: 80px; height: 1px; background: var(--brass); }
+  .hero-what { margin: 14px 0 0; max-width: 520px; font-family: var(--sans); font-size: 11px; letter-spacing: .24em; line-height: 1.8; text-transform: uppercase; color: #CFC8B8; }
 
-  /* Manifesto */
-  .manifesto-side { display: flex; flex-direction: column; gap: 24px; }
-  .manifesto-h { font-size: 72px; }
-  .article { padding: 38px 0; display: flex; flex-direction: column; gap: 16px; }
-  .article-head { display: flex; align-items: baseline; gap: 20px; }
+  /* The Manifesto, in brief */
+  .mani { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .mani-head { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+  .mani-list { list-style: none; margin: 48px 0 0; padding: 0; width: 100%; max-width: 1100px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+  .mani-list li { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 26px; }
+  .mani-list li + li { border-left: 1px solid rgba(243, 236, 220, .14); }
+  .mani-list .num { font-size: 44px; line-height: 1; }
+  .mani-t { font-family: var(--serif); font-style: italic; font-size: 24px; line-height: 1.2; }
+  .mani-s { font-size: 17px; line-height: 1.5; color: var(--muted-dark); }
+  .mani-go { margin-top: 48px; }
+
+  /* The Guild */
+  .guild-lead { margin: 22px 0 0; max-width: 640px; font-size: 22px; line-height: 1.45; }
+  .writers { margin-top: 52px; display: flex; flex-wrap: wrap; justify-content: center; gap: 36px 44px; }
+  .writer { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 150px; }
+  .writer-arch { width: 120px; height: 158px; border-radius: 999px 999px 0 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    background: #E3DCCD; color: var(--oxblood); font-family: var(--serif); font-size: 36px;
+    box-shadow: 0 0 0 1px var(--brass), 0 0 0 6px var(--paper), 0 0 0 7px rgba(159, 148, 94, .4); transition: box-shadow .4s; }
+  .writer-arch:has(img) { background: #E9E2D4; }
+  .writer-arch :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease, ease); }
+  .writer:hover .writer-arch :global(img) { transform: scale(1.05); }
+  .writer-name { margin-top: 12px; font-family: var(--serif); font-size: 22px; line-height: 1.15; text-align: center; }
+  .writer:hover .writer-name { color: var(--oxblood); }
+  .writer-craft { font-size: 9px; text-align: center; }
+  .guild-cta { margin-top: 52px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+  .guild-cta [hidden] { display: none; }
 
   /* Thesis */
   .thesis { min-height: 760px; display: flex; align-items: center; }
@@ -220,16 +199,26 @@ import { getCatalog } from '../lib/catalog';
   .pillar-link { margin-top: 20px; align-self: flex-start; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
   .pillar:hover .pillar-link { color: var(--oxblood); border-color: var(--oxblood); }
 
-  /* Editorial matrix (the .mx and .mx3 rows are styled in global.css) */
-  .mx:hover .h3 { color: var(--ember); }
   .matrix-sec { max-width: 1440px; }
   .matrix-sec > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
   .matrix-all { border-bottom: 1px solid rgba(207,200,184,.35); padding-bottom: 3px; }
   .matrix-all:hover { color: var(--ember); border-color: var(--ember); }
-  .mx3-head { width: 520px; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #A9A294; }
 
-  /* Format */
-  .format-arch { width: 180px; height: 240px; box-shadow: 0 0 0 1px var(--brass), 0 0 0 8px var(--paper), 0 0 0 9px rgba(159,148,94,.5); }
-  .format-name { margin-top: 10px; font-size: 34px; letter-spacing: .06em; text-transform: uppercase; }
-
+  @media (max-width: 700px) {
+    .hero-what { font-size: 10px; letter-spacing: .18em; max-width: 300px; }
+    .mani-list { grid-template-columns: minmax(0, 1fr); margin-top: 30px; }
+    .mani-list li { padding: 22px 0; }
+    .mani-list li + li { border-left: 0; border-top: 1px solid rgba(243, 236, 220, .12); }
+    .mani-list .num { font-size: 34px !important; }
+    .mani-t { font-size: 22px; }
+    .mani-s { font-size: 16px; }
+    .mani-go { margin-top: 30px; }
+    .guild-lead { font-size: 18px; }
+    .writers { margin-top: 36px; gap: 28px 16px; }
+    .writer { width: 140px; }
+    .writer-arch { width: 104px; height: 136px; font-size: 30px; }
+    .writer-name { font-size: 19px; }
+    .guild-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); margin-left: auto; margin-right: auto; margin-top: 40px; }
+    .guild-cta .btn, .guild-cta .ghost { text-align: center; }
+  }
 </style>

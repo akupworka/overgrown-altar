@@ -9,6 +9,7 @@ export interface DispatchItem {
   date: string;              // ISO date, e.g. "2026-11-03"
   author: { name: string; portrait?: string; href?: string; id?: string };
   image?: string; imagePos?: string; minutes?: number;
+  tag?: string;              // optional: lets a page filter the list (e.g. by kind of piece)
 }
 interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark' }
 const tone = Astro.props.tone ?? 'paper';
@@ -17,7 +18,7 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
 ---
 <ol class:list={['dispatches', { dark: tone === 'dark' }]}>
   {items.map((d) => (
-    <li>
+    <li data-tag={d.tag}>
       <div class="row-link">
         {d.image && (
           <span class="thumb"><img src={d.image} alt="" style={d.imagePos ? `object-position:${d.imagePos}` : undefined} loading="lazy" /></span>

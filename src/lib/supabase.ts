@@ -52,7 +52,7 @@ export const STATUS_LABEL: Record<Status, string> = {
 export const PILLARS = [
   { value: 'watchtower', label: 'The Watchtower · Prophetic Audits' },
   { value: 'hearth', label: 'The Hearth · Creative Guild' },
-  { value: 'perimeter', label: 'The Perimeter · Deliverance Protocols' },
+  { value: 'perimeter', label: 'The Perimeter · Testimony & the Unseen' },
 ] as const;
 export const MEDIUMS = [
   { value: 'prose', label: 'Prose' }, { value: 'poetry', label: 'Poetry' }, { value: 'fiction', label: 'Fiction' },

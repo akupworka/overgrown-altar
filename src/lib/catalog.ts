@@ -20,8 +20,8 @@ const FOUNDATIONS: CatalogItem[] = [
   {
     href: '/perimeter/untangling-mental-strongholds', title: 'Untangling Mental Strongholds',
     standfirst: 'A recovery manual in five movements for bringing a stronghold under the obedience of Christ.',
-    date: '2026-09-29', pillar: 'perimeter', medium: 'protocol', thinkers: [], minutes: 8,
-    kicker: 'Protocol III', image: '/images/untangling-mental-strongholds-1200.jpg', author: { name: 'Ainslie Willson' },
+    date: '2026-09-29', pillar: 'perimeter', medium: 'recovery', thinkers: [], minutes: 8,
+    kicker: 'Recovery story', image: '/images/untangling-mental-strongholds-1200.jpg', author: { name: 'Ainslie Willson' },
   },
 ];
 

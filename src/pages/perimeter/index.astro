@@ -1,37 +1,129 @@
 ---
-// The Perimeter — converted from the design file Perimeter.dc.html
-// The page's shared look comes from src/styles/global.css.
+// The Perimeter: writing about the spirit world. Deliverance stories, testimonies, recovery, and personal accounts.
+// Pieces come from the Guild Desk (members choose one of these four kinds when they pick The Perimeter).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
-import { authorUrl, guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../../lib/guild';
-const fromGuild: DispatchItem[] = (await guildPillar('perimeter')).filter((g) => g.medium !== 'protocol').map((g) => ({
-  href: guildUrl(g), title: g.title, kicker: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,
-  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
-  author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id }, image: g.image || '/images/chapel-and-cross-under-a-1200.jpg',
-}));
 import { inPillar } from '../../lib/catalog';
-const protocols = (await inPillar('perimeter')).filter((p) => p.medium === 'protocol');
+
+const KINDS = [
+  { value: 'testimony', label: 'Testimonies', note: 'What God has done, told by the one it happened to.' },
+  { value: 'deliverance', label: 'Deliverance stories', note: 'Freedom from what was binding: the fight, and the turning.' },
+  { value: 'recovery', label: 'Recovery', note: 'The long road back, and what holds on it.' },
+  { value: 'personal', label: 'Personal', note: 'Encounters, dreams, and experiences of the unseen.' },
+];
+const items: DispatchItem[] = (await inPillar('perimeter')).map((p) => ({
+  href: p.href, title: p.title, kicker: p.kicker.replace(/^The Perimeter · /, ''), standfirst: p.standfirst, date: p.date,
+  minutes: p.minutes, author: p.author, image: p.image, tag: p.medium,
+}));
+const count = (k: string) => items.filter((i) => i.tag === k).length;
 ---
-<BaseLayout title="The Perimeter">
-<section class="hero pill-h"><img src="/images/the-perimeter.jpg" srcset="/images/the-perimeter-1200.jpg 1200w, /images/the-perimeter.jpg 2880w" sizes="100vw" alt="The Perimeter" style="object-position:center 50%;" class="mono" fetchpriority="high" /><div class="veil-l"></div><SiteNav />
-<div class="pill-in"><span class="eb">03 · Deliverance Protocols</span><h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Perimeter</h1><p class="body" style="color:#E6DFD0;max-width:720px">Actionable recovery manuals for legal audits, breaking soul ties, untangling mental strongholds, and establishing firm personal and spiritual boundaries.</p></div></section>
-{fromGuild.length > 0 && (
-<section class="sec paper">
-<div class="row" style="padding-bottom:26px"><div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Guild</span><h2 class="h2">Newest work</h2></div><span class="lab mut">{fromGuild.length} {fromGuild.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
-<DispatchList items={fromGuild} />
-</section>
-)}
-<section class="sec paper"><div class="row" style="padding-bottom:34px;border-bottom:1px solid #2A2017"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Recovery Manuals</span><h2 class="h2">The protocols</h2></div><span class="it mut" style="font-size:20px">Actionable, step by step, kept in order.</span></div>
-<div class="g2" style="margin-top:56px">{protocols.map((p, i) => (
-<a href={p.href} class="protocol" style="display:flex;flex-direction:column;gap:16px;padding:40px;background:#F1ECE2;box-shadow:inset 0 0 0 1px rgba(42,32,23,.15)"><span class="num" style="font-size:80px;color:#62372D">{p.kicker.startsWith('Protocol') ? p.kicker.replace('Protocol ', '') : ['I','II','III','IV','V','VI','VII','VIII'][i]}</span><span class="h3">{p.title}</span><p class="body mut" style="font-size:19px">{p.standfirst}</p><span class="lab" style="align-self:flex-start;border-bottom:1px solid #2A2017;padding-bottom:4px">Open the manual</span></a>
-))}</div></section>
-<section class="hero" style="min-height:560px;display:flex;align-items:center"><img src="/images/chapel-and-cross-under-a.jpg" srcset="/images/chapel-and-cross-under-a-1200.jpg 1200w, /images/chapel-and-cross-under-a.jpg 2576w" sizes="100vw" alt="Chapel and cross under a storm sky" style="object-position:center 45%;" class="mono" loading="lazy" /><div class="veil-l"></div><div class="hin sec" style="max-width:900px;display:flex;flex-direction:column;gap:22px"><span class="eb">Unmasking the Script</span><p class="big-it" style="font-size:64px">We name the invisible mechanics.</p></div></section>
-<Subscribe />
+<BaseLayout title="The Perimeter" description="Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world.">
+  <section class="hero pill-h">
+    <img src="/images/the-perimeter.jpg" srcset="/images/the-perimeter-1200.jpg 1200w, /images/the-perimeter.jpg 2880w" sizes="100vw" alt="The Perimeter" style="object-position:center 50%;" class="mono" fetchpriority="high" />
+    <div class="veil-l"></div><SiteNav />
+    <div class="pill-in">
+      <span class="eb">03 · Testimony &amp; the Unseen</span>
+      <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Perimeter</h1>
+      <p class="body" style="color:#E6DFD0;max-width:720px">Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world, told honestly and anchored in Christ.</p>
+    </div>
+  </section>
+
+  <!-- The four kinds of writing here -->
+  <section class="sec dark pe-kinds">
+    <span class="eb">What you’ll find here</span>
+    <div class="pe-grid">
+      {KINDS.map((k) => (
+        <button type="button" class="pe-kind" data-kind={k.value}>
+          <span class="pe-k">{k.label}</span>
+          <span class="it pe-n">{k.note}</span>
+          <span class="lab pe-c">{count(k.value) ? `${count(k.value)} ${count(k.value) === 1 ? 'story' : 'stories'}` : 'Be the first'}</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <!-- Every story, newest first, with a filter -->
+  <section class="sec paper" id="stories">
+    <div class="row" style="padding-bottom:22px">
+      <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Perimeter</span><h2 class="h2">Stories</h2></div>
+      <span class="lab mut pe-total">{items.length} {items.length === 1 ? 'piece' : 'pieces'} · newest first</span>
+    </div>
+    <div class="filters pe-filters" role="group" aria-label="Show">
+      <button type="button" class="chip" aria-pressed="true" data-show="all">All</button>
+      {KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
+    </div>
+    <div class="pe-list">
+      {items.length > 0 ? <DispatchList items={items} /> : <p class="it mut" style="font-size:20px">The first stories are being written.</p>}
+      <p class="it mut pe-none" hidden>Nothing here yet. The first one may be yours.</p>
+    </div>
+  </section>
+
+  <!-- An invitation to tell their own -->
+  <section class="hero pe-share">
+    <img src="/images/chapel-and-cross-under-a.jpg" srcset="/images/chapel-and-cross-under-a-1200.jpg 1200w, /images/chapel-and-cross-under-a.jpg 2576w" sizes="100vw" alt="Chapel and cross under a storm sky" style="object-position:center 45%;" class="mono" loading="lazy" />
+    <div class="veil-l"></div>
+    <div class="hin sec pe-share-in">
+      <span class="eb">Your testimony</span>
+      <p class="big-it pe-big">They overcame by the word of their testimony.</p>
+      <span class="eb" style="font-size:11px">Revelation xii · xi</span>
+      <p class="body" style="color:#E6DFD0;max-width:620px">If you have walked through it, write it down. Every story is read by the editor before it is published.</p>
+      <div class="pe-cta">
+        <a class="btn" href="/guild/desk/#write" data-member hidden>Write your story</a>
+        <a class="btn" href="/guild" data-guest>Join the Guild to share yours</a>
+      </div>
+    </div>
+  </section>
+  <Subscribe />
 </BaseLayout>
 
+<script>
+  // Tapping a kind (or a filter) shows only those stories.
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.pe-filters .chip')];
+  const rows = [...document.querySelectorAll<HTMLElement>('.pe-list li[data-tag]')];
+  const none = document.querySelector<HTMLElement>('.pe-none');
+  const show = (k: string) => {
+    chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === k)));
+    let n = 0;
+    rows.forEach((r) => { const on = k === 'all' || r.dataset.tag === k; r.hidden = !on; if (on) n++; });
+    if (none) none.hidden = n > 0 || rows.length === 0;
+  };
+  chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.show!)));
+  document.querySelectorAll<HTMLButtonElement>('.pe-kind').forEach((b) => b.addEventListener('click', () => {
+    show(b.dataset.kind!);
+    document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' });
+  }));
+</script>
+
 <style>
-  .protocol:hover { box-shadow: inset 0 0 0 1px var(--oxblood) !important; }
-  @media (max-width: 700px) { .protocol { padding: 26px !important; } }
+  .pe-kinds { padding-top: 80px; padding-bottom: 80px; }
+  .pe-grid { margin-top: 34px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(243, 236, 220, .14); }
+  .pe-kind { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 30px 26px 8px; text-align: left; background: none; border: 0; color: inherit; cursor: pointer; }
+  .pe-kind + .pe-kind { border-left: 1px solid rgba(243, 236, 220, .14); }
+  .pe-k { font-family: var(--serif); font-size: 28px; line-height: 1.1; transition: color .3s; }
+  .pe-n { font-size: 17px; line-height: 1.45; color: var(--muted-dark); }
+  .pe-c { margin-top: 6px; color: var(--ember); font-size: 10px; }
+  .pe-kind:hover .pe-k { color: var(--ember); }
+  .pe-filters { margin-bottom: 26px; }
+  .pe-list li[hidden] { display: none; }
+  .pe-share { min-height: 620px; display: flex; align-items: center; }
+  .pe-share-in { max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+  .pe-big { font-size: 60px; }
+  .pe-cta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .pe-cta [hidden] { display: none; }
+  @media (max-width: 1000px) { .pe-grid { grid-template-columns: 1fr 1fr; } .pe-kind:nth-child(3) { border-left: 0; } .pe-kind:nth-child(n+3) { border-top: 1px solid rgba(243, 236, 220, .14); } }
+  @media (max-width: 700px) {
+    .pe-kinds { padding-top: 56px; padding-bottom: 48px; }
+    .pe-grid { grid-template-columns: 1fr; }
+    .pe-kind { padding: 20px 0; }
+    .pe-kind + .pe-kind { border-left: 0; border-top: 1px solid rgba(243, 236, 220, .14); }
+    .pe-k { font-size: 23px; }
+    .pe-n { font-size: 16px; }
+    .pe-big { font-size: 36px !important; }
+    .pe-share { min-height: 0; }
+    .pe-cta { flex-direction: column; align-items: stretch; }
+    .pe-cta .btn { text-align: center; }
+    .pe-total { display: none; }
+  }
 </style>
