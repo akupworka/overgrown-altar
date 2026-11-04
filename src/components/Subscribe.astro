@@ -4,11 +4,13 @@
 // (you'll find them in Netlify under Forms).
 import Cross from './Cross.astro';
 import GlassLight from './GlassLight.astro';
+import GlassCard from './GlassCard.astro';
 ---
 <section class="sec dark center" style="overflow:hidden">
   <div class="glow" aria-hidden="true"></div>
   <GlassLight size={360} intensity={0.7} style="left:50%;top:22%;translate:-50% 0" />
-  <div class="hin center">
+  <GlassCard class="sub-card">
+  <div class="hin center sub-in">
     <Cross width={27} color="#FFE3A3" />
     <h2 class="h2" style="margin-top:26px">Receive the Dispatches</h2>
     <p class="it mut" style="margin:20px 0 0;max-width:620px;font-size:23px;line-height:1.45">New essays from The Watchtower, work from The Hearth, and protocols from The Perimeter, delivered as a letter.</p>
@@ -19,6 +21,7 @@ import GlassLight from './GlassLight.astro';
       <button class="btn" type="submit">Subscribe</button>
     </form>
   </div>
+  </GlassCard>
 </section>
 
 <style>
@@ -26,10 +29,12 @@ import GlassLight from './GlassLight.astro';
     position: absolute; left: 50%; top: 50%; width: 1000px; height: 1000px; transform: translate(-50%, -50%);
     border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,140,.14), rgba(255,196,77,0)); pointer-events: none;
   }
-  .subscribe { margin-top: 40px; display: flex; width: 100%; max-width: 620px; border: 1px solid rgba(243,236,220,.55); }
-  .subscribe .field { flex: 1; min-width: 0; border: 0; text-align: left; }
+  :global(.sub-card) { width: 100%; max-width: 760px; margin: 0 auto; }
+  .sub-in { padding: 56px 48px 50px; }
+  .subscribe { margin-top: 36px; display: flex; gap: 10px; width: 100%; max-width: 560px; }
+  .subscribe .field { flex: 1; min-width: 0; text-align: left; }
   @media (max-width: 700px) {
-    .subscribe { flex-direction: column; border: 0; gap: 10px; }
-    .subscribe .field { border: 1px solid rgba(243,236,220,.55); }
+    .sub-in { padding: 40px 22px 30px; }
+    .subscribe { flex-direction: column; }
   }
 </style>

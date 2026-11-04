@@ -23,7 +23,8 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
   </head>
   <body>
-    <main>
+    <a class="skip" href="#main">Skip to content</a>
+    <main id="main">
       <slot />  <!-- the page's own content goes here -->
     </main>
     {footer && <SiteFooter />}
@@ -43,25 +44,11 @@ const fullTitle = title ? `${title} · Overgrown Altar` : 'Overgrown Altar';
         picks.forEach((el) => {
           if (el.getBoundingClientRect().top < innerHeight || el.closest('.reveal')) return;
           const i = [...el.parentElement!.children].indexOf(el);
-          (el as HTMLElement).style.setProperty('--d', `${(i % 4) * 110}ms`);
+          (el as HTMLElement).style.setProperty('--d', `${(i % 4) * 80}ms`);
           el.classList.add('reveal');
           seen.observe(el);
         });
 
-        // The first header photo drifts slower than the page.
-        const hero = document.querySelector<HTMLElement>('main .hero > img');
-        if (hero) {
-          let ticking = false;
-          addEventListener('scroll', () => {
-            if (ticking) return;
-            ticking = true;
-            requestAnimationFrame(() => {
-              const y = Math.min(scrollY, innerHeight * 1.2);
-              hero.style.setProperty('--py', `${y * 0.3}px`);
-              ticking = false;
-            });
-          }, { passive: true });
-        }
       }
     </script>
   </body>

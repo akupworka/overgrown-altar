@@ -3,18 +3,19 @@
 // The page's shared look comes from src/styles/global.css.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
+import GlassCard from '../components/GlassCard.astro';
 ---
 <BaseLayout title="Contact">
 <section class="hero" style="height:620px"><img src="/images/watchtower-photo.jpg" srcset="/images/watchtower-photo-1200.jpg 1200w, /images/watchtower-photo.jpg 2576w" sizes="100vw" alt="Write to Us" style="object-position:30% 50%;filter:brightness(.5)" fetchpriority="high" /><div class="veil"></div><SiteNav />
 <div class="hero-c" style="top:223px;padding:0 24px"><span class="eb">Contact</span><h1 class="h1" style="margin-top:22px">Write to Us</h1><p class="it" style="margin:24px 0 0;max-width:680px;font-size:26px;line-height:1.4;color:#E6DFD0">Letters, submissions and press. Every letter is read.</p></div></section>
 <section class="sec dark"><div class="side"><div style="display:flex;flex-direction:column;gap:18px" class="rv"><span class="eb">Directly</span><span class="h3">hello@overgrownaltar.com</span><span class="lab mut" style="margin-top:20px">Instagram · @overgrownaltar</span><p class="it mut" style="font-size:18px;margin:20px 0 0">For Guild applications, use the <a href="/guild" style="border-bottom:1px solid">Guild page</a>.</p></div>
 <!-- data-netlify="true": Netlify collects each letter and can email it to you (Netlify > Forms > Notifications). -->
-<form name="contact" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" style="display:flex;flex-direction:column;gap:16px">
+<GlassCard class="form-card"><form name="contact" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" class="card-form">
 <input type="hidden" name="form-name" value="contact" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" /></label></p>
 <div class="g2" style="gap:16px"><input class="field" name="name" placeholder="Name" aria-label="Name" autocomplete="name" required /><input class="field" type="email" name="email" placeholder="Email" aria-label="Email" autocomplete="email" required /></div>
 <fieldset class="filters" style="gap:10px;border:0;padding:0;margin:0"><legend class="visually-hidden">What is this about?</legend>
 <label class="chip chip-radio"><input type="radio" name="topic" value="A letter" checked /> A letter</label><label class="chip chip-radio"><input type="radio" name="topic" value="Submission" /> Submission</label><label class="chip chip-radio"><input type="radio" name="topic" value="Press" /> Press</label><label class="chip chip-radio"><input type="radio" name="topic" value="Folios" /> Folios</label></fieldset>
-<textarea class="field" name="message" placeholder="Your letter" aria-label="Your letter" style="height:200px" required></textarea><button class="btn" type="submit" style="align-self:flex-start">Send the letter</button>
-</form></div></div></section>
+<textarea class="field" name="message" placeholder="Your letter" aria-label="Your letter" style="height:200px" required></textarea><button class="btn" type="submit">Send the letter</button>
+</form></GlassCard></div></div></section>
 </BaseLayout>

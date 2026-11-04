@@ -3,6 +3,7 @@
 // The page's shared look comes from src/styles/global.css.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
+import GlassCard from '../components/GlassCard.astro';
 ---
 <BaseLayout title="Join the Guild">
 <section class="hero" style="height:820px"><img src="/images/format-guild.jpg" srcset="/images/format-guild-1200.jpg 1200w, /images/format-guild.jpg 2576w" sizes="100vw" alt="Altar of Our Lady between stained-glass windows" style="object-position:center 40%;filter:brightness(.6)" fetchpriority="high" /><div class="veil"></div><SiteNav />
@@ -12,12 +13,12 @@ import SiteNav from '../components/SiteNav.astro';
 <p class="lede center" style="margin:50px auto 0;max-width:980px;font-size:34px">We do not build digital stages for central gurus or performative influencers. We cultivate a guild—a gathering of sharp minds, soft hearts, and unyielding spirits who gather around the hearth to write, sharpen, and discern together.</p></section>
 <section class="sec dark"><div class="side"><div style="display:flex;flex-direction:column;gap:20px"><span class="eb">Apply</span><h2 class="h2">Pull up a chair.</h2><p class="body mut">The Guild is where readers become participants: comment on dispatches, submit work to The Hearth, and gather each month around one reading and one open table. Membership asks two things of you: that you come to make, and that you come to be made better.</p></div>
 <!-- Applications arrive in Netlify > Forms ("guild-application"). You then invite the people you choose. -->
-<form name="guild-application" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" style="display:flex;flex-direction:column;gap:16px">
+<GlassCard class="form-card"><form name="guild-application" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" class="card-form">
 <input type="hidden" name="form-name" value="guild-application" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" /></label></p>
 <div class="g2" style="gap:16px"><input class="field" name="name" placeholder="Name" aria-label="Name" autocomplete="name" required /><input class="field" type="email" name="email" placeholder="Email" aria-label="Email" autocomplete="email" required /></div>
 <input class="field" name="craft" placeholder="What you make (writing, photography, design, fiction…)" aria-label="What you make" required />
 <textarea class="field" name="why" placeholder="Why the table?" aria-label="Why the table?" style="height:150px" required></textarea>
-<button class="btn" type="submit" style="align-self:flex-start">Apply to the Guild</button>
-</form></div></div></section>
+<button class="btn" type="submit">Apply to the Guild</button>
+</form></GlassCard></div></div></section>
 </BaseLayout>

@@ -50,6 +50,12 @@ a { color: inherit; text-decoration: none; }
 img { max-width: 100%; }
 :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
 [hidden] { display: none !important; }
+.skip {
+  position: fixed; left: 16px; top: 12px; z-index: 100; padding: 12px 18px; border-radius: 6px;
+  background: var(--bone); color: #12160F; font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+  transform: translateY(-160%); transition: transform .3s;
+}
+.skip:focus { transform: none; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
@@ -139,7 +145,17 @@ img { max-width: 100%; }
 .field::placeholder { color: #A9A294; }
 .paper .field { border-color: rgba(42, 32, 23, .4); }
 .paper .field::placeholder { color: #6A5D4C; }
+.field { transition: border-color .3s, box-shadow .4s, background-color .3s; }
+.field:focus { border-color: var(--ember); box-shadow: 0 0 0 4px rgba(255, 227, 163, .1), 0 0 26px rgba(255, 214, 140, .16); }
+.paper .field:focus { border-color: var(--oxblood); box-shadow: 0 0 0 4px rgba(98, 55, 45, .1), 0 0 22px rgba(98, 55, 45, .12); }
 textarea.field { resize: vertical; }
+
+/* Inside a glowing card (components/GlassCard.astro): softer, rounded fields and buttons. */
+.glass-card .field { border-radius: 8px; background: rgba(243, 236, 220, .04); border-color: rgba(243, 236, 220, .26); }
+.glass-card .btn, .glass-card .ghost { border-radius: 8px; }
+.card-form { display: flex; flex-direction: column; gap: 16px; padding: 36px; }
+.card-form .btn { align-self: stretch; padding-top: 18px; padding-bottom: 18px; }
+@media (max-width: 700px) { .card-form { padding: 24px 20px; } }
 
 /* ---------- 10b. Filter chips (Archive, Contact) and menu links ---------- */
 .chip {
@@ -169,27 +185,30 @@ textarea.field { resize: vertical; }
 }
 /* !important here lets these phone sizes win over sizes written directly on an element. */
 @media (max-width: 700px) {
-  .sec { padding: 72px 22px; }
-  .h1 { font-size: 44px !important; }
-  .h2 { font-size: 36px !important; }
-  .h3 { font-size: 26px !important; }
-  .lede { font-size: 24px !important; }
-  .body { font-size: 18px !important; }
-  .big-it { font-size: 46px !important; }
-  .num { font-size: 48px !important; }
-  .g2, .g3, .g4, .side { grid-template-columns: minmax(0, 1fr); gap: 44px; }
-  .row { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .sec { padding: 64px 20px; }
+  .h1 { font-size: 38px !important; line-height: 1.02; }
+  .h2 { font-size: 31px !important; line-height: 1.05; }
+  .h3 { font-size: 23px !important; }
+  .lede { font-size: 21px !important; line-height: 1.35; }
+  .body { font-size: 17px !important; }
+  .big-it { font-size: 38px !important; line-height: 1.02; }
+  .num { font-size: 40px !important; }
+  .g2, .g3, .g4, .side { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .row { flex-direction: column; align-items: flex-start; gap: 14px; }
   .d-only { display: none !important; }
   .m-only { display: block; }
   .hide-m { display: none !important; }
-  .hero-c { top: 150px; padding: 0 20px; }
-  .pill-h { height: 640px; }
-  .pill-in { left: 22px; right: 22px; width: auto; bottom: 56px; }
-  .mx { grid-template-columns: 44px minmax(0, 1fr); gap: 16px; }
+  .hero-c { top: 130px; padding: 0 20px; }
+  .pill-h { height: 600px; }
+  .pill-in { left: 20px; right: 20px; width: auto; bottom: 48px; }
+  /* Header text sits at the bottom on phones, so shade from the bottom up. */
+  .veil-l { background: linear-gradient(180deg, rgba(8,10,8,.45) 0%, rgba(8,10,8,.5) 35%, rgba(8,10,8,.94) 100%); }
+  .veil { background: radial-gradient(ellipse 90% 70% at 50% 50%, rgba(6,8,6,.45) 0%, rgba(6,8,6,.88) 100%); }
+  .mx { grid-template-columns: 40px minmax(0, 1fr); gap: 14px; }
   .mx3 { font-size: 15px; }
-  .num { font-size: 44px !important; }
-  .drop { font-size: 72px; }
-  .mlink { font-size: 28px; }
+  .drop { font-size: 64px; }
+  .mlink { font-size: 26px; }
   .fl { width: 100%; }
-  .menu-in { padding: 24px 22px 40px !important; }
+  .menu-in { padding: 24px 20px 40px !important; }
+  .btn, .ghost { padding-left: 24px; padding-right: 24px; }
 }
