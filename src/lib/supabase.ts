@@ -59,4 +59,15 @@ export const MEDIUMS = [
   { value: 'essay', label: 'Essay / Dispatch' }, { value: 'photograph', label: 'Photographs' },
   { value: 'study', label: 'Architectural study' }, { value: 'teardown', label: 'Design teardown' },
   { value: 'protocol', label: 'Protocol' },
+  { value: 'recovery', label: 'Recovery story' }, { value: 'testimony', label: 'Testimony' },
+  { value: 'deliverance', label: 'Deliverance story' }, { value: 'personal', label: 'Personal' },
 ];
+// Each pillar takes its own kinds of piece: The Watchtower only essays / dispatches,
+// The Perimeter recovery stories, testimonies, deliverance stories and personal pieces, The Hearth the creative kinds. (The database enforces the same.)
+const BY_PILLAR: Record<string, string[]> = {
+  watchtower: ['essay'],
+  perimeter: ['recovery', 'testimony', 'deliverance', 'personal'],
+  hearth: ['prose', 'poetry', 'fiction', 'photograph', 'study', 'teardown'],
+};
+export const mediumsFor = (pillar: string) => MEDIUMS.filter((m) => (BY_PILLAR[pillar] ?? []).includes(m.value));
+export const fitMedium = (pillar: string, medium: string) => { const ok = BY_PILLAR[pillar] ?? []; return ok.includes(medium) ? medium : ok[0]; };

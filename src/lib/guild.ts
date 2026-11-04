@@ -64,7 +64,7 @@ export const guildPillar = async (pillar: GuildPiece['pillar']) => (await getGui
 export const guildUrl = (p: Pick<GuildPiece, 'slug'>) => `/guild/${p.slug}/`;
 export const MEDIUM_LABEL: Record<string, string> = {
   prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photographs',
-  study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol',
+  study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol', recovery: 'Recovery story', testimony: 'Testimony', deliverance: 'Deliverance story', personal: 'Personal',
 };
 export const PILLAR_LABEL = { watchtower: 'The Watchtower', hearth: 'The Hearth', perimeter: 'The Perimeter' } as const;
 export const readingMinutes = (body: string) => Math.max(1, Math.round(body.split(/\s+/).length / 230));
