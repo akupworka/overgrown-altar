@@ -9,7 +9,7 @@ import { shrinkImage, TooSmall } from '../../lib/shrink';
 // Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
 const MIN_PHOTO_WIDTH = 1600;
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
-import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
+import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
 const startHash = typeof window !== 'undefined' ? window.location.hash : '';
@@ -330,7 +330,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   const phone = useMedia('(max-width: 700px)');
   const [form, setForm] = useState({
     title: piece?.title ?? '', standfirst: piece?.standfirst ?? '', body: piece?.body ?? '',
-    pillar: piece?.pillar ?? 'hearth', medium: piece?.medium ?? 'prose',
+    pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? 'prose'),
     image_path: piece?.image_path ?? null as string | null, image_alt: piece?.image_alt ?? '',
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
@@ -343,6 +343,9 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   const rich = useRichBody(piece?.body ?? '', (marks) => set('body', marks));
   const timer = useRef<number | undefined>(undefined);
   const set = (k: keyof typeof form, v: any) => { setForm((f) => ({ ...f, [k]: v })); setState('idle'); };
+  // Choosing a pillar narrows the kinds of piece to the ones it takes.
+  const choosePillar = (v: string) => { setForm((f) => ({ ...f, pillar: v, medium: fitMedium(v, f.medium) })); setState('idle'); };
+  const kinds = mediumsFor(form.pillar);
   // The sheet grows with the writing, like paper, instead of scrolling inside a box.
   useEffect(() => {
     for (const el of [bodyRef.current, document.getElementById('d-title') as HTMLTextAreaElement | null]) {
@@ -486,20 +489,21 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
                 const [name, sub] = x.label.split(' · ');
                 return (
                   <label key={x.value} className={`d-pillar ${form.pillar === x.value ? 'on' : ''}`}>
-                    <input type="radio" name="pillar" value={x.value} checked={form.pillar === x.value} onChange={() => set('pillar', x.value)} />
+                    <input type="radio" name="pillar" value={x.value} checked={form.pillar === x.value} onChange={() => choosePillar(x.value)} />
                     <span className="d-pillar-name">{name}</span><span className="d-pillar-sub">{sub}</span>
                   </label>
                 );
               })}
             </div>
             <h2 className="d-step-h">What kind of piece?</h2>
+            {kinds.length === 1 ? <p className="d-medium-only"><span className="d-medium on">{kinds[0].label}</span><span className="it">{PILLARS.find((x) => x.value === form.pillar)?.label.split(' · ')[0]} takes {kinds[0].value === 'essay' ? 'essays and dispatches' : 'deliverance stories'}.</span></p> :
             <div className="d-mediums" role="radiogroup" aria-label="Medium">
-              {MEDIUMS.map((m) => (
+              {kinds.map((m) => (
                 <label key={m.value} className={`d-medium ${form.medium === m.value ? 'on' : ''}`}>
                   <input type="radio" name="medium" value={m.value} checked={form.medium === m.value} onChange={() => set('medium', m.value)} />{m.label}
                 </label>
               ))}
-            </div>
+            </div>}
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
             {photo}
             <span className="d-hint">At least 1600 pixels wide, so it looks sharp on the site. Photos from a phone camera are perfect; large ones are resized automatically.</span>
@@ -556,15 +560,17 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           <summary><h2 className="eb">Details</h2></summary>
           <div className="d-details-in">
           <label className="d-lbl"><span className="lab">Pillar</span>
-            <select className="field" value={form.pillar} onChange={(e) => set('pillar', e.target.value)}>
+            <select className="field" value={form.pillar} onChange={(e) => choosePillar(e.target.value)}>
               {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label.split(' · ')[0]}</option>)}
             </select>
           </label>
-          <label className="d-lbl"><span className="lab">Medium</span>
-            <select className="field" value={form.medium} onChange={(e) => set('medium', e.target.value)}>
-              {MEDIUMS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
-          </label>
+          {kinds.length === 1
+            ? <div className="d-lbl"><span className="lab">Medium</span><span className="d-medium-fixed">{kinds[0].label}</span></div>
+            : <label className="d-lbl"><span className="lab">Medium</span>
+                <select className="field" value={form.medium} onChange={(e) => set('medium', e.target.value)}>
+                  {kinds.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+                </select>
+              </label>}
           <div className="d-lbl">
             <span className="lab">Featured photograph</span>
             {photo}

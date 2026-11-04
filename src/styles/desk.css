@@ -550,3 +550,6 @@
 /* A message about a photo, right under the photo. */
 .d-photo-msg { margin: 8px 0 0; padding: 10px 14px; border-radius: 10px; background: rgba(255, 227, 163, .07); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25);
   font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.4; color: var(--ember); }
+.d-medium-fixed { font-family: var(--serif); font-size: 22px; padding: 6px 0 10px; border-bottom: 1px solid rgba(243, 236, 220, .14); }
+.d-medium-only { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.d-medium-only .it { font-size: 16px; color: #8C8679; }
