@@ -151,7 +151,9 @@ function Desk({ session }: { session: Session }) {
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [queue, setQueue] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
-  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : 'pieces');
+  // Links from elsewhere can open a section directly: #write, #my-page, #review.
+  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : 'pieces');
+  useEffect(() => { if (startHash === '#my-page' || startHash === '#review') history.replaceState(null, '', location.pathname + location.search); }, []);
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);

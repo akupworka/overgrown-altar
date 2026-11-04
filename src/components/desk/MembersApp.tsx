@@ -16,6 +16,8 @@ const readRoute = (): Route => {
 };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '');
 const pillarName = (v: string) => PILLARS.find((p) => p.value === v)?.label.split(' · ')[0] ?? '';
+// The public writer page's address, made the same way as when the site is built (lib/guild.ts).
+const authorSlug = (name: string) => name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'member';
 const mediumName = (v: string) => MEDIUMS.find((m) => m.value === v)?.label ?? '';
 
 function go(to: string) {
@@ -126,7 +128,19 @@ function MemberPage({ id, me }: { id: string; me: string }) {
             )}
           </span>
         )}
-        {person.id === me && <a className="m-edit lab" href="/guild/desk/">Edit my page at the Desk <span aria-hidden="true">→</span></a>}
+        {person.id === me && (
+          <nav className="m-actions" aria-label="My Desk">
+            <a className="m-act primary" href="/guild/desk/#write">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
+              Write a piece
+            </a>
+            <a className="m-act" href="/guild/desk/">My pieces</a>
+            <a className="m-act" href="/guild/desk/#my-page">Edit my page</a>
+            {person.role === 'editor' && <a className="m-act" href="/guild/desk/#review">Review submissions</a>}
+            {work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
+            <button type="button" className="m-signout lab" onClick={async () => { rememberMember(null); await supabase.auth.signOut(); location.href = '/guild/desk/'; }}>Sign out</button>
+          </nav>
+        )}
       </header>
       <section className="m-work">
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{work.length} {work.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
