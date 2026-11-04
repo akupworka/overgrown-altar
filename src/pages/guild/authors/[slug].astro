@@ -1,0 +1,71 @@
+---
+// A writer's public page, at /guild/authors/<their name>/: portrait, craft, a few lines about them,
+// their links, and everything they have published. Built from Supabase with the rest of the site;
+// their portrait also refreshes itself when the page opens (see BaseLayout), so a new photo shows at once.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteNav from '../../../components/SiteNav.astro';
+import DispatchList, { type DispatchItem } from '../../../components/DispatchList.astro';
+import Subscribe from '../../../components/Subscribe.astro';
+import { getAuthors, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildAuthor, type GuildPiece } from '../../../lib/guild';
+import '../../../styles/guild-piece.css';
+
+export async function getStaticPaths() {
+  return (await getAuthors()).map(({ author, pieces }) => ({ params: { slug: author.slug }, props: { author, pieces } }));
+}
+const { author: a, pieces } = Astro.props as { author: GuildAuthor; pieces: GuildPiece[] };
+const initials = a.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
+const site = a.website ? a.website.replace(/^https?:\/\//, '').replace(/\/$/, '') : '';
+const items: DispatchItem[] = pieces.map((g) => ({
+  href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
+  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), author: { name: a.display_name, portrait: a.portrait || undefined, id: a.id },
+  image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
+}));
+---
+<BaseLayout title={a.display_name} description={a.bio || `${a.craft || 'Member'} of the Overgrown Altar Guild.`} image={a.portrait || undefined}>
+  <section class="night au-hero">
+    <img class="au-bg" src="/images/tall-windows-dark-vault-1200.jpg" alt="" aria-hidden="true" />
+    <SiteNav />
+    <div class="au-in">
+      <span class="au-arch" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt={`Portrait of ${a.display_name}`} /> : <span>{initials}</span>}</span>
+      <span class="eb">Of the Guild</span>
+      <h1 class="h1 au-name">{a.display_name}</h1>
+      {a.craft && <span class="lab au-craft">{a.craft}</span>}
+      {a.bio && <p class="au-bio">{a.bio}</p>}
+      {(site || insta) && (
+        <span class="au-links">
+          {site && <a class="lab" href={a.website} target="_blank" rel="noopener noreferrer">{site} ↗</a>}
+          {insta && <a class="lab" href={insta} target="_blank" rel="noopener noreferrer">@{a.instagram} ↗</a>}
+        </span>
+      )}
+    </div>
+  </section>
+  <section class="sec paper">
+    <div class="au-head"><span class="eb">The work</span><span class="lab mut">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+    <DispatchList items={items} />
+  </section>
+  <Subscribe />
+</BaseLayout>
+
+<style>
+  .au-hero { position: relative; overflow: hidden; padding: 150px 24px 90px; text-align: center; }
+  .au-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: brightness(.22) saturate(.8); }
+  .au-in { position: relative; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .au-arch { width: 150px; height: 196px; margin-bottom: 18px; border-radius: 999px 999px 0 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    background: #1B201A; box-shadow: 0 0 0 1px var(--brass), 0 30px 60px -30px rgba(0, 0, 0, .8); color: var(--ember); font-family: var(--serif); font-size: 44px; }
+  .au-arch:has(img) { background: #E9E2D4; }
+  .au-arch :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .au-name { margin: 6px 0 0; }
+  .au-craft { color: var(--ember); }
+  .au-bio { margin: 10px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.5; color: #E6DFD0; }
+  .au-links { margin-top: 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; }
+  .au-links a { border-bottom: 1px solid rgba(243, 236, 220, .35); padding-bottom: 3px; }
+  .au-links a:hover { color: var(--ember); border-color: var(--ember); }
+  .au-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 700px) {
+    .au-hero { padding: 110px 20px 64px; }
+    .au-arch { width: 116px; height: 152px; font-size: 34px; }
+    .au-bio { font-size: 18px; }
+    .au-head { flex-direction: column; gap: 6px; }
+  }
+</style>

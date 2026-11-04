@@ -4,7 +4,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_KEY } from './supabase';
 
-export interface GuildAuthor { id: string; display_name: string; craft: string; bio: string; portrait: string; website: string; instagram: string }
+export interface GuildAuthor { id: string; slug?: string; display_name: string; craft: string; bio: string; portrait: string; website: string; instagram: string }
 export interface GuildPiece {
   id: string; slug: string; title: string; standfirst: string; body: string; pillar: 'watchtower' | 'hearth' | 'perimeter';
   medium: string; image: string; image_alt: string; published_at: string; author: GuildAuthor;
@@ -42,7 +42,24 @@ async function load(): Promise<GuildPiece[]> {
   }
 }
 
-export const getGuildPieces = () => (cache ??= load());
+// Every author gets a readable address from their name (/guild/authors/eden-albright/), unique across the Guild.
+function withAuthorSlugs(pieces: GuildPiece[]): GuildPiece[] {
+  const byId = new Map<string, string>(), taken = new Set<string>();
+  for (const p of [...pieces].reverse()) {           // oldest first, so an author's address never changes when someone new arrives
+    const id = p.author.id; if (!id || byId.has(id)) continue;
+    const base = p.author.display_name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'member';
+    let slug = base, n = 2; while (taken.has(slug)) slug = `${base}-${n++}`;
+    taken.add(slug); byId.set(id, slug);
+  }
+  return pieces.map((p) => ({ ...p, author: { ...p.author, slug: byId.get(p.author.id) } }));
+}
+export const getGuildPieces = () => (cache ??= load().then(withAuthorSlugs));
+export const authorUrl = (a: Pick<GuildAuthor, 'slug'>) => (a.slug ? `/guild/authors/${a.slug}/` : undefined);
+export async function getAuthors() {
+  const all = await getGuildPieces(); const out = new Map<string, { author: GuildAuthor; pieces: GuildPiece[] }>();
+  for (const p of all) { if (!p.author.slug) continue; (out.get(p.author.slug) ?? out.set(p.author.slug, { author: p.author, pieces: [] }).get(p.author.slug)!).pieces.push(p); }
+  return [...out.values()];
+}
 export const guildPillar = async (pillar: GuildPiece['pillar']) => (await getGuildPieces()).filter((p) => p.pillar === pillar);
 export const guildUrl = (p: Pick<GuildPiece, 'slug'>) => `/guild/${p.slug}/`;
 export const MEDIUM_LABEL: Record<string, string> = {

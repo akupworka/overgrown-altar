@@ -5,11 +5,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
-import { guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../../lib/guild';
+import { authorUrl, guildPillar, guildUrl, MEDIUM_LABEL, readingMinutes } from '../../lib/guild';
 const fromGuild: DispatchItem[] = (await guildPillar('perimeter')).filter((g) => g.medium !== 'protocol').map((g) => ({
   href: guildUrl(g), title: g.title, kicker: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
-  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/chapel-and-cross-under-a-1200.jpg',
+  author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id }, image: g.image || '/images/chapel-and-cross-under-a-1200.jpg',
 }));
 import { inPillar } from '../../lib/catalog';
 const protocols = (await inPillar('perimeter')).filter((p) => p.medium === 'protocol');

@@ -72,6 +72,28 @@ const imageUrl = new URL(image, site).toString();
         } catch {}
       }));
 
+      // Writers' pictures stay current: pages are built ahead of time, so when a writer changes their portrait,
+      // each picture marked data-author-id asks Supabase for the latest one as the page opens (one small request).
+      const marked = [...document.querySelectorAll<HTMLElement>('[data-author-id]')].filter((el) => el.dataset.authorId);
+      if (marked.length) {
+        const ids = [...new Set(marked.map((el) => el.dataset.authorId!))];
+        const base = 'https://zblgggifysohxqtgvgxs.supabase.co', key = 'sb_publishable_84SLMdb_AiDAbaiz1eitbw_DRMx38lH';
+        fetch(`${base}/rest/v1/profiles?select=id,portrait_path&id=in.(${ids.join(',')})`, { headers: { apikey: key } })
+          .then((r) => (r.ok ? r.json() : []))
+          .then((rows: { id: string; portrait_path: string | null }[]) => {
+            for (const row of rows) {
+              if (!row.portrait_path) continue;
+              const src = `${base}/storage/v1/object/public/portraits/${row.portrait_path.split('/').map(encodeURIComponent).join('/')}`;
+              for (const el of marked.filter((m) => m.dataset.authorId === row.id)) {
+                const img = el.querySelector('img');
+                if (img) { if (img.src !== src) img.src = src; }
+                else { const n = new Image(); n.src = src; n.alt = ''; el.textContent = ''; el.append(n); }
+              }
+            }
+          })
+          .catch(() => {});
+      }
+
       // Motion that needs to know where things are on screen. Styles live in src/styles/motion.css.
       const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!calm) {

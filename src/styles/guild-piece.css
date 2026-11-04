@@ -32,3 +32,14 @@
   .gp-author { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
   .gp-links { justify-content: center; }
 }
+/* The author is a link to their page. */
+.gp-by-who { display: inline-flex; align-items: center; gap: 12px; border-bottom: 1px solid transparent; transition: border-color .3s, color .3s; }
+.gp-by-who:hover { color: var(--ember); }
+.gp-by { gap: 8px; flex-wrap: wrap; justify-content: center; }
+.gp-arch:has(img) { background: #E9E2D4; }
+a.gp-arch { transition: box-shadow .4s; }
+a.gp-arch:hover { box-shadow: 0 0 0 1px var(--oxblood), 0 16px 40px -20px rgba(42, 32, 23, .5); }
+.gp-author-name { transition: color .3s; }
+.gp-author-name:hover { color: var(--oxblood); }
+.gp-all { align-self: flex-start; margin-top: 6px; color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .4); padding-bottom: 3px; }
+@media (max-width: 700px) { .gp-all { align-self: center; } }

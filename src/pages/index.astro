@@ -37,7 +37,7 @@ const formats = [
 ];
 import GlassLight from '../components/GlassLight.astro';
 import DispatchList, { type DispatchItem } from '../components/DispatchList.astro';
-import { getGuildPieces, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes } from '../lib/guild';
+import { authorUrl, getGuildPieces, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes } from '../lib/guild';
 
 // The Editorial Matrix: newest first. Pieces you approve at the Guild Desk arrive at the top;
 // the four foundational dispatches follow (each with its thinker → anchor line).
@@ -50,7 +50,7 @@ const foundations: DispatchItem[] = matrix.map((m, i) => ({
 const approved: DispatchItem[] = (await getGuildPieces()).map((g) => ({
   href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body),
-  author: { name: g.author.display_name, portrait: g.author.portrait || undefined }, image: g.image || '/images/tall-windows-dark-vault-1200.jpg',
+  author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id }, image: g.image || '/images/tall-windows-dark-vault-1200.jpg',
 }));
 const matrixFeed = (await getCatalog()).slice(0, 6);
 import { getCatalog } from '../lib/catalog';
