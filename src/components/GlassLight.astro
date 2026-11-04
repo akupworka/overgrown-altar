@@ -28,16 +28,16 @@ const { prism = true, beams = false, size = 520, intensity = 1, style = '' } = A
   /* Warm candle-light behind everything. */
   .halo {
     inset: -30%; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255, 214, 140, .22), rgba(255, 196, 77, .06) 55%, rgba(255, 196, 77, 0));
+    background: radial-gradient(closest-side, rgba(255, 214, 140, .26), rgba(255, 196, 77, .08) 55%, rgba(255, 196, 77, 0));
     animation: breathe 9s ease-in-out infinite;
   }
   /* The prism: a turning wheel of the five glass colours. */
   .prism {
     inset: 8%; border-radius: 50%;
     background: conic-gradient(from 20deg,
-      rgba(255, 59, 78, .30), rgba(255, 196, 77, .30), rgba(61, 224, 160, .24),
-      rgba(62, 123, 255, .30), rgba(176, 91, 255, .28), rgba(255, 59, 78, .30));
-    filter: blur(56px);
+      rgba(255, 59, 78, .46), rgba(255, 196, 77, .46), rgba(61, 224, 160, .38),
+      rgba(62, 123, 255, .46), rgba(176, 91, 255, .42), rgba(255, 59, 78, .46));
+    filter: blur(50px);
     animation: turn 48s linear infinite;
   }
   /* The beams: four soft coloured shafts, faded out at the top, bottom and sides. */
@@ -50,11 +50,11 @@ const { prism = true, beams = false, size = 520, intensity = 1, style = '' } = A
   .beam-set {
     position: absolute; inset: 0; transform: skewX(-22deg);
     background: linear-gradient(90deg,
-      transparent 30%, rgba(62, 123, 255, .34) 36%, rgba(62, 123, 255, .0) 41%,
-      rgba(255, 59, 78, .34) 44%, rgba(255, 59, 78, 0) 49%,
-      rgba(255, 196, 77, .36) 52%, rgba(255, 196, 77, 0) 58%,
-      rgba(61, 224, 160, .26) 61%, transparent 67%);
-    filter: blur(22px);
+      transparent 30%, rgba(62, 123, 255, .5) 36%, rgba(62, 123, 255, .0) 41%,
+      rgba(176, 91, 255, .38) 43%, rgba(255, 59, 78, .5) 46%, rgba(255, 59, 78, 0) 50%,
+      rgba(255, 196, 77, .52) 53%, rgba(255, 196, 77, 0) 58%,
+      rgba(61, 224, 160, .4) 61%, transparent 67%);
+    filter: blur(18px);
     animation: shimmer 7s ease-in-out infinite alternate;
   }
 
@@ -65,7 +65,7 @@ const { prism = true, beams = false, size = 520, intensity = 1, style = '' } = A
 
   /* Phones: smaller and softer, so it never floods the screen. */
   @media (max-width: 700px) {
-    .glass-light { width: min(calc(var(--size) * .7), 80vw); opacity: calc(var(--k) * .7); }
+    .glass-light { width: min(calc(var(--size) * .75), 86vw); opacity: calc(var(--k) * .85); }
   }
   @media (prefers-reduced-motion: reduce) {
     .halo, .prism, .beams, .beam-set { animation: none; }
