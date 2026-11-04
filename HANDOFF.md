@@ -27,7 +27,18 @@ Start by reading this file, then `README.md`.
   access to `api.sanity.io` + `4agnfn5q.api.sanity.io`). Keep `sanity` merged with `main`.
   Owner still has to choose: **A** seed the samples then switch, or **B** start fresh and switch.
 
-## What the owner wants next: the Guild Desk
+## Guild Desk: part 1 is built (accounts, writing, submitting)
+
+- Supabase project `zblgggifysohxqtgvgxs` (connected via the Supabase connector). Tables `profiles`, `pieces`
+  with row-level security; helpers in schema `private` (`is_editor`, `editor_emails`, trigger guards).
+  `akupworka@gmail.com` is in `private.editor_emails`, so that account becomes the editor on sign-up.
+  Storage bucket `guild` (private; each member writes only in their own folder).
+- Front end: `src/pages/guild/desk.astro` + `src/components/desk/DeskApp.tsx` (React, client-only),
+  client config `src/lib/supabase.ts`. The site gate exempts `/guild/desk`.
+- Part 2 still to build: editor Approve / Send back / Decline, publishing approved pieces to Sanity
+  (Netlify Function + `SANITY_WRITE_TOKEN`, already set in Netlify), email on submission, rebuild hook.
+
+## The original plan for the Guild Desk
 
 Members (and the owner) write **on the website**, and **nothing is published until the owner approves**.
 

@@ -76,8 +76,10 @@ export default async (req: Request, context: { next: () => Promise<Response> }) 
   return res;
 };
 
-// Everything is locked except the password screen itself and the files it needs to look right.
+// Everything is locked except the password screen, the Guild Desk, and the files they need to look right.
 export const config = {
   path: '/*',
-  excludedPath: ['/enter', '/enter/', '/_astro/*', '/fonts/*', '/images/*', '/favicon.ico', '/favicon.svg', '/robots.txt'],
+  // The Guild Desk stays reachable so invited members can sign in; its contents are protected by
+  // their own sign-in and the database's rules, not by the site password.
+  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/_astro/*', '/fonts/*', '/images/*', '/favicon.ico', '/favicon.svg', '/robots.txt'],
 };
