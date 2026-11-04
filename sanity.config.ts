@@ -24,8 +24,7 @@ export default defineConfig({
             S.listItem().title(title).id(value).child(
               S.documentList().title(title).schemaType('article').apiVersion('2025-01-01')
                 .filter('_type == "article" && pillar == $pillar').params({ pillar: value })
-                .defaultOrdering([{ field: 'number', direction: 'asc' }])
-                .initialValueTemplates([S.initialValueTemplateItem('article-in-pillar', { pillar: value })]),
+                .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }]),
             ),
           ),
           S.divider(),
@@ -33,15 +32,5 @@ export default defineConfig({
           S.documentTypeListItem('author').title('Authors'),
         ]),
     }),
-  ],
-  document: {
-    // Lets "new article" inside a pillar list start with that pillar already chosen.
-    newDocumentOptions: (prev) => prev.filter((t) => t.templateId !== 'article-in-pillar'),
-  },
-  templates: (prev) => [
-    ...prev,
-    { id: 'article-in-pillar', title: 'Article in pillar', schemaType: 'article',
-      parameters: [{ name: 'pillar', type: 'string' }],
-      value: (p: { pillar: string }) => ({ pillar: p.pillar, medium: p.pillar === 'perimeter' ? 'protocol' : p.pillar === 'watchtower' ? 'essay' : undefined }) },
   ],
 });
