@@ -33,14 +33,17 @@ export function rememberMember(p: Pick<Profile, 'display_name' | 'portrait_path'
     if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path) }));
     else localStorage.removeItem(MEMBER_KEY);
   } catch {}
-  // Refresh the header on this page too.
-  const av = typeof document !== 'undefined' ? document.querySelector<HTMLElement>('.member-av') : null;
-  if (av && p) {
-    const src = portraitUrl(p.portrait_path);
+  // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
+  document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
+  if (!p) return;
+  const src = portraitUrl(p.portrait_path);
+  document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
     av.textContent = '';
     if (src) { const img = new Image(); img.src = src; img.alt = ''; av.append(img); }
     else av.textContent = p.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
-  }
+  });
 }
 
 export const STATUS_LABEL: Record<Status, string> = {

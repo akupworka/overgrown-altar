@@ -1,0 +1,192 @@
+---
+// The menu, opened over the page (no new page to load). The header's Menu button opens it; Close, Escape,
+// or tapping a link closes it. On phones the links are visible straight away; the Guild sits at the top.
+// Without JavaScript the Menu button still goes to the /menu page.
+import Monogram from './Monogram.astro';
+import Wordmark from './Wordmark.astro';
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
+const on = (href: string) => (href === '/' ? here === '/' : here === href || here.startsWith(href + '/')) ? 'page' : undefined;
+const pillars = [
+  { href: '/watchtower', label: 'The Watchtower', note: 'Prophetic audits' },
+  { href: '/hearth', label: 'The Hearth', note: 'Creative guild' },
+  { href: '/perimeter', label: 'The Perimeter', note: 'Deliverance protocols' },
+];
+const groups = [
+  { title: 'Begin', links: [['/start-here', 'Start Here'], ['/manifesto', 'The Manifesto'], ['/archive', 'The Archive']] },
+  { title: 'The Publication', links: [['/folios', 'Folios'], ['/watchtower#letter', 'The Letter'], ['/guild', 'Join the Guild']] },
+  { title: 'The House', links: [['/about', 'About'], ['/beliefs', 'What We Believe'], ['/contact', 'Contact']] },
+];
+---
+<div class="mp" id="site-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden data-menu>
+  <div class="mp-bg" aria-hidden="true"><img src="/images/menu-photo-1200.jpg" alt="" loading="lazy" /></div>
+  <div class="mp-top">
+    <a href="/" class="mp-home" aria-label="Overgrown Altar, home"><Monogram size={38} color="#F3ECDC" /></a>
+    <button type="button" class="mp-close lab" data-menu-close>Close <span aria-hidden="true">✕</span></button>
+  </div>
+  <div class="mp-scroll">
+    <div class="mp-in">
+      <div class="mp-mark"><Wordmark width={300} ink="#F3ECDC" script="#FFE3A3" /></div>
+
+      <form action="/archive" method="get" role="search" class="mp-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" name="q" placeholder="Search the altar…" aria-label="Search the altar" enterkeyhint="search" />
+      </form>
+
+      <div class="mp-guild">
+        <a href="/guild/desk/" class="mp-desk" data-member hidden><span class="member-av mp-av" aria-hidden="true"></span><span><span class="lab">The Guild</span><span class="mp-desk-t">My Desk</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
+        <a href="/guild/members/" class="mp-chip lab" data-member hidden>Members</a>
+        <a href="/guild/desk" class="mp-desk" data-guest><span><span class="lab">Guild members</span><span class="mp-desk-t">Sign in</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
+      </div>
+
+      <nav class="mp-nav" aria-label="All sections">
+        <section class="mp-pillars">
+          <span class="eb">The Three Pillars</span>
+          {pillars.map((p) => (
+            <a href={p.href} class="mp-pillar" aria-current={on(p.href)}><span class="mp-pl">{p.label}</span><span class="mp-note">{p.note}</span></a>
+          ))}
+        </section>
+        {groups.map((g) => (
+          <section class="mp-group">
+            <span class="eb">{g.title}</span>
+            {g.links.map(([href, label]) => <a href={href} class="mp-link" aria-current={on(href)}>{label}</a>)}
+          </section>
+        ))}
+      </nav>
+      <p class="mp-motto it">We light the signal fires on the perimeter.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const panel = document.querySelector<HTMLElement>('[data-menu]');
+  const openers = document.querySelectorAll<HTMLAnchorElement>('.menu-link');
+  let last: HTMLElement | null = null;
+  const open = () => {
+    if (!panel) return;
+    last = document.activeElement as HTMLElement;
+    panel.hidden = false;
+    document.documentElement.classList.add('menu-open');
+    requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('on')));
+    openers.forEach((o) => o.setAttribute('aria-expanded', 'true'));
+    panel.querySelector<HTMLElement>('.mp-close')?.focus({ preventScroll: true });
+  };
+  const close = () => {
+    if (!panel || panel.hidden) return;
+    panel.classList.remove('on');
+    document.documentElement.classList.remove('menu-open');
+    openers.forEach((o) => o.setAttribute('aria-expanded', 'false'));
+    setTimeout(() => { panel.hidden = true; }, 380);
+    last?.focus({ preventScroll: true });
+  };
+  openers.forEach((o) => {
+    o.setAttribute('aria-controls', 'site-menu'); o.setAttribute('aria-expanded', 'false');
+    o.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  });
+  panel?.querySelector('[data-menu-close]')?.addEventListener('click', close);
+  // A link to somewhere on this same page (like The Letter) just closes the menu and scrolls there.
+  panel?.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => a.addEventListener('click', () => {
+    if (a.pathname === location.pathname) close();
+  }));
+  addEventListener('keydown', (e) => {
+    if (!panel || panel.hidden) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') {   // keep the keyboard inside the menu while it is open
+      const f = [...panel.querySelectorAll<HTMLElement>('a:not([hidden]), button, input')].filter((el) => el.offsetParent);
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  // Coming back with the browser's Back button: make sure the menu isn't left open.
+  addEventListener('pageshow', () => { if (panel && !panel.hidden) { panel.hidden = true; panel.classList.remove('on'); document.documentElement.classList.remove('menu-open'); } });
+</script>
+
+<style>
+  :global(html.menu-open), :global(html.menu-open body) { overflow: hidden; }
+  .mp { position: fixed; inset: 0; z-index: 100; background: #070907; color: var(--bone); display: flex; flex-direction: column;
+    opacity: 0; transition: opacity .38s ease; }
+  .mp.on { opacity: 1; }
+  .mp-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .mp-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; opacity: .14; transform: scale(1.04); transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .mp.on .mp-bg img { transform: none; }
+  .mp-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,9,7,.2), rgba(7,9,7,.85) 70%); }
+
+  .mp-top { position: relative; z-index: 2; flex: none; height: 84px; padding: 0 56px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(243,236,220,.07); }
+  .mp-home { width: 26px; height: 38px; display: block; }
+  .mp-close { background: none; border: 0; color: var(--bone); cursor: pointer; min-height: 44px; padding: 0 0 0 16px; display: inline-flex; align-items: center; gap: 10px; transition: color .25s; }
+  .mp-close:hover { color: var(--ember); }
+
+  .mp-scroll { position: relative; z-index: 1; flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .mp-in { max-width: 1240px; margin: 0 auto; padding: 44px 56px calc(60px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+  .mp-in > * { opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .8s cubic-bezier(.16,1,.3,1); }
+  .mp.on .mp-in > * { opacity: 1; transform: none; }
+  .mp.on .mp-in > :nth-child(2) { transition-delay: .05s; }
+  .mp.on .mp-in > :nth-child(3) { transition-delay: .1s; }
+  .mp.on .mp-in > :nth-child(4) { transition-delay: .15s; }
+  .mp.on .mp-in > :nth-child(5) { transition-delay: .2s; }
+
+  .mp-mark { display: flex; justify-content: center; }
+  .mp-search { margin: 36px auto 0; width: 100%; max-width: 620px; display: flex; align-items: center; gap: 14px; color: var(--muted-dark);
+    border-bottom: 1px solid rgba(243,236,220,.28); transition: border-color .3s; }
+  .mp-search:focus-within { border-color: var(--ember); color: var(--ember); }
+  .mp-search input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--bone); padding: 14px 0; font-family: var(--serif); font-style: italic; font-size: 22px; }
+  .mp-search input::placeholder { color: #8C8679; }
+
+  .mp-guild { margin: 34px auto 0; width: 100%; max-width: 620px; display: flex; gap: 12px; align-items: stretch; }
+  .mp-desk { flex: 1; display: flex; align-items: center; gap: 14px; padding: 14px 18px; min-height: 64px; position: relative;
+    box-shadow: inset 0 0 0 1px rgba(243,236,220,.18); transition: box-shadow .3s, color .3s; }
+  .mp-desk::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 0; height: 1px; opacity: .85;
+    background: linear-gradient(90deg, rgba(62,123,255,0), #3E7BFF 15%, #B05BFF 32%, #FF3B4E 50%, #FFC44D 68%, #3DE0A0 85%, rgba(61,224,160,0)); }
+  .mp-desk:hover { box-shadow: inset 0 0 0 1px rgba(255,227,163,.6); color: var(--ember); }
+  .mp-desk > span:not(.mp-av):not(.mp-arrow) { display: flex; flex-direction: column; gap: 4px; }
+  .mp-desk .lab { font-size: 9px; color: #8C8679; }
+  .mp-desk-t { font-family: var(--serif); font-size: 24px; line-height: 1; }
+  .mp-arrow { margin-left: auto; color: var(--ember); }
+  .mp-av { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center;
+    background: #14180F; box-shadow: 0 0 0 1px rgba(159,148,94,.8); color: var(--ember); font-family: var(--serif); font-size: 13px; letter-spacing: .04em; }
+  .mp-av :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .mp-chip { display: inline-flex; align-items: center; padding: 0 18px; box-shadow: inset 0 0 0 1px rgba(243,236,220,.18); transition: box-shadow .3s, color .3s; }
+  .mp-chip:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.6); }
+  .mp [hidden] { display: none !important; }
+
+  .mp-nav { margin-top: 60px; display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 40px; }
+  .mp-nav section { display: flex; flex-direction: column; gap: 14px; }
+  .mp-nav .eb { margin-bottom: 4px; }
+  .mp-pillar { display: flex; flex-direction: column; gap: 3px; }
+  .mp-pl { font-family: var(--serif); font-weight: 500; font-size: 32px; line-height: 1.1; transition: color .25s; }
+  .mp-note { font-family: var(--serif); font-style: italic; font-size: 16px; color: #8C8679; }
+  .mp-link { font-family: var(--serif); font-weight: 500; font-size: 24px; line-height: 1.2; transition: color .25s; }
+  .mp-pillar:hover .mp-pl, .mp-link:hover { color: var(--ember); }
+  .mp-pillar[aria-current] .mp-pl, .mp-link[aria-current] { color: var(--ember); }
+  .mp-motto { margin: 64px 0 0; text-align: center; font-size: 18px; color: #8C8679; }
+
+  @media (max-width: 1100px) { .mp-nav { grid-template-columns: 1fr 1fr; } }
+  /* Phones: the links first. No wordmark; the Guild and search at the top; a compact two-column list below the pillars. */
+  @media (max-width: 760px) {
+    .mp-top { height: 68px; padding: 0 16px 0 20px; }
+    .mp-in { padding: 18px 20px calc(110px + env(safe-area-inset-bottom)); }
+    .mp-mark { display: none; }
+    .mp-search { margin-top: 0; }
+    .mp-search input { font-size: 19px; padding: 12px 0; }
+    .mp-guild { margin-top: 18px; }
+    .mp-desk { min-height: 58px; padding: 10px 14px; }
+    .mp-desk-t { font-size: 21px; }
+    .mp-chip { padding: 0 14px; font-size: 10px; }
+    .mp-nav { margin-top: 30px; grid-template-columns: 1fr 1fr; gap: 28px 18px; }
+    .mp-pillars { grid-column: 1 / -1; gap: 0 !important; }
+    .mp-pillar { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(243,236,220,.08); }
+    .mp-pillars .eb + .mp-pillar { border-top: 1px solid rgba(243,236,220,.08); }
+    .mp-pl { font-size: 26px; }
+    .mp-note { font-size: 14px; text-align: right; }
+    .mp-group { gap: 4px !important; }
+    .mp-group:last-child { grid-column: 1 / -1; }
+    .mp-group:last-child { display: grid !important; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+    .mp-group:last-child .eb { grid-column: 1 / -1; }
+    .mp-link { font-size: 20px; padding: 8px 0; min-height: 40px; display: flex; align-items: center; }
+    .mp-motto { margin-top: 40px; font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mp, .mp-bg img, .mp-in > * { transition: none; }
+  }
+</style>

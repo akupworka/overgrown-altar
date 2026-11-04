@@ -20,6 +20,7 @@ Start by reading this file, then `README.md`.
 ## Latest polish
 - `src/lib/catalog.ts`: one list of real pieces (2 complete design pieces + published Guild pieces) used by Home,
   The Watchtower, The Perimeter, Archive, Start Here and "More to read". Sample-only pieces were retired.
+- Menu: `components/MenuPanel.astro` opens over the page from the header (the `/menu` page is the no-JavaScript fallback). Phones: while writing in the Desk the site header hides.
 - Forms (Guild application, Contact, newsletter `Subscribe`) use the doorway look: `components/DoorwayFrame.astro` + `styles/doorway.css`. Netlify form names unchanged.
 - BaseLayout: Open Graph/Twitter previews (`image` prop), OA favicon + apple-touch-icon, Share/Print, first-visit
   "arrival" (cross draws itself, `components/Arrival.astro`, once per browser). `/enter/` is a drawn doorway.

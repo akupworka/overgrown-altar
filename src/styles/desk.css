@@ -455,3 +455,10 @@
 .d-decide .d-danger:hover { color: #E6A99A; border-color: #E6A99A; }
 .d-decide .d-notice:empty { display: none; }
 .d-waiting .lab { white-space: nowrap; }
+
+/* Phones, while writing: the site header steps away so it never covers the page; the writing tools
+   stay pinned to the top of the screen, and "Back to my desk" is the way out. */
+@media (max-width: 700px) {
+  body:has(.d-room.writing) .site-header, body:has(.d-room.writing) .nav-shade { transform: translateY(-110%); opacity: 0; pointer-events: none; }
+  .d-room.writing .d-paper-tools { position: sticky; top: 0; z-index: 4; background: #F1ECE2; box-shadow: 0 1px 0 rgba(42,32,23,.08); }
+}

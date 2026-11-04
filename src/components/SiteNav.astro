@@ -5,6 +5,7 @@
 //  - scrolling down tucks it away, scrolling up brings it back.
 // Desktop shows the sections; smaller screens show Menu. The glowing Sign in is always there.
 import Monogram from './Monogram.astro';
+import MenuPanel from './MenuPanel.astro';
 
 const links = [
   { href: '/watchtower', label: 'The Watchtower' },
@@ -46,6 +47,7 @@ const current = Astro.url.pathname;
     </div>
   </nav>
 </header>
+<MenuPanel />
 
 <script>
   // Signed in to the Guild? Show the member's portrait (or initials) and "My Desk" instead of
@@ -57,11 +59,10 @@ const current = Astro.url.pathname;
       const name: string = me.name || '';
       document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = true));
       document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = false));
-      const av = document.querySelector<HTMLElement>('.member-av');
-      if (av) {
+      document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
         if (me.portrait) { const img = new Image(); img.src = me.portrait; img.alt = ''; av.append(img); }
         else av.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
-      }
+      });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
     }
   } catch {}
