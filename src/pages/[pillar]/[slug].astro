@@ -1,0 +1,15 @@
+---
+// One page per published article, at /<pillar>/<permanent address>,
+// e.g. /watchtower/nietzsche-surrendered. Astro asks Sanity for the list when the site is built.
+import ArticlePage from '../../components/ArticlePage.astro';
+import { getArticles, getArticle, type Pillar } from '../../lib/sanity';
+
+export async function getStaticPaths() {
+  const all = await getArticles();
+  return all.map((a) => ({ params: { pillar: a.pillar, slug: a.slug } }));
+}
+
+const { pillar, slug } = Astro.params as { pillar: Pillar; slug: string };
+const article = await getArticle(pillar, slug);
+---
+<ArticlePage article={article} />

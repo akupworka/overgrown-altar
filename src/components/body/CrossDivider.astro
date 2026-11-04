@@ -1,0 +1,8 @@
+---
+import Cross from '../Cross.astro';
+---
+<div class="cross-rule" role="separator"><span></span><Cross width={18} color="#9F945E" /><span></span></div>
+<style>
+  .cross-rule { margin: 20px 0; display: flex; align-items: center; gap: 18px; justify-content: center; }
+  .cross-rule span { width: 80px; height: 1px; background: var(--brass); }
+</style>

@@ -1,0 +1,44 @@
+---
+// Renders an article's body, block by block, in your design's styles.
+// Runs of ordinary text (paragraphs, headings, lists) go through PortableText;
+// the special blocks from the Studio's + menu get their own components.
+import { PortableText } from 'astro-portabletext';
+import Block from './body/Block.astro';
+import Scripture from './body/Scripture.astro';
+import PullQuote from './body/PullQuote.astro';
+import Plate from './body/Plate.astro';
+import CrossDivider from './body/CrossDivider.astro';
+import ProtocolStep from './body/ProtocolStep.astro';
+
+interface Props { body?: any[]; dropCap?: boolean }
+const { body = [], dropCap = true } = Astro.props;
+
+// Group consecutive text blocks together so lists render as one list.
+type Chunk = { text: any[] } | { node: any; step?: number };
+const chunks: Chunk[] = [];
+let step = 0;
+for (const node of body) {
+  if (node._type === 'block') {
+    const last = chunks.at(-1);
+    if (last && 'text' in last) last.text.push(node); else chunks.push({ text: [node] });
+  } else {
+    chunks.push({ node, step: node._type === 'protocolStep' ? ++step : undefined });
+  }
+}
+// The drop cap goes on the first ordinary paragraph.
+const firstPara = body.find((b) => b._type === 'block' && (b.style ?? 'normal') === 'normal' && !b.listItem);
+const blockFor = (node: any) => (node === firstPara && dropCap ? { ...node, _dropCap: true } : node);
+---
+{chunks.map((c) =>
+  'text' in c ? (
+    <PortableText
+      value={c.text.map(blockFor)}
+      components={{ block: Block }}
+    />
+  ) : c.node._type === 'scripture' ? <Scripture node={c.node} />
+  : c.node._type === 'pullQuote' ? <PullQuote node={c.node} />
+  : c.node._type === 'plate' ? <Plate node={c.node} />
+  : c.node._type === 'crossDivider' ? <CrossDivider />
+  : c.node._type === 'protocolStep' ? <ProtocolStep node={c.node} n={c.step!} />
+  : null
+)}

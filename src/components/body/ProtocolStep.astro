@@ -1,0 +1,29 @@
+---
+// One step of a Perimeter protocol, with a checklist readers can tick off.
+interface Props { node: any; n: number }
+const { node, n } = Astro.props;
+---
+<section class="step" id={`step-${n}`}>
+  <div style="display:flex;align-items:baseline;gap:18px">
+    <span class="num" style="color:var(--oxblood);font-size:60px">{n}</span>
+    <h2 class="h3">{node.title}</h2>
+  </div>
+  {node.intro && <p class="body">{node.intro}</p>}
+  {node.checklist?.length > 0 && (
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {node.checklist.map((item: string) => (
+        <label class="lab check"><input type="checkbox" /><span>{item}</span></label>
+      ))}
+    </div>
+  )}
+  {node.scripture && <div class="verse"><span class="it" style="font-size:20px">{node.scripture}</span></div>}
+</section>
+<style>
+  .step { padding: 36px; background: #F1ECE2; box-shadow: inset 0 0 0 1px rgba(42,32,23,.15); display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 30px; }
+  .check { display: flex; gap: 14px; align-items: center; letter-spacing: .14em; line-height: 1.5; cursor: pointer; min-height: 32px; }
+  .check input { appearance: none; flex: none; width: 16px; height: 16px; border: 1px solid var(--ink); margin: 0; cursor: pointer; }
+  .check input:checked { background: var(--ink); box-shadow: inset 0 0 0 3px #F1ECE2; }
+  .check input:checked + span { text-decoration: line-through; opacity: .6; }
+  .verse { padding: 18px 22px; border-left: 2px solid var(--brass); }
+  @media (max-width: 700px) { .step { padding: 24px 20px; } }
+</style>

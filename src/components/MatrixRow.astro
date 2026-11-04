@@ -1,0 +1,21 @@
+---
+// One row of the Editorial Matrix: number, title, and the thinker → fracture → anchor columns.
+import { articleUrl, PILLAR_NAMES, kind, type ArticleCard } from '../lib/sanity';
+interface Props { article: ArticleCard }
+const { article: a } = Astro.props;
+---
+<a class="mx rule" href={articleUrl(a)}>
+  <span class="num">{a.number}</span>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <span class="lab" style="color:var(--ember)">{PILLAR_NAMES[a.pillar]} · {kind(a)}</span>
+    <span class="h3">{a.title}</span>
+  </div>
+  <div class="mx3">
+    <div style="color:var(--muted-dark)"><span class="visually-hidden">Secular thinker: </span>{a.matrixThinker}</div>
+    <div style="color:var(--rose)"><span class="visually-hidden">Fracture point: </span>{a.matrixFracture}</div>
+    <div style="color:var(--ember)"><span class="visually-hidden">Biblical anchor: </span>{a.matrixAnchor}</div>
+  </div>
+</a>
+<style>
+  .mx:hover .h3 { color: var(--ember); }
+</style>

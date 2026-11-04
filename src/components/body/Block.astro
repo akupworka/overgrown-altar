@@ -1,0 +1,23 @@
+---
+// Paragraphs and headings in an article. The first paragraph gets a drop cap.
+import type { BlockProps } from 'astro-portabletext/types';
+type Props = BlockProps;
+const { node } = Astro.props;
+const dropCap = (node as any)._dropCap; // set by ArticleBody on the first paragraph
+---
+{node.style === 'h2' ? (
+  <h2 class="eb pt-heading"><slot /></h2>
+) : node.style === 'lede' ? (
+  <p class="lede" style="font-size:30px"><slot /></p>
+) : (
+  <p class:list={['body', 'pt-p', { 'has-drop': dropCap }]}><slot /></p>
+)}
+<style>
+  .pt-heading { margin: 0; }
+  .pt-p { font-size: 22px; }
+  .has-drop::first-letter {
+    float: left; font-family: var(--serif); font-weight: 500; font-size: 104px; line-height: .78;
+    margin: 8px 14px 0 0; color: var(--oxblood);
+  }
+  @media (max-width: 700px) { .has-drop::first-letter { font-size: 72px; } }
+</style>

@@ -1,0 +1,13 @@
+---
+// A photograph inside an article, in an arch (or full width).
+import { imgSrc, imgPos } from '../../lib/sanity';
+const { node } = Astro.props;
+---
+<figure class:list={['plate', { arch: node.shape !== 'full' }]}>
+  <img src={imgSrc(node, 1400)} alt={node.alt ?? ''} style={`object-position:${imgPos(node, 'center 55%')}`} loading="lazy" />
+</figure>
+<style>
+  .plate { height: 460px; margin: 20px 0; overflow: hidden; }
+  .plate img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (max-width: 700px) { .plate { height: 340px; } }
+</style>

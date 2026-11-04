@@ -1,0 +1,129 @@
+---
+// The page every article uses. Dispatches and Hearth pieces follow the "Dispatch (essay)" design;
+// Perimeter protocols follow the "Protocol (manual)" design, with steps listed down the side.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from './SiteNav.astro';
+import Subscribe from './Subscribe.astro';
+import Cross from './Cross.astro';
+import MatrixRow from './MatrixRow.astro';
+import ArticleBody from './ArticleBody.astro';
+import {
+  getArticles, getMatrix, articleUrl, PILLAR_NAMES, kind, imgSrc, imgPos, formatDate, readingTime, roman,
+  type Article,
+} from '../lib/sanity';
+
+interface Props { article: Article }
+const { article: a } = Astro.props;
+const isProtocol = a.pillar === 'perimeter';
+const firstName = a.author?.name?.split(' ')[0];
+const steps = (a.body ?? []).filter((b) => b._type === 'protocolStep');
+
+// What to show after the article.
+const matrix = a.pillar === 'watchtower' ? await getMatrix() : [];
+const more = matrix.length ? [] : (await getArticles(a.pillar)).filter((x) => x._id !== a._id).slice(0, 3);
+---
+<BaseLayout title={a.title} description={a.seoDescription || a.standfirst}>
+  <section class="hero" style={`height:${isProtocol ? 700 : 720}px`}>
+    {a.image && <img src={imgSrc(a.image, 2000)} alt={a.image.alt ?? ''} style={`object-position:${imgPos(a.image, 'center 45%')};filter:brightness(.5)`} fetchpriority="high" />}
+    <div class="veil"></div>
+    <SiteNav />
+    <div class="hero-c article-hero">
+      <span class="eb">{PILLAR_NAMES[a.pillar]} · {kind(a)}</span>
+      <h1 class="h1" style="margin-top:22px;max-width:1000px;font-size:72px">{a.title}</h1>
+      {isProtocol ? (
+        <p class="it" style="margin:24px 0 0;max-width:680px;font-size:26px;line-height:1.4;color:#E6DFD0">A recovery manual, step by step.</p>
+      ) : (
+        <span class="lab mut" style="margin-top:26px">
+          {[a.author?.name, formatDate(a.publishedAt), `${readingTime(a.body)} min read`].filter(Boolean).join(' · ')}
+        </span>
+      )}
+    </div>
+  </section>
+
+  {isProtocol ? (
+    <section class="sec paper">
+      <div class="side">
+        <aside class="protocol-side">
+          <span class="eb">In this protocol</span>
+          <nav aria-label="Steps">
+            {steps.map((s, i) => <a class="lab step-link" href={`#step-${i + 1}`}>Step {i + 1} · {s.title}</a>)}
+          </nav>
+          <button class="btn" type="button" style="margin-top:14px;align-self:flex-start" onclick="window.print()">Print / Download</button>
+          <p class="it mut" style="margin:6px 0 0;font-size:16px;line-height:1.45">Spiritual and practical guidance, not legal, medical or psychological advice. <a href="/legal" style="border-bottom:1px solid">Read the disclaimer.</a></p>
+        </aside>
+        <div class="flow">
+          <ArticleBody body={a.body} dropCap={false} />
+          {a.signed && firstName && (
+            <div class="signature"><Cross width={20} color="#62372D" /><span>{firstName}</span></div>
+          )}
+        </div>
+      </div>
+    </section>
+  ) : (
+    <article class="sec paper">
+      <div class="narrow flow">
+        {a.inMatrix && (
+          <div class="mx3 matrix-box">
+            <div style="padding-left:18px">{a.matrixThinker}</div>
+            <div style="color:var(--oxblood)">{a.matrixFracture}</div>
+            <div>{a.matrixAnchor}</div>
+          </div>
+        )}
+        <ArticleBody body={a.body} />
+        {a.signed && firstName && (
+          <div class="signature" style="margin-top:10px"><Cross width={20} color="#62372D" /><span>{firstName}</span></div>
+        )}
+        <div class="rule" style="padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <a class="lab mut" href={`/${a.pillar}`}>Filed under {PILLAR_NAMES[a.pillar]}</a>
+          <span class="lab mut">
+            <a href={`mailto:?subject=${encodeURIComponent(a.title)}&body=${encodeURIComponent(Astro.url.href)}`}>Share</a> ·
+            <button type="button" class="print" onclick="window.print()">Print</button>
+          </span>
+        </div>
+      </div>
+    </article>
+  )}
+
+  {matrix.length > 0 && (
+    <section class="sec dark">
+      <span class="eb">Next in the matrix</span>
+      <div style="margin-top:20px">{matrix.map((m) => <MatrixRow article={m} />)}</div>
+    </section>
+  )}
+  {more.length > 0 && (
+    <section class="sec dark">
+      <span class="eb">More from {PILLAR_NAMES[a.pillar]}</span>
+      <div class="g3" style="margin-top:30px">
+        {more.map((m) => (
+          <a href={articleUrl(m)} class="rule more" style="padding-top:24px;display:flex;flex-direction:column;gap:10px">
+            <span class="num" style="font-size:48px">{m.pillar === 'perimeter' ? roman(m.number) : m.number ?? ''}</span>
+            <span class="h3" style="font-size:26px">{m.title}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+  <Subscribe />
+</BaseLayout>
+
+<style>
+  .article-hero { top: 250px; padding: 0 40px; }
+  .flow { display: flex; flex-direction: column; gap: 30px; }
+  .matrix-box { border: 1px solid rgba(42,32,23,.25); padding: 18px 0; }
+  .matrix-box > div + div { border-color: rgba(42,32,23,.25) !important; }
+  .signature { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .signature span { font-family: var(--script); font-size: 54px; color: var(--oxblood); line-height: 1.2; }
+  .protocol-side { display: flex; flex-direction: column; gap: 18px; align-self: start; position: sticky; top: 110px; }
+  .protocol-side nav { display: flex; flex-direction: column; }
+  .step-link { padding: 12px 0; border-top: 1px solid rgba(42,32,23,.2); }
+  .step-link:hover, .more:hover .h3 { color: var(--oxblood); }
+  .more:hover .h3 { color: var(--ember); }
+  .print { background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+  @media (max-width: 700px) {
+    .article-hero { top: 150px; padding: 0 20px; }
+    .protocol-side { position: static; }
+  }
+  @media print {
+    :global(.nav), :global(.nav-shade), :global(.foot), .protocol-side button, .dark, :global(form) { display: none !important; }
+  }
+</style>

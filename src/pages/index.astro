@@ -7,6 +7,11 @@ import SiteNav from '../components/SiteNav.astro';
 import Wordmark from '../components/Wordmark.astro';
 import Cross from '../components/Cross.astro';
 import Subscribe from '../components/Subscribe.astro';
+import MatrixRow from '../components/MatrixRow.astro';
+import { getMatrix } from '../lib/sanity';
+
+// The Editorial Matrix comes from Sanity: tick "Show in the Editorial Matrix" on an article.
+const matrix = await getMatrix();
 
 // The content lives in lists like these for now.
 // In step 2 these will come from Sanity, so you can edit them without code.
@@ -23,12 +28,6 @@ const pillars = [
   { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Deliverance Protocols', name: 'The Perimeter', text: 'Actionable recovery manuals for legal audits, breaking soul ties, untangling mental strongholds, and establishing firm personal and spiritual boundaries.' },
 ];
 
-const matrix = [
-  { title: 'Nietzsche Surrendered: The Übermensch at the Foot of the Cross', thinker: 'Nietzsche’s Will to Power', fracture: 'Self-Exaltation & Madness', anchor: 'Surrender & Divine Authority' },
-  { title: 'Jung vs. Tolkien: The Counterfeit Unconscious vs. Myth Realized', thinker: 'Jung’s Archetypal Psyche', fracture: 'God as a Mind-Projection', anchor: 'The True Myth Made Flesh' },
-  { title: 'Newtonian Determinism: The Missing Anchor', thinker: 'Newtonian Mechanics', fracture: 'Closed, Sterile Materialism', anchor: 'Colossians 1:17 Coherence' },
-  { title: 'The Resurrection as the Primary Quantum Law', thinker: 'Quantum Paradox & Entropy', fracture: 'Absurd, Random Matter', anchor: 'Resurrection Re-encryption' },
-];
 
 const formats = [
   { href: '/watchtower', img: '/images/format-dispatches.jpg', mono: false, name: 'Dispatches', text: 'Long-form dispatches' },
@@ -140,20 +139,7 @@ const formats = [
         <div>Secular thinker / system</div><div>The fracture point</div><div>The biblical anchor</div>
       </div>
     </div>
-    {matrix.map((m, i) => (
-      <a class="mx rule" href="/watchtower">
-        <span class="num">{i + 1}</span>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <span class="lab" style="color:var(--ember)">The Watchtower · Dispatch {i + 1}</span>
-          <span class="h3">{m.title}</span>
-        </div>
-        <div class="mx3">
-          <div style="color:var(--muted-dark)"><span class="visually-hidden">Secular thinker: </span>{m.thinker}</div>
-          <div style="color:var(--rose)"><span class="visually-hidden">Fracture point: </span>{m.fracture}</div>
-          <div style="color:var(--ember)"><span class="visually-hidden">Biblical anchor: </span>{m.anchor}</div>
-        </div>
-      </a>
-    ))}
+    {matrix.map((m) => <MatrixRow article={m} />)}
     <div class="center" style="margin-top:40px"><a class="ghost" href="/watchtower">All dispatches from The Watchtower</a></div>
   </section>
 
@@ -212,8 +198,7 @@ const formats = [
   .pillar-link { margin-top: 20px; align-self: flex-start; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
   .pillar:hover .pillar-link { color: var(--oxblood); border-color: var(--oxblood); }
 
-  /* Editorial matrix (the .mx and .mx3 rows are styled in global.css) */
-  .mx:hover .h3 { color: var(--ember); }
+  /* Editorial matrix (the rows themselves are the MatrixRow component) */
   .mx3-head { width: 520px; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #A9A294; }
 
   /* Format */
