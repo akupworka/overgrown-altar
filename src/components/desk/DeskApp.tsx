@@ -11,6 +11,25 @@ const arrivedToSetPassword = /type=(invite|recovery)/.test(startHash);
 
 // ---------------------------------------------------------------- small pieces
 
+function useMedia(query: string) {
+  const [match, setMatch] = useState(() => typeof window !== 'undefined' && matchMedia(query).matches);
+  useEffect(() => {
+    const m = matchMedia(query); const on = () => setMatch(m.matches);
+    m.addEventListener('change', on); return () => m.removeEventListener('change', on);
+  }, [query]);
+  return match;
+}
+
+const ICONS: Record<string, ReactNode> = {
+  pieces: <path d="M5 6h14M5 12h14M5 18h9" />,
+  write: <><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></>,
+  review: <><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></>,
+  profile: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></>,
+};
+const Icon = ({ name }: { name: string }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
+);
+
 function Glass({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div className={`glass-card ${className}`}>
@@ -175,9 +194,10 @@ function Desk({ session }: { session: Session }) {
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number]] : []),
     ['profile', 'My page'],
   ];
+  const short: Record<Tab, string> = { pieces: 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page' };
 
   return (
-    <div className="d-room">
+    <div className={`d-room ${tab === 'write' ? 'writing' : ''}`}>
       <aside className="d-side">
         <div className="d-me">
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
@@ -208,6 +228,16 @@ function Desk({ session }: { session: Session }) {
           : <Queue queue={queue} onRead={setReading} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
       </div>
+
+      {/* Phones: an app-style tab bar within thumb's reach. */}
+      <nav className="d-tabbar" aria-label="Desk">
+        {items.map(([t, , n]) => (
+          <button key={t} type="button" className={tab === t ? 'on' : ''} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
+            <span className="d-tabbar-icon"><Icon name={t} />{n ? <span className="d-tabbar-dot">{n}</span> : null}</span>
+            <span>{short[t]}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
@@ -278,6 +308,7 @@ const TOOLS: { label: string; wrap?: string; prefix?: string; hint: string }[] =
 ];
 
 function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | null; onSaved: (p: Piece) => void; onDone: () => void }) {
+  const phone = useMedia('(max-width: 700px)');
   const [form, setForm] = useState({
     title: piece?.title ?? '', standfirst: piece?.standfirst ?? '', body: piece?.body ?? '',
     pillar: piece?.pillar ?? 'hearth', medium: piece?.medium ?? 'prose',
@@ -290,6 +321,12 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<number | undefined>(undefined);
   const set = (k: keyof typeof form, v: any) => { setForm((f) => ({ ...f, [k]: v })); setState('idle'); };
+  // The sheet grows with the writing, like paper, instead of scrolling inside a box.
+  useEffect(() => {
+    for (const el of [bodyRef.current, document.getElementById('d-title') as HTMLTextAreaElement | null]) {
+      if (!el) continue; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px';
+    }
+  }, [form.body, form.title]);
 
   useEffect(() => {
     if (!form.image_path) return setPreview(null);
@@ -357,14 +394,15 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
 
   return (
     <section className="d-write">
+      <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
       <div className="d-write-bar">
-        <span className="lab mut" role="status" aria-live="polite">
+        <button type="button" className="d-link d-close" onClick={onDone}>← My pieces</button>
+        <span className="lab mut d-state" role="status" aria-live="polite">
           {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved changes' : (id ? '' : 'A new piece')}
         </span>
         <div className="d-write-actions">
-          <button type="button" className="d-link" onClick={onDone}>Close</button>
-          <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}>Save draft</button>
-          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}>Send to the editor</button>
+          <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}><span className="d-long">Save draft</span><span className="d-short">Save</span></button>
+          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">Send to the editor</span><span className="d-short">Send →</span></button>
         </div>
       </div>
       {piece?.status === 'returned' && piece.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p>}
@@ -385,8 +423,9 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
           <span className="d-paper-count">{words(form.body)} words</span>
         </article>
 
-        <aside className="d-details" aria-label="Details">
-          <h2 className="eb">Details</h2>
+        <details className="d-details" open={!phone} key={phone ? 'p' : 'd'}>
+          <summary><h2 className="eb">Details</h2><span className="lab mut d-details-sum">{PILLARS.find((p) => p.value === form.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === form.medium)?.label}</span></summary>
+          <div className="d-details-in">
           <label className="d-lbl"><span className="lab">Pillar</span>
             <select className="field" value={form.pillar} onChange={(e) => set('pillar', e.target.value)}>
               {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label.split(' · ')[0]}</option>)}
@@ -408,14 +447,15 @@ function Editor({ uid, piece, onSaved, onDone }: { uid: string; piece: Piece | n
           <label className="d-lbl"><span className="lab">Describe the photograph</span>
             <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
           </label>
-          <div className="d-guide">
-            <span className="lab">Writing marks</span>
+          <details className="d-guide">
+            <summary className="lab">Writing marks</summary>
             <p><code>##</code> starts a section heading</p>
             <p><code>&gt;</code> sets a line large, as a pull quote</p>
             <p><code>+</code> marks a verse; end it with — and the reference</p>
             <p><code>*words*</code> italic · <code>**words**</code> bold</p>
+          </details>
           </div>
-        </aside>
+        </details>
       </div>
     </section>
   );
@@ -504,6 +544,11 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       <label className="d-check"><input type="checkbox" checked={f.listed} onChange={(e) => setF({ ...f, listed: e.target.checked })} /><span>Show me in the Guild directory</span></label>
       <p className="it d-notice" role="status">{msg}</p>
       <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
+      <div className="d-account">
+        <a className="d-link" href={`/guild/members/?m=${profile.id}`}>View my page</a>
+        <a className="d-link" href="/guild/members/">The Guild</a>
+        <button type="button" className="d-link" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>Sign out</button>
+      </div>
     </form>
   );
 }
