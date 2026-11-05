@@ -1,6 +1,6 @@
 ---
 // A writer's trophies, earned ones only (public pages). Category trophies show their metal now and the next one.
-import { trophiesFor, trophySvg, TIER_LABEL, type TrophyCtx } from '../lib/trophies';
+import { trophiesFor, trophySvg, TIER_LABEL, unitFor, type TrophyCtx } from '../lib/trophies';
 import '../styles/trophies.css';
 interface Props { ctx: TrophyCtx; tone?: 'dark' | 'paper' }
 const { ctx, tone = 'paper' } = Astro.props;
@@ -14,7 +14,7 @@ const earned = trophiesFor(ctx).filter((t) => t.earned);
         <figure class="tr" data-tier={tier} title={t.note}>
           <Fragment set:html={trophySvg(t, 76, tier)} />
           <span class="tr-name">{t.name}</span>
-          <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${t.unit}` : ''}</span>
+          <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
           {t.count && next ? <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
         </figure>
       ))}

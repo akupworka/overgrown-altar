@@ -28,6 +28,15 @@ const words = (s: string) => (s.trim() ? s.trim().split(/\s+/).length : 0);
 const has = (c: TrophyCtx, f: (p: TrophyPiece) => boolean) => c.pieces.some(f);
 const kinds = (c: TrophyCtx) => new Set(c.pieces.map((p) => p.medium)).size;
 const count = (c: TrophyCtx, f: (p: TrophyPiece) => boolean) => c.pieces.filter(f).length;
+// Whole years since they joined, and their longest run of consecutive months with a published piece.
+const yearsAt = (c: TrophyCtx) => c.member.created_at ? Math.floor((Date.now() - Date.parse(c.member.created_at)) / (365.25 * 864e5)) : 0;
+const longestStreak = (c: TrophyCtx) => {
+  const idx = [...new Set(c.pieces.map((p) => (p.published_at ?? '').slice(0, 7)).filter(Boolean))]
+    .map((m) => Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1).sort((a, b) => a - b);
+  let best = 0, run = 0;
+  idx.forEach((m, i) => { run = i && m === idx[i - 1] + 1 ? run + 1 : 1; best = Math.max(best, run); });
+  return best;
+};
 const months = (c: TrophyCtx) => new Set(c.pieces.map((p) => (p.published_at ?? '').slice(0, 7)).filter(Boolean)).size;
 
 // Emblems are drawn on a 24×24 grid with fine lines.
@@ -57,6 +66,8 @@ const G = {
   witnesses: 'M5 20v-4a2 2 0 0 1 4 0v4M15 20v-4a2 2 0 0 1 4 0v4M10 20v-6a2 2 0 0 1 4 0v6M7 11.5a1.5 1.5 0 1 0 .01 0M17 11.5a1.5 1.5 0 1 0 .01 0M12 8a1.6 1.6 0 1 0 .01 0M3 20h18',
   lantern: 'M10 3h4v2h-4zM8.5 7h7l1 2.5v8l-1 2.5h-7l-1-2.5v-8zM12 10v6M12 5v2M7.5 9.5h9M7.5 17.5h9',
   stones: 'M3 20h18M4.5 20v-5h4.5v5M9.8 20V9.5h4.4V20M15 20v-7h4.5v7M9.8 13h4.4M12 5.5l2.2 4h-4.4z',
+  table: 'M3 10h18M5 10v9M19 10v9M8 14h8M8 14v5M16 14v5M12 4c1 1.2 1.2 2.2 0 3.4-1.2-1.2-1-2.2 0-3.4zM12 7.4V10',
+  ring: 'M12 21a8 8 0 1 0 0-16M12 5a8 8 0 0 0-5.7 13.6M12 8c1.8 2.2 3 3.4 3 5.2a3 3 0 0 1-6 0c0-1.2.8-2 1.6-2.8.4.9.8 1.2 1.2 1.2 0-1.3-.4-2.2.2-3.6z',
   dove: 'M3 13c4 0 6-3 8-6 1 3 3 5 7 5l3-2-1 4c-2 3-5 5-9 5-3 0-6-2-8-6zM11 7c0-2 1-3 3-4',
 };
 
@@ -75,6 +86,9 @@ export const TROPHIES: Trophy[] = [
   { id: 'stained-glass', name: 'The Stained Glass Relic', tier: 'bronze', glyph: G.lancet, unit: 'visual works', note: 'For published visual work: dark atmospheric photography, architectural studies, original design teardowns.', ...cat(isRelic, 3, 10, 20, 30) },
   { id: 'scribes-quill', name: 'The Scribe’s Quill', tier: 'bronze', glyph: G.quill, unit: 'long-form pieces', note: 'For long-form fiction and narrative prose (1,500 words or more) accepted into The Hearth.', ...cat(isQuill, 1, 5, 12, 25) },
   { id: 'lyre', name: 'The Lyre', tier: 'bronze', glyph: G.lyre, unit: 'poems', note: 'For poems published at the Guild.', ...cat(isLyre, 3, 10, 20, 30) },
+  // Time: they grow too, by themselves
+  { id: 'years', name: 'Years at the Table', tier: 'bronze', glyph: G.table, unit: 'years at the table', note: 'For each year kept with the Guild since taking a seat.', at: { bronze: 1, silver: 2, gold: 3, rainbow: 5 }, count: yearsAt, earned: (c) => yearsAt(c) >= 1 },
+  { id: 'unbroken', name: 'The Unbroken Flame', tier: 'bronze', glyph: G.ring, unit: 'months in a row', note: 'For publishing every month without a break: the longest run counts.', at: { bronze: 3, silver: 6, gold: 12, rainbow: 24 }, count: longestStreak, earned: (c) => longestStreak(c) >= 3 },
   // Won once
   { id: 'first-light', name: 'First Light', tier: 'bronze', glyph: G.candle, note: 'Published a first piece.', earned: (c) => c.pieces.length >= 1 },
   { id: 'sitter', name: 'The Sitter', tier: 'bronze', glyph: G.arch, note: 'Added a portrait to their page.', earned: (c) => !!(c.member.portrait_path || c.member.portrait) },
@@ -88,9 +102,11 @@ export const TROPHIES: Trophy[] = [
   { id: 'seasons', name: 'Every Season', tier: 'gold', glyph: G.hourglass, note: 'Published in four different months.', earned: (c) => months(c) >= 4 },
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s founding year.', earned: (c) => (c.member.created_at ?? '').startsWith('2026') },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its editor.', earned: (c) => c.member.role === 'editor' },
-  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at).every((t) => t.count!(c) >= t.at!.gold) },
+  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
 ];
 
+/** "1 year at the table", "3 years at the table": the unit, made singular for one. */
+export const unitFor = (n: number, unit = '') => (n === 1 ? unit.replace(/^(\w+?)s\b/, '$1') : unit);
 export const TIER_LABEL: Record<Tier, string> = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', rainbow: 'Rainbow' };
 
 /** Where a member stands with each trophy: earned or not, its metal now, and (for category trophies) the next metal. */

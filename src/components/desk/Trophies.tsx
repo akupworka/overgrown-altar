@@ -1,6 +1,6 @@
 // The trophy case for the members' area (same look as components/TrophyCase.astro).
 // On your own page it also shows, as shadows, the trophies still to earn.
-import { TROPHIES, TIER_AT, trophiesFor, trophySvg, TIER_LABEL, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
+import { TROPHIES, TIER_AT, trophiesFor, trophySvg, TIER_LABEL, unitFor, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
 import '../../styles/trophies.css';
 
 type Standing = ReturnType<typeof trophiesFor>[number];
@@ -11,10 +11,10 @@ function Medal({ s, locked }: { s: Standing; locked?: boolean }) {
     <figure className={`tr${locked ? ' locked' : ''}`} data-tier={tier} title={t.note}>
       <span dangerouslySetInnerHTML={{ __html: trophySvg(t, 76, tier) }} />
       <span className="tr-name">{t.name}</span>
-      <span className="tr-tier">{TIER_LABEL[tier]}{t.count && !locked ? ` · ${n} ${t.unit}` : ''}</span>
+      <span className="tr-tier">{TIER_LABEL[tier]}{t.count && !locked ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
       {t.count && !locked && next
         ? <><span className="tr-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.round((n / next.at) * 100))}%` }} /></span><span className="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span></>
-        : <span className="tr-note">{locked && t.count ? `${n ? `${n} of ${t.at?.bronze ?? 1}. ` : ''}Bronze at ${t.at?.bronze ?? 1} ${t.unit}.` : t.note}</span>}
+        : <span className="tr-note">{locked && t.count ? `${n ? `${n} of ${t.at?.bronze ?? 1}. ` : ''}Bronze at ${t.at?.bronze ?? 1} ${unitFor(t.at?.bronze ?? 1, t.unit)}.` : t.note}</span>}
     </figure>
   );
 }
@@ -45,7 +45,7 @@ export function TrophyCatalogue() {
   return (
     <div className="tcat">
       <span className="eb tcat-h">Trophies that grow</span>
-      <p className="it tcat-p">The same trophy, raised from bronze to silver, gold and rainbow glass as the articles in its category grow. The easier a kind of work is to make, the more it takes; rainbow is rare.</p>
+      <p className="it tcat-p">The same trophy, raised from bronze to silver, gold and rainbow glass as the articles in its category grow, or as the years and the unbroken months add up. The easier a thing is, the more it takes; rainbow is rare.</p>
       <div className="tcat-rows">
         {growing.map((t: Trophy) => (
           <div key={t.id} className="tcat-row">
