@@ -101,7 +101,10 @@ const isLyre = (p: TrophyPiece) => p.medium === 'poetry';
 const metaOf = (p: TrophyPiece): PhotoMeta => p.photo_meta ?? p.photoMeta ?? {};
 const isPhoto = (p: TrophyPiece) => p.medium === 'photograph';
 // The forum
-const fo = (c: TrophyCtx) => c.forum ?? { posts: 0, threads: 0, best_thread: 0, prayer: 0, boards: [] };
+const fo = (c: TrophyCtx): ForumTally => {
+  const f = c.forum ?? ({} as Partial<ForumTally>);
+  return { posts: Number(f.posts) || 0, threads: Number(f.threads) || 0, best_thread: Number(f.best_thread) || 0, prayer: Number(f.prayer) || 0, boards: Array.isArray(f.boards) ? f.boards : [] };
+};
 const isFilm = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'film';
 const isDigital = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'digital';
 const fullNotes = (p: TrophyPiece) => {

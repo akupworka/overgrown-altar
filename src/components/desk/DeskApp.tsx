@@ -349,6 +349,50 @@ function StatusChip({ status }: { status: Piece['status'] }) {
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
+// The editor's own tools on the Desk home: invite a writer, and put the latest changes on the site now.
+function EditorTools() {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [built, setBuilt] = useState('');
+  async function invite(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setMsg('');
+    const { data: s } = await supabase.auth.getSession();
+    const res = await fetch('/.netlify/functions/invite-writer', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session?.access_token ?? ''}` }, body: JSON.stringify({ email, name }) })
+      .catch(() => null);
+    const out = res ? await res.json().catch(() => ({})) : { error: 'The invitation couldn’t be sent. Check your connection.' };
+    setBusy(false);
+    if (res?.ok) { setMsg(`Invitation sent to ${email}. They’ll arrive as a Writer.`); setEmail(''); setName(''); }
+    else setMsg(out.error || 'The invitation couldn’t be sent.');
+  }
+  async function rebuild() {
+    if (!confirm('Rebuild the site now? Changes usually go up on their own within the hour.')) return;
+    const { error } = await supabase.rpc('rebuild_now');
+    setBuilt(error ? error.message : 'Rebuilding. The site will show the latest in a minute or two.');
+  }
+  return (
+    <section className="d-editor-tools">
+      <form className="d-invite" onSubmit={invite}>
+        <span className="eb">Invite a writer</span>
+        <p className="it mut d-tools-sub">They’ll get the Guild’s welcome email with a link to choose a password.</p>
+        <div className="d-invite-row">
+          <input className="field" placeholder="Their name (optional)" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} aria-label="Their name" />
+          <input className="field" type="email" required placeholder="Their email" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Their email" />
+          <button className="btn d-btn" type="submit" disabled={busy || !email}>{busy ? 'Sending…' : 'Send invitation'}</button>
+        </div>
+        {msg && <p className="d-photo-msg" role="status">{msg}</p>}
+      </form>
+      <div className="d-rebuild">
+        <span className="eb">The site</span>
+        <p className="it mut d-tools-sub">Approved pieces appear in the lists at once, and the site rebuilds itself within the hour. Need it now?</p>
+        <button type="button" className="ghost d-btn" onClick={rebuild}>Rebuild now</button>
+        {built && <p className="d-photo-msg" role="status">{built}</p>}
+      </div>
+    </section>
+  );
+}
+
 // A small mark beside each piece: a pen for writing, a camera for a photograph.
 function KindMark({ medium }: { medium: string }) {
   const photo = medium === 'photograph';
@@ -402,6 +446,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         </div>
       </header>
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
+      {isEditor && <EditorTools />}
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
         <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>

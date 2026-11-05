@@ -32,7 +32,9 @@ const watchtowerFeed = (await inPillar('watchtower')).slice(0, 4);
 // The Guild's writers, as arches (those with published work).
 const writers = (await getAuthors()).slice(0, 6).map(({ author }) => author);
 import { inPillar } from '../lib/catalog';
-import { getAuthors } from '../lib/guild';
+import { getAuthors, guildPillar, guildUrl } from '../lib/guild';
+// The newest photographs from the Hearth's gallery, for a strip of plates.
+const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photograph' && g.image).slice(0, 5);
 ---
 <BaseLayout>
 
@@ -63,7 +65,7 @@ import { getAuthors } from '../lib/guild';
         <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">The newest from The Watchtower</span><h2 class="h2">Dispatches</h2></div>
         <a class="lab wt-list-all" href="/watchtower">All dispatches →</a>
       </div>
-      <DispatchList items={watchtowerFeed} tone="dark" />
+      <DispatchList items={watchtowerFeed} tone="dark" live={{ pillar: 'watchtower', max: 4 }} />
       <div class="wt-more"><a class="ghost" href="/watchtower">Read more from The Watchtower <span aria-hidden="true">→</span></a></div>
     </div>
   </section>
@@ -103,6 +105,24 @@ import { getAuthors } from '../lib/guild';
       ))}
     </div>
   </section>
+
+  {photos.length > 0 && (
+    <!-- 4½. From the Hearth: the newest photographs, a strip of plates -->
+    <section class="sec dark home-plates">
+      <div class="row" style="padding-bottom:30px">
+        <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Hearth</span><h2 class="h2">The gallery</h2></div>
+        <a class="lab home-plates-go" href="/hearth/gallery/">Enter the gallery <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="home-plates-row">
+        {photos.map((g, i) => (
+          <a class="home-plate" href={guildUrl(g)}>
+            <span class="home-plate-img"><img src={g.image} alt={g.image_alt || g.title} loading="lazy" style={g.imagePos ? `object-position:${g.imagePos}` : undefined} /></span>
+            <span class="lab mut home-plate-cap">Plate {['i', 'ii', 'iii', 'iv', 'v'][i]} · {g.title}<span>{g.author.display_name}{g.photoMeta?.format ? ` · ${g.photoMeta.format === 'film' ? 'Film' : 'Digital'}` : ''}</span></span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 
   <!-- 5. The Manifesto, in brief: four articles, one line each -->
   <section class="sec dark mani">
@@ -230,4 +250,17 @@ import { getAuthors } from '../lib/guild';
     .guild-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); margin-left: auto; margin-right: auto; margin-top: 40px; }
     .guild-cta .btn, .guild-cta .ghost { text-align: center; }
   }
+  /* From the Hearth: a strip of plates, the first one larger */
+  .home-plates-go { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .4); padding-bottom: 3px; align-self: flex-end; }
+  .home-plates-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 16px; align-items: end; }
+  .home-plate { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .home-plate-img { display: block; height: 260px; overflow: hidden; background: #14180F; }
+  .home-plate:first-child .home-plate-img { height: 340px; }
+  .home-plate-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s var(--ease, ease); }
+  .home-plate:hover .home-plate-img img { transform: scale(1.04); }
+  .home-plate-cap { font-size: 9.5px; line-height: 1.6; display: flex; flex-direction: column; overflow: hidden; }
+  .home-plate-cap span { opacity: .7; }
+  .home-plate:hover .home-plate-cap { color: var(--ember); }
+  @media (max-width: 900px) { .home-plates-row { grid-template-columns: 1fr 1fr; } .home-plate:first-child { grid-column: 1 / -1; } .home-plate:nth-child(n + 4) { display: none; } }
+  @media (max-width: 700px) { .home-plate-img { height: 170px; } .home-plate:first-child .home-plate-img { height: 260px; } }
 </style>

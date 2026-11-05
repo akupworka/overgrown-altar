@@ -110,3 +110,21 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - Test on iPhone 16 size (393x852) as well as desktop; keep motion transform/opacity-only (smooth).
 - This cloud workspace may not reach Sanity or Supabase directly; test what you can and tell the
   owner exactly what to check live.
+
+## Rebuilds, live lists, writer emails, inviting from the Desk
+- Rebuilds no longer happen on every change. Approving, changing a live piece or a published writer's page marks
+  `private.settings.rebuild_pending`; a pg_cron job (`overgrown-rebuild-if-pending`, minute 7 of every hour) calls the
+  Netlify build hook only if something is pending. The editor's Desk has **Rebuild now** (`public.rebuild_now()`).
+- Lists fill themselves in between builds (`lib/live.ts`): DispatchList with `live={{ pillar, max }}` (home, Watchtower,
+  Perimeter) and the Hearth's cards ask Supabase for pieces approved since the page was built. New piece pages already
+  work at once (the 404 page's LivePiece). Writer pages and the archive catch up at the next rebuild.
+- Writers are emailed the editor's decision (approved, returned with the note, declined): Supabase calls
+  `netlify/functions/notify-writer.mts`, which sends through Resend, once per decision (`pieces.writer_notified`).
+- The editor's **Invite a writer** box calls `netlify/functions/invite-writer.mts` (checks the caller is the editor,
+  then Supabase sends the branded invite and sets their name).
+- Both functions need Netlify environment variables (Site configuration > Environment variables):
+  `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API keys > secret key) for both,
+  `RESEND_API_KEY` (resend.com, with overgrownaltar.com verified) for the writer emails, and optionally
+  `EMAIL_FROM` (default "Overgrown Altar <editor@overgrownaltar.com>"). Without them, they quietly do nothing.
+- Forum extras: "new since your last visit" (kept on each device), Quote, *italic* / **bold** / links in posts,
+  and each poster's prestige badge.

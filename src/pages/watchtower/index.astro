@@ -121,7 +121,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
           <input type="search" placeholder="Search the dispatches" autocomplete="off" />
         </label>
       </div>
-      <div class="wt-list"><DispatchList items={rest} /></div>
+      <div class="wt-list"><DispatchList items={rest} live={{ pillar: 'watchtower' }} /></div>
       <p class="it mut wt-none" hidden>No dispatch matches that. Try another word, or <a href="/archive">search everything</a>.</p>
       </>)}
 

@@ -11,12 +11,16 @@ export interface DispatchItem {
   image?: string; imagePos?: string; minutes?: number;
   tag?: string;              // optional: lets a page filter the list (e.g. by kind of piece)
 }
-interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark' }
+// live: fill in pieces approved since the site was built (see lib/live.ts). pillar narrows it; max keeps the list short.
+interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark'; live?: { pillar?: string; max?: number; kicker?: 'full' | 'kind' } }
 const tone = Astro.props.tone ?? 'paper';
+const live = Astro.props.live;
+const BUILT = new Date().toISOString();
 const items = [...Astro.props.items].sort((a, b) => b.date.localeCompare(a.date));
 const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-<ol class:list={['dispatches', { dark: tone === 'dark' }]}>
+<ol class:list={['dispatches', { dark: tone === 'dark' }]} data-live={live ? '' : undefined} data-built={live ? BUILT : undefined}
+  data-pillar={live?.pillar} data-max={live?.max} data-kicker={live?.kicker ?? 'full'}>
   {items.map((d) => (
     <li data-tag={d.tag}>
       <div class="row-link">
@@ -40,8 +44,43 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
   ))}
 </ol>
 
+<script>
+  import { freshSince } from '../lib/live';
+  // New pieces approved since this page was built join the top of the list, drawn from its own first row.
+  const fmtLong = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  const fmtShort = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  document.querySelectorAll<HTMLOListElement>('ol.dispatches[data-live]').forEach(async (list) => {
+    const model = list.querySelector<HTMLLIElement>(':scope > li');
+    if (!model) return;
+    const have = new Set([...list.querySelectorAll<HTMLAnchorElement>('a.title')].map((a) => new URL(a.href).pathname));
+    const fresh = (await freshSince(list.dataset.built!, list.dataset.pillar)).filter((p) => p.medium !== 'photograph' && !have.has(p.href));
+    for (const p of [...fresh].reverse()) {
+      const li = model.cloneNode(true) as HTMLLIElement;
+      li.dataset.tag = p.medium;
+      const t = li.querySelector<HTMLAnchorElement>('a.title'); if (t) { t.href = p.href; t.textContent = p.title; }
+      const k = li.querySelector('.kicker'); if (k) k.textContent = list.dataset.kicker === 'kind' ? p.kind : `${p.room} · ${p.kind}`;
+      const s = li.querySelector('.summary'); if (s) { s.textContent = p.standfirst; (s as HTMLElement).hidden = !p.standfirst; }
+      const img = li.querySelector<HTMLImageElement>('.thumb img'); if (img && p.image) { img.src = p.image; img.style.objectPosition = p.imagePos; }
+      li.querySelectorAll<HTMLElement>('.who').forEach((w) => (w.textContent = p.author));
+      li.querySelectorAll<HTMLAnchorElement>('a.author').forEach((a) => a.removeAttribute('href'));
+      const av = li.querySelector<HTMLElement>('.avatar');
+      if (av) { av.dataset.authorId = p.authorId; av.innerHTML = ''; if (p.portrait) { const i = new Image(); i.src = p.portrait; i.alt = ''; av.append(i); } else { const sp = document.createElement('span'); sp.textContent = p.author.split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase(); av.append(sp); } }
+      const time = li.querySelector('time'); if (time) time.setAttribute('datetime', p.date);
+      const l = li.querySelector('.long'); if (l) l.textContent = fmtLong(p.date);
+      const sh = li.querySelector('.short'); if (sh) sh.textContent = fmtShort(p.date);
+      const m = li.querySelector('.mins'); if (m) m.textContent = ` · ${p.minutes} min`;
+      li.classList.add('is-fresh');
+      list.prepend(li);
+    }
+    const max = Number(list.dataset.max); if (max) [...list.children].slice(max).forEach((c) => c.remove());
+    if (fresh.length) list.dispatchEvent(new CustomEvent('oa:fresh', { bubbles: true }));
+  });
+</script>
+
 <style>
   .dispatches { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(42, 32, 23, .25); }
+  .dispatches :global(li.is-fresh) { animation: fresh-in .6s ease both; }
+  @keyframes fresh-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   .dispatches li { border-bottom: 1px solid rgba(42, 32, 23, .18); position: relative; }
   .title::after { content: ''; position: absolute; inset: 0; }   /* the whole row opens the piece */
   .author { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 10px; min-width: 0; transition: color .25s; }

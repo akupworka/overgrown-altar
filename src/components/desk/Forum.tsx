@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { pageList } from '../../lib/pager';
 import { Initials } from './DeskApp';
+import { PrestigeBadge } from './Prestige';
 import '../../styles/forum.css';
 
 interface Board { id: string; slug: string; name: string; description: string; image: string; position: number; editor_only: boolean; keep_threads: number }
@@ -37,9 +38,58 @@ async function loadPeople(ids: (string | null | undefined)[]): Promise<People> {
   const want = [...new Set(ids.filter(Boolean) as string[])];
   if (!want.length) return {};
   const { data } = await supabase.from('profiles').select('id, display_name, portrait_path, role').in('id', want);
-  return Object.fromEntries((data ?? []).map((p: any) => [p.id, p]));
+  return Object.fromEntries((Array.isArray(data) ? data : []).map((p: any) => [p.id, p]));
 }
 const nameOf = (people: People, id?: string | null) => (id && people[id]?.display_name) || 'A member';
+
+// ---- What's new since you last looked (kept on this device): each thread's last visit, and when you first came.
+const SEEN = 'oa_forum_seen', FIRST = 'oa_forum_first';
+function seenMap(): Record<string, string> { try { return JSON.parse(localStorage.getItem(SEEN) || '{}'); } catch { return {}; } }
+function firstVisit(): string {
+  try { let f = localStorage.getItem(FIRST); if (!f) { f = new Date(Date.now() - 864e5 * 3).toISOString(); localStorage.setItem(FIRST, f); } return f; } catch { return new Date().toISOString(); }
+}
+/** Has this thread had a post (by someone else) since you last opened it? */
+export function isNew(t: Pick<Thread, 'id' | 'last_post_at' | 'last_author_id'>, me?: string, seen = seenMap()) {
+  if (me && t.last_author_id === me) return false;
+  return t.last_post_at > (seen[t.id] ?? firstVisit());
+}
+function markSeen(id: string) {
+  try { const m = seenMap(); m[id] = new Date().toISOString(); const keep = Object.entries(m).sort((a, b) => b[1].localeCompare(a[1])).slice(0, 400); localStorage.setItem(SEEN, JSON.stringify(Object.fromEntries(keep))); } catch {}
+}
+
+// ---- A post, set as written: blank lines make paragraphs, "> " lines are a quotation,
+// *italic* and **bold** are honored, and web addresses become links. (React escapes everything else.)
+function inline(text: string, key: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*|https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g;
+  let last = 0, m: RegExpExecArray | null, i = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const t = m[0];
+    out.push(t.startsWith('**') ? <strong key={key + i++}>{t.slice(2, -2)}</strong>
+      : t.startsWith('*') ? <em key={key + i++}>{t.slice(1, -1)}</em>
+      : <a key={key + i++} href={t} target="_blank" rel="noopener noreferrer nofollow">{t.replace(/^https?:\/\/(www\.)?/, '')}</a>);
+    last = m.index + t.length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+export function PostBody({ body }: { body: string }) {
+  const blocks = body.replace(/\r\n/g, '\n').split(/\n{2,}/);
+  return (
+    <div className="fo-body">
+      {blocks.map((b, bi) => {
+        const lines = b.split('\n');
+        if (lines.every((l) => l.startsWith('>'))) {
+          const q = lines.map((l) => l.replace(/^>\s?/, ''));
+          const who = /^(.+) wrote:$/.exec(q[0]);
+          return <blockquote key={bi} className="fo-quote">{who && <span className="lab fo-quote-who">{who[1]} wrote</span>}{(who ? q.slice(1) : q).map((l, li) => <span key={li}>{inline(l, `${bi}-${li}-`)}{li < q.length - 1 && <br />}</span>)}</blockquote>;
+        }
+        return <p key={bi}>{lines.map((l, li) => <span key={li}>{inline(l, `${bi}-${li}-`)}{li < lines.length - 1 && <br />}</span>)}</p>;
+      })}
+    </div>
+  );
+}
 
 function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
   return (
@@ -54,7 +104,7 @@ function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
 
 // ---------------------------------------------------------------- the boards
 
-export function ForumIndex() {
+export function ForumIndex({ me }: { me?: string } = {}) {
   const [boards, setBoards] = useState<Board[] | null>(null);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [people, setPeople] = useState<People>({});
@@ -64,8 +114,8 @@ export function ForumIndex() {
         supabase.from('forum_boards').select('*').order('position'),
         supabase.from('forum_threads').select('*').order('last_post_at', { ascending: false }),
       ]);
-      setBoards((b as Board[]) ?? []); setThreads((t as Thread[]) ?? []);
-      setPeople(await loadPeople((t ?? []).map((x: any) => x.last_author_id)));
+      setBoards((b as Board[]) ?? []); setThreads(Array.isArray(t) ? (t as Thread[]) : []);
+      setPeople(await loadPeople((Array.isArray(t) ? t : []).map((x: any) => x.last_author_id)));
     })();
   }, []);
   const posts = threads.reduce((n, t) => n + t.reply_count + 1, 0);
@@ -83,12 +133,13 @@ export function ForumIndex() {
           {boards.map((b) => {
             const mine = threads.filter((t) => t.board_id === b.id);
             const latest = mine[0];
+            const fresh = mine.filter((t) => isNew(t, me)).length;
             return (
               <li key={b.id}>
                 <Link to={`/guild/members/?board=${b.slug}`} className="fo-board">
                   <span className="fo-board-img">{b.image ? <img src={b.image} alt="" loading="lazy" /> : null}</span>
                   <span className="fo-board-text">
-                    <span className="fo-board-name"><span className="fo-chev" aria-hidden="true">»</span>{b.name}{b.editor_only && <span className="lab fo-tag">From the editor</span>}</span>
+                    <span className="fo-board-name"><span className="fo-chev" aria-hidden="true">»</span>{b.name}{b.editor_only && <span className="lab fo-tag">From the editor</span>}{fresh > 0 && <span className="lab fo-new">{fresh} new</span>}</span>
                     <span className="fo-board-desc">{b.description}</span>
                   </span>
                   <span className="fo-board-stats">
@@ -122,8 +173,8 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
     if (!b) return;
     const { data: t } = await supabase.from('forum_threads').select('*').eq('board_id', b.id)
       .order('pinned', { ascending: false }).order('last_post_at', { ascending: false });
-    setThreads((t as Thread[]) ?? []);
-    setPeople(await loadPeople((t ?? []).flatMap((x: any) => [x.author_id, x.last_author_id])));
+    setThreads(Array.isArray(t) ? (t as Thread[]) : []);
+    setPeople(await loadPeople((Array.isArray(t) ? t : []).flatMap((x: any) => [x.author_id, x.last_author_id])));
   }, [slug]);
   useEffect(() => { load(); }, [load]);
   if (board === undefined) return <p className="lab mut d-loading">Opening the board…</p>;
@@ -158,6 +209,7 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
                   <span className="fo-thread-t">
                     {t.pinned && <span className="lab fo-tag">Pinned</span>}
                     {t.locked && <span className="lab fo-tag fo-tag-dim">Closed</span>}
+                    {isNew(t, me) && <span className="lab fo-new">New</span>}
                     {t.title}
                   </span>
                   <span className="lab mut">Started by {nameOf(people, t.author_id)} · {ago(t.created_at)}</span>
@@ -221,6 +273,9 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [pieces, setPieces] = useState<Record<string, number>>({});   // each poster's published pieces, for their prestige
+  const [since] = useState(() => seenMap()[id] ?? firstVisit());     // when you last looked, so newer posts can be marked
+  useEffect(() => () => markSeen(id), [id]);
   const load = useCallback(async () => {
     const { data: t } = await supabase.from('forum_threads').select('*').eq('id', id).maybeSingle();
     setThread((t as Thread) ?? null);
@@ -230,9 +285,23 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
       supabase.from('forum_posts').select('*').eq('thread_id', id).order('created_at'),
     ]);
     setBoard((b as Board) ?? null); setPosts((p as Post[]) ?? []);
-    setPeople(await loadPeople((p ?? []).map((x: any) => x.author_id)));
+    const authors = [...new Set((Array.isArray(p) ? p : []).map((x: any) => x.author_id))];
+    setPeople(await loadPeople(authors));
+    if (authors.length) {
+      const { data: w } = await supabase.from('pieces').select('author_id').eq('status', 'approved').in('author_id', authors);
+      const n: Record<string, number> = {}; (Array.isArray(w) ? w : []).forEach((r: any) => { n[r.author_id] = (n[r.author_id] ?? 0) + 1; });
+      setPieces(n);
+    }
+    markSeen(id);
   }, [id]);
   useEffect(() => { load(); }, [load]);
+  function quote(p: Post) {
+    const who = people[p.author_id]?.display_name || 'A member';
+    const text = p.body.split('\n').filter((l) => !l.startsWith('>')).join('\n').trim().slice(0, 600);
+    setReply((r) => `> ${who} wrote:\n${text.split('\n').map((l) => `> ${l}`).join('\n')}\n\n${r}`);
+    const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea');
+    box?.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => box?.focus(), 400);
+  }
   useEffect(() => { if (thread) document.title = `${thread.title} · The Forum · Overgrown Altar`; }, [thread]);
 
   if (thread === undefined) return <p className="lab mut d-loading">Opening the thread…</p>;
@@ -296,13 +365,14 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           const who = people[p.author_id];
           const mine = p.author_id === me;
           return (
-            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}`} id={`post-${p.id}`}>
+            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}${p.created_at > since && !mine ? ' fresh' : ''}`} id={`post-${p.id}`}>
               <aside className="fo-who">
                 <Link to={`/guild/members/?m=${p.author_id}`} className="fo-who-link">
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
                   <span className="fo-who-name">{who?.display_name || 'A member'}</span>
                 </Link>
                 <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : 'Writer'}</span>
+                <PrestigeBadge published={pieces[p.author_id] ?? 0} />
               </aside>
               <div className="fo-post-main">
                 <span className="lab mut fo-post-when">{ago(p.created_at)}{p.edited_at ? ' · edited' : ''}{i === 0 ? ' · opening post' : ''}</span>
@@ -311,11 +381,12 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                     <textarea className="field" rows={6} maxLength={6000} value={editing.body} onChange={(e) => setEditing({ id: p.id, body: e.target.value })} />
                     <span className="fo-post-acts"><button type="button" className="btn d-btn" onClick={saveEdit}>Save</button><button type="button" className="d-textbtn" onClick={() => setEditing(null)}>Cancel</button></span>
                   </div>
-                ) : <div className="fo-body">{p.body}</div>}
-                {editing?.id !== p.id && (mine || isEditor) && (
+                ) : <PostBody body={p.body} />}
+                {editing?.id !== p.id && (
                   <span className="fo-post-acts">
+                    {open && <button type="button" className="d-textbtn" onClick={() => quote(p)}>Quote</button>}
                     {mine && <button type="button" className="d-textbtn" onClick={() => setEditing({ id: p.id, body: p.body })}>Edit</button>}
-                    {i > 0 && <button type="button" className="d-textbtn d-danger" onClick={() => removePost(p)}>Delete</button>}
+                    {i > 0 && (mine || isEditor) && <button type="button" className="d-textbtn d-danger" onClick={() => removePost(p)}>Delete</button>}
                   </span>
                 )}
               </div>
@@ -327,7 +398,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         <form className="fo-compose fo-reply" onSubmit={send}>
           <label className="d-lbl"><span className="lab">{thread.locked ? 'Reply (the thread is closed; only you can post)' : 'Your reply'}</span>
             <textarea className="field" rows={5} maxLength={6000} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Add to the conversation." /></label>
-          <div className="fo-compose-acts"><button className="btn d-btn" type="submit" disabled={busy || !reply.trim()}>{busy ? 'Posting…' : 'Post reply'}</button></div>
+          <div className="fo-compose-acts"><button className="btn d-btn" type="submit" disabled={busy || !reply.trim()}>{busy ? 'Posting…' : 'Post reply'}</button><span className="lab mut fo-hint">*italic* · **bold** · links work</span></div>
         </form>
       ) : <p className="it mut fo-empty">This thread is closed to new replies.</p>}
     </div>
@@ -347,9 +418,9 @@ export function ForumLatest({ count = 3, plain = false }: { count?: number; plai
         supabase.from('forum_threads').select('*').order('last_post_at', { ascending: false }).limit(count),
         supabase.from('forum_boards').select('*'),
       ]);
-      const boards = new Map(((b as Board[]) ?? []).map((x) => [x.id, x]));
-      setRows(((t as Thread[]) ?? []).map((x) => ({ ...x, board: boards.get(x.board_id) })));
-      setPeople(await loadPeople((t ?? []).map((x: any) => x.last_author_id)));
+      const boards = new Map((Array.isArray(b) ? (b as Board[]) : []).map((x) => [x.id, x]));
+      setRows((Array.isArray(t) ? (t as Thread[]) : []).map((x) => ({ ...x, board: boards.get(x.board_id) })));
+      setPeople(await loadPeople((Array.isArray(t) ? t : []).map((x: any) => x.last_author_id)));
     })();
   }, [count]);
   const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) =>

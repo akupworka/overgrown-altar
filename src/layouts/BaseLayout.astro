@@ -79,7 +79,7 @@ const imageUrl = new URL(image, site).toString();
         const data = { title: document.title, url: location.href };
         try {
           if (navigator.share) await navigator.share(data);
-          else { await navigator.clipboard.writeText(location.href); const t = b.textContent; b.textContent = 'Link copied'; setTimeout(() => (b.textContent = t), 1800); }
+          else { await navigator.clipboard.writeText(location.href); const el = b.querySelector('span') ?? b; const t = el.textContent; el.textContent = 'Link copied'; setTimeout(() => (el.textContent = t), 1800); }
         } catch {}
       }));
 

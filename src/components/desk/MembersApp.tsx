@@ -418,7 +418,7 @@ export default function MembersApp() {
   );
   if (route.t) return <ForumThread id={route.t} me={session.user.id} isEditor={isEditor} />;
   if (route.board) return <ForumBoard slug={route.board} me={session.user.id} isEditor={isEditor} />;
-  if (route.view === 'forum') return <ForumIndex />;
+  if (route.view === 'forum') return <ForumIndex me={session.user.id} />;
   if (route.p) return <Reading id={route.p} />;
   if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
   return <Directory />;

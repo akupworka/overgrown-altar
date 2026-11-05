@@ -94,7 +94,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
       {KINDS.filter((k) => k.value !== 'photograph').map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
     </div>
     {works.length > 0 ? (
-      <ol class="he-grid">
+      <ol class="he-grid" data-built={new Date().toISOString()}>
         {works.map((w) => (
           <li data-tag={w.kind}>
             <a class="he-card-img" href={w.href} tabindex="-1" aria-hidden="true"><img class:list={[{ mono: !w.hasPhoto }]} src={w.image} alt="" loading="lazy" style={w.pos} /></a>
@@ -165,9 +165,10 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
 
 <script>
   import { PER_PAGE, pagerHtml } from '../lib/pager';
+  import { freshSince } from '../lib/live';
   // Tapping a kind shows only that kind of work; six at a time, with pages below.
   const chips = [...document.querySelectorAll<HTMLButtonElement>('.he-filters .chip')];
-  const cards = [...document.querySelectorAll<HTMLElement>('.he-grid li[data-tag]')];
+  let cards = [...document.querySelectorAll<HTMLElement>('.he-grid li[data-tag]')];
   const none = document.querySelector<HTMLElement>('.he-none');
   const pager = document.querySelector<HTMLElement>('.he-pager');
   let kind = 'all', page = 1;
@@ -193,6 +194,29 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
   }));
   draw();
+
+  // Written work approved since this page was built joins the front of the cards (photographs go to the gallery).
+  const grid = document.querySelector<HTMLOListElement>('.he-grid');
+  const model = grid?.querySelector<HTMLLIElement>(':scope > li');
+  if (grid && model) freshSince(grid.dataset.built!, 'hearth').then((fresh) => {
+    const have = new Set(cards.map((c) => new URL(c.querySelector<HTMLAnchorElement>('a.he-card-t')!.href).pathname));
+    const add = fresh.filter((p) => p.medium !== 'photograph' && !have.has(p.href));
+    for (const p of [...add].reverse()) {
+      const li = model.cloneNode(true) as HTMLLIElement;
+      li.dataset.tag = p.medium; li.hidden = false;
+      li.querySelectorAll<HTMLAnchorElement>('a.he-card-img, a.he-card-t').forEach((a) => (a.href = p.href));
+      const t = li.querySelector('.he-card-t'); if (t) t.textContent = p.title;
+      const k = li.querySelector('.he-card-k'); if (k) k.textContent = p.kind;
+      const sf = li.querySelector<HTMLElement>('.he-card-sf'); if (sf) { sf.textContent = p.standfirst; sf.hidden = !p.standfirst; }
+      const img = li.querySelector<HTMLImageElement>('.he-card-img img'); if (img && p.image) { img.src = p.image; img.style.objectPosition = p.imagePos; img.classList.remove('mono'); }
+      const by = li.querySelector('.he-card-by .lab'); if (by) by.textContent = p.author;
+      li.querySelector<HTMLAnchorElement>('a.he-card-by')?.removeAttribute('href');
+      const av = li.querySelector<HTMLElement>('.avatar');
+      if (av) { av.innerHTML = ''; if (p.portrait) { const i = new Image(); i.src = p.portrait; i.alt = ''; av.append(i); } else { const sp = document.createElement('span'); sp.textContent = p.author.split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase(); av.append(sp); } }
+      grid.prepend(li);
+    }
+    if (add.length) { cards = [...document.querySelectorAll<HTMLElement>('.he-grid li[data-tag]')]; draw(); }
+  });
 </script>
 
 <style>

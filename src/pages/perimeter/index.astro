@@ -56,7 +56,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
       {KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
     </div>
     <div class="pe-list">
-      {items.length > 0 ? <DispatchList items={items} /> : <p class="it mut" style="font-size:20px">The first stories are being written.</p>}
+      {items.length > 0 ? <DispatchList items={items} live={{ pillar: 'perimeter', kicker: 'kind' }} /> : <p class="it mut" style="font-size:20px">The first stories are being written.</p>}
       <p class="it mut pe-none" hidden>Nothing here yet. The first one may be yours.</p>
     </div>
   </section>
@@ -82,13 +82,14 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
 <script>
   // Tapping a kind (or a filter) shows only those stories.
   const chips = [...document.querySelectorAll<HTMLButtonElement>('.pe-filters .chip')];
-  const rows = [...document.querySelectorAll<HTMLElement>('.pe-list li[data-tag]')];
+  const rows = () => [...document.querySelectorAll<HTMLElement>('.pe-list li[data-tag]')];   // asked fresh each time: new stories can join the list
   const none = document.querySelector<HTMLElement>('.pe-none');
   const show = (k: string) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === k)));
     let n = 0;
-    rows.forEach((r) => { const on = k === 'all' || r.dataset.tag === k; r.hidden = !on; if (on) n++; });
-    if (none) none.hidden = n > 0 || rows.length === 0;
+    const all = rows();
+    all.forEach((r) => { const on = k === 'all' || r.dataset.tag === k; r.hidden = !on; if (on) n++; });
+    if (none) none.hidden = n > 0 || all.length === 0;
   };
   chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.show!)));
   document.querySelectorAll<HTMLButtonElement>('.pe-kind').forEach((b) => b.addEventListener('click', () => {

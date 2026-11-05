@@ -20,6 +20,7 @@ export async function getStaticPaths() {
 const { piece: p } = Astro.props as { piece: GuildPiece };
 const a = p.author;
 const more = (await guildPillar(p.pillar)).filter((x) => x.id !== p.id).slice(0, 3);
+const FALLBACK: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 const date = new Date(p.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const first = a.display_name.split(' ')[0];
 const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
@@ -51,6 +52,13 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
       {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} gallery={p.gallery} />}
       {p.body.trim() && <Body body={p.body} />}
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>
+      <!-- Share: the phone's share sheet, or the link copied on a computer (BaseLayout's [data-share]). -->
+      <div class="gp-share">
+        <button type="button" class="gp-share-btn" data-share>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>
+          <span>Share this {isPhoto ? 'photograph' : 'piece'}</span>
+        </button>
+      </div>
 
       <aside class="gp-author" aria-label="About the author">
         <a class="gp-arch" href={aUrl} aria-hidden="true" tabindex="-1" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt="" loading="lazy" /> : a.display_name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')}</a>
@@ -72,9 +80,11 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
       <span class="eb">More from {PILLAR_LABEL[p.pillar]}</span>
       <div class="g3" style="margin-top:30px">
         {more.map((m) => (
-          <a href={guildUrl(m)} class="rule gp-more">
-            <span class="lab mut">{m.author.display_name}</span>
+          <a href={guildUrl(m)} class="gp-more">
+            <span class="gp-more-img"><img src={m.image || FALLBACK[m.pillar]} alt="" loading="lazy" class:list={[{ mono: !m.image }]} style={m.image && m.imagePos ? `object-position:${m.imagePos}` : undefined} /></span>
+            <span class="lab gp-more-k">{MEDIUM_LABEL[m.medium] ?? ''} · {m.author.display_name}</span>
             <span class="h3">{m.title}</span>
+            {m.standfirst && <span class="it gp-more-sf">{m.standfirst}</span>}
           </a>
         ))}
       </div>
