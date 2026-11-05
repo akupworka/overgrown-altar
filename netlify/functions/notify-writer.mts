@@ -4,7 +4,9 @@
 // Needs, in Netlify > Site configuration > Environment variables:
 //   SUPABASE_SERVICE_ROLE_KEY  (Supabase > Project Settings > API keys > secret key) to read the writer's address
 //   RESEND_API_KEY             (resend.com > API Keys) to send the email
-//   EMAIL_FROM                 optional, e.g. "Overgrown Altar <editor@overgrownaltar.com>" (a domain verified in Resend)
+//   EMAIL_FROM                 optional, e.g. "Overgrown Altar <editor@overgrownaltar.com>" (any address at the domain verified
+//                              in Resend; it needn't be a real inbox)
+//   EMAIL_REPLY_TO             optional, a real inbox (e.g. your Gmail) where writers' replies should land
 // Without them it does nothing, quietly.
 //
 // It only ever writes to the piece's own author, only about a decision made in the last ten minutes,
@@ -69,7 +71,10 @@ export default async (req: Request) => {
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${resend}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: mail.subject, html: mail.html }),
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: mail.subject, html: mail.html,
+      ...(process.env.EMAIL_REPLY_TO ? { reply_to: process.env.EMAIL_REPLY_TO } : {}),
+    }),
   });
   if (!res.ok) return new Response('send failed: ' + (await res.text()).slice(0, 200), { status: 502 });
   await db.from('pieces').update({ writer_notified: p.status }).eq('id', p.id);

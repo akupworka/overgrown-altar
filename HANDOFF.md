@@ -125,6 +125,7 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - Both functions need Netlify environment variables (Site configuration > Environment variables):
   `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API keys > secret key) for both,
   `RESEND_API_KEY` (resend.com, with overgrownaltar.com verified) for the writer emails, and optionally
-  `EMAIL_FROM` (default "Overgrown Altar <editor@overgrownaltar.com>"). Without them, they quietly do nothing.
+  `EMAIL_FROM` (default "Overgrown Altar <editor@overgrownaltar.com>"; needn't be a real inbox) and
+  `EMAIL_REPLY_TO` (a real inbox where writers' replies land). Without them, they quietly do nothing.
 - Forum extras: "new since your last visit" (kept on each device), Quote, *italic* / **bold** / links in posts,
   and each poster's prestige badge.
