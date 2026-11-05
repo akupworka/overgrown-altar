@@ -301,7 +301,7 @@ function Prestiges({ me }: { me: string }) {
       <section className="pz-trophies" id="trophies">
         <span className="eb">Beside the prestiges</span>
         <h2 className="h2">The trophies</h2>
-        <p className="it pz-lead">Prestiges count how much you have published. Trophies mark particular things done well: a first poem, a story in every room of the house, a piece of real length. Bronze, silver, gold, and the rare rainbow glass.</p>
+        <p className="it pz-lead">Prestiges count everything you publish. Trophies mark the work in each category, raised from bronze to silver, gold and rainbow glass as it grows, and a few things done once and done well.</p>
         <div className="pz-cat"><TrophyCatalogue /></div>
       </section>
     </div>

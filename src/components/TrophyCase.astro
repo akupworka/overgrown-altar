@@ -1,21 +1,21 @@
 ---
-// A writer's trophies, earned ones only (public pages). Built from their published pieces and their page.
+// A writer's trophies, earned ones only (public pages). Category trophies show their metal now and the next one.
 import { trophiesFor, trophySvg, TIER_LABEL, type TrophyCtx } from '../lib/trophies';
 import '../styles/trophies.css';
 interface Props { ctx: TrophyCtx; tone?: 'dark' | 'paper' }
 const { ctx, tone = 'paper' } = Astro.props;
-const earned = trophiesFor(ctx).filter((t) => t.earned).map((t) => t.trophy);
+const earned = trophiesFor(ctx).filter((t) => t.earned);
 ---
 {earned.length > 0 && (
   <section class:list={['tc', { 'paper-tone': tone === 'paper' }]}>
     <div class="tc-head"><span class="eb">Trophies</span><a class="lab mut" href="/guild/members/?view=prestige#trophies">{earned.length} earned · see all</a></div>
     <div class="tc-grid">
-      {earned.map((t) => (
-        <figure class="tr" data-tier={t.tier} title={t.note}>
-          <Fragment set:html={trophySvg(t)} />
+      {earned.map(({ trophy: t, tier, n, next }) => (
+        <figure class="tr" data-tier={tier} title={t.note}>
+          <Fragment set:html={trophySvg(t, 76, tier)} />
           <span class="tr-name">{t.name}</span>
-          <span class="tr-tier">{TIER_LABEL[t.tier]}</span>
-          <span class="tr-note">{t.note}</span>
+          <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${t.unit}` : ''}</span>
+          {t.count && next ? <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
         </figure>
       ))}
     </div>

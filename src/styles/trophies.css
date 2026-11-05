@@ -22,7 +22,35 @@
 .tc.paper-tone .tr-note { color: var(--muted-paper); opacity: 1; }
 @media (max-width: 700px) {
   .tc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 10px; }
-  .tr-svg { width: 56px; height: 56px; }
+  .tr-svg { width: 62px; height: 62px; }
   .tr-name { font-size: 15px; }
   .tr-note { display: none; }
+}
+/* Progress towards the next metal */
+.tr-bar { width: 90px; height: 2px; border-radius: 2px; background: rgba(128,128,128,.25); overflow: hidden; }
+.tr-bar i { display: block; height: 100%; background: linear-gradient(90deg, #C98A5B, #AEB8C3, #D2A23A, #B05BFF); }
+.tr-next { font-family: var(--serif); font-style: italic; font-size: 14px; opacity: .8; }
+/* The catalogue */
+.tcat { display: flex; flex-direction: column; gap: 18px; text-align: left; }
+.tcat-h { margin-top: 20px; }
+.tcat-p { margin: 0; font-size: 17px; color: var(--muted-dark); max-width: 640px; }
+.tcat-rows { display: flex; flex-direction: column; border-top: 1px solid rgba(243,236,220,.1); }
+.tcat-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(243,236,220,.08); }
+.tcat-text { display: flex; flex-direction: column; gap: 6px; }
+.tcat-text .tr-name { color: var(--bone); font-size: 21px; }
+.tcat-text .tr-note { max-width: 420px; text-align: left; }
+.tcat-metals { display: flex; gap: 14px; }
+.tr-mini { gap: 6px; }
+.tr-mini .tr-tier { font-size: 8px; letter-spacing: .14em; }
+@media (max-width: 700px) {
+  .tcat-row { grid-template-columns: 1fr; gap: 14px; }
+  .tcat-metals { justify-content: space-between; }
+  .tr-mini .tr-svg { width: 52px; height: 52px; }
+  .tcat-text .tr-note { display: block; font-size: 15px; }
+}
+.tcat-metals { display: grid !important; grid-template-columns: repeat(4, 64px); gap: 12px; }
+@media (max-width: 700px) {
+  .tcat-metals { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .tr-mini-name { display: none; }
+  .tr-mini .tr-tier { font-size: 10px; letter-spacing: .08em; }
 }
