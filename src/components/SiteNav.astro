@@ -77,7 +77,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     const update = () => {
       const y = scrollY;
       const nowSolid = y > 40 || header.hasAttribute('data-always-solid');
-      const nowHidden = y > 320 && y > lastY + 4 && !header.contains(document.activeElement);
+      // Inside the members' area the header stays put (sticky); elsewhere it tucks away while you scroll down.
+      const nowHidden = !header.hasAttribute('data-always-solid') && y > 320 && y > lastY + 4 && !header.contains(document.activeElement);
       const showing = y < lastY - 4;
       if (nowSolid !== solid) { solid = nowSolid; header.classList.toggle('solid', solid); }
       if (nowHidden && !hidden) { hidden = true; header.classList.add('tucked'); }
