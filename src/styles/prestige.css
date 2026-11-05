@@ -29,3 +29,5 @@
 .pr-lg { font-size: 11px; padding: 7px 15px 7px 11px; gap: 9px; }
 .pr-lg .pr-gem { width: 11px; height: 11px; }
 .pr-lg .pr-n { font-size: 14px; }
+a.pr { cursor: pointer; transition: filter .3s, transform .3s; }
+a.pr:hover { filter: brightness(1.18); transform: translateY(-1px); }

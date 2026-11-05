@@ -272,6 +272,7 @@ function DeskPrestige({ published }: { published: number }) {
     <div className="d-prestige">
       {current ? <PrestigeBadge published={published} size="lg" /> : <span className="lab mut">Your first published piece earns your first prestige.</span>}
       {next && <span className="it d-prestige-next">{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b>{next.name}</b></span>}
+      <a className="d-prestige-page lab" href="/guild/members/?view=prestige">See the ladder and who holds each rank →</a>
       <details className="d-prestige-all">
         <summary className="lab">The ten prestiges</summary>
         <ol>
