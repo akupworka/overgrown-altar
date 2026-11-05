@@ -1,6 +1,7 @@
 /* A published Guild piece (page src/pages/guild/[slug].astro and the live fallback on the 404 page). */
-.gp-hero { height: 680px; }
-.gp-hero-c { top: 230px; padding: 0 40px; }
+.gp-hero { height: auto; }
+/* The header is only as tall as what is in it: room for the nav above, a little breathing room below. */
+.gp-hero-c { position: relative; top: auto; padding: 190px 40px 120px; }
 .gp-hero-c .eb a:hover { color: var(--bone); }
 .gp-title { margin-top: 22px; max-width: 980px; font-size: 68px; }
 .gp-by { margin-top: 26px; display: inline-flex; align-items: center; gap: 12px; }
@@ -24,8 +25,7 @@
 .gp-more { padding-top: 24px; display: flex; flex-direction: column; gap: 10px; }
 .gp-more:hover .h3 { color: var(--ember); }
 @media (max-width: 700px) {
-  .gp-hero { height: 560px; }
-  .gp-hero-c { top: 140px; padding: 0 22px; }
+  .gp-hero-c { padding: 118px 22px 64px; }
   .gp-title { font-size: 36px !important; }
   .gp-by .lab { font-size: 9px; letter-spacing: .14em; }
   .gp-standfirst { font-size: 21px !important; }
@@ -34,8 +34,10 @@
   .gp-links { justify-content: center; }
 }
 /* The author is a link to their page. */
-.gp-by-who { display: inline-flex; align-items: center; gap: 12px; border-bottom: 1px solid transparent; transition: border-color .3s, color .3s; }
+.gp-by-who { display: inline-flex; align-items: center; gap: 12px; transition: color .3s; }
+.gp-by-who .lab { padding-bottom: 3px; border-bottom: 1px solid rgba(201, 162, 39, .55); transition: border-color .3s; }
 .gp-by-who:hover { color: var(--ember); }
+.gp-by-who:hover .lab { border-bottom-color: var(--ember); }
 .gp-by { gap: 8px; flex-wrap: wrap; justify-content: center; }
 .gp-arch:has(img) { background: #E9E2D4; }
 a.gp-arch { transition: box-shadow .4s; }
