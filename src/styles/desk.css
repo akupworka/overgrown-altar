@@ -790,3 +790,10 @@
 .d-kind-look, .d-kind-len { font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.5; color: #ABA597; }
 .d-kind-look .lab, .d-kind-len .lab { display: block; font-style: normal; font-size: 8.5px; color: var(--ember); margin-bottom: 2px; }
 .d-kind-all { align-self: flex-start; font-size: 9.5px; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 2px; }
+
+/* Phones: a fade to black behind the bottom tab bar, so writing melts away before it instead of showing beneath it. */
+@media (max-width: 700px) {
+  .d-tabbar::before { content: ''; position: absolute; z-index: -1; pointer-events: none;
+    left: -12px; right: -12px; top: -56px; bottom: calc(-12px - env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(10,12,10,0) 0%, rgba(10,12,10,.85) 38%, #0A0C0A 62%); }
+}

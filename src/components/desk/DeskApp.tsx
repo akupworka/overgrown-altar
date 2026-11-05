@@ -385,7 +385,7 @@ function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChange
             <li key={p.id} className="d-item">
               <div className="d-item-main">
                 <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
-                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} words · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} {words(p.body) === 1 ? 'word' : 'words'} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
@@ -567,7 +567,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
         <input ref={inlineInput} type="file" accept="image/*" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addInlinePhoto(f); }} />
       </div>
       <RichBody editor={rich} />
-      <span className="d-paper-count">{words(form.body)} words</span>
+      <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
     </article>
   );
   const photo = (
@@ -645,7 +645,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
               <h3 className="d-preview-t">{form.title || 'Untitled'}</h3>
               {form.standfirst && <p className="d-preview-s">{form.standfirst}</p>}
               {firstPara && <p className="d-preview-p">{firstPara.length > 220 ? firstPara.slice(0, 220).trim() + '…' : firstPara}</p>}
-              <span className="lab mut">{words(form.body)} words</span>
+              <span className="lab mut">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
             </article>
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(0)}>Edit the writing</button>
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(1)}>Change the labels or photograph</button>
