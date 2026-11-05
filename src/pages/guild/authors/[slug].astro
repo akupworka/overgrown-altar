@@ -5,6 +5,8 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SiteNav from '../../../components/SiteNav.astro';
 import DispatchList, { type DispatchItem } from '../../../components/DispatchList.astro';
+import { KINDS } from '../../../lib/kinds';
+import { PER_PAGE } from '../../../lib/pager';
 import Subscribe from '../../../components/Subscribe.astro';
 import AuthorLinks from '../../../components/AuthorLinks.astro';
 import PrestigeBadge from '../../../components/PrestigeBadge.astro';
@@ -23,8 +25,10 @@ const items: DispatchItem[] = pieces.map((g) => ({
   href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), author: { name: a.display_name, portrait: a.portrait || undefined, id: a.id },
   image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
-  imagePos: (g.image && g.imagePos) || undefined,
+  imagePos: (g.image && g.imagePos) || undefined, tag: g.medium,
 }));
+// The kinds this writer has published, in the Guild's own order, for the filter.
+const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.value).length })).filter((k) => k.n > 0);
 ---
 <BaseLayout title={a.display_name} description={a.bio || `${a.craft || 'Member'} of the Overgrown Altar Guild.`} image={a.portrait || undefined}>
   <section class="night au-hero">
@@ -41,14 +45,61 @@ const items: DispatchItem[] = pieces.map((g) => ({
     </div>
   </section>
   <section class="sec paper">
-    <div class="au-head"><span class="eb">The work</span><span class="lab mut">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
-    <DispatchList items={items} />
+    <div class="au-shelf" data-per={PER_PAGE}>
+      <div class="au-head"><span class="eb">The work</span><span class="lab mut"><span class="au-count">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'}</span> · newest first</span></div>
+      {kinds.length > 1 && (
+        <div class="filters shelf-filters" role="group" aria-label="Show">
+          <button type="button" class="chip" aria-pressed="true" data-show="all">All<span class="chip-n">{pieces.length}</span></button>
+          {kinds.map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.plural}<span class="chip-n">{k.n}</span></button>)}
+        </div>
+      )}
+      <DispatchList items={items} />
+      <nav class="pager" aria-label="Pages of work" hidden></nav>
+    </div>
   </section>
   <TrophyCase name={a.display_name} ctx={{ pieces, member: { portrait: a.portrait, bio: a.bio, craft: a.craft, role: a.role, created_at: a.created_at } }} />
   <Subscribe />
 </BaseLayout>
 
+<script>
+  import { pageList } from '../../../lib/pager';
+  // Six pieces at a time, with pages below; the kind filter narrows the list first.
+  const shelf = document.querySelector<HTMLElement>('.au-shelf');
+  if (shelf) {
+    const per = Number(shelf.dataset.per) || 6;
+    const rows = [...shelf.querySelectorAll<HTMLElement>('.dispatches > li')];
+    const chips = [...shelf.querySelectorAll<HTMLButtonElement>('.shelf-filters .chip')];
+    const pager = shelf.querySelector<HTMLElement>('.pager')!;
+    const count = shelf.querySelector('.au-count')!;
+    let kind = 'all', page = 1;
+    const arrow = (d: 'l' | 'r') => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="${d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`;
+    const draw = (scroll = false) => {
+      const shown = rows.filter((r) => kind === 'all' || r.dataset.tag === kind);
+      const pages = Math.max(1, Math.ceil(shown.length / per));
+      page = Math.min(page, pages);
+      rows.forEach((r) => { r.hidden = true; });
+      shown.slice((page - 1) * per, page * per).forEach((r) => { r.hidden = false; });
+      count.textContent = `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
+      pager.hidden = pages < 2;
+      pager.innerHTML = pages < 2 ? '' :
+        `<button type="button" class="pg-step" data-go="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="Newer pieces">${arrow('l')}<span class="pg-word">Newer</span></button>` +
+        pageList(page, pages).map((n) => n === '…' ? '<span class="pg-gap" aria-hidden="true">…</span>'
+          : `<button type="button" class="pg-n" data-go="${n}" ${n === page ? 'aria-current="page"' : ''} aria-label="Page ${n} of ${pages}">${n}</button>`).join('') +
+        `<button type="button" class="pg-step" data-go="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="Older pieces"><span class="pg-word">Older</span>${arrow('r')}</button>`;
+      if (scroll) shelf.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    pager.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
+      if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
+    });
+    chips.forEach((c) => c.addEventListener('click', () => { kind = c.dataset.show!; page = 1; draw(); }));
+    draw();
+  }
+</script>
+
 <style>
+  .au-shelf { scroll-margin-top: 110px; }
   .au-hero { position: relative; overflow: hidden; padding: 150px 24px 90px; text-align: center; }
   .au-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: brightness(.22) saturate(.8); }
   .au-in { position: relative; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }

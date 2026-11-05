@@ -298,3 +298,26 @@ html.ptr-on, html.ptr-on body { overscroll-behavior-y: none; }
 .ptr.ready { box-shadow: 0 0 0 1px rgba(255,227,163,.8), 0 0 18px rgba(255,214,140,.35), 0 10px 24px rgba(0,0,0,.45); }
 .ptr.spin svg { animation: ptr-spin .8s linear infinite; }
 @keyframes ptr-spin { to { transform: rotate(360deg); } }
+
+/* ---- Pages of a long list (writer pages): ← Newer · 1 2 3 … 17 · Older → */
+.pager { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 40px; flex-wrap: wrap; }
+.pager[hidden] { display: none; }
+.pager button, .pager .pg-gap { min-width: 40px; height: 40px; padding: 0 10px; border-radius: 999px; background: none; border: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.pager .pg-gap { cursor: default; opacity: .5; min-width: 20px; padding: 0; }
+.pager .pg-n:hover, .pager .pg-step:hover:not(:disabled) { color: var(--oxblood); }
+.pager .pg-n[aria-current='page'] { background: var(--ink); color: var(--bone); }
+.pager .pg-step { padding: 0 14px; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .3); }
+.pager .pg-step:disabled { opacity: .3; cursor: default; }
+.pager .pg-step svg { flex: none; }
+.dark .pager .pg-n[aria-current='page'], .night .pager .pg-n[aria-current='page'] { background: var(--bone); color: #12160F; }
+.dark .pager .pg-step, .night .pager .pg-step { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3); }
+.dark .pager .pg-n:hover, .dark .pager .pg-step:hover:not(:disabled) { color: var(--ember); }
+.shelf-filters { margin-bottom: 26px; }
+.chip .chip-n { opacity: .55; margin-left: 6px; }
+@media (max-width: 700px) {
+  .pager { gap: 2px; margin-top: 30px; }
+  .pager .pg-step .pg-word { display: none; }
+  .pager .pg-step { padding: 0; width: 40px; }
+  .pager button { min-width: 36px; }
+}

@@ -11,6 +11,8 @@ import { Initials, Icon } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
+import { KINDS } from '../../lib/kinds';
+import { PER_PAGE, pageList } from '../../lib/pager';
 
 type Route = { m?: string; p?: string; view?: string };
 const readRoute = (): Route => {
@@ -86,6 +88,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const [person, setPerson] = useState<Profile | null | undefined>(undefined);
   const [work, setWork] = useState<Piece[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  const [kind, setKind] = useState('all');
+  const [page, setPage] = useState(1);
   useEffect(() => {
     (async () => {
       const [{ data: p }, { data: w }] = await Promise.all([
@@ -107,6 +111,14 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   if (person === null) return <div className="m-gate"><p className="it mut d-empty">This member’s page could not be found.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
   const handle = (person.instagram ?? '').replace(/^@/, '');
+  // Six pieces to a page, with pages below; the kind filter narrows the list first.
+  const kinds = KINDS.map((k) => ({ ...k, n: work.filter((w) => w.medium === k.value).length })).filter((k) => k.n > 0);
+  const shown = kind === 'all' ? work : work.filter((w) => w.medium === kind);
+  const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
+  const cur = Math.min(page, pages);
+  const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
+  const turn = (n: number) => { setPage(n); document.querySelector('.m-work')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const arrow = (d: 'l' | 'r') => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d={d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>;
   // The same page as the public writer page (/guild/authors/<name>/): an arch, the name, craft, a few lines, two link pills, then the work.
   return (
     <div className="m-page">
@@ -167,12 +179,18 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
       </header>
       <section className="m-work">
-        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{work.length} {work.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{shown.length} {shown.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+        {kinds.length > 1 && (
+          <div className="filters shelf-filters" role="group" aria-label="Show">
+            <button type="button" className="chip" aria-pressed={kind === 'all'} onClick={() => { setKind('all'); setPage(1); }}>All<span className="chip-n">{work.length}</span></button>
+            {kinds.map((k) => <button key={k.value} type="button" className="chip" aria-pressed={kind === k.value} onClick={() => { setKind(k.value); setPage(1); }}>{k.plural}<span className="chip-n">{k.n}</span></button>)}
+          </div>
+        )}
         {work.length === 0 ? (
           <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
         ) : (
           <ol className="m-list">
-            {work.map((w) => (
+            {onPage.map((w) => (
               <li key={w.id}>
                 <button type="button" className="m-piece" onClick={() => go(`/guild/members/?p=${w.id}`)}>
                   <span className="m-piece-text">
@@ -186,6 +204,15 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               </li>
             ))}
           </ol>
+        )}
+        {pages > 1 && (
+          <nav className="pager" aria-label="Pages of work">
+            <button type="button" className="pg-step" disabled={cur === 1} aria-label="Newer pieces" onClick={() => turn(cur - 1)}>{arrow('l')}<span className="pg-word">Newer</span></button>
+            {pageList(cur, pages).map((n, i) => n === '…'
+              ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+              : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} aria-label={`Page ${n} of ${pages}`} onClick={() => turn(n)}>{n}</button>)}
+            <button type="button" className="pg-step" disabled={cur === pages} aria-label="Older pieces" onClick={() => turn(cur + 1)}><span className="pg-word">Older</span>{arrow('r')}</button>
+          </nav>
         )}
       </section>
       <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person }} mine={person.id === me} name={person.display_name} /></div>
