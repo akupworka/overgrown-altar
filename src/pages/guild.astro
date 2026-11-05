@@ -104,7 +104,7 @@ import '../styles/doorway.css';
 <p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
 
 <fieldset class="ap-step" data-step="0">
-  <legend class="ap-h"><span class="num">I</span>About you</legend>
+  <legend class="ap-h"><span class="num">I</span><span class="ap-of">Step 1 of 3</span>About you</legend>
   <div class="ap-row"><label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
   <label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label></div>
   <div class="ap-row"><label class="dw-field"><span class="dw-label">Where you are based</span><span class="dw-line-row"><input name="location" placeholder="City, country" required /></span></label>
@@ -113,7 +113,7 @@ import '../styles/doorway.css';
 </fieldset>
 
 <fieldset class="ap-step" data-step="1" hidden>
-  <legend class="ap-h"><span class="num">II</span>Your work</legend>
+  <legend class="ap-h"><span class="num">II</span><span class="ap-of">Step 2 of 3</span>Your work</legend>
   <label class="dw-field"><span class="dw-label">What you make</span><span class="dw-line-row"><input name="craft" placeholder="Essays, poems, fiction, photographs…" required /></span></label>
   <div class="dw-field"><span class="dw-label">Which rooms you would write for</span>
     <div class="dw-topics ap-pillars" data-need-one>
@@ -127,7 +127,7 @@ import '../styles/doorway.css';
 </fieldset>
 
 <fieldset class="ap-step" data-step="2" hidden>
-  <legend class="ap-h"><span class="num">III</span>Faith &amp; commitment</legend>
+  <legend class="ap-h"><span class="num">III</span><span class="ap-of">Step 3 of 3</span>Faith &amp; commitment</legend>
   <label class="dw-field"><span class="dw-label">Your walk with Christ</span><span class="dw-line-row"><textarea name="faith" rows="4" required placeholder="A few honest lines, and where you worship."></textarea></span></label>
   <label class="dw-field"><span class="dw-label">Why this table?</span><span class="dw-line-row"><textarea name="why" rows="3" required placeholder="What you hope to bring, and to be sharpened in."></textarea></span></label>
   <label class="dw-field"><span class="dw-label">A reference</span><span class="dw-line-row"><input name="reference" required placeholder="Someone who knows you or your work: name and how to reach them" /></span><span class="ap-hint">A pastor, an editor, a teacher, a friend in the faith.</span></label>
@@ -249,6 +249,53 @@ import '../styles/doorway.css';
     .gd-qs summary { font-size: 19px; padding: 18px 0; }
     .gd-qs p { font-size: 16px; }
   }
+
+  /* Readability: a darker window, a solid card, brighter labels and lines */
+  .apply-bg { filter: brightness(.12) saturate(.6) !important; }
+  .apply::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8,10,8,.75) 0%, rgba(8,10,8,.35) 45%, rgba(8,10,8,.55) 100%); }
+  .apply-in { z-index: 1; }
+  .apply-card { background: #121510 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: inset 0 0 0 1px rgba(243,236,220,.16), 0 40px 80px -30px rgba(0,0,0,.95) !important; }
+  .apply .dw-label { font-size: 11px; color: #D8D1C2; letter-spacing: .2em; }
+  .apply .dw-line-row { border-bottom-color: rgba(243,236,220,.42); }
+  .apply .dw-field input::placeholder, .apply .dw-field textarea::placeholder { color: #9A9486; }
+  .apply .ap-hint { color: #ABA597; font-size: 15px; }
+  .apply .dw-topic { color: #D8D1C2; box-shadow: inset 0 0 0 1px rgba(243,236,220,.32); }
+  .apply .ap-check { color: #E6DFD0; }
+  .apply-lead { color: #E6DFD0 !important; }
+  .apply-steps li { opacity: .72 !important; }
+  .apply-steps li.on, .apply-steps li.done { opacity: 1 !important; }
+  .apply-steps em { color: #ABA597 !important; }
+  .apply-promise { color: #ABA597 !important; }
+  .ap-nav { border-top-color: rgba(243,236,220,.12) !important; }
+  .apply .ap-back { color: #CFC8B8; }
+
+  /* The card as a sheet of paper on the dark glass */
+  .apply-card { position: relative; background: linear-gradient(180deg, #F4EFE5, #EEE8DC) !important; color: var(--ink);
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 50px 90px -40px rgba(0,0,0,.95), 0 0 0 1px rgba(159,148,94,.5) !important; border-radius: 6px; overflow: hidden; }
+  .apply-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
+  .apply-card .ap-h { color: var(--ink); display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: baseline; }
+  .apply-card .ap-h .num { color: var(--oxblood); font-size: 34px !important; }
+  .apply-card .ap-of { grid-column: 1 / -1; order: -1; margin-bottom: 6px; font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #8A7B68; }
+  .apply-card .dw-label { color: #5A4D3F; font-weight: 500; }
+  .apply-card .dw-line-row { border-bottom: 1px solid rgba(42,32,23,.35); }
+  .apply-card .dw-line-row input, .apply-card .dw-field textarea { color: var(--ink); }
+  .apply-card .dw-field input::placeholder, .apply-card .dw-field textarea::placeholder { color: #9C8F7E; }
+  .apply-card .dw-field:focus-within .dw-line-row { border-color: var(--oxblood); box-shadow: 0 12px 24px -18px rgba(98,55,45,.55); }
+  .apply-card .dw-field:focus-within .dw-label { color: var(--oxblood); }
+  .apply-card .ap-hint { color: #7A6D5C; }
+  .apply-card .dw-topic { color: #4A3E33; box-shadow: inset 0 0 0 1px rgba(42,32,23,.3); }
+  .apply-card .dw-topic:has(input:checked) { color: #F4EFE5; background: var(--ink); box-shadow: none; }
+  .apply-card .dw-topic:has(input:focus-visible) { outline-color: var(--oxblood); }
+  .apply-card .ap-check { color: #2A2017; }
+  .apply-card .ap-check input { accent-color: #62372D; }
+  .apply-card .ap-check a { color: var(--oxblood); border-bottom-color: rgba(98,55,45,.4); }
+  .apply-card .ap-msg { color: #8A2E2E; background: rgba(138,46,46,.06); box-shadow: inset 0 0 0 1px rgba(138,46,46,.3); }
+  .apply-card .ap-nav { border-top: 1px solid rgba(42,32,23,.15) !important; }
+  .apply-card .ap-next, .apply-card .ap-submit { border: 0 !important; background: var(--ink); color: #F4EFE5 !important; padding: 15px 26px !important; border-radius: 999px; }
+  .apply-card .ap-next:hover, .apply-card .ap-submit:hover { background: var(--oxblood); }
+  .apply-card .ap-back { color: #5A4D3F !important; border-bottom-color: rgba(42,32,23,.3) !important; }
+  .apply-card .ap-back:hover { color: var(--oxblood) !important; }
+  @media (max-width: 900px) { .apply-card .ap-h .num { font-size: 28px !important; } .apply-card .ap-next, .apply-card .ap-submit { flex: 1; justify-content: center; } }
 
   /* The application: a calm side panel and a wide card, one step at a time */
   .apply { position: relative; overflow: hidden; background: #0A0C0A; color: var(--bone); padding: 120px 48px; }
