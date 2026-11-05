@@ -5,26 +5,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import { getCatalog } from '../lib/catalog';
 const pieces = await getCatalog();
+import { ROOMS, KINDS } from '../lib/kinds';
 ---
 <BaseLayout title="Archive">
 <section class="hero" style="height:560px"><img src="/images/tall-windows-dark-vault.jpg" srcset="/images/tall-windows-dark-vault-1200.jpg 1200w, /images/tall-windows-dark-vault.jpg 1331w" sizes="100vw" alt="Tall stained-glass windows in a dark Gothic vault" style="object-position:center 62%;filter:grayscale(1) brightness(.45)" class="mono" fetchpriority="high" /><div class="veil"></div><SiteNav />
 <div class="hero-c" style="top:202px;padding:0 24px"><span class="eb">Everything, in one place</span><h1 class="h1" style="margin-top:22px">The Archive</h1></div></section>
 <section class="sec paper" style="padding-top:80px"><div style="display:flex;flex-direction:column;gap:26px">
-<input class="field search" type="search" placeholder="Search by title, thinker or medium…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />
-<div class="filters"><span class="lab mut fl">Pillar</span><button type="button" class="chip" aria-pressed="true" data-k="pillar" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="watchtower">The Watchtower</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="hearth">The Hearth</button><button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v="perimeter">The Perimeter</button></div>
-<div class="filters"><span class="lab mut fl">Medium</span><button type="button" class="chip" aria-pressed="true" data-k="medium" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="essay">Essays</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="photograph">Photographs</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="prose">Prose</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="fiction">Fiction</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="teardown">Teardowns</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="protocol">Protocols</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="recovery">Recovery stories</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="testimony">Testimonies</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="deliverance">Deliverance stories</button><button type="button" class="chip" aria-pressed="false" data-k="medium" data-v="personal">Personal</button></div>
-<div class="filters"><span class="lab mut fl">Thinker</span><button type="button" class="chip" aria-pressed="true" data-k="thinker" data-v="all">All</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="nietzsche">Nietzsche</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="jung">Jung</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="freud">Freud</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="bukowski">Bukowski</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="newton">Newton</button><button type="button" class="chip" aria-pressed="false" data-k="thinker" data-v="quantum">Quantum</button></div></div>
+<input class="field search" type="search" placeholder="Search by title, writer or form…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />
+<div class="ar-filters">
+<div class="filters"><span class="lab mut fl">Room</span><button type="button" class="chip" aria-pressed="true" data-k="pillar" data-v="all">All</button>{ROOMS.map((r) => <button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v={r.id}>{r.name}</button>)}</div>
+<div class="filters"><span class="lab mut fl">Form</span><button type="button" class="chip" aria-pressed="true" data-k="medium" data-v="all">All</button>{KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-k="medium" data-v={k.value} data-room={k.pillar}>{k.plural}</button>)}<a class="ar-guide lab" href="/forms/">What each form is →</a></div>
+</div>
 <div class="g3 results" style="margin-top:60px">{pieces.map((a) => (
-<a class="item" href={a.href} data-pillar={a.pillar} data-medium={a.medium === 'study' || a.medium === 'poetry' ? 'prose' : a.medium} data-thinker={a.thinkers.join(' ')} style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src={a.image} alt="" loading="lazy" /></div><span class="lab" style="color:#62372D">{a.kicker.split(' · ')[0] === 'Dispatch 1' ? 'The Watchtower · Essay' : a.kicker === 'Recovery story' ? 'The Perimeter · Recovery story' : a.kicker}</span><span class="h3" style="font-size:27px">{a.title}</span><span class="lab mut" style="font-size:10px">{a.author.name}</span></a>
+<a class="item" href={a.href} data-pillar={a.pillar} data-medium={a.medium} style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src={a.image} alt="" loading="lazy" /></div><span class="lab" style="color:#62372D">{a.kicker.split(' · ')[0] === 'Dispatch 1' ? 'The Watchtower · Essay' : a.kicker === 'Recovery story' ? 'The Perimeter · Recovery story' : a.kicker}</span><span class="h3" style="font-size:27px">{a.title}</span><span class="lab mut" style="font-size:10px">{a.author.name}</span></a>
 ))}</div>
 <p class="it mut empty" style="display:none;margin-top:40px;font-size:22px">Nothing here yet. Try another filter.</p></section>
 <script>
   // Archive search and filters. This runs in the visitor's browser.
-  // Each result card carries data-pillar, data-medium and data-thinker tags;
+  // Each result card carries data-pillar and data-medium tags;
   // we hide the cards that don't match the chosen chips and the search words.
   const search = document.querySelector<HTMLInputElement>('#archive-search')!;
   const items = [...document.querySelectorAll<HTMLElement>('.results .item')];
-  const chosen: Record<string, string> = { pillar: 'all', medium: 'all', thinker: 'all' };
+  const chosen: Record<string, string> = { pillar: 'all', medium: 'all' };
 
   const empty = document.createElement('p');
   empty.className = 'it mut';
@@ -50,13 +52,40 @@ const pieces = await getCatalog();
       const key = chip.dataset.k!;
       chosen[key] = chip.dataset.v!;
       document.querySelectorAll(`.chip[data-k="${key}"]`).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      if (key === 'pillar') narrowForms();
       update();
     });
   });
   search.addEventListener('input', update);
+
+  // Choosing a room shows only the forms that room takes.
+  function narrowForms() {
+    const room = chosen.pillar;
+    document.querySelectorAll<HTMLButtonElement>('.chip[data-k="medium"][data-room]').forEach((c) => {
+      const fits = room === 'all' || c.dataset.room === room;
+      c.hidden = !fits;
+      if (!fits && chosen.medium === c.dataset.v) { chosen.medium = 'all'; document.querySelectorAll('.chip[data-k="medium"]').forEach((x) => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.v === 'all'))); }
+    });
+  }
+  // Arriving from the Forms page: /archive/?pillar=hearth&medium=poetry
+  const want = new URLSearchParams(location.search);
+  for (const key of ['pillar', 'medium']) {
+    const v = want.get(key); if (!v) continue;
+    const chip = document.querySelector<HTMLButtonElement>(`.chip[data-k="${key}"][data-v="${v}"]`); chip?.click();
+  }
 
   // Arriving from the Menu's search box: /archive?q=jung
   const q = new URLSearchParams(location.search).get('q');
   if (q) { search.value = q; update(); }
 </script>
 </BaseLayout>
+
+<style>
+  .ar-filters { display: flex; flex-direction: column; gap: 12px; }
+  .ar-filters .chip { font-size: 9.5px; letter-spacing: .16em; padding: 6px 13px; min-height: 30px; }
+  .ar-filters .chip[hidden] { display: none; }
+  .ar-filters .fl { width: 64px; font-size: 10px; }
+  .ar-filters .filters { gap: 7px; }
+  .ar-guide { margin-left: 6px; color: var(--oxblood); border-bottom: 1px solid rgba(98,55,45,.35); padding-bottom: 2px; font-size: 10px; white-space: nowrap; }
+  @media (max-width: 700px) { .ar-guide { display: none; } }
+</style>

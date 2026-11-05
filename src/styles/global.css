@@ -273,3 +273,14 @@ textarea.field { resize: vertical; }
   .mx3[style*="border"] > div { padding-left: 0 !important; }
   .mx3[style*="border"] > div:first-child { border-top: 0; }
 }
+
+/* Browsers paint auto-filled fields pale blue or yellow. Keep every field in the site's own look:
+   the fill colour is held off indefinitely and the text keeps its own colour. */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus,
+textarea:-webkit-autofill, select:-webkit-autofill {
+  -webkit-text-fill-color: currentColor;
+  caret-color: currentColor;
+  transition: background-color 100000s ease-in-out 0s, color 100000s ease-in-out 0s;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+}
+input:autofill, textarea:autofill { background-color: transparent !important; }

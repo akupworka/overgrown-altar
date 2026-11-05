@@ -1,0 +1,115 @@
+---
+// The Forms: every kind of work the Guild publishes, room by room: what it is, what the editor looks for,
+// a rough length, how many are published, and a way in to read them. Content lives in src/lib/kinds.ts.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import Subscribe from '../components/Subscribe.astro';
+import { ROOMS } from '../lib/kinds';
+import { getCatalog } from '../lib/catalog';
+const catalog = await getCatalog();
+const count = (pillar: string, kind: string) => catalog.filter((p) => p.pillar === pillar && p.medium === kind).length;
+const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/pillar-perimeter-1200.jpg' };
+---
+<BaseLayout title="The Forms" description="Every kind of work the Guild publishes: what it is, what the editor looks for, and how long it runs.">
+  <section class="hero fm-hero">
+    <img src="/images/archive-photo-1200.jpg" alt="" style="object-position:center 50%;filter:brightness(.42)" fetchpriority="high" />
+    <div class="veil"></div><SiteNav />
+    <div class="hero-c fm-hero-c">
+      <span class="eb">A guide for readers and writers</span>
+      <h1 class="h1">The Forms</h1>
+      <p class="it fm-lead">Eleven kinds of work in three rooms. What each one is, what the Editor in Chief looks for, and how long it tends to run.</p>
+      <nav class="fm-jump" aria-label="Rooms">{ROOMS.map((r) => <a class="ghost" href={`#${r.id}`}>{r.name}</a>)}</nav>
+    </div>
+  </section>
+
+  {ROOMS.map((room, ri) => (
+    <section class:list={['sec', ri % 2 ? 'dark' : 'paper', 'fm-room']} id={room.id}>
+      <div class="fm-in">
+        <header class="fm-room-head">
+          <div class="arch fm-arch"><img src={ROOM_IMG[room.id]} alt="" loading="lazy" class={room.id === 'hearth' ? undefined : 'mono'} /></div>
+          <div class="fm-room-text">
+            <span class="eb">{['01', '02', '03'][ri]} · The room</span>
+            <h2 class="h2">{room.name}</h2>
+            <p class="it fm-room-line">{room.line}</p>
+            <a class="lab fm-room-link" href={`/${room.id}`}>Visit {room.name} →</a>
+          </div>
+        </header>
+        <div class="fm-kinds">
+          {room.kinds.map((k) => {
+            const n = count(room.id, k.value);
+            return (
+              <article class="fm-kind" id={k.value}>
+                <div class="fm-kind-top">
+                  <h3 class="fm-kind-name">{k.name}</h3>
+                  <span class="lab fm-len">{k.length}</span>
+                </div>
+                <p class="fm-what">{k.what}</p>
+                <div class="fm-look"><span class="lab">What we look for</span><p class="it">{k.lookFor}</p></div>
+                <a class="lab fm-read" href={`/archive/?pillar=${room.id}&medium=${k.value}`}>{n ? `Read ${n} published →` : 'None published yet: be the first →'}</a>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="sec paper center fm-cta">
+    <span class="eb">Write for the Guild</span>
+    <h2 class="h2" style="margin-top:14px">Found your form?</h2>
+    <p class="it mut" style="margin:18px auto 0;max-width:560px;font-size:20px">Members write in any of the three rooms. Every piece is read by the Editor in Chief before it is published.</p>
+    <div class="fm-cta-row">
+      <a class="btn" href="/guild/desk/#write" data-member hidden>Begin a piece</a>
+      <a class="btn" href="/guild#apply" data-guest>Apply to the Guild</a>
+      <a class="ghost" href="/guild#expectations">What we ask of members</a>
+    </div>
+  </section>
+  <Subscribe />
+</BaseLayout>
+
+<style>
+  .fm-hero { height: 640px; }
+  .fm-hero-c { top: 200px; padding: 0 24px; }
+  .fm-lead { margin: 22px auto 0; max-width: 620px; font-size: 23px; line-height: 1.45; color: #E6DFD0; }
+  .fm-jump { margin-top: 34px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .fm-jump .ghost { padding: 12px 20px; font-size: 10px; }
+  .fm-in { max-width: 1180px; margin: 0 auto; }
+  .fm-room-head { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; align-items: end; padding-bottom: 40px; margin-bottom: 8px; }
+  .fm-arch { height: 280px; }
+  .fm-arch img { width: 100%; height: 100%; object-fit: cover; }
+  .fm-room-text { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .fm-room-text .h2 { margin: 0; }
+  .fm-room-line { margin: 0; font-size: 21px; line-height: 1.45; max-width: 560px; opacity: .85; }
+  .fm-room-link { margin-top: 6px; border-bottom: 1px solid currentColor; padding-bottom: 3px; opacity: .8; }
+  .fm-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; border-top: 1px solid rgba(128,118,100,.35); }
+  .fm-room:has(.fm-kinds > :only-child) .fm-kinds { grid-template-columns: 1fr; max-width: 760px; }
+  .fm-kind { display: flex; flex-direction: column; gap: 12px; padding: 30px 0; border-bottom: 1px solid rgba(128,118,100,.22); scroll-margin-top: 100px; }
+  .fm-kind-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .fm-kind-name { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.1; }
+  .fm-len { font-size: 9.5px; white-space: nowrap; opacity: .7; }
+  .fm-what { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.55; }
+  .fm-look { display: flex; flex-direction: column; gap: 4px; padding-left: 16px; border-left: 1px solid var(--brass); }
+  .fm-look .lab { font-size: 9px; opacity: .7; }
+  .fm-look p { margin: 0; font-size: 17px; line-height: 1.5; opacity: .85; }
+  .fm-read { align-self: flex-start; margin-top: 4px; padding-bottom: 3px; border-bottom: 1px solid currentColor; font-size: 10px; }
+  .paper .fm-kind-name, .paper .fm-what { color: var(--ink); }
+  .paper .fm-read, .paper .eb { color: var(--oxblood); }
+  .dark .fm-kind-name { color: var(--bone); }
+  .dark .fm-what { color: #E6DFD0; }
+  .dark .fm-read { color: var(--ember); }
+  .fm-cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+  .fm-cta-row [hidden] { display: none; }
+  @media (max-width: 800px) {
+    .fm-hero { height: 600px; }
+    .fm-hero-c { top: 140px; }
+    .fm-lead { font-size: 19px; }
+    .fm-room-head { grid-template-columns: 1fr; gap: 22px; }
+    .fm-arch { height: 200px; width: 160px; max-height: none; }
+    .fm-room-line { font-size: 18px; }
+    .fm-kinds { grid-template-columns: 1fr; }
+    .fm-kind-name { font-size: 25px; }
+    .fm-what { font-size: 17px; }
+    .fm-look p { font-size: 16px; }
+    .fm-cta-row { flex-direction: column; align-items: stretch; max-width: 300px; margin-left: auto; margin-right: auto; }
+  }
+</style>

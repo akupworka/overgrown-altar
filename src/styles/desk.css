@@ -781,3 +781,12 @@
   background: none; border: 0; cursor: pointer; color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243,236,220,.12);
   font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; transition: color .3s, box-shadow .3s; }
 .d-signout:hover { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230,169,154,.5); }
+
+/* The guide to the chosen kind of work */
+.d-kind-note { margin: 4px 0 6px; padding: 16px 18px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px;
+  background: rgba(243,236,220,.035); box-shadow: inset 0 0 0 1px rgba(243,236,220,.1); }
+.d-kind-note p { margin: 0; }
+.d-kind-what { font-family: var(--serif); font-size: 16px; line-height: 1.5; color: #E6DFD0; }
+.d-kind-look, .d-kind-len { font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.5; color: #ABA597; }
+.d-kind-look .lab, .d-kind-len .lab { display: block; font-style: normal; font-size: 8.5px; color: var(--ember); margin-bottom: 2px; }
+.d-kind-all { align-self: flex-start; font-size: 9.5px; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 2px; }

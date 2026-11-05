@@ -10,6 +10,7 @@ import { shrinkImage, TooSmall } from '../../lib/shrink';
 // Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
 const MIN_PHOTO_WIDTH = 1600;
 import { PrestigeBadge } from './Prestige';
+import { KINDS } from '../../lib/kinds';
 import { prestigeFor } from '../../lib/prestige';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
@@ -251,6 +252,9 @@ function Desk({ session }: { session: Session }) {
           <a className="d-side-link" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
+          <a className="d-side-link" href="/forms/">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M4 5h11l5 5v9H4zM15 5v5h5M8 13h8M8 16h6" /></svg>
+            The Forms<span aria-hidden="true">→</span></a>
         </div>
         <button type="button" className="d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
@@ -311,6 +315,20 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
         <span className="d-standing-tally">{tally.map(({ t, n }) => <span key={t} data-tier={t}><i />{n}</span>)}{earned.length > 0 && <em>{earned.length} of {TROPHIES.length}</em>}</span>
         {uid && <a className="lab d-standing-link" href={`/guild/members/?m=${uid}#vault`}>Open your vault →</a>}
       </div>
+    </div>
+  );
+}
+
+// A short guide to the chosen kind of work: what it is, what the editor looks for, and the usual length.
+function KindNote({ value }: { value: string }) {
+  const k = KINDS.find((x) => x.value === value);
+  if (!k) return null;
+  return (
+    <div className="d-kind-note">
+      <p className="d-kind-what">{k.what}</p>
+      <p className="d-kind-look"><span className="lab">What the editor looks for</span>{k.lookFor}</p>
+      <p className="d-kind-len"><span className="lab">Usual length</span>{k.length}</p>
+      <a className="lab d-kind-all" href={`/forms/#${k.value}`} target="_blank" rel="noopener">See every form →</a>
     </div>
   );
 }
@@ -605,6 +623,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
                 </label>
               ))}
             </div>}
+            <KindNote value={form.medium} />
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
             {photo}
             <span className="d-hint">At least 1600 pixels wide, so it looks sharp on the site. Photos from a phone camera are perfect; large ones are resized automatically.</span>
@@ -675,6 +694,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
                   {kinds.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
               </label>}
+          <KindNote value={form.medium} />
           <div className="d-lbl">
             <span className="lab">Featured photograph</span>
             {photo}
