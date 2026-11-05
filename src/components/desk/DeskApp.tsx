@@ -14,6 +14,7 @@ import { KINDS } from '../../lib/kinds';
 import { prestigeFor } from '../../lib/prestige';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
+import { PhotoFocus } from './PhotoFocus';
 import '../../styles/guild-piece.css';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -412,7 +413,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
   const [form, setForm] = useState({
     title: start?.title ?? '', standfirst: start?.standfirst ?? '', body: start?.body ?? '',
     pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? 'prose'),
-    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '',
+    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '', image_focus: start?.image_focus ?? '',
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
@@ -447,7 +448,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
         if (res.error) { setState('error'); setMsg(res.error.message); return null; }
         setState('saved'); onSaved(res.data as Piece); return res.data as Piece;
       }
-      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt } });
+      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt, image_focus: form.image_focus } });
       if (error) { setState('error'); setMsg(error.message); return null; }
       setState('saved'); return piece;
     }
@@ -508,7 +509,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
     setPhotoMsg('Uploading the photograph…');
     const { error } = await supabase.storage.from('guild').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
     if (error) return setPhotoMsg('The photograph didn’t upload. Please try again. (' + error.message + ')');
-    setPhotoMsg(''); set('image_path', path);
+    setPhotoMsg(''); setForm((f) => ({ ...f, image_path: path, image_focus: '' })); setState('idle');
   }
 
   async function submit() {
@@ -578,8 +579,11 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
   );
   const photo = (
     <>
-      <label className="d-photo-frame">
-        {preview ? <img src={preview} alt="" /> : <span className="lab mut">Add a photograph</span>}
+      {preview && form.image_path
+        ? <PhotoFocus src={preview} focus={form.image_focus} onChange={(f) => set('image_focus', f)} />
+        : null}
+      <label className={preview && form.image_path ? 'd-textbtn pf-change' : 'd-photo-frame'}>
+        {preview && form.image_path ? 'Choose a different photograph' : <span className="lab mut">Add a photograph</span>}
         <input type="file" className="visually-hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f); }} />
       </label>
       {photoMsg && <p className="d-photo-msg" role="status">{photoMsg}</p>}
@@ -646,7 +650,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
           <div className="d-step">
             <h2 className="d-step-h">How it will look</h2>
             <article className="d-preview">
-              {preview && <img src={preview} alt="" className="d-preview-img" />}
+              {preview && <img src={preview} alt="" className="d-preview-img" style={form.image_focus ? { objectPosition: form.image_focus } : undefined} />}
               <span className="lab d-preview-k">{pillar?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === form.medium)?.label}</span>
               <h3 className="d-preview-t">{form.title || 'Untitled'}</h3>
               {form.standfirst && <p className="d-preview-s">{form.standfirst}</p>}
@@ -725,7 +729,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
 }
 
 // The full page, exactly as the site will draw it (same styles as /guild/<piece>/), before anything is sent.
-function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string }; photo: string | null; author: Profile | null; onClose: () => void }) {
+function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string; image_focus?: string }; photo: string | null; author: Profile | null; onClose: () => void }) {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.documentElement.classList.add('menu-open');
@@ -747,7 +751,7 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
       </div>
       <div className="pv-page">
         <section className="hero gp-hero">
-          <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? form.image_alt : ''} style={{ objectPosition: 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
+          <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? form.image_alt : ''} style={{ objectPosition: (photo && form.image_focus) || 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
           <div className="veil" />
           <div className="hero-c gp-hero-c">
             <span className="eb">{pillar} · {kind}</span>

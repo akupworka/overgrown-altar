@@ -6,7 +6,7 @@ import { getGuildPieces, guildUrl, authorUrl, MEDIUM_LABEL, PILLAR_LABEL, readin
 export interface CatalogItem {
   href: string; title: string; standfirst: string; date: string;
   pillar: 'watchtower' | 'hearth' | 'perimeter'; medium: string; thinkers: string[];
-  kicker: string; minutes?: number; image: string;
+  kicker: string; minutes?: number; image: string; imagePos?: string;
   author: { name: string; portrait?: string; href?: string; id?: string };
 }
 
@@ -25,6 +25,7 @@ export async function getCatalog(): Promise<CatalogItem[]> {
     pillar: g.pillar, medium: g.medium, thinkers: [], minutes: readingMinutes(g.body),
     kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`,
     image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
+    imagePos: (g.image && g.imagePos) || undefined,
     author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id },
   }));
   return [...guild, ...FOUNDATIONS].sort((a, b) => b.date.localeCompare(a.date));

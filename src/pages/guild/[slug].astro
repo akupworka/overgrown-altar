@@ -28,7 +28,7 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
 <BaseLayout title={p.title} image={p.image || undefined} description={p.standfirst || `${MEDIUM_LABEL[p.medium] ?? ''} by ${a.display_name}`}>
   <section class="hero gp-hero">
     {p.image
-      ? <img src={p.image} alt={p.image_alt} style="object-position:center 45%;filter:brightness(.5)" fetchpriority="high" />
+      ? <img src={p.image} alt={p.image_alt} style={`object-position:${p.imagePos || 'center 45%'};filter:brightness(.5)`} fetchpriority="high" />
       : <img src="/images/tall-windows-dark-vault-1200.jpg" alt="" style="object-position:center 55%;filter:brightness(.35)" fetchpriority="high" />}
     <div class="veil"></div>
     <SiteNav />

@@ -16,7 +16,7 @@ export default function LivePiece() {
     if (!m || ['desk', 'members'].includes(m[1])) return;
     (async () => {
       const { data } = await supabase.from('pieces')
-        .select('title, standfirst, body, pillar, medium, image_path, image_alt, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
+        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
         .eq('slug', m[1]).eq('status', 'approved').maybeSingle();
       if (!data) return;
       if (data.image_path) {
@@ -40,7 +40,7 @@ export default function LivePiece() {
   return (
     <>
       <section className="hero gp-hero">
-        <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? piece.image_alt : ''} style={{ objectPosition: 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
+        <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? piece.image_alt : ''} style={{ objectPosition: (photo && piece.image_focus) || 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
         <div className="veil" />
         <div className="hero-c gp-hero-c">
           <span className="eb"><a href={`/${piece.pillar}`}>{PILLAR[piece.pillar]}</a> · {MEDIUM[piece.medium] ?? ''}</span>

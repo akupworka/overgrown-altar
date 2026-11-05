@@ -22,7 +22,7 @@ const FALLBACK = ['/images/glass-2-1200.jpg', '/images/window-light-on-wall-1200
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const works = (await guildPillar('hearth')).map((g, i) => ({
   href: guildUrl(g), title: g.title, kind: g.medium, kindLabel: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,
-  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), image: g.image || FALLBACK[i % FALLBACK.length], hasPhoto: !!g.image,
+  date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), image: g.image || FALLBACK[i % FALLBACK.length], hasPhoto: !!g.image, pos: (g.image && g.imagePos) ? `object-position:${g.imagePos}` : undefined,
   author: g.author, authorHref: authorUrl(g.author),
 }));
 const featured = works[0];
@@ -44,7 +44,7 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
     <!-- The newest work, large -->
     <section class="sec paper he-feat-sec">
       <a class="he-feat" href={featured.href}>
-        <span class="he-feat-img"><img src={featured.image} alt="" /></span>
+        <span class="he-feat-img"><img src={featured.image} alt="" style={featured.pos} /></span>
         <span class="he-feat-text">
           <span class="eb">Newest at the hearth · {featured.kindLabel}</span>
           <span class="h2 he-feat-title">{featured.title}</span>
@@ -85,7 +85,7 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
       <ol class="he-grid">
         {works.map((w) => (
           <li data-tag={w.kind}>
-            <a class="he-card-img" href={w.href} tabindex="-1" aria-hidden="true"><img class:list={[{ mono: !w.hasPhoto }]} src={w.image} alt="" loading="lazy" /></a>
+            <a class="he-card-img" href={w.href} tabindex="-1" aria-hidden="true"><img class:list={[{ mono: !w.hasPhoto }]} src={w.image} alt="" loading="lazy" style={w.pos} /></a>
             <span class="lab he-card-k">{w.kindLabel}</span>
             <a class="he-card-t" href={w.href}>{w.title}</a>
             {w.standfirst && <span class="it he-card-sf">{w.standfirst}</span>}

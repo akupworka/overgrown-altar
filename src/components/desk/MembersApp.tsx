@@ -169,7 +169,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
                     {w.standfirst && <span className="it m-sf">{w.standfirst}</span>}
                     {w.published_at && <span className="lab m-date">{fmt(w.published_at)}</span>}
                   </span>
-                  <span className="m-thumb">{w.image_path && thumbs[w.image_path] ? <img src={thumbs[w.image_path]} alt="" loading="lazy" /> : null}</span>
+                  <span className="m-thumb">{w.image_path && thumbs[w.image_path] ? <img src={thumbs[w.image_path]} alt="" loading="lazy" style={w.image_focus ? { objectPosition: w.image_focus } : undefined} /> : null}</span>
                 </button>
               </li>
             ))}

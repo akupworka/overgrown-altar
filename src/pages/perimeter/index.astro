@@ -15,7 +15,7 @@ const KINDS = [
 ];
 const items: DispatchItem[] = (await inPillar('perimeter')).map((p) => ({
   href: p.href, title: p.title, kicker: p.kicker.replace(/^The Perimeter · /, ''), standfirst: p.standfirst, date: p.date,
-  minutes: p.minutes, author: p.author, image: p.image, tag: p.medium,
+  minutes: p.minutes, author: p.author, image: p.image, imagePos: p.imagePos, tag: p.medium,
 }));
 const count = (k: string) => items.filter((i) => i.tag === k).length;
 ---
