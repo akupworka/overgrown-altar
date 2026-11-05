@@ -42,6 +42,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
         </button>
       ))}
     </div>
+    <a class="lab room-forms" href="/forms/#perimeter">What each form is, and what the editor looks for →</a>
   </section>
 
   <!-- Every story, newest first, with a filter -->
@@ -97,6 +98,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
 </script>
 
 <style>
+  .room-forms { display: inline-block; margin-top: 26px; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.4); padding-bottom: 3px; }
   .pe-kinds { padding-top: 80px; padding-bottom: 80px; }
   .pe-grid { margin-top: 34px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(243, 236, 220, .14); }
   .pe-kind { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 30px 26px 8px; text-align: left; background: none; border: 0; color: inherit; cursor: pointer; }
