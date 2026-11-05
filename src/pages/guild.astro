@@ -120,6 +120,7 @@ import '../styles/doorway.css';
       <label class="dw-topic"><input type="checkbox" name="pillar-watchtower" value="yes" />The Watchtower</label>
       <label class="dw-topic"><input type="checkbox" name="pillar-hearth" value="yes" />The Hearth</label>
       <label class="dw-topic"><input type="checkbox" name="pillar-perimeter" value="yes" />The Perimeter</label>
+      <label class="dw-topic ap-all"><input type="checkbox" name="pillar-all" value="yes" />All three</label>
     </div>
   </div>
   <label class="dw-field"><span class="dw-label">Where your work has appeared</span><span class="dw-line-row"><textarea name="experience" rows="3" placeholder="Publications, blogs, exhibitions, or “nowhere yet”: that is fine."></textarea></span></label>
@@ -187,6 +188,11 @@ import '../styles/doorway.css';
       if (sample && sample.value.trim().split(/\s+/).length < 40 && !/https?:\/\//.test(sample.value)) { msg.textContent = 'Please share a little more of your work: at least a paragraph, or a link.'; msg.hidden = false; sample.focus(); return false; }
       return true;
     };
+    // "All three" ticks every room; unticking any room unticks "All three".
+    const rooms = [...form.querySelectorAll<HTMLInputElement>('.ap-pillars input:not([name="pillar-all"])')];
+    const all = form.querySelector<HTMLInputElement>('input[name="pillar-all"]');
+    all?.addEventListener('change', () => rooms.forEach((r) => (r.checked = all.checked)));
+    rooms.forEach((r) => r.addEventListener('change', () => { if (all) all.checked = rooms.every((x) => x.checked); }));
     next.addEventListener('click', () => { if (ok(at)) show(at + 1); });
     back.addEventListener('click', () => show(at - 1));
     form.addEventListener('submit', (e) => { if (!ok(at)) e.preventDefault(); });
@@ -350,6 +356,7 @@ import '../styles/doorway.css';
   .ap-step[hidden] { display: none; }
   .ap-hint { display: block; margin-top: 6px; font-family: var(--serif); font-style: italic; font-size: 14px; color: #8C8679; }
   .ap-pillars { justify-content: flex-start; margin: 6px 0 0; }
+  .apply-card .ap-all { font-style: italic; }
   .ap-agree { display: flex; flex-direction: column; gap: 12px; margin: 6px 0 4px; }
   .ap-check { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 12px; align-items: start; font-family: var(--serif); font-size: 16px; line-height: 1.45; color: #CFC8B8; cursor: pointer; }
   .ap-check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: #E2B84E; }
