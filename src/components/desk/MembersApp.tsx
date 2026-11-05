@@ -14,11 +14,12 @@ import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
+import { ForumIndex, ForumBoard, ForumThread } from './Forum';
 
-type Route = { m?: string; p?: string; view?: string };
+type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
   const q = new URLSearchParams(location.search);
-  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined };
+  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined };
 };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '');
 const pillarName = (v: string) => PILLARS.find((p) => p.value === v)?.label.split(' · ')[0] ?? '';
@@ -62,7 +63,10 @@ function Directory() {
         <span className="eb">The Guild</span>
         <h1 className="h1">At the table</h1>
         <p className="it mut d-sub">Everyone who has taken a seat and chosen to be listed. Open a page to meet them and read their work.</p>
-        <Link className="g-prestige-link lab" to="/guild/members/?view=prestige">The ten prestiges →</Link>
+        <span className="g-head-links">
+          <Link className="g-prestige-link g-forum-link lab" to="/guild/members/?view=forum">The Forum →</Link>
+          <Link className="g-prestige-link lab" to="/guild/members/?view=prestige">The ten prestiges →</Link>
+        </span>
       </header>
       {!members ? <p className="lab mut">Gathering the Guild…</p>
         : members.length === 0 ? <p className="it mut d-empty">No one is listed yet.</p>
@@ -363,8 +367,14 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
+  // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
+  const [isEditor, setIsEditor] = useState(false);
+  useEffect(() => {
+    if (!session) return setIsEditor(false);
+    supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(({ data }) => setIsEditor(data?.role === 'editor'));
+  }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;
   if (route.view === 'prestige') return <Prestiges me={session?.user.id ?? ''} />;
@@ -377,6 +387,9 @@ export default function MembersApp() {
       <a className="d-link" href="/guild">Apply to the Guild</a>
     </div>
   );
+  if (route.t) return <ForumThread id={route.t} me={session.user.id} isEditor={isEditor} />;
+  if (route.board) return <ForumBoard slug={route.board} me={session.user.id} isEditor={isEditor} />;
+  if (route.view === 'forum') return <ForumIndex />;
   if (route.p) return <Reading id={route.p} />;
   if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
   return <Directory />;

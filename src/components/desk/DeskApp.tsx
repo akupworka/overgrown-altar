@@ -252,6 +252,9 @@ function Desk({ session }: { session: Session }) {
           ))}
         </nav>
         <div className="d-side-links">
+          <a className="d-side-link" href="/guild/members/?view=forum">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>
+            The Forum<span aria-hidden="true">→</span></a>
           <a className="d-side-link" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
@@ -392,6 +395,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <button type="button" className="ghost d-btn d-begin-photo" onClick={() => onOpen(null, 'photograph')}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
             Submit a photograph</button>
+          <a className="d-forum-link lab" href="/guild/members/?view=forum">The Forum →</a>
         </div>
       </header>
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {} }} uid={profile?.id} />
