@@ -14,7 +14,7 @@ import GlassLight from '../components/GlassLight.astro';
       <Cross width={30} color="#FFE3A3" />
       <span class="eb" style="margin-top:30px">Received</span>
       <h1 class="h1" style="margin-top:22px">Thank you.</h1>
-      <p class="it mut" style="margin:24px 0 0;max-width:620px;font-size:24px;line-height:1.45">Your words have reached the altar. Every letter is read, and every application is answered.</p>
+      <p class="it mut thanks-line" style="margin:24px 0 0;max-width:620px;font-size:24px;line-height:1.45">Your words have reached the altar. Every letter is read, and every application is answered.</p>
       <div style="margin-top:42px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
         <a class="btn" href="/">Return home</a>
         <a class="ghost" href="/watchtower">Read the Dispatches</a>
@@ -22,6 +22,15 @@ import GlassLight from '../components/GlassLight.astro';
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // After a Guild application: say when they will hear back.
+  if (new URLSearchParams(location.search).get('for') === 'guild') {
+    const line = document.querySelector('.thanks-line');
+    if (line) line.textContent = 'Your application has reached the table. The Editor in Chief reads every one, and you will hear back within three days.';
+    const eb = document.querySelector('.hero-c .eb'); if (eb) eb.textContent = 'Application received';
+  }
+</script>
 
 <style>
   .glow {

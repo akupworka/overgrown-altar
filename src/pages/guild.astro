@@ -13,16 +13,113 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
 <p class="lede center" style="margin:50px auto 0;max-width:980px;font-size:34px">We do not build digital stages for central gurus or performative influencers. We cultivate a guild—a gathering of sharp minds, soft hearts, and unyielding spirits who gather around the hearth to write, sharpen, and discern together.</p></section>
 <!-- Applications arrive in Netlify > Forms ("guild-application"). You then invite the people you choose. -->
 <DoorwayFrame kicker="Apply" title="Pull up a chair." image="/images/tall-windows-dark-vault-1200.jpg"
-  lead="Come to make, and come to be made better. Tell us a little about your craft.">
-<form name="guild-application" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="company" class="dw-form">
+  lead="Every application is read by the Editor in Chief. It takes about ten minutes; answer as you would at the table.">
+<form name="guild-application" method="POST" action="/thanks/?for=guild" data-netlify="true" netlify-honeypot="company" class="dw-form ap" novalidate>
 <input type="hidden" name="form-name" value="guild-application" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
-<label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
-<label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label>
-<label class="dw-field"><span class="dw-label">What you make</span><span class="dw-line-row"><input name="craft" placeholder="Essays, poems, photographs…" required /></span></label>
-<label class="dw-field"><span class="dw-label">Why the table?</span><span class="dw-line-row"><textarea name="why" rows="3" required></textarea></span></label>
-<button class="dw-send" type="submit">Apply to the Guild <span aria-hidden="true">→</span></button>
+<div class="ap-steps" aria-hidden="true"><span class="on">I · You</span><span>II · Your work</span><span>III · Faith</span></div>
+
+<fieldset class="ap-step" data-step="0">
+  <legend class="visually-hidden">About you</legend>
+  <label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Where you are based</span><span class="dw-line-row"><input name="location" placeholder="City, country" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Website or portfolio (optional)</span><span class="dw-line-row"><input name="website" type="url" inputmode="url" placeholder="https://" /></span></label>
+  <label class="dw-field"><span class="dw-label">How you heard of the Guild</span><span class="dw-line-row"><input name="heard" placeholder="A friend, Instagram, a piece you read…" /></span></label>
+</fieldset>
+
+<fieldset class="ap-step" data-step="1" hidden>
+  <legend class="visually-hidden">Your work</legend>
+  <label class="dw-field"><span class="dw-label">What you make</span><span class="dw-line-row"><input name="craft" placeholder="Essays, poems, fiction, photographs…" required /></span></label>
+  <div class="dw-field"><span class="dw-label">Which rooms you would write for</span>
+    <div class="dw-topics ap-pillars" data-need-one>
+      <label class="dw-topic"><input type="checkbox" name="pillar-watchtower" value="yes" />The Watchtower</label>
+      <label class="dw-topic"><input type="checkbox" name="pillar-hearth" value="yes" />The Hearth</label>
+      <label class="dw-topic"><input type="checkbox" name="pillar-perimeter" value="yes" />The Perimeter</label>
+    </div>
+  </div>
+  <label class="dw-field"><span class="dw-label">Where your work has appeared</span><span class="dw-line-row"><textarea name="experience" rows="3" placeholder="Publications, blogs, exhibitions, or “nowhere yet”: that is fine."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">A sample of your work</span><span class="dw-line-row"><textarea name="sample" rows="6" required placeholder="Paste 150 to 500 words, or a link to a piece or a gallery."></textarea></span><span class="ap-hint">Your best short piece, or an excerpt. Photographers and designers: a link to your images.</span></label>
+</fieldset>
+
+<fieldset class="ap-step" data-step="2" hidden>
+  <legend class="visually-hidden">Faith and commitment</legend>
+  <label class="dw-field"><span class="dw-label">Your walk with Christ</span><span class="dw-line-row"><textarea name="faith" rows="4" required placeholder="A few honest lines, and where you worship."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">Why this table?</span><span class="dw-line-row"><textarea name="why" rows="3" required placeholder="What you hope to bring, and to be sharpened in."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">A reference</span><span class="dw-line-row"><input name="reference" required placeholder="Someone who knows you or your work: name and how to reach them" /></span><span class="ap-hint">A pastor, an editor, a teacher, a friend in the faith.</span></label>
+  <div class="dw-field"><span class="dw-label">How often you could bring work</span>
+    <div class="dw-topics">
+      <label class="dw-topic"><input type="radio" name="commitment" value="Monthly" required />Monthly</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="Each season" />Each season</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="When something is ready" />When it is ready</label>
+    </div>
+  </div>
+  <div class="ap-agree">
+    <label class="ap-check"><input type="checkbox" name="read-beliefs" value="yes" required /><span>I have read <a href="/beliefs" target="_blank" rel="noopener">What We Believe</a> and <a href="/manifesto" target="_blank" rel="noopener">the Manifesto</a>, and can write within them.</span></label>
+    <label class="ap-check"><input type="checkbox" name="accept-editing" value="yes" required /><span>I understand every piece is read, and may be edited or returned, before it is published.</span></label>
+    <label class="ap-check"><input type="checkbox" name="over-18" value="yes" required /><span>I am 18 or older.</span></label>
+  </div>
+</fieldset>
+
+<p class="ap-msg" role="alert" hidden></p>
+<div class="ap-nav">
+  <button type="button" class="dw-text ap-back" hidden>← Back</button>
+  <button type="button" class="dw-send ap-next">Next <span aria-hidden="true">→</span></button>
+  <button type="submit" class="dw-send ap-submit" hidden>Send my application <span aria-hidden="true">→</span></button>
+</div>
 </form>
-<Fragment slot="foot">Members comment on dispatches, submit to The Hearth, and gather monthly around one reading and one open table.</Fragment>
+<Fragment slot="foot">You’ll hear back from us within three days. If there is a seat for you, your invitation will arrive by email.</Fragment>
 </DoorwayFrame>
+
+<script>
+  // The application in three steps. Each step checks its own answers before moving on; everything is sent together.
+  const form = document.querySelector<HTMLFormElement>('form.ap');
+  if (form) {
+    const steps = [...form.querySelectorAll<HTMLFieldSetElement>('.ap-step')];
+    const marks = [...form.querySelectorAll<HTMLElement>('.ap-steps span')];
+    const back = form.querySelector<HTMLButtonElement>('.ap-back')!, next = form.querySelector<HTMLButtonElement>('.ap-next')!, send = form.querySelector<HTMLButtonElement>('.ap-submit')!;
+    const msg = form.querySelector<HTMLElement>('.ap-msg')!;
+    let at = 0;
+    const show = (i: number) => {
+      at = i;
+      steps.forEach((s, j) => (s.hidden = j !== i));
+      marks.forEach((m, j) => m.classList.toggle('on', j <= i));
+      back.hidden = i === 0; next.hidden = i === steps.length - 1; send.hidden = i !== steps.length - 1;
+      msg.hidden = true;
+      form.closest('.dw-inline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const ok = (i: number) => {
+      const step = steps[i];
+      for (const el of step.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')) {
+        if (!el.checkValidity()) { el.reportValidity(); return false; }
+      }
+      const group = step.querySelector('[data-need-one]');
+      if (group && !group.querySelector('input:checked')) { msg.textContent = 'Choose at least one room you would write for.'; msg.hidden = false; return false; }
+      const sample = step.querySelector<HTMLTextAreaElement>('textarea[name="sample"]');
+      if (sample && sample.value.trim().split(/\s+/).length < 40 && !/https?:\/\//.test(sample.value)) { msg.textContent = 'Please share a little more of your work: at least a paragraph, or a link.'; msg.hidden = false; sample.focus(); return false; }
+      return true;
+    };
+    next.addEventListener('click', () => { if (ok(at)) show(at + 1); });
+    back.addEventListener('click', () => show(at - 1));
+    form.addEventListener('submit', (e) => { if (!ok(at)) e.preventDefault(); });
+  }
+</script>
+
+<style>
+  .ap-steps { display: flex; justify-content: center; gap: 6px; margin: 0 0 26px; }
+  .ap-steps span { font-family: var(--sans); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: #6F6A60; padding: 5px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(243,236,220,.12); transition: color .3s, box-shadow .3s; }
+  .ap-steps span.on { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.5); }
+  .ap-step { border: 0; padding: 0; margin: 0; min-width: 0; text-align: left; }
+  .ap-step[hidden] { display: none; }
+  .ap-hint { display: block; margin-top: 6px; font-family: var(--serif); font-style: italic; font-size: 14px; color: #8C8679; }
+  .ap-pillars { justify-content: flex-start; margin: 6px 0 0; }
+  .ap-agree { display: flex; flex-direction: column; gap: 12px; margin: 6px 0 4px; }
+  .ap-check { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 12px; align-items: start; font-family: var(--serif); font-size: 16px; line-height: 1.45; color: #CFC8B8; cursor: pointer; }
+  .ap-check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: #E2B84E; }
+  .ap-check a { color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.4); }
+  .ap-msg { margin: 10px 0 0; padding: 10px 14px; border-radius: 10px; background: rgba(230,169,154,.08); box-shadow: inset 0 0 0 1px rgba(230,169,154,.35); font-family: var(--serif); font-style: italic; font-size: 16px; color: #E6A99A; text-align: left; }
+  .ap-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+  .ap-nav .ap-next, .ap-nav .ap-submit { margin-left: auto; }
+  .ap-nav [hidden] { display: none !important; }
+</style>
 </BaseLayout>

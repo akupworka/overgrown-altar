@@ -20,6 +20,7 @@ Start by reading this file, then `README.md`.
 ## Latest polish
 - `src/lib/catalog.ts`: one list of real pieces (2 complete design pieces + published Guild pieces) used by Home,
   The Watchtower, The Perimeter, Archive, Start Here and "More to read". Sample-only pieces were retired.
+- Guild application (`pages/guild.astro`): three steps (you / work / faith) with a writing sample, reference and agreements; lands on `/thanks/?for=guild` ("within three days"). Invitation + reset emails: `emails/` (paste into Supabase templates); links `?token_hash=` handled in DeskApp.
 - Photos inside a piece: "+ Photo" in the writing bar uploads to the public `media` bucket and saves `![caption](url)` on its own line (lib/marks.tsx renders it). Editing live work: members' edits to a published piece go via `rpc propose_revision` into `pieces.revision` (live stays until the editor approves in Waiting for you); the editor's own edits update the live piece. "Preview" opens a full-page render with the site's piece styles.
 - Writing sheet is styled as you write (TipTap, `components/desk/RichBody.tsx`); it still saves the simple writing marks (`## > + * **`) that `lib/marks.tsx` reads.
 - Pillars decide the kinds of piece (DB trigger `private.pillar_medium`, front end `mediumsFor` in `lib/supabase.ts`): Watchtower = essay; Perimeter = recovery, testimony, deliverance, personal; Hearth = creative kinds. A published writer changing their profile triggers a rebuild (`private.after_profile_change`).
