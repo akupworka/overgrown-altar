@@ -62,7 +62,7 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
 </BaseLayout>
 
 <script>
-  import { pageList } from '../../../lib/pager';
+  import { pagerHtml } from '../../../lib/pager';
   // Six pieces at a time, with pages below; the kind filter narrows the list first.
   const shelf = document.querySelector<HTMLElement>('.au-shelf');
   if (shelf) {
@@ -72,7 +72,6 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
     const pager = shelf.querySelector<HTMLElement>('.pager')!;
     const count = shelf.querySelector('.au-count')!;
     let kind = 'all', page = 1;
-    const arrow = (d: 'l' | 'r') => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="${d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`;
     const draw = (scroll = false) => {
       const shown = rows.filter((r) => kind === 'all' || r.dataset.tag === kind);
       const pages = Math.max(1, Math.ceil(shown.length / per));
@@ -82,11 +81,7 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
       count.textContent = `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`;
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
       pager.hidden = pages < 2;
-      pager.innerHTML = pages < 2 ? '' :
-        `<button type="button" class="pg-step" data-go="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="Newer pieces">${arrow('l')}<span class="pg-word">Newer</span></button>` +
-        pageList(page, pages).map((n) => n === '…' ? '<span class="pg-gap" aria-hidden="true">…</span>'
-          : `<button type="button" class="pg-n" data-go="${n}" ${n === page ? 'aria-current="page"' : ''} aria-label="Page ${n} of ${pages}">${n}</button>`).join('') +
-        `<button type="button" class="pg-step" data-go="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="Older pieces"><span class="pg-word">Older</span>${arrow('r')}</button>`;
+      pager.innerHTML = pagerHtml(page, pages);
       if (scroll) shelf.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     pager.addEventListener('click', (e) => {

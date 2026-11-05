@@ -113,6 +113,34 @@ const imageUrl = new URL(image, site).toString();
         });
       }
 
+      // Filter rows scroll sideways on phones: a round arrow at the end shows there is more, and moves the row along.
+      // It goes once the row is at its end (or everything fits). Rows the page draws later (the Guild pages) get one too.
+      const hintRows = () => document.querySelectorAll<HTMLElement>('.filters').forEach((row) => {
+        let wrap = row.parentElement!;
+        if (!wrap.classList.contains('filters-wrap')) {
+          if (row.closest('[data-reactroot], .m-page')) return;   // React draws its own wrapper
+          wrap = document.createElement('div'); wrap.className = 'filters-wrap';
+          row.replaceWith(wrap); wrap.append(row);
+        }
+        let more = wrap.querySelector<HTMLButtonElement>(':scope > .filters-more');
+        if (!more) {
+          more = document.createElement('button'); more.type = 'button'; more.className = 'filters-more'; more.setAttribute('aria-label', 'More choices');
+          more.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+          wrap.append(more);
+        }
+        if (!wrap.dataset.ready) {
+          wrap.dataset.ready = '1';
+          const check = () => { wrap.dataset.end = String(row.scrollLeft + row.clientWidth >= row.scrollWidth - 8); };
+          row.addEventListener('scroll', check, { passive: true }); addEventListener('resize', check);
+          more.addEventListener('click', () => row.scrollBy({ left: row.clientWidth * 0.7, behavior: 'smooth' }));
+          check();
+        }
+      });
+      hintRows();
+      let hintQueued = false;
+      new MutationObserver(() => { if (hintQueued) return; hintQueued = true; requestAnimationFrame(() => { hintQueued = false; hintRows(); }); })
+        .observe(document.body, { childList: true, subtree: true });
+
       // Writers' pictures stay current: pages are built ahead of time, so when a writer changes their portrait,
       // each picture marked data-author-id asks Supabase for the latest one as the page opens (one small request).
       const marked = [...document.querySelectorAll<HTMLElement>('[data-author-id]')].filter((el) => el.dataset.authorId);

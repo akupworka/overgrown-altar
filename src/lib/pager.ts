@@ -13,3 +13,13 @@ export function pageList(current: number, total: number): (number | '…')[] {
   });
   return out;
 }
+
+// The row of page buttons, as HTML for the static pages' small scripts (buttons carry data-go="<page>").
+const arrow = (d: 'l' | 'r') => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="${d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`;
+export function pagerHtml(page: number, pages: number, newer = 'Newer', older = 'Older'): string {
+  if (pages < 2) return '';
+  return `<button type="button" class="pg-step" data-go="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="${newer} pieces">${arrow('l')}<span class="pg-word">${newer}</span></button>` +
+    pageList(page, pages).map((n) => n === '…' ? '<span class="pg-gap" aria-hidden="true">…</span>'
+      : `<button type="button" class="pg-n" data-go="${n}" ${n === page ? 'aria-current="page"' : ''} aria-label="Page ${n} of ${pages}">${n}</button>`).join('') +
+    `<button type="button" class="pg-step" data-go="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="${older} pieces"><span class="pg-word">${older}</span>${arrow('r')}</button>`;
+}

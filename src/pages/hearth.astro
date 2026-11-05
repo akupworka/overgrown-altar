@@ -97,6 +97,7 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
       </ol>
     ) : <p class="it mut" style="font-size:22px;margin:0">The first pieces from the fellowship are being written.</p>}
     <p class="it mut he-none" hidden>Nothing of this kind yet. The first one may be yours.</p>
+    <nav class="pager he-pager" aria-label="Pages of work" hidden></nav>
   </section>
 
   <!-- Photograph plates -->
@@ -134,21 +135,35 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
 </BaseLayout>
 
 <script>
-  // Tapping a kind (or a filter) shows only that kind of work.
+  import { PER_PAGE, pagerHtml } from '../lib/pager';
+  // Tapping a kind shows only that kind of work; six at a time, with pages below.
   const chips = [...document.querySelectorAll<HTMLButtonElement>('.he-filters .chip')];
   const cards = [...document.querySelectorAll<HTMLElement>('.he-grid li[data-tag]')];
   const none = document.querySelector<HTMLElement>('.he-none');
-  const show = (k: string) => {
-    chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === k)));
-    let n = 0;
-    cards.forEach((c) => { const on = k === 'all' || c.dataset.tag === k; c.hidden = !on; if (on) n++; });
-    if (none) none.hidden = n > 0 || cards.length === 0;
+  const pager = document.querySelector<HTMLElement>('.he-pager');
+  let kind = 'all', page = 1;
+  const draw = (scroll = false) => {
+    chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
+    const shown = cards.filter((c) => kind === 'all' || c.dataset.tag === kind);
+    const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
+    page = Math.min(page, pages);
+    cards.forEach((c) => { c.hidden = true; });
+    shown.slice((page - 1) * PER_PAGE, page * PER_PAGE).forEach((c) => { c.hidden = false; });
+    if (none) none.hidden = shown.length > 0 || cards.length === 0;
+    if (pager) { pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages); }
+    if (scroll) document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
   };
+  const show = (k: string) => { kind = k; page = 1; draw(); };
+  pager?.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
+    if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
+  });
   chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.show!)));
   document.querySelectorAll<HTMLButtonElement>('.he-kind').forEach((b) => b.addEventListener('click', () => {
     show(b.dataset.kind!);
     document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
   }));
+  draw();
 </script>
 
 <style>
@@ -177,6 +192,8 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
 
   /* The work, as a gallery */
   .he-filters { margin-bottom: 30px; }
+  #work { scroll-margin-top: 90px; }
+  .he-pager { margin-top: 56px; }
   .he-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px 32px; }
   .he-grid li { display: flex; flex-direction: column; gap: 10px; }
   .he-grid li[hidden] { display: none; }

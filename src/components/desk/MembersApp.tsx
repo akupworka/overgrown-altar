@@ -181,10 +181,10 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <section className="m-work">
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{shown.length} {shown.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
         {kinds.length > 1 && (
-          <div className="filters shelf-filters" role="group" aria-label="Show">
+          <div className="filters-wrap"><div className="filters shelf-filters" role="group" aria-label="Show">
             <button type="button" className="chip" aria-pressed={kind === 'all'} onClick={() => { setKind('all'); setPage(1); }}>All<span className="chip-n">{work.length}</span></button>
             {kinds.map((k) => <button key={k.value} type="button" className="chip" aria-pressed={kind === k.value} onClick={() => { setKind(k.value); setPage(1); }}>{k.plural}<span className="chip-n">{k.n}</span></button>)}
-          </div>
+          </div></div>
         )}
         {work.length === 0 ? (
           <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>

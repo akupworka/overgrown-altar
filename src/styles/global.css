@@ -321,3 +321,17 @@ html.ptr-on, html.ptr-on body { overscroll-behavior-y: none; }
   .pager .pg-step { padding: 0; width: 40px; }
   .pager button { min-width: 36px; }
 }
+
+/* Filter rows on phones: an arrow at the end shows the row scrolls (added by BaseLayout's script). */
+.filters-wrap { position: relative; }
+.filters-more { display: none; }
+@media (max-width: 700px) {
+  .filters-more { display: flex; align-items: center; justify-content: flex-end; position: absolute; top: 0; bottom: 0; right: -24px; width: 64px; padding: 0 14px 0 0;
+    border: 0; cursor: pointer; color: var(--ink); background: linear-gradient(90deg, rgba(233, 226, 214, 0), var(--paper, #E9E2D6) 55%); transition: opacity .3s; }
+  .filters-more svg { width: 30px; height: 30px; padding: 8px; border-radius: 50%; background: var(--ink); color: var(--bone); box-shadow: 0 4px 12px rgba(42, 32, 23, .25);
+    animation: filters-nudge 1.6s ease-in-out 2; }
+  .filters-wrap[data-end='true'] .filters-more { opacity: 0; pointer-events: none; }
+  .dark .filters-more, .night .filters-more { color: var(--bone); background: linear-gradient(90deg, rgba(10, 12, 10, 0), #0A0C0A 55%); }
+  .dark .filters-more svg, .night .filters-more svg { background: var(--bone); color: #12160F; }
+}
+@keyframes filters-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
