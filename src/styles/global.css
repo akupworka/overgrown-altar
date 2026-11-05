@@ -284,3 +284,17 @@ textarea:-webkit-autofill, select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px transparent inset;
 }
 input:autofill, textarea:autofill { background-color: transparent !important; }
+
+/* Pull to refresh (BaseLayout script): the browser's own pull is switched off on touch screens, so only one happens. */
+html.ptr-on, html.ptr-on body { overscroll-behavior-y: none; }
+.ptr { position: fixed; top: 0; left: 50%; z-index: 300; width: 44px; height: 44px; border-radius: 50%; pointer-events: none;
+  display: flex; align-items: center; justify-content: center; background: #12150F; opacity: 0; transform: translate(-50%, -56px);
+  box-shadow: 0 0 0 1px rgba(159,148,94,.45), 0 10px 24px rgba(0,0,0,.45); --k: 0; }
+.ptr svg { fill: none; stroke-linecap: round; }
+.ptr-track { stroke: rgba(243,236,220,.12); stroke-width: 2; }
+.ptr-fill { stroke: #E2B84E; stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--k)); transform: rotate(-90deg); transform-origin: 50% 50%; }
+.ptr-cross { stroke: rgba(255,227,163,.55); stroke-width: 1.4; transition: stroke .2s; }
+.ptr.ready .ptr-cross { stroke: #FFE3A3; }
+.ptr.ready { box-shadow: 0 0 0 1px rgba(255,227,163,.8), 0 0 18px rgba(255,214,140,.35), 0 10px 24px rgba(0,0,0,.45); }
+.ptr.spin svg { animation: ptr-spin .8s linear infinite; }
+@keyframes ptr-spin { to { transform: rotate(360deg); } }
