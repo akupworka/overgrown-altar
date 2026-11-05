@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
 import { Body } from '../../lib/marks';
-import { Initials } from './DeskApp';
+import { Initials, Icon } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
@@ -147,10 +147,23 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               Write a piece
             </a>
             <a className="m-act" href="/guild/desk/">My pieces</a>
-            <a className="m-act" href="/guild/desk/#my-page">Edit my page</a>
+            <a className="m-act" href="/guild/desk/#my-page">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+              Edit my page
+            </a>
             {person.role === 'editor' && <a className="m-act" href="/guild/desk/#review">Review submissions</a>}
             {work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
             <button type="button" className="m-signout lab" onClick={async () => { rememberMember(null); await supabase.auth.signOut(); location.href = '/guild/desk/'; }}>Sign out</button>
+          </nav>
+        )}
+        {/* Phones: the Desk's tab bar, so your own page is one of the Desk's rooms. */}
+        {person.id === me && (
+          <nav className="d-tabbar" aria-label="Desk">
+            {([['pieces', 'Pieces', '/guild/desk/'], ['write', 'Write', '/guild/desk/#write'],
+              ...(person.role === 'editor' ? [['review', 'Waiting', '/guild/desk/#review']] : []),
+              ['profile', 'My page', '']] as [string, string, string][]).map(([t, label, href]) => t === 'profile'
+              ? <span key={t} className="on" aria-current="page"><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></span>
+              : <a key={t} href={href}><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></a>)}
           </nav>
         )}
       </header>

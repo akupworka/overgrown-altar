@@ -44,7 +44,7 @@ const ICONS: Record<string, ReactNode> = {
   review: <><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></>,
   profile: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></>,
 };
-const Icon = ({ name }: { name: string }) => (
+export const Icon = ({ name }: { name: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
 );
 
@@ -201,6 +201,8 @@ function Desk({ session }: { session: Session }) {
   };
   const go = (t: Tab) => {
     if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
+    // "My page" is your own page in the Guild (with Edit my page on it), not the form.
+    if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); history.pushState({ desk: 'write' }, '', '#write'); }
     setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -247,9 +249,6 @@ function Desk({ session }: { session: Session }) {
           ))}
         </nav>
         <div className="d-side-links">
-          <a className="d-side-link" href={`/guild/members/?m=${uid}`}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>
-            View my page<span aria-hidden="true">→</span></a>
           <a className="d-side-link" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
