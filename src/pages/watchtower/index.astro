@@ -1,20 +1,33 @@
 ---
 // The Watchtower: the dispatches, laid out like a journal's blog section.
-//   - a short header, so the writing starts right away
-//   - the latest dispatch, large
-//   - every other dispatch below it, newest first
-//   - one search box that filters the list as you type (no sidebar: one clean column)
+//   - the header, with how many dispatches and writers
+//   - the latest dispatch, large, and two more beside it ("Also new")
+//   - how a dispatch works: Thinker, Fracture, Anchor
+//   - a line from the newest dispatches, set large
+//   - every earlier dispatch, with a search that filters as you type
+//   - the writers of The Watchtower, and an invitation to write for it
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
 import { inPillar } from '../../lib/catalog';
+import { authorUrl, guildPillar, guildUrl, type GuildAuthor } from '../../lib/guild';
+import { parseBody } from '../../lib/marks';
 
 // Every dispatch: real pieces only (the design's complete essay, plus pieces published at the Guild Desk).
 const newestFirst: DispatchItem[] = await inPillar('watchtower');
 const latest = newestFirst[0];
-const rest = newestFirst.slice(1);
+const alsoNew = newestFirst.slice(1, 3);           // two more, as large features
+const rest = newestFirst.slice(3);                 // everything earlier, as a searchable list
+
+// The writers of The Watchtower, and a line worth pausing on: the first pull quote (a "> " line) in the newest dispatches.
+const guildPieces = await guildPillar('watchtower');
+const writers = [...new Map(guildPieces.map((g) => [g.author.id, g.author] as [string, GuildAuthor])).values()].slice(0, 8);
+const quoted = guildPieces.map((g) => ({ g, q: parseBody(g.body).find((b) => b.type === 'quote') })).find((x) => x.q);
+const pull = quoted
+  ? { text: quoted.q!.text.replace(/\*+/g, ''), by: quoted.g.author.display_name, from: quoted.g.title, href: guildUrl(quoted.g) }
+  : { text: 'Broken pieces of a mirror that Christ holds whole.', by: '', from: 'The Core Thesis', href: '/manifesto' };
 
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
@@ -28,6 +41,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
       <span class="eb">01 · Prophetic Audits</span>
       <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Watchtower</h1>
       <p class="body" style="color:#E6DFD0;max-width:640px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols, and Leviathan structures in art and philosophy.</p>
+      <span class="lab wt-stats">{newestFirst.length} {newestFirst.length === 1 ? 'dispatch' : 'dispatches'}{writers.length ? ` · ${writers.length} ${writers.length === 1 ? 'writer' : 'writers'}` : ''}</span>
     </div>
   </section>
 
@@ -50,10 +64,57 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
         </div>
       </article>
 
-      <!-- Every other dispatch, newest first, with a search that filters as you type -->
+      <!-- Also new: two more, as large features -->
+      {alsoNew.length > 0 && (
+        <div class="also">
+          <h2 class="eb also-h">Also new</h2>
+          <div class="also-grid">
+            {alsoNew.map((d) => (
+              <a class="also-card" href={d.href}>
+                <span class="also-img"><img src={d.image} alt="" loading="lazy" style={d.imagePos ? `object-position:${d.imagePos}` : undefined} /></span>
+                <span class="lab also-k">{d.kicker}</span>
+                <span class="also-t">{d.title}</span>
+                {d.standfirst && <span class="it also-sf">{d.standfirst}</span>}
+                <span class="lab mut also-by">{d.author.name} · {fmt(d.date)}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- How a dispatch works -->
+  <section class="sec dark method">
+    <div class="method-head">
+      <span class="eb">The method</span>
+      <h2 class="h2">How a dispatch works</h2>
+      <p class="it method-lead">Every dispatch takes one great secular mind seriously, then follows the truth they held to where it holds whole.</p>
+    </div>
+    <ol class="method-steps">
+      <li><span class="num">I</span><span class="method-k">The Thinker</span><span class="method-d">A great secular mind, and the real piece of truth they held: Nietzsche, Jung, Freud, Bukowski, Newton.</span></li>
+      <li><span class="num">II</span><span class="method-k">The Fracture</span><span class="method-d">Where that insight broke, for lack of a divine keystone, and what it cost those who followed it.</span></li>
+      <li><span class="num">III</span><span class="method-k">The Anchor</span><span class="method-d">How the same truth holds again, whole, in the resurrection of Christ.</span></li>
+    </ol>
+    <a class="ghost method-go" href="/watchtower/nietzsche-surrendered">See it in a dispatch: Nietzsche Surrendered</a>
+  </section>
+
+  <!-- A line from the newest dispatches, set large -->
+  <section class="hero wt-pull">
+    <img src="/images/labyrinth-stained-light-1200.jpg" alt="" loading="lazy" aria-hidden="true" />
+    <div class="veil"></div>
+    <figure class="wt-pull-in">
+      <blockquote class="big-it">“{pull.text}”</blockquote>
+      <figcaption class="lab">{pull.by && <>{pull.by} · </>}<a href={pull.href}>{pull.from}</a></figcaption>
+    </figure>
+  </section>
+
+  <section class="paper blog blog-2">
+    <div class="blog-col">
+      <!-- Every earlier dispatch, newest first, with a search that filters as you type -->
       {rest.length > 0 && (<>
       <div class="list-head">
-        <div class="list-title"><h2 class="eb">All dispatches</h2><span class="lab mut wt-count">{rest.length} {rest.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+        <div class="list-title"><h2 class="eb">Earlier dispatches</h2><span class="lab mut wt-count">{rest.length} {rest.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
         <label class="wt-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <span class="visually-hidden">Search the dispatches</span>
@@ -63,6 +124,30 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
       <div class="wt-list"><DispatchList items={rest} /></div>
       <p class="it mut wt-none" hidden>No dispatch matches that. Try another word, or <a href="/archive">search everything</a>.</p>
       </>)}
+
+      <!-- The writers, and an open invitation -->
+      <div class="wt-write">
+        <div class="wt-write-text">
+          <span class="eb">Write for The Watchtower</span>
+          <h2 class="h2 wt-write-h">Name the thinker. Find the fracture. Set the anchor.</h2>
+          <p class="it mut wt-write-p">The Watchtower takes essays and dispatches. Every piece is read by the editor before it is published.</p>
+          <div class="wt-write-cta">
+            <a class="btn" href="/guild/desk/#write" data-member hidden>Write a dispatch</a>
+            <a class="btn" href="/guild" data-guest>Join the Guild to write</a>
+          </div>
+        </div>
+        {writers.length > 0 && (
+          <div class="wt-writers">
+            <span class="lab mut">The writers</span>
+            {writers.map((w) => (
+              <a class="wt-writer" href={authorUrl(w)}>
+                <Avatar name={w.display_name} src={w.portrait || undefined} size={44} id={w.id} />
+                <span><span class="wt-writer-n">{w.display_name}</span>{w.craft && <span class="lab mut wt-writer-c">{w.craft}</span>}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   </section>
 
@@ -105,6 +190,60 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .list-head > * { white-space: nowrap; }
   .list-head .eb { margin: 0; }
 
+  .wt-stats { margin-top: 6px; color: var(--ember); }
+
+  /* Also new */
+  .also { padding-top: 8px; border-top: 1px solid rgba(42, 32, 23, .25); }
+  .also-h { margin: 26px 0 24px; }
+  .also-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .also-card { display: flex; flex-direction: column; gap: 10px; }
+  .also-img { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #DDD5C6; margin-bottom: 6px; }
+  .also-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease, ease); }
+  .also-card:hover .also-img img { transform: scale(1.04); }
+  .also-k { color: var(--oxblood); font-size: 10px; }
+  .also-t { font-family: var(--serif); font-style: italic; font-size: 30px; line-height: 1.12; transition: color .3s; }
+  .also-card:hover .also-t { color: var(--oxblood); }
+  .also-sf { font-size: 18px; line-height: 1.45; color: var(--muted-paper); }
+  .also-by { font-size: 10px; }
+
+  /* The method */
+  .method { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .method-head { display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 720px; }
+  .method-lead { margin: 0; font-size: 22px; line-height: 1.45; color: var(--muted-dark); }
+  .method-steps { list-style: none; margin: 56px 0 0; padding: 0; width: 100%; max-width: 1100px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .method-steps li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 30px; }
+  .method-steps li + li { border-left: 1px solid rgba(243, 236, 220, .14); }
+  .method-steps li + li::before { content: '→'; position: absolute; left: -10px; top: 14px; color: var(--brass); font-size: 16px; background: #0A0C0A; padding: 2px 0; }
+  .method-steps .num { font-size: 48px; line-height: 1; }
+  .method-k { font-family: var(--serif); font-size: 28px; }
+  .method-d { font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--muted-dark); max-width: 300px; }
+  .method-go { margin-top: 52px; }
+
+  /* The pull quote */
+  .wt-pull { min-height: 520px; display: flex; align-items: center; justify-content: center; }
+  .wt-pull > img { filter: brightness(.6); object-position: center 60%; }
+  .wt-pull-in { position: relative; z-index: 1; margin: 0; padding: 80px 24px; max-width: 980px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .wt-pull-in blockquote { margin: 0; }
+  .wt-pull-in figcaption { color: var(--ember); }
+  .wt-pull-in figcaption a { border-bottom: 1px solid rgba(255, 227, 163, .4); }
+
+  /* Write for The Watchtower */
+  .blog-2 { padding-top: 80px !important; }
+  .wt-write { margin-top: 80px; padding: 48px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; align-items: start;
+    background: linear-gradient(180deg, #F1ECE2, #EDE6D9); box-shadow: inset 0 0 0 1px rgba(159, 148, 94, .45); border-radius: 4px; }
+  .blog-2 .blog-col > .wt-write:first-child { margin-top: 0; }
+  .wt-write-text { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+  .wt-write-h { font-size: 40px; line-height: 1.08; }
+  .wt-write-p { margin: 0; font-size: 19px; line-height: 1.5; }
+  .wt-write-cta { margin-top: 6px; }
+  .wt-write-cta [hidden] { display: none; }
+  .wt-writers { display: flex; flex-direction: column; gap: 14px; padding-left: 40px; border-left: 1px solid rgba(42, 32, 23, .15); }
+  .wt-writer { display: flex; align-items: center; gap: 14px; }
+  .wt-writer > span:last-child { display: flex; flex-direction: column; gap: 3px; }
+  .wt-writer-n { font-family: var(--serif); font-size: 21px; transition: color .3s; }
+  .wt-writer:hover .wt-writer-n { color: var(--oxblood); }
+  .wt-writer-c { font-size: 9px; }
+
   .list-title { display: flex; flex-direction: column; gap: 8px; }
   .list-head { align-items: flex-end !important; padding-bottom: 18px !important; border-bottom: 0; }
   .wt-search { display: flex; align-items: center; gap: 10px; min-width: 280px; padding: 0 2px 8px; border-bottom: 1px solid rgba(42, 32, 23, .35); color: var(--muted-paper); transition: border-color .3s, color .3s; }
@@ -128,6 +267,26 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     .latest-title { font-size: 30px !important; }
     .latest-sum { font-size: 17px !important; }
     .latest .btn { align-self: stretch; text-align: center; }
+    .also-grid { grid-template-columns: 1fr; gap: 34px; }
+    .also-t { font-size: 24px; }
+    .also-sf { font-size: 16px; }
+    .method-steps { grid-template-columns: 1fr; margin-top: 36px; }
+    .method-steps li { padding: 26px 0; }
+    .method-steps li + li { border-left: 0; border-top: 1px solid rgba(243, 236, 220, .14); }
+    .method-steps li + li::before { content: '↓'; left: 50%; top: -12px; translate: -50% 0; padding: 0 8px; }
+    .method-steps .num { font-size: 38px !important; }
+    .method-k { font-size: 24px; }
+    .method-d { font-size: 16px; }
+    .method-lead { font-size: 18px; }
+    .method-go { margin-top: 32px; text-align: center; }
+    .wt-pull { min-height: 0; }
+    .wt-pull-in { padding: 72px 24px; }
+    .blog-2 { padding-top: 56px !important; }
+    .wt-write { margin-top: 56px; padding: 30px 22px; grid-template-columns: 1fr; gap: 30px; }
+    .wt-write-h { font-size: 28px !important; }
+    .wt-write-p { font-size: 17px; }
+    .wt-write-cta, .wt-write-cta .btn { align-self: stretch; text-align: center; width: 100%; }
+    .wt-writers { padding-left: 0; padding-top: 24px; border-left: 0; border-top: 1px solid rgba(42, 32, 23, .15); }
     .list-head { flex-direction: column; align-items: stretch !important; gap: 18px !important; }
     .wt-search { min-width: 0; }
   }
