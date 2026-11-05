@@ -4,15 +4,15 @@
 export interface Prestige { level: number; numeral: string; name: string; at: number; color: string; note: string }
 
 export const PRESTIGES: Prestige[] = [
-  { level: 1, numeral: 'I', name: 'Kindling', at: 1, color: '#C98A5B', note: 'The first piece laid on the fire.' },
-  { level: 2, numeral: 'II', name: 'Ember', at: 2, color: '#E2C58F', note: 'Still burning, and catching.' },
-  { level: 3, numeral: 'III', name: 'Torchbearer', at: 3, color: '#F0A93B', note: 'Carries the light into the dark.' },
-  { level: 4, numeral: 'IV', name: 'Stonemason', at: 5, color: '#9BA8B5', note: 'Building what will outlast us.' },
-  { level: 5, numeral: 'V', name: 'Glasswright', at: 8, color: '#D2404F', note: 'Sets colour into the window.' },
-  { level: 6, numeral: 'VI', name: 'Illuminator', at: 12, color: '#4A7BEA', note: 'Gold and lapis on the page.' },
-  { level: 7, numeral: 'VII', name: 'Watchman', at: 17, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
-  { level: 8, numeral: 'VIII', name: 'Flamekeeper', at: 25, color: '#9B6BEA', note: 'The fire does not go out on their watch.' },
-  { level: 9, numeral: 'IX', name: 'Herald', at: 35, color: 'rainbow', note: 'Goes ahead of the King with the news.' },
+  { level: 1, numeral: 'I', name: 'Inkling', at: 1, color: '#B9A78A', note: 'The first hint of something to say.' },
+  { level: 2, numeral: 'II', name: 'Kindling', at: 2, color: '#C98A5B', note: 'The first pieces laid on the fire.' },
+  { level: 3, numeral: 'III', name: 'Scribe', at: 3, color: '#F0A93B', note: 'Puts it down, and keeps putting it down.' },
+  { level: 4, numeral: 'IV', name: 'Torchbearer', at: 5, color: '#E0603A', note: 'Carries the light into the dark.' },
+  { level: 5, numeral: 'V', name: 'Stonemason', at: 8, color: '#9BA8B5', note: 'Building what will outlast us.' },
+  { level: 6, numeral: 'VI', name: 'Glasswright', at: 12, color: '#D2404F', note: 'Sets colour into the window.' },
+  { level: 7, numeral: 'VII', name: 'Illuminator', at: 17, color: '#4A7BEA', note: 'Gold and lapis on the page.' },
+  { level: 8, numeral: 'VIII', name: 'Watchman', at: 25, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
+  { level: 9, numeral: 'IX', name: 'Flamekeeper', at: 35, color: 'rainbow', note: 'The fire does not go out on their watch.' },
   { level: 10, numeral: 'X', name: 'Lodestar', at: 50, color: 'gold', note: 'The star the others steer by.' },
 ];
 
