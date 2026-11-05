@@ -4,16 +4,16 @@
 export interface Prestige { level: number; numeral: string; name: string; at: number; color: string; note: string }
 
 export const PRESTIGES: Prestige[] = [
-  { level: 1, numeral: 'I', name: 'Ember', at: 1, color: '#C98A5B', note: 'The first coal laid on the fire.' },
-  { level: 2, numeral: 'II', name: 'Torchbearer', at: 2, color: '#E2C58F', note: 'Carries the light into the dark.' },
-  { level: 3, numeral: 'III', name: 'Vigil', at: 3, color: '#F0A93B', note: 'Stays awake while others sleep.' },
-  { level: 4, numeral: 'IV', name: 'Glasswright', at: 5, color: '#D2404F', note: 'Sets colour into the window.' },
-  { level: 5, numeral: 'V', name: 'Keystone', at: 8, color: '#9BA8B5', note: 'The stone the whole arch rests on.' },
+  { level: 1, numeral: 'I', name: 'Kindling', at: 1, color: '#C98A5B', note: 'The first piece laid on the fire.' },
+  { level: 2, numeral: 'II', name: 'Ember', at: 2, color: '#E2C58F', note: 'Still burning, and catching.' },
+  { level: 3, numeral: 'III', name: 'Torchbearer', at: 3, color: '#F0A93B', note: 'Carries the light into the dark.' },
+  { level: 4, numeral: 'IV', name: 'Stonemason', at: 5, color: '#9BA8B5', note: 'Building what will outlast us.' },
+  { level: 5, numeral: 'V', name: 'Glasswright', at: 8, color: '#D2404F', note: 'Sets colour into the window.' },
   { level: 6, numeral: 'VI', name: 'Illuminator', at: 12, color: '#4A7BEA', note: 'Gold and lapis on the page.' },
-  { level: 7, numeral: 'VII', name: 'Sentinel', at: 17, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
+  { level: 7, numeral: 'VII', name: 'Watchman', at: 17, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
   { level: 8, numeral: 'VIII', name: 'Flamekeeper', at: 25, color: '#9B6BEA', note: 'The fire does not go out on their watch.' },
-  { level: 9, numeral: 'IX', name: 'Rose Window', at: 35, color: 'rainbow', note: 'Every colour, gathered into one light.' },
-  { level: 10, numeral: 'X', name: 'Pillar of Fire', at: 50, color: 'gold', note: 'Goes before the people by night.' },
+  { level: 9, numeral: 'IX', name: 'Herald', at: 35, color: 'rainbow', note: 'Goes ahead of the King with the news.' },
+  { level: 10, numeral: 'X', name: 'Lodestar', at: 50, color: 'gold', note: 'The star the others steer by.' },
 ];
 
 /** Where a member stands: their prestige (null before the first published piece) and how far to the next. */
