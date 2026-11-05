@@ -262,7 +262,7 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} onReview={() => go('review')} onOpen={open} onChanged={load} />}
+        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} isEditor={isEditor} onReview={() => go('review')} onOpen={open} onChanged={load} />}
         {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} author={profile} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
@@ -340,7 +340,7 @@ function StatusChip({ status }: { status: Piece['status'] }) {
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
-function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
+function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -348,6 +348,15 @@ function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChange
   }), [pieces]);
   async function withdraw(p: Piece) {
     await supabase.from('pieces').update({ status: 'draft' }).eq('id', p.id); onChanged();
+  }
+  // The editor only: a fresh draft copy of one of your pieces, opened ready to write.
+  async function duplicate(p: Piece) {
+    const { data, error } = await supabase.from('pieces').insert({
+      title: `${p.title || 'Untitled'} (copy)`.slice(0, 200), standfirst: p.standfirst, body: p.body, pillar: p.pillar, medium: p.medium,
+      image_path: p.image_path, image_alt: p.image_alt, image_focus: p.image_focus ?? '', status: 'draft',
+    }).select().single();
+    if (error) { alert('The copy couldn’t be made: ' + error.message); return; }
+    onChanged(); onOpen(data as Piece);
   }
   async function remove(p: Piece) {
     if (!confirm(`Delete “${p.title || 'Untitled'}”? This cannot be undone.`)) return;
@@ -393,6 +402,7 @@ function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChange
                 {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
                 {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
+                {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
             </li>
