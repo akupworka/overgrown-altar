@@ -16,6 +16,10 @@ export interface Piece {
   pillar: 'watchtower' | 'hearth' | 'perimeter'; medium: string;
   image_path: string | null; image_alt: string; status: Status; editor_note: string;
   submitted_at: string | null; published_at: string | null; created_at: string; updated_at: string;
+  slug?: string | null;
+  // A member's changes to a published piece, waiting for the editor (the live piece is unchanged until approved).
+  revision?: { title: string; standfirst: string; body: string; image_path: string | null; image_alt: string } | null;
+  revision_at?: string | null;
 }
 export interface Profile {
   id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor';

@@ -23,6 +23,14 @@ const Verse = Node.create({
   addInputRules() { return [textblockTypeInputRule({ find: /^\+\s$/, type: this.type })]; },
 });
 
+// A photograph inside the piece, with its caption. Saved as  ![caption](url)  on a line of its own.
+const Photo = Node.create({
+  name: 'photo', group: 'block', atom: true, draggable: true,
+  addAttributes: () => ({ src: { default: '' }, alt: { default: '' } }),
+  parseHTML: () => [{ tag: 'figure.m-figure', getAttrs: (el) => { const img = (el as HTMLElement).querySelector('img'); return { src: img?.getAttribute('src') ?? '', alt: img?.getAttribute('alt') ?? '' }; } }],
+  renderHTML: ({ HTMLAttributes }) => ['figure', { class: 'm-figure' }, ['img', { src: HTMLAttributes.src, alt: HTMLAttributes.alt }], ['figcaption', {}, HTMLAttributes.alt || '']],
+});
+
 // ---- writing marks  <->  the styled sheet
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const inlineHtml = (s: string) => esc(s)
@@ -43,6 +51,7 @@ export function marksToHtml(body: string): string {
     lastWasP = false;
     out.push(b.type === 'h' ? `<h2>${inlineHtml(b.text)}</h2>`
       : b.type === 'quote' ? `<blockquote class="m-quote">${inlineHtml(b.text)}</blockquote>`
+      : b.type === 'img' ? `<figure class="m-figure"><img src="${esc(b.src)}" alt="${esc(b.alt).replace(/"/g, '&quot;')}"><figcaption>${esc(b.alt)}</figcaption></figure>`
       : `<blockquote class="m-verse">${inlineHtml(b.text + (b.reference ? ` — ${b.reference}` : ''))}</blockquote>`);
   }
   return out.join('') || '<p></p>';
@@ -65,6 +74,7 @@ export function docToMarks(doc: PMNode): string {
   let lines: string[] = [];
   const flush = () => { if (lines.length) chunks.push(lines.join('\n')); lines = []; };
   doc.forEach((n) => {
+    if (n.type.name === 'photo') { flush(); if (n.attrs.src) chunks.push(`![${String(n.attrs.alt ?? '').replace(/[\[\]\n]/g, ' ').trim()}](${n.attrs.src})`); return; }
     const text = inlineMarks(n);
     if (n.type.name === 'paragraph') { if (text) lines.push(text); else flush(); return; }   // an empty line ends the paragraph
     flush();
@@ -91,6 +101,10 @@ export function applyTool(ed: TipTap | null, tool: Tool) {
   else if (tool === 'bold') c.toggleBold().run();
   else (ed.isActive(tool) ? c.setParagraph() : c.setNode(tool)).run();
 }
+/** Put a photograph into the piece where the writer is. */
+export function insertPhoto(ed: TipTap | null, src: string, alt: string) {
+  ed?.chain().focus().insertContent([{ type: 'photo', attrs: { src, alt } }, { type: 'paragraph' }]).run();
+}
 export const isOn = (ed: TipTap | null, tool: Tool) => !!ed && (tool === 'heading' ? ed.isActive('heading', { level: 2 }) : ed.isActive(tool));
 
 export function useRichBody(initial: string, onChange: (marks: string) => void) {
@@ -101,7 +115,7 @@ export function useRichBody(initial: string, onChange: (marks: string) => void) 
         heading: { levels: [2] }, blockquote: false, bulletList: false, orderedList: false, listItem: false,
         code: false, codeBlock: false, horizontalRule: false, strike: false,
       }),
-      PullQuote, Verse,
+      PullQuote, Verse, Photo,
       Placeholder.configure({ placeholder: 'Begin here. Enter starts a new line; leave an empty line between paragraphs or stanzas.' }),
     ],
     content: marksToHtml(initial),

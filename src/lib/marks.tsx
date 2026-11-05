@@ -4,6 +4,7 @@
 //   > A line     -> a pull quote
 //   + A verse — Reference -> Scripture, with its reference
 //   *italic*  **bold**
+//   ![A caption](https://…)  -> a photograph, on a line of its own
 // Used to show pieces on member pages, and (next) to publish approved pieces to Sanity.
 import type { ReactNode } from 'react';
 
@@ -11,7 +12,8 @@ export type Block =
   | { type: 'p'; text: string }
   | { type: 'h'; text: string }
   | { type: 'quote'; text: string }
-  | { type: 'verse'; text: string; reference?: string };
+  | { type: 'verse'; text: string; reference?: string }
+  | { type: 'img'; src: string; alt: string };
 
 export function parseBody(body: string): Block[] {
   return body
@@ -20,6 +22,8 @@ export function parseBody(body: string): Block[] {
     .map((chunk) => chunk.trim())
     .filter(Boolean)
     .map((chunk): Block => {
+      const img = chunk.match(/^!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)$/);
+      if (img) return { type: 'img', alt: img[1].trim(), src: img[2] };
       if (chunk.startsWith('## ')) return { type: 'h', text: chunk.slice(3).trim() };
       if (chunk.startsWith('> ')) return { type: 'quote', text: chunk.replace(/^>\s?/gm, '').trim() };
       if (chunk.startsWith('+ ')) {
@@ -52,7 +56,8 @@ export function Body({ body }: { body: string }) {
   return (
     <>
       {parseBody(body).map((b, i) =>
-        b.type === 'h' ? <h2 key={i} className="eb">{inline(b.text)}</h2>
+        b.type === 'img' ? <figure key={i} className="m-figure"><img src={b.src} alt={b.alt} loading="lazy" />{b.alt && <figcaption>{b.alt}</figcaption>}</figure>
+        : b.type === 'h' ? <h2 key={i} className="eb">{inline(b.text)}</h2>
         : b.type === 'quote' ? <blockquote key={i} className="m-quote">{inline(b.text)}</blockquote>
         : b.type === 'verse' ? <blockquote key={i} className="m-verse">{inline(b.text)}{b.reference && <cite>{b.reference}</cite>}</blockquote>
         : <p key={i} className={b.text.includes('\n') ? 'body lines' : 'body'}>{inline(b.text)}</p>,

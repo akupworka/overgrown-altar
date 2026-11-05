@@ -3,7 +3,8 @@
 // this screen only makes it pleasant to use.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { Body } from '../../lib/marks';
+import { createPortal } from 'react-dom';
+import { Body, wantsDropCap } from '../../lib/marks';
 import { Doorway, Line, Arrow } from './Doorway';
 import { shrinkImage, TooSmall } from '../../lib/shrink';
 // Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
@@ -11,7 +12,8 @@ const MIN_PHOTO_WIDTH = 1600;
 import { PrestigeBadge } from './Prestige';
 import { prestigeFor } from '../../lib/prestige';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
-import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
+import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
+import '../../styles/guild-piece.css';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -172,7 +174,7 @@ function Desk({ session }: { session: Session }) {
     rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
     if ((p as Profile)?.role === 'editor') {
-      const { data: q } = await supabase.from('pieces').select('*, profiles(display_name)').eq('status', 'submitted').order('submitted_at', { ascending: true });
+      const { data: q } = await supabase.from('pieces').select('*, profiles(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
   }, [uid]);
@@ -246,7 +248,7 @@ function Desk({ session }: { session: Session }) {
 
       <div className="d-main">
         {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} onReview={() => go('review')} onOpen={open} onChanged={load} />}
-        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
+        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} author={profile} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
@@ -354,13 +356,14 @@ function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChange
             <li key={p.id} className="d-item">
               <div className="d-item-main">
                 <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
-                <span className="d-meta"><StatusChip status={p.status} /><span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} words · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} words · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
                 {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
-                {p.status === 'approved' && (p as any).slug && <a className="d-link" href={`/guild/${(p as any).slug}/`}>View on the site</a>}
+                {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
+                {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
             </li>
@@ -371,12 +374,16 @@ function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChange
   );
 }
 
-function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string; piece: Piece | null; isEditor?: boolean; onSaved: (p: Piece) => void; onDone: () => void }) {
+function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }: { uid: string; author?: Profile | null; piece: Piece | null; isEditor?: boolean; onSaved: (p: Piece) => void; onDone: () => void }) {
   const phone = useMedia('(max-width: 700px)');
+  // A published piece: the editor's changes go live directly; a member's go to the editor as a revision.
+  const live = piece?.status === 'approved';
+  const start = (live && !isEditor && piece?.revision) ? { ...piece, ...piece.revision } : piece;
+  const [showPreview, setShowPreview] = useState(false);
   const [form, setForm] = useState({
-    title: piece?.title ?? '', standfirst: piece?.standfirst ?? '', body: piece?.body ?? '',
+    title: start?.title ?? '', standfirst: start?.standfirst ?? '', body: start?.body ?? '',
     pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? 'prose'),
-    image_path: piece?.image_path ?? null as string | null, image_alt: piece?.image_alt ?? '',
+    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '',
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
@@ -385,7 +392,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   const [preview, setPreview] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   // The piece itself, styled as you write (bold, italic, headings, pull quotes, verses).
-  const rich = useRichBody(piece?.body ?? '', (marks) => set('body', marks));
+  const rich = useRichBody(start?.body ?? '', (marks) => set('body', marks));
   const timer = useRef<number | undefined>(undefined);
   const set = (k: keyof typeof form, v: any) => { setForm((f) => ({ ...f, [k]: v })); setState('idle'); };
   // Choosing a pillar narrows the kinds of piece to the ones it takes.
@@ -405,6 +412,16 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
 
   const save = useCallback(async (status: 'draft' | 'submitted' = 'draft') => {
     setState('saving'); setMsg('');
+    if (live && id) {
+      if (isEditor) {   // the editor's own edits to a live piece go live (the site rebuilds)
+        const res = await supabase.from('pieces').update({ ...form }).eq('id', id).select().single();
+        if (res.error) { setState('error'); setMsg(res.error.message); return null; }
+        setState('saved'); onSaved(res.data as Piece); return res.data as Piece;
+      }
+      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt } });
+      if (error) { setState('error'); setMsg(error.message); return null; }
+      setState('saved'); return piece;
+    }
     const row = { ...form, status };
     const res = id
       ? await supabase.from('pieces').update(row).eq('id', id).select().single()
@@ -412,11 +429,11 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     if (res.error) { setState('error'); setMsg(res.error.message); return null; }
     setId(res.data.id); setState('saved'); onSaved(res.data as Piece);
     return res.data as Piece;
-  }, [form, id, onSaved]);
+  }, [form, id, onSaved, live, isEditor, piece]);
 
   // Quietly keep the draft safe while writing.
   useEffect(() => {
-    if (state !== 'idle' || (!form.title.trim() && !form.body.trim())) return;
+    if (live || state !== 'idle' || (!form.title.trim() && !form.body.trim())) return;
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => save('draft'), 1800);
     return () => window.clearTimeout(timer.current);
@@ -425,13 +442,29 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   // Leaving the sheet (Back, or another tab) with unsaved words: save them as a draft on the way out.
   const latest = useRef({ state, save, has: false });
   latest.current = { state, save, has: !!(form.title.trim() || form.body.trim()) };
-  useEffect(() => () => { const l = latest.current; if (l.state === 'idle' && l.has) l.save('draft'); }, []);
+  useEffect(() => () => { const l = latest.current; if (!live && l.state === 'idle' && l.has) l.save('draft'); }, []);
 
   // Warn before leaving with unsaved words.
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => { if (state === 'idle' || state === 'saving') { e.preventDefault(); } };
     addEventListener('beforeunload', warn); return () => removeEventListener('beforeunload', warn);
   }, [state]);
+
+  // A photograph inside the piece: resized, stored in the public media store, and placed where the writer is.
+  const inlineInput = useRef<HTMLInputElement>(null);
+  async function addInlinePhoto(file: File) {
+    setMsg('Preparing the photograph…');
+    let blob: Blob;
+    try { blob = await shrinkImage(file, 2000, 0.86); } catch { return setMsg('This photograph couldn’t be opened. Try a JPG or PNG.'); }
+    const path = `${uid}/${crypto.randomUUID()}.jpg`;
+    setMsg('Uploading the photograph…');
+    const { error } = await supabase.storage.from('media').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) return setMsg('The photograph didn’t upload. Please try again. (' + error.message + ')');
+    const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+    const caption = (prompt('A caption for this photograph (optional). It also describes it for readers who can’t see it.') ?? '').trim();
+    setMsg('');
+    insertPhoto(rich, url, caption);
+  }
 
   // The featured photograph: shrunk in the browser first (any phone photo works), then uploaded.
   async function upload(file: File) {
@@ -451,6 +484,11 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
 
   async function submit() {
     if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
+    if (live) {
+      if (!confirm(isEditor ? 'Update the live piece on the site now?' : 'Send these changes to the editor? The live piece stays as it is until they are approved.')) return;
+      if (await save()) onDone();
+      return;
+    }
     if (isEditor) {
       if (!confirm('Publish this piece to the site now?')) return;
       const draft = await save('draft');
@@ -478,7 +516,11 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     else { setStep(i); window.scrollTo({ top: 0 }); }
   };
   const saved = state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved' : '';
-  const note = piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
+  const note = live
+    ? <p className="d-note d-note-live"><span className="lab">This piece is live</span>{isEditor ? 'Your changes go live as soon as you update it.' : piece?.revision ? 'Your changes are with the editor. The live piece stays as it is until they approve them. You can keep editing, or withdraw them.' : 'Your changes go to the editor. The live piece stays as it is until they approve them.'}
+        {!isEditor && piece?.revision && <button type="button" className="d-link" onClick={async () => { if (!confirm('Withdraw your changes? The live piece stays as it is.')) return; await supabase.rpc('propose_revision', { p_id: piece.id, p_rev: null }); onDone(); }}>Withdraw changes</button>}</p>
+    : piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
+  const sendLabel = live ? (isEditor ? 'Update live piece' : 'Send changes') : (isEditor ? 'Publish' : 'Send to the editor');
 
   const paper = (
     <article className="d-paper">
@@ -492,6 +534,8 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           <button key={t.tool} type="button" title={t.hint} className={isOn(rich, t.tool) ? 'on' : ''} aria-pressed={isOn(rich, t.tool)}
             onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(rich, t.tool)}>{t.label}</button>
         ))}
+        <button type="button" className="d-tool-photo" title="Put a photograph here, in the piece" onMouseDown={(e) => e.preventDefault()} onClick={() => inlineInput.current?.click()}>+ Photo</button>
+        <input ref={inlineInput} type="file" accept="image/*" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addInlinePhoto(f); }} />
       </div>
       <RichBody editor={rich} />
       <span className="d-paper-count">{words(form.body)} words</span>
@@ -513,13 +557,14 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
     const firstPara = form.body.split(/\n\s*\n/).find((x) => x.trim() && !/^[#>+]/.test(x.trim())) ?? '';
     return (
       <section className={`d-write d-steps step-${step}`}>
+        {showPreview && <PiecePreview form={form} photo={preview} author={author} onClose={() => setShowPreview(false)} />}
         <div className="d-write-bar">
           <button type="button" className="d-link d-close" onClick={() => (step === 0 ? onDone() : toStep(step - 1))} aria-label={step === 0 ? 'Back to my pieces' : `Back to ${titles[step - 1]}`}><span aria-hidden="true">←</span></button>
           <span className="d-step-title"><span className="d-step-n lab">{step + 1} of 3</span><span className="d-step-name">{titles[step]}</span></span>
           <span className="lab mut d-state" role="status" aria-live="polite">{saved}</span>
           {step < 2
             ? <button type="button" className="btn d-btn d-next" onClick={() => toStep(step + 1)}>Next</button>
-            : <button type="button" className="btn d-btn d-next" onClick={submit} disabled={state === 'saving'}>{isEditor ? 'Publish' : 'Send'}</button>}
+            : <button type="button" className="btn d-btn d-next" onClick={submit} disabled={state === 'saving'}>{live ? (isEditor ? 'Update' : 'Send') : (isEditor ? 'Publish' : 'Send')}</button>}
           <span className="d-progress" aria-hidden="true"><i className="on" /><i className={step >= 1 ? 'on' : ''} /><i className={step >= 2 ? 'on' : ''} /></span>
         </div>
         <p className="it d-notice" role="alert">{msg}</p>
@@ -575,8 +620,9 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(0)}>Edit the writing</button>
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(1)}>Change the labels or photograph</button>
             <p className="d-step-note it">{isEditor ? 'Publishing puts it on the site straight away.' : 'The editor reads every piece before it goes on the site. You can withdraw it to keep editing.'}</p>
-            <button type="button" className="btn d-btn d-step-go" onClick={submit} disabled={state === 'saving'}>{isEditor ? 'Publish to the site' : 'Send to the editor'}</button>
-            <button type="button" className="d-textbtn d-later" onClick={async () => { if (await save('draft')) onDone(); }}>Save as a draft and finish later</button>
+            <button type="button" className="ghost d-btn d-step-go d-preview-go" onClick={() => setShowPreview(true)}>See the full page preview</button>
+            <button type="button" className="btn d-btn d-step-go" onClick={submit} disabled={state === 'saving'}>{live ? sendLabel : isEditor ? 'Publish to the site' : 'Send to the editor'}</button>
+            {!live && <button type="button" className="d-textbtn d-later" onClick={async () => { if (await save('draft')) onDone(); }}>Save as a draft and finish later</button>}
           </div>
         )}
       </section>
@@ -585,6 +631,7 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
 
   return (
     <section className="d-write">
+      {showPreview && <PiecePreview form={form} photo={preview} author={author} onClose={() => setShowPreview(false)} />}
       <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
       <div className="d-write-bar">
         <button type="button" className="d-link d-close" onClick={onDone} aria-label="Back to my pieces"><span aria-hidden="true">←</span><span className="d-long"> My pieces</span></button>
@@ -592,8 +639,9 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
           {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : state === 'error' ? 'Not saved' : (form.title || form.body) ? 'Unsaved changes' : (id ? '' : 'A new piece')}
         </span>
         <div className="d-write-actions">
-          <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}><span className="d-long">Save draft</span><span className="d-short">Save</span></button>
-          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">{isEditor ? 'Publish' : 'Send to the editor'}</span><span className="d-short">{isEditor ? 'Publish' : 'Send →'}</span></button>
+          <button type="button" className="d-link d-preview-btn" onClick={() => setShowPreview(true)}>Preview</button>
+          {!live && <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}><span className="d-long">Save draft</span><span className="d-short">Save</span></button>}
+          <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">{sendLabel}</span><span className="d-short">{live ? (isEditor ? 'Update' : 'Send') : isEditor ? 'Publish' : 'Send →'}</span></button>
         </div>
       </div>
       {note}
@@ -639,20 +687,67 @@ function Editor({ uid, piece, isEditor = false, onSaved, onDone }: { uid: string
   );
 }
 
+// The full page, exactly as the site will draw it (same styles as /guild/<piece>/), before anything is sent.
+function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string }; photo: string | null; author: Profile | null; onClose: () => void }) {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.documentElement.classList.add('menu-open');
+    addEventListener('keydown', key);
+    return () => { document.documentElement.classList.remove('menu-open'); removeEventListener('keydown', key); };
+  }, [onClose]);
+  const name = author?.display_name || 'You';
+  const pillar = PILLARS.find((x) => x.value === form.pillar)?.label.split(' · ')[0] ?? '';
+  const kind = MEDIUMS.find((m) => m.value === form.medium)?.label ?? '';
+  const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const portrait = portraitUrl(author?.portrait_path);
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  // Drawn at the top of the page (above the site header), not inside the Desk.
+  return createPortal(
+    <div className="pv" role="dialog" aria-modal="true" aria-label="Preview">
+      <div className="pv-bar">
+        <span className="lab">Preview · how it will look on the site</span>
+        <button type="button" className="btn d-btn pv-close" onClick={onClose}>Back to writing</button>
+      </div>
+      <div className="pv-page">
+        <section className="hero gp-hero">
+          <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? form.image_alt : ''} style={{ objectPosition: 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
+          <div className="veil" />
+          <div className="hero-c gp-hero-c">
+            <span className="eb">{pillar} · {kind}</span>
+            <h1 className="h1 gp-title">{form.title || 'Untitled'}</h1>
+            <span className="gp-by">
+              <span className="avatar-live">{portrait ? <img src={portrait} alt="" /> : initials}</span>
+              <span className="lab">{name} · {date} · {Math.max(1, Math.round(words(form.body) / 230))} min read</span>
+            </span>
+          </div>
+        </section>
+        <article className="sec paper gp-article">
+          <div className={`narrow gp-flow${wantsDropCap(form.medium, form.body) ? ' gp-drop' : ''}`}>
+            {form.standfirst && <p className="lede gp-standfirst">{form.standfirst}</p>}
+            <Body body={form.body} />
+            <div className="gp-sign"><span>{name.split(' ')[0]}</span></div>
+          </div>
+        </article>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name: string } })[]; onRead: (p: Piece) => void }) {
   return (
     <section className="d-section">
-      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces members have sent to your table, oldest first.</p></header>
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces members have sent to your table, and changes to published pieces, oldest first.</p></header>
       {queue.length === 0 ? <p className="it mut d-empty">Nothing is waiting. The table is quiet.</p> : (
         <ul className="d-list">
           {queue.map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
-                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · sent {fmt(p.submitted_at)}</span>
-                <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
-                {p.standfirst && <span className="it mut">{p.standfirst}</span>}
+                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
+                <span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span>
+                {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
               </div>
-              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>Read</button></div>
+              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button></div>
             </li>
           ))}
         </ul>
@@ -666,6 +761,15 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const rev = piece.status === 'approved' ? piece.revision ?? null : null;
+  const shown = rev ? { ...piece, ...rev } : piece;
+  async function applyChanges(accept: boolean) {
+    setBusy(true); setMsg('');
+    const { error } = await supabase.from('pieces').update(accept && rev ? { ...rev, revision: null, revision_at: null } : { revision: null, revision_at: null }).eq('id', piece.id);
+    setBusy(false);
+    if (error) return setMsg(error.message);
+    onDecided();
+  }
   async function decide(status: 'approved' | 'returned' | 'declined') {
     setBusy(true); setMsg('');
     const { error } = await supabase.from('pieces').update({ status, editor_note: status === 'approved' ? '' : note.trim() }).eq('id', piece.id);
@@ -678,17 +782,22 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
       <button type="button" className="d-back-link" onClick={onBack}>← Waiting for you</button>
       <article className="d-paper">
         <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === piece.medium)?.label}</span>
-        <h2 className="h1 d-reader-title">{piece.title}</h2>
-        {piece.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{piece.standfirst}</p>}
-        <div className="gp-body-in-desk"><Body body={piece.body} /></div>
+        {rev && <span className="lab d-rev-tag">Proposed changes to a published piece. The live version stays until you approve.</span>}
+        <h2 className="h1 d-reader-title">{shown.title}</h2>
+        {shown.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{shown.standfirst}</p>}
+        <div className="gp-body-in-desk"><Body body={shown.body} /></div>
       </article>
       <div className="d-decide">
-        {mode === 'read' && (<>
+        {rev && (<>
+          <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Put these changes on the live piece?')) applyChanges(true); }}>Approve the changes</button>
+          <button type="button" className="d-link d-danger" disabled={busy} onClick={() => { if (confirm('Discard these changes? The live piece stays as it is.')) applyChanges(false); }}>Discard the changes</button>
+        </>)}
+        {!rev && mode === 'read' && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
           <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
           <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
         </>)}
-        {mode !== 'read' && (
+        {!rev && mode !== 'read' && (
           <div className="d-decide-note">
             <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
               <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}
