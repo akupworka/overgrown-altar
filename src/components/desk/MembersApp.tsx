@@ -69,7 +69,7 @@ function Directory() {
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft">{[m.role === 'editor' ? 'Editor' : '', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
+                <span className="lab mut g-craft">{[m.role === 'editor' ? 'Editor in Chief' : 'Writer', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
                 <span className="lab mut g-craft">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
@@ -113,7 +113,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <header className="m-hero">
         <Link className="m-back lab" to="/guild/members/">← The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{person.role === 'editor' ? 'Editor of the Guild' : 'Of the Guild'}</span>
+        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : 'Writer of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         <PrestigeBadge published={work.length} size="lg" />

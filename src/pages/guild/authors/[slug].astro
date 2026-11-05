@@ -31,7 +31,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
     <SiteNav />
     <div class="au-in">
       <span class="au-arch" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt={`Portrait of ${a.display_name}`} /> : <span>{initials}</span>}</span>
-      <span class="eb">Of the Guild</span>
+      <span class="eb">{a.role === 'editor' ? 'Editor in Chief' : 'Writer of the Guild'}</span>
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
       <PrestigeBadge published={pieces.length} size="lg" />

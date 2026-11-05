@@ -229,7 +229,7 @@ function Desk({ session }: { session: Session }) {
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? 'Editor' : 'Member of the Guild'}</span>
+            <span className="lab mut">{isEditor ? 'Editor in Chief' : 'Writer'}</span>
           </div>
         </div>
         <nav className="d-nav" aria-label="Desk">
