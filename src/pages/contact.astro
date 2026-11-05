@@ -10,7 +10,7 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
 <div class="hero-c" style="top:223px;padding:0 24px"><span class="eb">Contact</span><h1 class="h1" style="margin-top:22px">Write to Us</h1><p class="it" style="margin:24px 0 0;max-width:680px;font-size:26px;line-height:1.4;color:#E6DFD0">Letters, submissions and press. Every letter is read.</p></div></section>
 <!-- data-netlify="true": Netlify collects each letter and can email it to you (Netlify > Forms > Notifications). -->
 <DoorwayFrame kicker="Correspondence" title="Write a letter." image="/images/window-light-on-wall-1200.jpg" lead="Every letter is read, and most are answered.">
-<form name="contact" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" class="dw-form">
+<form name="contact" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="company" class="dw-form">
 <input type="hidden" name="form-name" value="contact" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
 <label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>

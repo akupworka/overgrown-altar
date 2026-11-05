@@ -14,7 +14,7 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
 <!-- Applications arrive in Netlify > Forms ("guild-application"). You then invite the people you choose. -->
 <DoorwayFrame kicker="Apply" title="Pull up a chair." image="/images/tall-windows-dark-vault-1200.jpg"
   lead="Come to make, and come to be made better. Tell us a little about your craft.">
-<form name="guild-application" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="company" class="dw-form">
+<form name="guild-application" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="company" class="dw-form">
 <input type="hidden" name="form-name" value="guild-application" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
 <label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
