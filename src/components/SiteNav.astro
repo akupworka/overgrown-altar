@@ -15,7 +15,8 @@ const links = [
   { href: '/about', label: 'About' },
 ];
 const current = Astro.url.pathname;
-// Inside the members' area (the Desk and the Guild's pages) the header is always the solid bar, never see-through.
+// Inside the members' area (the Desk and the Guild's pages) the header is always the solid bar, never see-through,
+// and leaves out Folios (the members' bar carries the Guild's own rooms instead). Signed in anywhere, About steps aside too.
 const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/members');
 ---
 <div class="nav-shade" aria-hidden="true"></div>
@@ -27,8 +28,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     </a>
 
     <div class="nav-links">
-      {links.map((l) => (
-        <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined}>{l.label}</a>
+      {links.filter((l) => !(inside && l.href === '/folios')).map((l) => (
+        <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' ? '' : undefined}>{l.label}</a>
       ))}
     </div>
 
@@ -48,6 +49,20 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       </a>
     </div>
   </nav>
+  {inside && (
+    <!-- Inside the members' area: the Guild's own rooms, which the public header doesn't carry. -->
+    <nav class="inner lab" aria-label="The Guild" data-inner>
+      <span class="inner-mark" aria-hidden="true">The Guild</span>
+      <a href="/guild/desk/" data-match="desk">My Desk</a>
+      <a href="/guild/desk/#write" data-match="write">Write</a>
+      <a href="/guild/desk/#review" data-match="review" data-editor hidden>Review</a>
+      <a href="/guild/members/?view=forum" data-match="forum" data-spa>The Forum</a>
+      <a href="/guild/members/" data-match="members" data-spa>Members</a>
+      <a href="/guild/members/?view=prestige" data-match="prestige" data-spa>Prestiges</a>
+      <a href="/guild/members/" data-match="me" data-spa data-my-page>My page</a>
+      <a href="/crafts/" class="inner-quiet">The crafts</a>
+    </nav>
+  )}
 </header>
 <MenuPanel />
 
@@ -66,8 +81,49 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         else av.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
       });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
+      // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
+      const home = document.querySelector<HTMLAnchorElement>('.nav-home');
+      if (home) { home.href = '/guild/members/'; home.setAttribute('aria-label', 'The Guild, home for members'); }
     }
   } catch {}
+
+  // The members' bar: which room you are in (it follows the Desk and the Guild's pages as they change),
+  // your own page, the editor's Review, and moving between the Guild's pages without reloading.
+  const inner = document.querySelector<HTMLElement>('[data-inner]');
+  if (inner) {
+    try {
+      const me = JSON.parse(localStorage.getItem('oa_member') || '{}');
+      const uid = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || '{}')?.user?.id;
+      if (me.editor) inner.querySelectorAll<HTMLElement>('[data-editor]').forEach((a) => (a.hidden = false));
+      if (uid) inner.querySelector<HTMLAnchorElement>('[data-my-page]')!.href = `/guild/members/?m=${uid}`;
+    } catch {}
+    const here = () => {
+      const q = new URLSearchParams(location.search), path = location.pathname, h = location.hash;
+      const uid = inner.querySelector<HTMLAnchorElement>('[data-my-page]')!.href.split('m=')[1];
+      return path.startsWith('/guild/desk')
+        ? (h.startsWith('#write') ? 'write' : h === '#review' ? 'review' : h === '#my-page' ? 'me' : 'desk')
+        : q.get('view') === 'forum' || q.get('board') || q.get('t') ? 'forum'
+        : q.get('view') === 'prestige' ? 'prestige'
+        : q.get('m') && q.get('m') === uid ? 'me' : 'members';
+    };
+    const mark = () => {
+      const now = here();
+      inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));
+      inner.querySelector('[aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    };
+    mark();
+    addEventListener('popstate', mark); addEventListener('hashchange', mark);
+    for (const k of ['pushState', 'replaceState'] as const) {
+      const orig = history[k].bind(history);
+      history[k] = (...args: Parameters<History['pushState']>) => { orig(...args); queueMicrotask(mark); };
+    }
+    inner.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-spa]');
+      if (!a || e.metaKey || e.ctrlKey || !location.pathname.startsWith('/guild/members')) return;
+      e.preventDefault();
+      history.pushState(null, '', a.href); dispatchEvent(new PopStateEvent('popstate')); scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   // Turns the header into a dark bar after you scroll, and tucks it away while you
   // scroll down. Only flips a class when something changes, so scrolling stays smooth.
@@ -175,5 +231,25 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   }
   @media (prefers-reduced-motion: reduce) {
     .site-header { transition: none; }
+  }
+</style>
+<style>
+  /* The members' bar, under the main header, inside the Desk and the Guild's pages */
+  .inner { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 120px; height: 46px; border-top: 1px solid rgba(243, 236, 220, .08);
+    overflow-x: auto; scrollbar-width: none; font-size: 10px; letter-spacing: .2em; }
+  .inner::-webkit-scrollbar { display: none; }
+  .inner-mark { flex: none; color: var(--ember); margin-right: 14px; font-family: var(--serif); letter-spacing: .3em; }
+  .inner a { flex: none; padding: 8px 12px; border-radius: 999px; color: #CFC8B8; transition: color .25s, background-color .25s; white-space: nowrap; }
+  .inner a:hover { color: var(--ember); }
+  .inner a[aria-current] { color: #12160F; background: var(--bone); }
+  .inner a[hidden] { display: none; }
+  .inner .inner-quiet { margin-left: auto; color: var(--muted-dark); }
+  @media (max-width: 1320px) { .inner { padding: 0 48px; } }
+  @media (max-width: 760px) {
+    .inner { padding: 0 16px; height: 42px; gap: 2px; font-size: 9px; letter-spacing: .16em;
+      -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+    .inner-mark { display: none; }
+    .inner a { padding: 7px 10px; }
+    .inner .inner-quiet { margin-left: 0; }
   }
 </style>

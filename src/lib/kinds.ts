@@ -1,5 +1,5 @@
 // Every kind of work the Guild publishes, room by room: what it is, what the editor looks for, and a rough length.
-// Used by the Forms page (/forms/) and the Archive filters. The Desk's choices come from lib/supabase.ts (MEDIUMS).
+// Used by the Crafts page (/crafts/) and the Archive filters. The Desk's choices come from lib/supabase.ts (MEDIUMS).
 export type PillarId = 'watchtower' | 'hearth' | 'perimeter';
 export interface Kind { value: string; name: string; plural: string; pillar: PillarId; what: string; lookFor: string; length: string }
 export interface Room { id: PillarId; name: string; line: string; kinds: Kind[] }

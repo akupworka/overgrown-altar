@@ -1,5 +1,5 @@
 ---
-// The Forms: every kind of work the Guild publishes, room by room: what it is, what the editor looks for,
+// The Crafts: every kind of work the Guild publishes, room by room: what it is, what the editor looks for,
 // a rough length, how many are published, and a way in to read them. Content lives in src/lib/kinds.ts.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -10,13 +10,13 @@ const catalog = await getCatalog();
 const count = (pillar: string, kind: string) => catalog.filter((p) => p.pillar === pillar && p.medium === kind).length;
 const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/pillar-perimeter-1200.jpg' };
 ---
-<BaseLayout title="The Forms" description="Every kind of work the Guild publishes: what it is, what the editor looks for, and how long it runs.">
+<BaseLayout title="The Crafts" description="Every kind of work the Guild publishes: what it is, what the editor looks for, and how long it runs.">
   <section class="hero fm-hero">
     <img src="/images/archive-photo-1200.jpg" alt="" style="object-position:center 50%;filter:brightness(.42)" fetchpriority="high" />
     <div class="veil"></div><SiteNav />
     <div class="hero-c fm-hero-c">
       <span class="eb">A guide for readers and writers</span>
-      <h1 class="h1">The Forms</h1>
+      <h1 class="h1">The Crafts</h1>
       <p class="it fm-lead">Eleven kinds of work in three rooms. What each one is, what the Editor in Chief looks for, and how long it tends to run.</p>
       <nav class="fm-jump" aria-label="Rooms">{ROOMS.map((r) => <a class="ghost" href={`#${r.id}`}>{r.name}</a>)}</nav>
     </div>
@@ -56,7 +56,7 @@ const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-120
 
   <section class="sec paper center fm-cta">
     <span class="eb">Write for the Guild</span>
-    <h2 class="h2" style="margin-top:14px">Found your form?</h2>
+    <h2 class="h2" style="margin-top:14px">Found your craft?</h2>
     <p class="it mut" style="margin:18px auto 0;max-width:560px;font-size:20px">Members write in any of the three rooms. Every piece is read by the Editor in Chief before it is published.</p>
     <div class="fm-cta-row">
       <a class="btn" href="/guild/desk/#write" data-member hidden>Begin a piece</a>

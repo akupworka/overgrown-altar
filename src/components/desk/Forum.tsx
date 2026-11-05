@@ -333,3 +333,53 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     </div>
   );
 }
+
+// ---------------------------------------------------------------- the latest threads, for other pages (the Guild, the Desk)
+
+/** The few most recently active threads, with their boards: a small way into the forum from elsewhere.
+ *  `plain` uses ordinary links (for pages outside the members' area, like the Desk). */
+export function ForumLatest({ count = 3, plain = false }: { count?: number; plain?: boolean }) {
+  const [rows, setRows] = useState<(Thread & { board: Board | undefined })[] | null>(null);
+  const [people, setPeople] = useState<People>({});
+  useEffect(() => {
+    (async () => {
+      const [{ data: t }, { data: b }] = await Promise.all([
+        supabase.from('forum_threads').select('*').order('last_post_at', { ascending: false }).limit(count),
+        supabase.from('forum_boards').select('*'),
+      ]);
+      const boards = new Map(((b as Board[]) ?? []).map((x) => [x.id, x]));
+      setRows(((t as Thread[]) ?? []).map((x) => ({ ...x, board: boards.get(x.board_id) })));
+      setPeople(await loadPeople((t ?? []).map((x: any) => x.last_author_id)));
+    })();
+  }, [count]);
+  const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) =>
+    plain ? <a href={to} className={className}>{children}</a> : <Link to={to} className={className}>{children}</Link>;
+  if (!rows) return <p className="lab mut fo-latest-wait">Listening at the door…</p>;
+  if (!rows.length) return <p className="it mut fo-latest-none">Quiet so far. <A to="/guild/members/?view=forum">Start the first conversation →</A></p>;
+  return (
+    <ol className="fo-latest">
+      {rows.map((t) => (
+        <li key={t.id}>
+          <A to={`/guild/members/?t=${t.id}`} className="fo-latest-row">
+            {t.board?.image && <span className="fo-latest-img"><img src={t.board.image} alt="" loading="lazy" /></span>}
+            <span className="fo-latest-text">
+              <span className="fo-latest-title">{t.pinned && <span className="lab fo-tag">Pinned</span>}{t.title}</span>
+              <span className="lab mut">{t.board?.name ?? 'The Forum'} · {nameOf(people, t.last_author_id)} · {ago(t.last_post_at)}</span>
+            </span>
+          </A>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** A member's forum tally, for their trophies (null when they haven't posted yet). */
+export function useForumTally(uid?: string | null) {
+  const [tally, setTally] = useState<import('../../lib/trophies').ForumTally | null>(null);
+  useEffect(() => {
+    if (!uid) return;
+    supabase.from('forum_tallies').select('posts, threads, best_thread, prayer, boards').eq('member_id', uid).maybeSingle()
+      .then(({ data }) => setTally((data as any) ?? null));
+  }, [uid]);
+  return tally;
+}

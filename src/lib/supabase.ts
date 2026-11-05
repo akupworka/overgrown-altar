@@ -33,15 +33,18 @@ export const portraitUrl = (path?: string | null) =>
 
 /** Remembers, on this device, who is signed in, so the site header can greet them without loading anything. */
 export const MEMBER_KEY = 'oa_member';
-export function rememberMember(p: Pick<Profile, 'display_name' | 'portrait_path'> | null) {
+export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path'> & { role?: string | null }) | null) {
   try {
-    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path) }));
+    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor' }));
     else localStorage.removeItem(MEMBER_KEY);
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
   if (typeof document === 'undefined') return;
   document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
+  document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));
+  const home = document.querySelector<HTMLAnchorElement>('.nav-home');
+  if (home) { home.href = p ? '/guild/members/' : '/'; home.setAttribute('aria-label', p ? 'The Guild, home for members' : 'Overgrown Altar, home'); }
   if (!p) return;
   const src = portraitUrl(p.portrait_path);
   document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {

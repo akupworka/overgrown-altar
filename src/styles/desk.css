@@ -4,7 +4,7 @@
 .desk-memory { position: absolute; inset: 0 0 auto 0; height: 520px; pointer-events: none; }
 .desk-memory img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; filter: grayscale(.6) brightness(.32); opacity: .55;
   -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, transparent 100%); }
-.desk-in { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 140px 24px 96px; }
+.desk-in { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 186px 24px 96px; }   /* room for the header and the members' bar */
 .d-loading { margin-top: 120px; }
 
 /* ---- Signed out: the glass card ---- */
@@ -148,7 +148,7 @@
   .d-details { position: static; }
 }
 @media (max-width: 700px) {
-  .desk-in { padding: 100px 16px 64px; }
+  .desk-in { padding: 146px 16px 64px; }
   .d-card { padding: 36px 22px 30px; }
   .d-title { font-size: 38px !important; }
   .d-hello { font-size: 38px !important; }
@@ -260,7 +260,7 @@
 .d-details[open] > summary { margin-bottom: 4px; }
 
 @media (max-width: 700px) {
-  .desk-in { padding: 84px 16px 124px; }
+  .desk-in { padding: 128px 16px 124px; }
   .d-room { gap: 22px; }
 
   /* A clean top: just who you are. */
@@ -481,7 +481,7 @@
   .d-room.writing .d-write-actions .btn { padding: 9px 14px !important; font-size: 9.5px; border-radius: 999px; }
   .d-room.writing .d-paper-tools { top: calc(52px + env(safe-area-inset-top)); gap: 16px; padding: 10px 20px; }
   .d-room.writing .d-paper-tools button { font-size: 9px; }
-  .desk-in:has(.d-room.writing) { padding-top: 64px; padding-bottom: 60px; }
+  .desk-in:has(.d-room.writing) { padding-top: 108px; padding-bottom: 60px; }
 }
 
 /* ---- Phones: writing in three pages (Write · Label it · Review) ---- */
@@ -610,7 +610,7 @@
 .desk-in:has(.m-work) { padding-bottom: 0 !important; }
 
 /* Your own page: the things you'd come to the Desk for, in one row of quiet buttons. */
-.m-actions { margin-top: 22px; padding-top: 22px; border-top: 1px solid rgba(243, 236, 220, .1); width: 100%; max-width: 520px;
+.m-actions { margin-top: 22px; padding-top: 22px; border-top: 1px solid rgba(243, 236, 220, .1); width: 100%; max-width: 820px;
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
 .m-act { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; white-space: nowrap;
   font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--bone);
@@ -883,3 +883,24 @@
   color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .35); background: rgba(255, 227, 163, .05); }
 .d-kind-mark.photo { color: #BFD3E6; box-shadow: inset 0 0 0 1px rgba(191, 211, 230, .4); background: rgba(191, 211, 230, .06); }
 @media (max-width: 700px) { .d-item-head { gap: 10px; } .d-kind-mark { width: 28px; height: 28px; } .d-kind-mark svg { width: 14px; height: 14px; } }
+
+/* ---- The Guild's page: its rooms, then its people */
+.g-rooms { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; }
+.g-room { display: flex; flex-direction: column; gap: 8px; padding: 24px 26px; border-radius: 4px; background: rgba(243, 236, 220, .035);
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .12); transition: box-shadow .3s, background-color .3s; }
+.g-room-forum { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .3); }
+.g-room-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.g-room-sub { margin: 0 0 4px; font-size: 16px; }
+.g-room-side { display: flex; flex-direction: column; gap: 12px; }
+.g-room-small { padding: 18px 22px; gap: 6px; }
+.g-room-small:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); background: rgba(255, 227, 163, .04); }
+.g-room-line { font-family: var(--serif); font-size: 17px; line-height: 1.35; color: #CFC8B8; }
+.g-room-go { color: var(--ember); }
+.g-room-small .g-room-go { align-self: flex-start; }
+.g-people-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 18px; border-top: 1px solid rgba(243, 236, 220, .12); }
+/* The Desk home: the latest from the forum */
+.d-forum-panel { display: flex; flex-direction: column; gap: 6px; padding: 22px 24px; border-radius: 4px; background: rgba(243, 236, 220, .03); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); }
+.d-forum-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.d-forum-link { color: var(--ember); }
+@media (max-width: 860px) { .g-rooms { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 700px) { .g-room { padding: 18px 16px; } .d-forum-panel { padding: 18px 16px; } }

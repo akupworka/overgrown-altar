@@ -11,10 +11,10 @@ import { ROOMS, KINDS } from '../lib/kinds';
 <section class="hero" style="height:560px"><img src="/images/tall-windows-dark-vault.jpg" srcset="/images/tall-windows-dark-vault-1200.jpg 1200w, /images/tall-windows-dark-vault.jpg 1331w" sizes="100vw" alt="Tall stained-glass windows in a dark Gothic vault" style="object-position:center 62%;filter:grayscale(1) brightness(.45)" class="mono" fetchpriority="high" /><div class="veil"></div><SiteNav />
 <div class="hero-c" style="top:202px;padding:0 24px"><span class="eb">Everything, in one place</span><h1 class="h1" style="margin-top:22px">The Archive</h1></div></section>
 <section class="sec paper" style="padding-top:80px"><div style="display:flex;flex-direction:column;gap:26px">
-<input class="field search" type="search" placeholder="Search by title, writer or form…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />
+<input class="field search" type="search" placeholder="Search by title, writer or craft…" aria-label="Search the archive" id="archive-search" name="q" style="font-size:24px;padding:22px 24px;width:100%" />
 <div class="ar-filters">
 <div class="filters"><span class="lab mut fl">Room</span><button type="button" class="chip" aria-pressed="true" data-k="pillar" data-v="all">All</button>{ROOMS.map((r) => <button type="button" class="chip" aria-pressed="false" data-k="pillar" data-v={r.id}>{r.name}</button>)}</div>
-<div class="filters"><span class="lab mut fl">Form</span><button type="button" class="chip" aria-pressed="true" data-k="medium" data-v="all">All</button>{KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-k="medium" data-v={k.value} data-room={k.pillar}>{k.plural}</button>)}<a class="ar-guide lab" href="/forms/">What each form is →</a></div>
+<div class="filters"><span class="lab mut fl">Craft</span><button type="button" class="chip" aria-pressed="true" data-k="medium" data-v="all">All</button>{KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-k="medium" data-v={k.value} data-room={k.pillar}>{k.plural}</button>)}<a class="ar-guide lab" href="/crafts/">What each craft is →</a></div>
 </div>
 <div class="g3 results" style="margin-top:60px">{pieces.map((a) => (
 <a class="item" href={a.href} data-pillar={a.pillar} data-medium={a.medium} style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src={a.image} alt="" loading="lazy" style={a.imagePos ? `object-position:${a.imagePos}` : undefined} /></div><span class="lab" style="color:#62372D">{a.kicker.split(' · ')[0] === 'Dispatch 1' ? 'The Watchtower · Essay' : a.kicker === 'Recovery story' ? 'The Perimeter · Recovery story' : a.kicker}</span><span class="h3" style="font-size:27px">{a.title}</span><span class="lab mut" style="font-size:10px">{a.author.name}</span></a>
@@ -58,7 +58,7 @@ import { ROOMS, KINDS } from '../lib/kinds';
   });
   search.addEventListener('input', update);
 
-  // Choosing a room shows only the forms that room takes.
+  // Choosing a room shows only the crafts that room takes.
   function narrowForms() {
     const room = chosen.pillar;
     document.querySelectorAll<HTMLButtonElement>('.chip[data-k="medium"][data-room]').forEach((c) => {
@@ -67,7 +67,7 @@ import { ROOMS, KINDS } from '../lib/kinds';
       if (!fits && chosen.medium === c.dataset.v) { chosen.medium = 'all'; document.querySelectorAll('.chip[data-k="medium"]').forEach((x) => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.v === 'all'))); }
     });
   }
-  // Arriving from the Forms page: /archive/?pillar=hearth&medium=poetry
+  // Arriving from the Crafts page: /archive/?pillar=hearth&medium=poetry
   const want = new URLSearchParams(location.search);
   for (const key of ['pillar', 'medium']) {
     const v = want.get(key); if (!v) continue;

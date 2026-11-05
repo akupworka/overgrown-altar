@@ -14,7 +14,7 @@ import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
-import { ForumIndex, ForumBoard, ForumThread } from './Forum';
+import { ForumIndex, ForumBoard, ForumThread, ForumLatest, useForumTally } from './Forum';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -62,12 +62,37 @@ function Directory() {
       <header className="g-head">
         <span className="eb">The Guild</span>
         <h1 className="h1">At the table</h1>
-        <p className="it mut d-sub">Everyone who has taken a seat and chosen to be listed. Open a page to meet them and read their work.</p>
-        <span className="g-head-links">
-          <Link className="g-prestige-link g-forum-link lab" to="/guild/members/?view=forum">The Forum →</Link>
-          <Link className="g-prestige-link lab" to="/guild/members/?view=prestige">The ten prestiges →</Link>
-        </span>
+        <p className="it mut d-sub">The members’ house: talk in the forum, climb the prestiges, and meet everyone who has taken a seat.</p>
       </header>
+      {/* The Guild's rooms, before its people */}
+      <div className="g-rooms">
+        <section className="g-room g-room-forum">
+          <div className="g-room-head">
+            <span className="eb">The Forum</span>
+            <Link className="lab g-room-go" to="/guild/members/?view=forum">All boards →</Link>
+          </div>
+          <p className="it mut g-room-sub">The latest conversations among the Guild.</p>
+          <ForumLatest count={4} />
+        </section>
+        <div className="g-room-side">
+          <a className="g-room g-room-small" href="/guild/desk/">
+            <span className="eb">Your Desk</span>
+            <span className="g-room-line">Write, send, and see where your pieces stand.</span>
+            <span className="lab g-room-go">Open →</span>
+          </a>
+          <Link className="g-room g-room-small" to="/guild/members/?view=prestige">
+            <span className="eb">The Prestiges</span>
+            <span className="g-room-line">Ten ranks of glass, earned piece by piece.</span>
+            <span className="lab g-room-go">See them →</span>
+          </Link>
+          <a className="g-room g-room-small" href="/crafts/">
+            <span className="eb">The crafts</span>
+            <span className="g-room-line">Every kind of work the Guild publishes, and what the editor looks for.</span>
+            <span className="lab g-room-go">Read →</span>
+          </a>
+        </div>
+      </div>
+      <div className="g-people-head"><span className="eb">Members</span>{members && <span className="lab mut">{members.length} at the table</span>}</div>
       {!members ? <p className="lab mut">Gathering the Guild…</p>
         : members.length === 0 ? <p className="it mut d-empty">No one is listed yet.</p>
         : (
@@ -94,6 +119,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const [work, setWork] = useState<Piece[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [kind, setKind] = useState('all');
+  const tally = useForumTally(id);   // their part in the forum, for its trophies
   const [page, setPage] = useState(1);
   useEffect(() => {
     (async () => {
@@ -220,7 +246,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
           </nav>
         )}
       </section>
-      <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person }} mine={person.id === me} name={person.display_name} /></div>
+      <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person, forum: tally }} mine={person.id === me} name={person.display_name} /></div>
     </div>
   );
 }
@@ -373,7 +399,10 @@ export default function MembersApp() {
   const [isEditor, setIsEditor] = useState(false);
   useEffect(() => {
     if (!session) return setIsEditor(false);
-    supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(({ data }) => setIsEditor(data?.role === 'editor'));
+    supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(({ data }) => {
+      setIsEditor(data?.role === 'editor');
+      document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = data?.role !== 'editor'));   // the members' bar's Review
+    });
   }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;

@@ -19,7 +19,9 @@ export interface TrophyPiece {
   photo_meta?: PhotoMeta | null; photoMeta?: PhotoMeta | null; gallery?: unknown[] | null;
 }
 export interface TrophyMember { portrait_path?: string | null; portrait?: string; bio?: string; craft?: string; role?: string; created_at?: string | null }
-export interface TrophyCtx { pieces: TrophyPiece[]; member: TrophyMember }
+/** A member's part in the forum (public.forum_tallies): it only ever goes up, so trophies are never lost to cleared threads. */
+export interface ForumTally { posts: number; threads: number; best_thread: number; prayer: number; boards: string[] }
+export interface TrophyCtx { pieces: TrophyPiece[]; member: TrophyMember; forum?: ForumTally | null }
 export interface Trophy {
   id: string; name: string; tier: Tier; note: string; glyph: string; earned: (c: TrophyCtx) => boolean;
   count?: (c: TrophyCtx) => number;   // set for category trophies: how many pieces count toward it
@@ -74,6 +76,11 @@ const G = {
   stones: 'M3 20h18M4.5 20v-5h4.5v5M9.8 20V9.5h4.4V20M15 20v-7h4.5v7M9.8 13h4.4M12 5.5l2.2 4h-4.4z',
   table: 'M3 10h18M5 10v9M19 10v9M8 14h8M8 14v5M16 14v5M12 4c1 1.2 1.2 2.2 0 3.4-1.2-1.2-1-2.2 0-3.4zM12 7.4V10',
   ring: 'M12 21a8 8 0 1 0 0-16M12 5a8 8 0 0 0-5.7 13.6M12 8c1.8 2.2 3 3.4 3 5.2a3 3 0 0 1-6 0c0-1.2.8-2 1.6-2.8.4.9.8 1.2 1.2 1.2 0-1.3-.4-2.2.2-3.6z',
+  // The forum
+  talk: 'M3 5h12v8H8l-4 3v-3H3zM17 9h4v8h-1.5v3L16 17h-5v-2',
+  door: 'M6 21V7a6 6 0 0 1 12 0v14M3 21h18M14.5 14h.01M12 4v2',
+  firstword: 'M4 5h16v10H10l-5 4v-4H4zM8 9h8M8 12h5',
+  rooms: 'M3 21V10l4.5-4L12 10v11M12 21V10l4.5-4L21 10v11M2 21h20M6 14h3M15 14h3M6 17.5h3M15 17.5h3',
   // Photography
   canister: 'M5 7h9v13H5zM7 7V4.5h5V7M14 9h6v9h-6M16 9v9M18 9v9M14 11.5h6M14 15.5h6M5 11h9',
   camera: 'M3 8h4l2-3h6l2 3h4v11H3zM12 10a3.5 3.5 0 1 0 .01 0M18.5 6V3.5M21 7.5l1.5-1.5M17 5.5l-1-1',
@@ -93,6 +100,8 @@ const isLyre = (p: TrophyPiece) => p.medium === 'poetry';
 // Photography
 const metaOf = (p: TrophyPiece): PhotoMeta => p.photo_meta ?? p.photoMeta ?? {};
 const isPhoto = (p: TrophyPiece) => p.medium === 'photograph';
+// The forum
+const fo = (c: TrophyCtx) => c.forum ?? { posts: 0, threads: 0, best_thread: 0, prayer: 0, boards: [] };
 const isFilm = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'film';
 const isDigital = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'digital';
 const fullNotes = (p: TrophyPiece) => {
@@ -112,6 +121,8 @@ export const TROPHIES: Trophy[] = [
   { id: 'lyre', name: 'The Lyre', tier: 'bronze', glyph: G.lyre, unit: 'poems', note: 'For poems published at the Guild.', ...cat(isLyre, 3, 10, 20, 30) },
   { id: 'darkroom', name: 'The Darkroom', tier: 'bronze', glyph: G.canister, unit: 'film photographs', note: 'For photographs made on film: loaded by hand, developed in the dark.', ...cat(isFilm, 1, 3, 8, 15) },
   { id: 'daylight-lens', name: 'The Daylight Lens', tier: 'bronze', glyph: G.camera, unit: 'digital photographs', note: 'For photographs made digitally: light caught and kept the moment it falls.', ...cat(isDigital, 1, 3, 8, 15) },
+  { id: 'common-table', name: 'The Common Table', tier: 'bronze', glyph: G.talk, unit: 'forum posts', note: 'For keeping company in the Guild’s forum: every post and reply counts.', at: { bronze: 10, silver: 50, gold: 150, rainbow: 400 }, count: (c) => fo(c).posts, earned: (c) => fo(c).posts >= 10 },
+  { id: 'open-door', name: 'The Open Door', tier: 'bronze', glyph: G.door, unit: 'threads started', note: 'For opening conversations in the forum.', at: { bronze: 1, silver: 5, gold: 15, rainbow: 40 }, count: (c) => fo(c).threads, earned: (c) => fo(c).threads >= 1 },
   // Time: they grow too, by themselves
   { id: 'years', name: 'Years at the Table', tier: 'bronze', glyph: G.table, unit: 'years at the table', note: 'For each year kept with the Guild since taking a seat.', at: { bronze: 1, silver: 2, gold: 3, rainbow: 5 }, count: yearsAt, earned: (c) => yearsAt(c) >= 1 },
   { id: 'unbroken', name: 'The Unbroken Flame', tier: 'bronze', glyph: G.ring, unit: 'months in a row', note: 'For publishing every month without a break: the longest run counts.', at: { bronze: 3, silver: 6, gold: 12, rainbow: 24 }, count: longestStreak, earned: (c) => longestStreak(c) >= 3 },
@@ -132,9 +143,14 @@ export const TROPHIES: Trophy[] = [
   { id: 'contact-sheet', name: 'The Contact Sheet', tier: 'silver', glyph: G.frames, note: 'Published a photograph with all four smaller frames beneath it.', earned: (c) => has(c, (p) => isPhoto(p) && (p.gallery?.length ?? 0) >= 4) },
   { id: 'thousand-words', name: 'Worth a Thousand Words', tier: 'silver', glyph: G.thousand, note: 'Published a photograph with a thousand words or more beside it.', earned: (c) => has(c, (p) => isPhoto(p) && words(p.body) >= 1000) },
   { id: 'grain-and-pixel', name: 'Grain & Pixel', tier: 'gold', glyph: G.grain, note: 'Published photographs on film and digitally.', earned: (c) => has(c, isFilm) && has(c, isDigital) },
+  // The forum, won once
+  { id: 'first-word', name: 'First Word', tier: 'bronze', glyph: G.firstword, note: 'Spoke up in the forum for the first time.', earned: (c) => fo(c).posts >= 1 },
+  { id: 'kindled', name: 'A Conversation Kindled', tier: 'silver', glyph: G.flame, note: 'Started a thread that drew ten replies or more.', earned: (c) => fo(c).best_thread >= 10 },
+  { id: 'every-room', name: 'Every Room Visited', tier: 'silver', glyph: G.rooms, note: 'Posted in six different boards of the forum.', earned: (c) => fo(c).boards.length >= 6 },
+  { id: 'burden-bearer', name: 'Burden Bearer', tier: 'gold', glyph: G.dove, note: 'Twenty-five posts of prayer and encouragement for the Guild.', earned: (c) => fo(c).prayer >= 25 },
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s founding year.', earned: (c) => (c.member.created_at ?? '').startsWith('2026') },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its Editor in Chief.', earned: (c) => c.member.role === 'editor' },
-  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken', 'darkroom', 'daylight-lens'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
+  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken', 'darkroom', 'daylight-lens', 'common-table', 'open-door'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
 ];
 
 const RANK: Record<Tier, number> = { rainbow: 4, gold: 3, silver: 2, bronze: 1 };
@@ -145,7 +161,7 @@ export function finestFirst<T extends { tier: Tier; n: number }>(list: T[]) {
 /** "1 year at the table", "3 years at the table": the unit, made singular for one. */
 const ONE: Record<string, string> = {
   dispatches: 'dispatch', testimonies: 'testimony', 'visual works': 'visual work', 'long-form pieces': 'long-form piece',
-  poems: 'poem', 'film photographs': 'film photograph', 'digital photographs': 'digital photograph', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
+  poems: 'poem', 'film photographs': 'film photograph', 'digital photographs': 'digital photograph', 'forum posts': 'forum post', 'threads started': 'thread started', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
 };
 export const unitFor = (n: number, unit = '') => (n === 1 ? ONE[unit] ?? unit : unit);
 export const TIER_LABEL: Record<Tier, string> = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', rainbow: 'Rainbow' };

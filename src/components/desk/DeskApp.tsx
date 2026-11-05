@@ -15,6 +15,7 @@ import { prestigeFor } from '../../lib/prestige';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
+import { ForumLatest, useForumTally } from './Forum';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
@@ -223,6 +224,8 @@ function Desk({ session }: { session: Session }) {
   useEffect(() => {
     const onPop = () => {
       if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
+      // The members' bar can open these directly, too.
+      if (location.hash === '#review' || location.hash === '#my-page') { setTab(location.hash === '#review' ? 'review' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }
       setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
@@ -258,9 +261,9 @@ function Desk({ session }: { session: Session }) {
           <a className="d-side-link" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
-          <a className="d-side-link" href="/forms/">
+          <a className="d-side-link" href="/crafts/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M4 5h11l5 5v9H4zM15 5v5h5M8 13h8M8 16h6" /></svg>
-            The Forms<span aria-hidden="true">→</span></a>
+            The Crafts<span aria-hidden="true">→</span></a>
         </div>
         <button type="button" className="d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
@@ -334,7 +337,7 @@ function KindNote({ value }: { value: string }) {
       <p className="d-kind-what">{k.what}</p>
       <p className="d-kind-look"><span className="lab">What the editor looks for</span>{k.lookFor}</p>
       <p className="d-kind-len"><span className="lab">Usual length</span>{k.length}</p>
-      <a className="lab d-kind-all" href={`/forms/#${k.value}`} target="_blank" rel="noopener">See every form →</a>
+      <a className="lab d-kind-all" href={`/crafts/#${k.value}`} target="_blank" rel="noopener">See every craft →</a>
     </div>
   );
 }
@@ -359,6 +362,7 @@ function KindMark({ medium }: { medium: string }) {
 }
 
 function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
+  const tally = useForumTally(profile?.id);   // their part in the forum, for its trophies
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -395,10 +399,14 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <button type="button" className="ghost d-btn d-begin-photo" onClick={() => onOpen(null, 'photograph')}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
             Submit a photograph</button>
-          <a className="d-forum-link lab" href="/guild/members/?view=forum">The Forum →</a>
         </div>
       </header>
-      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {} }} uid={profile?.id} />
+      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
+      {/* What the Guild is talking about */}
+      <section className="d-forum-panel">
+        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
+        <ForumLatest count={3} plain />
+      </section>
       {waiting > 0 && (
         <button type="button" className="d-waiting" onClick={onReview}>
           <span className="d-waiting-dot" aria-hidden="true" />
