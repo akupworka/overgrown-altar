@@ -12,7 +12,7 @@ export const PRESTIGES: Prestige[] = [
   { level: 6, numeral: 'VI', name: 'Glasswright', at: 12, color: '#D2404F', note: 'Sets colour into the window.' },
   { level: 7, numeral: 'VII', name: 'Illuminator', at: 17, color: '#4A7BEA', note: 'Gold and lapis on the page.' },
   { level: 8, numeral: 'VIII', name: 'Watchman', at: 25, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
-  { level: 9, numeral: 'IX', name: 'Flamekeeper', at: 35, color: 'rainbow', note: 'The fire does not go out on their watch.' },
+  { level: 9, numeral: 'IX', name: 'Luminary', at: 35, color: 'rainbow', note: 'A great light, gathered from every colour.' },
   { level: 10, numeral: 'X', name: 'Seraph', at: 50, color: 'gold', note: 'One of the burning ones.' },
 ];
 
