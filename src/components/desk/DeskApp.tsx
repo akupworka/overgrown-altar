@@ -16,7 +16,7 @@ import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, t
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
 import { PhotoPlate } from '../PhotoPlate';
-import { LENS_FIELDS, type PhotoMeta } from '../../lib/photo';
+import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -343,6 +343,18 @@ function StatusChip({ status }: { status: Piece['status'] }) {
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
+// A small mark beside each piece: a pen for writing, a camera for a photograph.
+function KindMark({ medium }: { medium: string }) {
+  const photo = medium === 'photograph';
+  return (
+    <span className={`d-kind-mark${photo ? ' photo' : ''}`} title={photo ? 'Photograph' : 'Writing'} aria-label={photo ? 'Photograph' : 'Writing'} role="img">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {photo ? <><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></> : <><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></>}
+      </svg>
+    </span>
+  );
+}
+
 function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
@@ -356,7 +368,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
   async function duplicate(p: Piece) {
     const { data, error } = await supabase.from('pieces').insert({
       title: `${p.title || 'Untitled'} (copy)`.slice(0, 200), standfirst: p.standfirst, body: p.body, pillar: p.pillar, medium: p.medium,
-      image_path: p.image_path, image_alt: p.image_alt, image_focus: p.image_focus ?? '', photo_meta: p.photo_meta ?? {}, status: 'draft',
+      image_path: p.image_path, image_alt: p.image_alt, image_focus: p.image_focus ?? '', photo_meta: p.photo_meta ?? {}, gallery: p.gallery ?? [], status: 'draft',
     }).select().single();
     if (error) { alert('The copy couldn’t be made: ' + error.message); return; }
     onChanged(); onOpen(data as Piece);
@@ -401,8 +413,8 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           {pieces.map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
-                <span className="h3 d-item-title">{p.title || 'Untitled'}</span>
-                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {words(p.body)} {words(p.body) === 1 ? 'word' : 'words'} · {fmt(p.updated_at)}</span></span>
+                <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
@@ -430,7 +442,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   const [form, setForm] = useState({
     title: start?.title ?? '', standfirst: start?.standfirst ?? '', body: start?.body ?? '',
     pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? startMedium ?? 'prose'),
-    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '', image_focus: start?.image_focus ?? '', photo_meta: (start?.photo_meta ?? {}) as PhotoMeta,
+    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '', image_focus: start?.image_focus ?? '', photo_meta: (start?.photo_meta ?? {}) as PhotoMeta, gallery: (start?.gallery ?? []) as GalleryItem[],
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
@@ -468,7 +480,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         if (res.error) { setState('error'); setMsg(res.error.message); return null; }
         setState('saved'); onSaved(res.data as Piece); return res.data as Piece;
       }
-      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt, image_focus: form.image_focus, photo_meta: form.photo_meta } });
+      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt, image_focus: form.image_focus, photo_meta: form.photo_meta, gallery: form.gallery } });
       if (error) { setState('error'); setMsg(error.message); return null; }
       setState('saved'); return piece;
     }
@@ -502,6 +514,27 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
 
   // A photograph inside the piece: resized, stored in the public media store, and placed where the writer is.
   const inlineInput = useRef<HTMLInputElement>(null);
+  // A photography piece's smaller photographs (up to four), uploaded to the public media bucket.
+  const [moreMsg, setMoreMsg] = useState('');
+  async function addMore(file: File) {
+    if (form.gallery.length >= MAX_MORE) return;
+    setMoreMsg('Preparing the photograph…');
+    let blob: Blob;
+    try { blob = await shrinkImage(file, 2000, 0.86); } catch { return setMoreMsg('This photograph couldn’t be opened. Try a JPG or PNG.'); }
+    const path = `${uid}/${crypto.randomUUID()}.jpg`;
+    setMoreMsg('Uploading the photograph…');
+    const { error } = await supabase.storage.from('media').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) return setMoreMsg('The photograph didn’t upload. Please try again. (' + error.message + ')');
+    const src = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+    setMoreMsg(''); setForm((f) => ({ ...f, gallery: [...f.gallery, { src, caption: '' }].slice(0, MAX_MORE) })); setState('idle');
+  }
+  const editMore = (i: number, g: Partial<GalleryItem> | null) => {
+    setForm((f) => { const next = [...f.gallery]; if (g) next[i] = { ...next[i], ...g }; else next.splice(i, 1); return { ...f, gallery: next }; }); setState('idle');
+  };
+  const moveMore = (i: number, d: -1 | 1) => {
+    setForm((f) => { const next = [...f.gallery]; const j = i + d; if (j < 0 || j >= next.length) return f; [next[i], next[j]] = [next[j], next[i]]; return { ...f, gallery: next }; }); setState('idle');
+  };
+
   async function addInlinePhoto(file: File) {
     setMsg('Preparing the photograph…');
     let blob: Blob;
@@ -635,6 +668,32 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         <label className="d-lbl"><span className="lab">Caption · also read aloud for readers who can’t see it</span>
           <input className="field" maxLength={200} placeholder="What, or who, is in the photograph" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
         </label>
+      </section>
+      <section className="d-ph-sec">
+        <h2 className="d-ph-h">More photographs <span className="d-opt">optional · up to {MAX_MORE}</span></h2>
+        <span className="d-hint">Shown smaller, in a row beneath the main photograph; readers can open each one full size.</span>
+        {form.gallery.length > 0 && (
+          <ol className="d-more">
+            {form.gallery.map((g, i) => (
+              <li key={g.src} className="d-more-item">
+                <img src={g.src} alt="" />
+                <input className="field" maxLength={200} placeholder="Caption (optional)" aria-label={`Caption for photograph ${i + 2}`} value={g.caption ?? ''} onChange={(e) => editMore(i, { caption: e.target.value })} />
+                <span className="d-more-acts">
+                  <button type="button" className="d-textbtn" disabled={i === 0} onClick={() => moveMore(i, -1)} aria-label="Move earlier">←</button>
+                  <button type="button" className="d-textbtn" disabled={i === form.gallery.length - 1} onClick={() => moveMore(i, 1)} aria-label="Move later">→</button>
+                  <button type="button" className="d-textbtn d-danger" onClick={() => editMore(i, null)}>Remove</button>
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+        {form.gallery.length < MAX_MORE && (
+          <label className="d-more-add">
+            <span aria-hidden="true">+</span> Add {form.gallery.length ? 'another' : 'a'} photograph
+            <input type="file" className="visually-hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addMore(f); }} />
+          </label>
+        )}
+        {moreMsg && <p className="d-photo-msg" role="status">{moreMsg}</p>}
       </section>
       <section className="d-ph-sec">
         <h2 className="d-ph-h">Behind the lens <span className="d-opt">optional</span></h2>
@@ -804,7 +863,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
 }
 
 // The full page, exactly as the site will draw it (same styles as /guild/<piece>/), before anything is sent.
-function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string; image_focus?: string; photo_meta?: PhotoMeta }; photo: string | null; author: Profile | null; onClose: () => void }) {
+function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string; image_focus?: string; photo_meta?: PhotoMeta; gallery?: GalleryItem[] }; photo: string | null; author: Profile | null; onClose: () => void }) {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.documentElement.classList.add('menu-open');
@@ -840,7 +899,7 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
         <article className="sec paper gp-article">
           <div className={`narrow gp-flow${form.medium === 'photograph' ? ' gp-photo' : wantsDropCap(form.medium, form.body) ? ' gp-drop' : ''}`}>
             {form.standfirst && <p className="lede gp-standfirst">{form.standfirst}</p>}
-            {form.medium === 'photograph' && photo && <PhotoPlate src={photo} alt={form.image_alt} meta={form.photo_meta} />}
+            {form.medium === 'photograph' && photo && <PhotoPlate src={photo} alt={form.image_alt} meta={form.photo_meta} gallery={form.gallery} />}
             {form.body.trim() && <Body body={form.body} />}
             <div className="gp-sign"><span>{name.split(' ')[0]}</span></div>
           </div>
@@ -861,7 +920,7 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
             <li key={p.id} className="d-item">
               <div className="d-item-main">
                 <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
-                <span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span>
+                <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
                 {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
               </div>
               <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button></div>
@@ -909,7 +968,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
         <h2 className="h1 d-reader-title">{shown.title}</h2>
         {shown.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{shown.standfirst}</p>}
         {photo && (shown.medium === 'photograph'
-          ? <PhotoPlate src={photo} alt={shown.image_alt} meta={shown.photo_meta} />
+          ? <PhotoPlate src={photo} alt={shown.image_alt} meta={shown.photo_meta} gallery={shown.gallery} />
           : <img className="m-photo" src={photo} alt={shown.image_alt} />)}
         {shown.body.trim() ? <div className="gp-body-in-desk"><Body body={shown.body} /></div> : shown.medium === 'photograph' ? <p className="it mut">No words with this photograph.</p> : null}
       </article>

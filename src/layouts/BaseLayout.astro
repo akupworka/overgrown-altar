@@ -141,6 +141,22 @@ const imageUrl = new URL(image, site).toString();
       new MutationObserver(() => { if (hintQueued) return; hintQueued = true; requestAnimationFrame(() => { hintQueued = false; hintRows(); }); })
         .observe(document.body, { childList: true, subtree: true });
 
+      // A photograph opens full size: links marked data-zoom (a photography piece's smaller photographs).
+      document.addEventListener('click', (e) => {
+        const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-zoom]');
+        if (!link || e.metaKey || e.ctrlKey) return;
+        e.preventDefault();
+        const box = document.createElement('div'); box.className = 'zoom'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+        const img = document.createElement('img'); img.src = link.href; img.alt = link.dataset.caption || '';
+        const close = document.createElement('button'); close.type = 'button'; close.setAttribute('aria-label', 'Close'); close.textContent = '×';
+        box.append(img); if (link.dataset.caption) { const p = document.createElement('p'); p.textContent = link.dataset.caption; box.append(p); }
+        box.append(close);
+        const shut = () => { box.remove(); removeEventListener('keydown', key); link.focus(); };
+        const key = (k: KeyboardEvent) => { if (k.key === 'Escape') shut(); };
+        box.addEventListener('click', shut); addEventListener('keydown', key);
+        document.body.append(box); close.focus();
+      });
+
       // Writers' pictures stay current: pages are built ahead of time, so when a writer changes their portrait,
       // each picture marked data-author-id asks Supabase for the latest one as the page opens (one small request).
       const marked = [...document.querySelectorAll<HTMLElement>('[data-author-id]')].filter((el) => el.dataset.authorId);

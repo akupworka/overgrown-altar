@@ -10,8 +10,14 @@
 // They are worked out from what the site already knows (published pieces and the member's page), so they
 // update by themselves. Reading and commenting trophies can join once those features exist.
 
+import type { PhotoMeta } from './photo';
+
 export type Tier = 'bronze' | 'silver' | 'gold' | 'rainbow';
-export interface TrophyPiece { pillar: string; medium: string; body: string; published_at: string | null }
+export interface TrophyPiece {
+  pillar: string; medium: string; body: string; published_at: string | null;
+  // Photography: the details behind the lens and the smaller photographs (named either way, from the Desk or the built site)
+  photo_meta?: PhotoMeta | null; photoMeta?: PhotoMeta | null; gallery?: unknown[] | null;
+}
 export interface TrophyMember { portrait_path?: string | null; portrait?: string; bio?: string; craft?: string; role?: string; created_at?: string | null }
 export interface TrophyCtx { pieces: TrophyPiece[]; member: TrophyMember }
 export interface Trophy {
@@ -68,6 +74,14 @@ const G = {
   stones: 'M3 20h18M4.5 20v-5h4.5v5M9.8 20V9.5h4.4V20M15 20v-7h4.5v7M9.8 13h4.4M12 5.5l2.2 4h-4.4z',
   table: 'M3 10h18M5 10v9M19 10v9M8 14h8M8 14v5M16 14v5M12 4c1 1.2 1.2 2.2 0 3.4-1.2-1.2-1-2.2 0-3.4zM12 7.4V10',
   ring: 'M12 21a8 8 0 1 0 0-16M12 5a8 8 0 0 0-5.7 13.6M12 8c1.8 2.2 3 3.4 3 5.2a3 3 0 0 1-6 0c0-1.2.8-2 1.6-2.8.4.9.8 1.2 1.2 1.2 0-1.3-.4-2.2.2-3.6z',
+  // Photography
+  canister: 'M5 7h9v13H5zM7 7V4.5h5V7M14 9h6v9h-6M16 9v9M18 9v9M14 11.5h6M14 15.5h6M5 11h9',
+  camera: 'M3 8h4l2-3h6l2 3h4v11H3zM12 10a3.5 3.5 0 1 0 .01 0M18.5 6V3.5M21 7.5l1.5-1.5M17 5.5l-1-1',
+  frames: 'M3 4h18v16H3zM3 9.5h18M3 15h18M9 4v16M15 4v16',
+  notes: 'M5 3h11v18H5zM8 7h5M8 10h5M8 13h3M19 5l2 2-6.5 8-3 1 1-3z',
+  grain: 'M12 3a9 9 0 1 0 0 18zM12 3a9 9 0 0 1 0 18M14.5 8h2v2h-2zM17 12h2v2h-2zM14.5 15h2v2h-2zM8 8.5h.01M6.5 12h.01M8.5 15.5h.01M10 11h.01',
+  thousand: 'M3 3h18v11H3zM6 11l3.5-3.5L12 10l2-2 4 3M3 17.5h18M3 20.5h12',
+  silent: 'M3 4h18v16H3zM5.5 17l4.5-5.5 3 3 2.5-2.5 3.5 5M16 8a1.6 1.6 0 1 0 .01 0',
   dove: 'M3 13c4 0 6-3 8-6 1 3 3 5 7 5l3-2-1 4c-2 3-5 5-9 5-3 0-6-2-8-6zM11 7c0-2 1-3 3-4',
 };
 
@@ -76,6 +90,16 @@ const isStone = (p: TrophyPiece) => p.pillar === 'perimeter' && ['testimony', 'd
 const isRelic = (p: TrophyPiece) => ['photograph', 'study', 'teardown'].includes(p.medium);
 const isQuill = (p: TrophyPiece) => p.pillar === 'hearth' && ['fiction', 'prose'].includes(p.medium) && words(p.body) >= 1500;
 const isLyre = (p: TrophyPiece) => p.medium === 'poetry';
+// Photography
+const metaOf = (p: TrophyPiece): PhotoMeta => p.photo_meta ?? p.photoMeta ?? {};
+const isPhoto = (p: TrophyPiece) => p.medium === 'photograph';
+const isFilm = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'film';
+const isDigital = (p: TrophyPiece) => isPhoto(p) && metaOf(p).format === 'digital';
+const fullNotes = (p: TrophyPiece) => {
+  const m = metaOf(p);
+  return isPhoto(p) && !!m.format && ['camera', 'lens', 'settings', 'place', 'taken'].every((k) => (m[k as keyof PhotoMeta] ?? '').trim())
+    && (m.format !== 'film' || !!m.film?.trim());
+};
 const cat = (f: (p: TrophyPiece) => boolean, b: number, si: number, g: number, r: number) =>
   ({ at: { bronze: b, silver: si, gold: g, rainbow: r }, count: (c: TrophyCtx) => count(c, f), earned: (c: TrophyCtx) => count(c, f) >= b });
 
@@ -86,6 +110,8 @@ export const TROPHIES: Trophy[] = [
   { id: 'stained-glass', name: 'The Stained Glass Relic', tier: 'bronze', glyph: G.lancet, unit: 'visual works', note: 'For published visual work: dark atmospheric photography, architectural studies, original design teardowns.', ...cat(isRelic, 3, 10, 20, 30) },
   { id: 'scribes-quill', name: 'The Scribe’s Quill', tier: 'bronze', glyph: G.quill, unit: 'long-form pieces', note: 'For long-form fiction and narrative prose (1,500 words or more) accepted into The Hearth.', ...cat(isQuill, 1, 5, 12, 25) },
   { id: 'lyre', name: 'The Lyre', tier: 'bronze', glyph: G.lyre, unit: 'poems', note: 'For poems published at the Guild.', ...cat(isLyre, 3, 10, 20, 30) },
+  { id: 'darkroom', name: 'The Darkroom', tier: 'bronze', glyph: G.canister, unit: 'film photographs', note: 'For photographs made on film: loaded by hand, developed in the dark.', ...cat(isFilm, 1, 3, 8, 15) },
+  { id: 'daylight-lens', name: 'The Daylight Lens', tier: 'bronze', glyph: G.camera, unit: 'digital photographs', note: 'For photographs made digitally: light caught and kept the moment it falls.', ...cat(isDigital, 1, 3, 8, 15) },
   // Time: they grow too, by themselves
   { id: 'years', name: 'Years at the Table', tier: 'bronze', glyph: G.table, unit: 'years at the table', note: 'For each year kept with the Guild since taking a seat.', at: { bronze: 1, silver: 2, gold: 3, rainbow: 5 }, count: yearsAt, earned: (c) => yearsAt(c) >= 1 },
   { id: 'unbroken', name: 'The Unbroken Flame', tier: 'bronze', glyph: G.ring, unit: 'months in a row', note: 'For publishing every month without a break: the longest run counts.', at: { bronze: 3, silver: 6, gold: 12, rainbow: 24 }, count: longestStreak, earned: (c) => longestStreak(c) >= 3 },
@@ -100,9 +126,15 @@ export const TROPHIES: Trophy[] = [
   { id: 'three-rooms', name: 'Three Rooms', tier: 'gold', glyph: G.arches, note: 'Published in all three pillars.', earned: (c) => ['watchtower', 'hearth', 'perimeter'].every((x) => has(c, (p) => p.pillar === x)) },
   { id: 'polymath', name: 'The Polymath', tier: 'gold', glyph: G.compass, note: 'Published four different kinds of work.', earned: (c) => kinds(c) >= 4 },
   { id: 'seasons', name: 'Every Season', tier: 'gold', glyph: G.hourglass, note: 'Published in four different months.', earned: (c) => months(c) >= 4 },
+  // Photography, won once
+  { id: 'let-it-speak', name: 'Let It Speak', tier: 'bronze', glyph: G.silent, note: 'Published a photograph with no words at all.', earned: (c) => has(c, (p) => isPhoto(p) && words(p.body) === 0) },
+  { id: 'field-notes', name: 'Field Notes', tier: 'bronze', glyph: G.notes, note: 'Gave every detail behind the lens: digital or film, camera, lens, settings, where and when.', earned: (c) => has(c, fullNotes) },
+  { id: 'contact-sheet', name: 'The Contact Sheet', tier: 'silver', glyph: G.frames, note: 'Published a photograph with all four smaller frames beneath it.', earned: (c) => has(c, (p) => isPhoto(p) && (p.gallery?.length ?? 0) >= 4) },
+  { id: 'thousand-words', name: 'Worth a Thousand Words', tier: 'silver', glyph: G.thousand, note: 'Published a photograph with a thousand words or more beside it.', earned: (c) => has(c, (p) => isPhoto(p) && words(p.body) >= 1000) },
+  { id: 'grain-and-pixel', name: 'Grain & Pixel', tier: 'gold', glyph: G.grain, note: 'Published photographs on film and digitally.', earned: (c) => has(c, isFilm) && has(c, isDigital) },
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s founding year.', earned: (c) => (c.member.created_at ?? '').startsWith('2026') },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its Editor in Chief.', earned: (c) => c.member.role === 'editor' },
-  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
+  { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken', 'darkroom', 'daylight-lens'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
 ];
 
 const RANK: Record<Tier, number> = { rainbow: 4, gold: 3, silver: 2, bronze: 1 };
@@ -113,7 +145,7 @@ export function finestFirst<T extends { tier: Tier; n: number }>(list: T[]) {
 /** "1 year at the table", "3 years at the table": the unit, made singular for one. */
 const ONE: Record<string, string> = {
   dispatches: 'dispatch', testimonies: 'testimony', 'visual works': 'visual work', 'long-form pieces': 'long-form piece',
-  poems: 'poem', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
+  poems: 'poem', 'film photographs': 'film photograph', 'digital photographs': 'digital photograph', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
 };
 export const unitFor = (n: number, unit = '') => (n === 1 ? ONE[unit] ?? unit : unit);
 export const TIER_LABEL: Record<Tier, string> = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', rainbow: 'Rainbow' };

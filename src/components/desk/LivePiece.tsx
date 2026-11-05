@@ -17,7 +17,7 @@ export default function LivePiece() {
     if (!m || ['desk', 'members'].includes(m[1])) return;
     (async () => {
       const { data } = await supabase.from('pieces')
-        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
+        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
         .eq('slug', m[1]).eq('status', 'approved').maybeSingle();
       if (!data) return;
       if (data.image_path) {
@@ -56,7 +56,7 @@ export default function LivePiece() {
       <article className="sec paper gp-article">
         <div className={`narrow gp-flow${isPhoto ? ' gp-photo' : wantsDropCap(piece.medium, piece.body) ? ' gp-drop' : ''}`}>
           {piece.standfirst && <p className="lede gp-standfirst">{piece.standfirst}</p>}
-          {isPhoto && photo && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} />}
+          {isPhoto && photo && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} gallery={piece.gallery} />}
           {piece.body.trim() && <Body body={piece.body} />}
           <div className="gp-sign"><span>{(a.display_name || '').split(' ')[0]}</span></div>
           <aside className="gp-author" aria-label="About the author">

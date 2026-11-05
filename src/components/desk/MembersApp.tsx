@@ -250,7 +250,7 @@ function Reading({ id }: { id: string }) {
         <span className="eb">{pillarName(piece.pillar)} · {mediumName(piece.medium)}</span>
         <h1 className="h1">{piece.title}</h1>
         {piece.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{piece.standfirst}</p>}
-        {photo && piece.medium === 'photograph' && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} />}
+        {photo && piece.medium === 'photograph' && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} gallery={piece.gallery} />}
         {piece.body.trim() && <Body body={piece.body} />}
         {author && (
           <div className="m-byline">

@@ -20,3 +20,13 @@ export function lensRows(meta: PhotoMeta | null | undefined): [string, string][]
   }
   return rows;
 }
+
+/** Up to four more photographs, shown smaller beneath the main one (pieces.gallery). Kept in the public media bucket. */
+export interface GalleryItem { src: string; caption?: string }
+export const MAX_MORE = 4;
+/** Only photographs the Desk uploaded (our own media bucket) are shown. */
+export const isOwnPhoto = (src: unknown): src is string =>
+  typeof src === 'string' && /^https:\/\/zblgggifysohxqtgvgxs\.supabase\.co\/storage\/v1\/object\/public\/media\//.test(src);
+export const cleanGallery = (g: unknown): GalleryItem[] =>
+  (Array.isArray(g) ? g : []).filter((x) => x && isOwnPhoto(x.src)).slice(0, MAX_MORE)
+    .map((x) => ({ src: x.src, caption: typeof x.caption === 'string' ? x.caption.slice(0, 200) : '' }));

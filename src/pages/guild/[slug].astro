@@ -48,7 +48,7 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
   <article class="sec paper gp-article">
     <div class:list={['narrow gp-flow', { 'gp-drop': !isPhoto && wantsDropCap(p.medium, p.body), 'gp-photo': isPhoto }]}>
       {p.standfirst && <p class="lede gp-standfirst">{p.standfirst}</p>}
-      {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} />}
+      {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} gallery={p.gallery} />}
       {p.body.trim() && <Body body={p.body} />}
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>
 
