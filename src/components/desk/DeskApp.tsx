@@ -8,6 +8,8 @@ import { Doorway, Line, Arrow } from './Doorway';
 import { shrinkImage, TooSmall } from '../../lib/shrink';
 // Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
 const MIN_PHOTO_WIDTH = 1600;
+import { PrestigeBadge } from './Prestige';
+import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -263,6 +265,29 @@ function Desk({ session }: { session: Session }) {
   );
 }
 
+// Where you stand among the ten prestiges, what the next one is, and all ten behind a small "see all".
+function DeskPrestige({ published }: { published: number }) {
+  const { current, next, toNext } = prestigeFor(published);
+  return (
+    <div className="d-prestige">
+      {current ? <PrestigeBadge published={published} size="lg" /> : <span className="lab mut">Your first published piece earns your first prestige.</span>}
+      {next && <span className="it d-prestige-next">{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b>{next.name}</b></span>}
+      <details className="d-prestige-all">
+        <summary className="lab">The ten prestiges</summary>
+        <ol>
+          {PRESTIGES.map((p) => (
+            <li key={p.level} className={current && p.level <= current.level ? 'won' : ''}>
+              <PrestigeBadge published={p.at} />
+              <span className="it">{p.note}</span>
+              <span className="lab mut">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </div>
+  );
+}
+
 function StatusChip({ status }: { status: Piece['status'] }) {
   return <span className={`d-status s-${status}`}><i aria-hidden="true" />{STATUS_LABEL[status]}</span>;
 }
@@ -289,6 +314,7 @@ function Pieces({ name, pieces, waiting = 0, onReview, onOpen, onChanged }: { na
           <p className="d-tally">
             <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
           </p>
+          <DeskPrestige published={counts.published} />
         </div>
         <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
       </header>

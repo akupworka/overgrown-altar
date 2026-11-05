@@ -628,3 +628,24 @@
 .d-email { display: flex; flex-direction: column; gap: 12px; }
 .d-email-field { margin-left: 34px; }
 @media (max-width: 700px) { .d-email-field { margin-left: 0; } }
+
+/* Prestige on the Desk */
+.d-prestige { margin-top: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.d-prestige-next { font-size: 17px; color: var(--muted-dark); }
+.d-prestige-next b { font-weight: 500; color: var(--bone); font-style: normal; }
+.d-prestige-all summary { cursor: pointer; color: var(--muted-dark); list-style: none; border-bottom: 1px solid rgba(243,236,220,.2); padding-bottom: 3px; display: inline-block; }
+.d-prestige-all summary::-webkit-details-marker { display: none; }
+.d-prestige-all summary:hover { color: var(--ember); }
+.d-prestige-all ol { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.d-prestige-all li { display: grid; grid-template-columns: 220px minmax(0, 1fr) auto; gap: 14px; align-items: center; opacity: .55; }
+.d-prestige-all li.won { opacity: 1; }
+.d-prestige-all li .it { font-size: 16px; color: var(--muted-dark); }
+.d-prestige-all li .lab { font-size: 9px; }
+.m-hero .pr { margin-top: 4px; }
+.g-card .pr { margin-top: 4px; }
+@media (max-width: 700px) {
+  .d-prestige-all li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
+  .d-prestige-all li .it { grid-column: 1 / -1; font-size: 15px; }
+  .d-prestige-all li .lab { grid-row: 1; grid-column: 2; }
+}
+.d-prestige-all li .pr { justify-self: start; }

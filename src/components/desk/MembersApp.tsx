@@ -8,6 +8,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
 import { Body } from '../../lib/marks';
 import { Initials } from './DeskApp';
+import { PrestigeBadge } from './Prestige';
 
 type Route = { m?: string; p?: string };
 const readRoute = (): Route => {
@@ -67,6 +68,7 @@ function Directory() {
                 <span className="g-name">{m.display_name || 'A member'}</span>
                 <span className="lab mut g-craft">{[m.role === 'editor' ? 'Editor' : '', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
                 <span className="lab mut g-craft">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
+                <PrestigeBadge published={m.count} />
               </Link>
             ))}
           </div>
@@ -111,6 +113,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <span className="eb">{person.role === 'editor' ? 'Editor of the Guild' : 'Of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
+        <PrestigeBadge published={work.length} size="lg" />
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
         {(site || handle || person.public_email) && (
           <span className="m-pills">

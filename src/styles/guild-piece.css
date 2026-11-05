@@ -70,3 +70,4 @@ a.gp-arch:hover { box-shadow: 0 0 0 1px var(--oxblood), 0 16px 40px -20px rgba(4
   .gp-author-text .al { justify-content: center; }
   .gp-all { align-self: center; }
 }
+.gp-prestige { margin-top: 10px; }

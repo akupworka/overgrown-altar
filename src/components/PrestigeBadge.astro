@@ -1,0 +1,14 @@
+---
+// A writer's prestige, from how many pieces they have published. Nothing shows before the first.
+import { prestigeFor } from '../lib/prestige';
+import '../styles/prestige.css';
+interface Props { published: number; tone?: 'dark' | 'paper'; size?: 'sm' | 'lg' }
+const { published, tone = 'dark', size = 'sm' } = Astro.props;
+const { current: p } = prestigeFor(published);
+---
+{p && (
+  <span class:list={['pr', { 'pr-paper': tone === 'paper', 'pr-lg': size === 'lg' }]} data-level={p.level}
+    style={p.level < 9 ? `--c:${p.color}` : undefined} title={`${p.name}: ${p.note}`}>
+    <span class="pr-gem" aria-hidden="true"></span><span class="pr-n">{p.numeral}</span>{p.name}
+  </span>
+)}

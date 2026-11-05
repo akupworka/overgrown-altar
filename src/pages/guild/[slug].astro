@@ -6,6 +6,7 @@ import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import Cross from '../../components/Cross.astro';
 import AuthorLinks from '../../components/AuthorLinks.astro';
+import PrestigeBadge from '../../components/PrestigeBadge.astro';
 import { Body, wantsDropCap } from '../../lib/marks';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
 import '../../styles/desk.css';
@@ -22,6 +23,7 @@ const date = new Date(p.published_at).toLocaleDateString('en-US', { month: 'long
 const first = a.display_name.split(' ')[0];
 const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
 const aUrl = authorUrl(a);
+const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).length;
 ---
 <BaseLayout title={p.title} image={p.image || undefined} description={p.standfirst || `${MEDIUM_LABEL[p.medium] ?? ''} by ${a.display_name}`}>
   <section class="hero gp-hero">
@@ -52,6 +54,7 @@ const aUrl = authorUrl(a);
           <span class="eb">About the author</span>
           <a class="gp-author-name" href={aUrl}>{a.display_name}</a>
           {a.craft && <span class="gp-craft">{a.craft}</span>}
+          <span class="gp-prestige"><PrestigeBadge published={published} tone="paper" /></span>
           {a.bio && <p class="gp-bio">{a.bio}</p>}
           <AuthorLinks website={a.website} instagram={a.instagram} email={a.email} />
           <a class="gp-all" href={aUrl}>All of {first}’s work <span aria-hidden="true">→</span></a>

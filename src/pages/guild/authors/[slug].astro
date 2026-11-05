@@ -7,6 +7,7 @@ import SiteNav from '../../../components/SiteNav.astro';
 import DispatchList, { type DispatchItem } from '../../../components/DispatchList.astro';
 import Subscribe from '../../../components/Subscribe.astro';
 import AuthorLinks from '../../../components/AuthorLinks.astro';
+import PrestigeBadge from '../../../components/PrestigeBadge.astro';
 import { getAuthors, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildAuthor, type GuildPiece } from '../../../lib/guild';
 import '../../../styles/guild-piece.css';
 
@@ -32,6 +33,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
       <span class="eb">Of the Guild</span>
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
+      <PrestigeBadge published={pieces.length} size="lg" />
       {a.bio && <p class="au-bio">{a.bio}</p>}
       <span class="au-links"><AuthorLinks website={a.website} instagram={a.instagram} email={a.email} tone="dark" /></span>
     </div>
