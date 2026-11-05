@@ -2,8 +2,9 @@
 // The Hearth: the Guild's creative room. Prose, poetry, fiction, photographs, architectural studies and design teardowns.
 //   - a featured piece (the newest), large
 //   - the six kinds of work, each a filter
-//   - the work as a gallery of cards, newest first
-//   - photograph plates, the makers, and an invitation to bring work to the table
+//   - the written work as a gallery of cards, newest first (photographs have their own section)
+//   - the gallery: the newest photographs, and a link to all of them (/hearth/gallery/)
+//   - the makers, and an invitation to bring work to the table
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Subscribe from '../components/Subscribe.astro';
@@ -20,14 +21,18 @@ const KINDS = [
 ];
 const FALLBACK = ['/images/glass-2-1200.jpg', '/images/window-light-on-wall-1200.jpg', '/images/bay-window-of-stained-glass-1200.jpg', '/images/faded-chapel-wall-with-a-1200.jpg'];
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-const works = (await guildPillar('hearth')).map((g, i) => ({
+const all = (await guildPillar('hearth')).map((g, i) => ({
   href: guildUrl(g), title: g.title, kind: g.medium, kindLabel: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), image: g.image || FALLBACK[i % FALLBACK.length], hasPhoto: !!g.image, pos: (g.image && g.imagePos) ? `object-position:${g.imagePos}` : undefined,
-  author: g.author, authorHref: authorUrl(g.author),
+  author: g.author, authorHref: authorUrl(g.author), format: g.photoMeta?.format ?? '', more: g.gallery?.length ?? 0,
 }));
-const featured = works[0];
-const count = (k: string) => works.filter((w) => w.kind === k).length;
-const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, GuildAuthor])).values()].slice(0, 8);
+const featured = all[0];
+// Photographs live in the gallery; the cards below are the written work.
+const works = all.filter((w) => w.kind !== 'photograph');
+const photos = all.filter((w) => w.kind === 'photograph' && w.hasPhoto);
+const count = (k: string) => all.filter((w) => w.kind === k).length;
+const ROMAN = ['i', 'ii', 'iii', 'iv'];
+const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, GuildAuthor])).values()].slice(0, 8);
 ---
 <BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry, fiction, photographs, architectural studies and design teardowns.">
   <section class="hero pill-h">
@@ -61,11 +66,18 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
     <span class="eb">What the fellowship makes</span>
     <div class="he-kinds">
       {KINDS.map((k) => (
+        k.value === 'photograph' ? (
+          <a class="he-kind" href="#gallery">
+            <span class="he-k">{k.label}</span>
+            <span class="it he-n">{k.note}</span>
+            <span class="lab he-c">{count(k.value) ? `${count(k.value)} in the gallery` : 'Be the first'}</span>
+          </a>
+        ) : (
         <button type="button" class="he-kind" data-kind={k.value}>
           <span class="he-k">{k.label}</span>
           <span class="it he-n">{k.note}</span>
           <span class="lab he-c">{count(k.value) ? `${count(k.value)} ${count(k.value) === 1 ? 'piece' : 'pieces'}` : 'Be the first'}</span>
-        </button>
+        </button>)
       ))}
     </div>
     <a class="lab room-forms" href="/forms/#hearth">What each form is, and what the editor looks for →</a>
@@ -79,7 +91,7 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
     </div>
     <div class="filters he-filters" role="group" aria-label="Show">
       <button type="button" class="chip" aria-pressed="true" data-show="all">All</button>
-      {KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
+      {KINDS.filter((k) => k.value !== 'photograph').map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
     </div>
     {works.length > 0 ? (
       <ol class="he-grid">
@@ -100,14 +112,31 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
     <nav class="pager he-pager" aria-label="Pages of work" hidden></nav>
   </section>
 
-  <!-- Photograph plates -->
-  <section class="sec dark">
+  <!-- The gallery: the newest photographs from the fellowship, and the way to all of them -->
+  <section class="sec dark" id="gallery">
     <div class="row" style="padding-bottom:30px"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Photographs</span><h2 class="h2">The gallery</h2></div><span class="it mut" style="font-size:20px">Stone in monochrome. Color only through glass.</span></div>
-    <div class="g4 he-plates">
-      <figure><div class="tile" style="height:360px"><img src="/images/glass.jpg" alt="Glass" loading="lazy" /></div><figcaption class="lab mut">Plate i · Glass</figcaption></figure>
-      <figure><div class="tile" style="height:280px"><img src="/images/ivy.jpg" alt="Ivy" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate ii · Ivy</figcaption></figure>
-      <figure><div class="tile" style="height:360px"><img src="/images/glass-2.jpg" srcset="/images/glass-2-1200.jpg 1200w, /images/glass-2.jpg 1617w" sizes="(max-width: 700px) 100vw, 50vw" alt="Glass" style="object-position:center 30%;" loading="lazy" /></div><figcaption class="lab mut">Plate iii · Glass</figcaption></figure>
-      <figure><div class="tile" style="height:280px"><img src="/images/stone.jpg" alt="Stone" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate iv · Stone</figcaption></figure>
+    {photos.length > 0 ? (
+      <div class="g4 he-plates">
+        {photos.slice(0, 4).map((w, i) => (
+          <a class="he-plate" href={w.href}>
+            <figure><div class="tile" style={`height:${i % 2 ? 280 : 360}px`}><img src={w.image} alt="" loading="lazy" style={w.pos} /></div>
+              <figcaption class="lab mut">Plate {ROMAN[i]} · {w.title}<span class="he-plate-by">{w.author.display_name}{w.format ? ` · ${w.format === 'film' ? 'Film' : 'Digital'}` : ''}</span></figcaption></figure>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="g4 he-plates">
+        <figure><div class="tile" style="height:360px"><img src="/images/glass.jpg" alt="Glass" loading="lazy" /></div><figcaption class="lab mut">Plate i · Glass</figcaption></figure>
+        <figure><div class="tile" style="height:280px"><img src="/images/ivy.jpg" alt="Ivy" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate ii · Ivy</figcaption></figure>
+        <figure><div class="tile" style="height:360px"><img src="/images/glass-2.jpg" srcset="/images/glass-2-1200.jpg 1200w, /images/glass-2.jpg 1617w" sizes="(max-width: 700px) 100vw, 50vw" alt="Glass" style="object-position:center 30%;" loading="lazy" /></div><figcaption class="lab mut">Plate iii · Glass</figcaption></figure>
+        <figure><div class="tile" style="height:280px"><img src="/images/stone.jpg" alt="Stone" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate iv · Stone</figcaption></figure>
+      </div>
+    )}
+    <div class="he-gallery-go">
+      {photos.length > 0
+        ? <a class="btn" href="/hearth/gallery/">View the full gallery <span aria-hidden="true">→</span></a>
+        : <a class="btn" href="/guild/">Bring the first photograph</a>}
+      {photos.length > 0 && <span class="lab mut">{photos.length} {photos.length === 1 ? 'photograph' : 'photographs'} from the fellowship</span>}
     </div>
   </section>
 
@@ -159,7 +188,7 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
     if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
   });
   chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.show!)));
-  document.querySelectorAll<HTMLButtonElement>('.he-kind').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll<HTMLButtonElement>('button.he-kind').forEach((b) => b.addEventListener('click', () => {
     show(b.dataset.kind!);
     document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
   }));
@@ -211,7 +240,13 @@ const makers = [...new Map(works.map((w) => [w.author.id, w.author] as [string, 
 
   /* Plates */
   .he-plates figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  .he-plates figcaption { font-size: 10px; }
+  .he-plates figcaption { font-size: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .he-plate-by { opacity: .7; }
+  .he-plate { display: block; }
+  .he-plate .tile img { transition: transform 1.1s var(--ease, ease); }
+  .he-plate:hover .tile img { transform: scale(1.04); }
+  .he-plate:hover figcaption { color: var(--ember); }
+  .he-gallery-go { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
   /* The table */
   .he-makers { margin-top: 44px; display: flex; flex-wrap: wrap; justify-content: center; gap: 28px 40px; }
