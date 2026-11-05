@@ -195,7 +195,16 @@ import '../styles/doorway.css';
     rooms.forEach((r) => r.addEventListener('change', () => { if (all) all.checked = rooms.every((x) => x.checked); }));
     next.addEventListener('click', () => { if (ok(at)) show(at + 1); });
     back.addEventListener('click', () => show(at - 1));
-    form.addEventListener('submit', (e) => { if (!ok(at)) e.preventDefault(); });
+    // Enter in a field moves to the next step; only the last step can send, and only when every step is complete.
+    form.addEventListener('submit', (e) => {
+      if (at < steps.length - 1) { e.preventDefault(); if (ok(at)) show(at + 1); return; }
+      for (let i = 0; i < steps.length; i++) {
+        if (i !== at) steps[i].hidden = false;
+        const good = ok(i);
+        if (i !== at) steps[i].hidden = true;
+        if (!good) { e.preventDefault(); show(i); ok(i); return; }
+      }
+    });
   }
 </script>
 
