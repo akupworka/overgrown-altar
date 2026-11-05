@@ -4,7 +4,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_KEY } from './supabase';
 
-export interface GuildAuthor { id: string; slug?: string; display_name: string; craft: string; bio: string; portrait: string; website: string; instagram: string; email?: string }
+export interface GuildAuthor { id: string; slug?: string; display_name: string; craft: string; bio: string; portrait: string; website: string; instagram: string; email?: string; role?: string; created_at?: string | null }
 export interface GuildPiece {
   id: string; slug: string; title: string; standfirst: string; body: string; pillar: 'watchtower' | 'hearth' | 'perimeter';
   medium: string; image: string; image_alt: string; published_at: string; author: GuildAuthor;
@@ -21,7 +21,7 @@ async function load(): Promise<GuildPiece[]> {
   try {
     const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     const { data, error } = await db.from('pieces')
-      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, published_at, author:profiles(id, display_name, craft, bio, portrait_path, website, instagram, public_email)')
+      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, published_at, author:profiles(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
       .eq('status', 'approved').not('slug', 'is', null).order('published_at', { ascending: false });
     if (error) throw error;
     const paths = (data ?? []).map((p: any) => p.image_path).filter(Boolean);
@@ -33,7 +33,7 @@ async function load(): Promise<GuildPiece[]> {
       author: {
         id: p.author?.id, display_name: p.author?.display_name ?? 'A member', craft: p.author?.craft ?? '', bio: p.author?.bio ?? '',
         portrait: p.author?.portrait_path ? db.storage.from('portraits').getPublicUrl(p.author.portrait_path).data.publicUrl : '',
-        website: p.author?.website ?? '', instagram: p.author?.instagram ?? '', email: p.author?.public_email ?? '',
+        website: p.author?.website ?? '', instagram: p.author?.instagram ?? '', email: p.author?.public_email ?? '', role: p.author?.role ?? 'member', created_at: p.author?.created_at ?? null,
       },
     }));
   } catch (e) {

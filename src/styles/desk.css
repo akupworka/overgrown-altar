@@ -685,3 +685,8 @@
   .pz-rung-text { grid-column: 1 / -1; }
   .pz-note { font-size: 15px; }
 }
+.m-trophies:not(:empty) { margin-bottom: 60px; }
+.pz-trophies { margin-top: 80px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.pz-cat { margin-top: 30px; width: 100%; }
+.pz-cat .tr-name { color: var(--bone); }
+@media (max-width: 700px) { .m-trophies:not(:empty) { margin-bottom: 44px; } .pz-trophies { margin-top: 56px; } }

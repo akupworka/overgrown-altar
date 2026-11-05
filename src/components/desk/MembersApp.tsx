@@ -9,6 +9,7 @@ import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, ty
 import { Body } from '../../lib/marks';
 import { Initials } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
+import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 
 type Route = { m?: string; p?: string; view?: string };
@@ -154,6 +155,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
       </header>
       <section className="m-work">
+        <div className="m-trophies"><TrophyCase ctx={{ pieces: work, member: person }} mine={person.id === me} /></div>
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{work.length} {work.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
         {work.length === 0 ? (
           <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
@@ -295,6 +297,13 @@ function Prestiges({ me }: { me: string }) {
           );
         })}
       </ol>
+
+      <section className="pz-trophies" id="trophies">
+        <span className="eb">Beside the prestiges</span>
+        <h2 className="h2">The trophies</h2>
+        <p className="it pz-lead">Prestiges count how much you have published. Trophies mark particular things done well: a first poem, a story in every room of the house, a piece of real length. Bronze, silver, gold, and the rare rainbow glass.</p>
+        <div className="pz-cat"><TrophyCatalogue /></div>
+      </section>
     </div>
   );
 }

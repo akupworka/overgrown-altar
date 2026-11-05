@@ -8,6 +8,7 @@ import DispatchList, { type DispatchItem } from '../../../components/DispatchLis
 import Subscribe from '../../../components/Subscribe.astro';
 import AuthorLinks from '../../../components/AuthorLinks.astro';
 import PrestigeBadge from '../../../components/PrestigeBadge.astro';
+import TrophyCase from '../../../components/TrophyCase.astro';
 import { getAuthors, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildAuthor, type GuildPiece } from '../../../lib/guild';
 import '../../../styles/guild-piece.css';
 
@@ -39,6 +40,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
     </div>
   </section>
   <section class="sec paper">
+    <div class="au-trophies"><TrophyCase ctx={{ pieces, member: { portrait: a.portrait, bio: a.bio, craft: a.craft, role: a.role, created_at: a.created_at } }} /></div>
     <div class="au-head"><span class="eb">The work</span><span class="lab mut">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
     <DispatchList items={items} />
   </section>
@@ -60,6 +62,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
   .au-links :global(.al) { justify-content: center; }
   .au-links a { border-bottom: 1px solid rgba(243, 236, 220, .35); padding-bottom: 3px; }
   .au-links a:hover { color: var(--ember); border-color: var(--ember); }
+  .au-trophies:not(:empty) { margin-bottom: 64px; }
   .au-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 24px; }
   @media (max-width: 700px) {
     .au-hero { padding: 110px 20px 64px; }
