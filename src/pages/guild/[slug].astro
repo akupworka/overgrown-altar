@@ -53,7 +53,7 @@ const aUrl = authorUrl(a);
           <a class="gp-author-name" href={aUrl}>{a.display_name}</a>
           {a.craft && <span class="gp-craft">{a.craft}</span>}
           {a.bio && <p class="gp-bio">{a.bio}</p>}
-          <AuthorLinks website={a.website} instagram={a.instagram} />
+          <AuthorLinks website={a.website} instagram={a.instagram} email={a.email} />
           <a class="gp-all" href={aUrl}>All of {first}’s work <span aria-hidden="true">→</span></a>
         </div>
       </aside>

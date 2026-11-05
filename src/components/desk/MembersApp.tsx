@@ -112,7 +112,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
-        {(site || handle) && (
+        {(site || handle || person.public_email) && (
           <span className="m-pills">
             {site && (
               <a href={person.website!} target="_blank" rel="noopener noreferrer" aria-label={`Website: ${site} (opens in a new tab)`}>
@@ -124,6 +124,12 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <a href={`https://instagram.com/${handle}`} target="_blank" rel="noopener noreferrer" aria-label={`Instagram: @${handle} (opens in a new tab)`}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none" /></svg>
                 <span>@{handle}</span>
+              </a>
+            )}
+            {person.public_email && (
+              <a href={`mailto:${person.public_email}`} aria-label={`Email ${person.public_email}`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="M3.5 6.5 12 13l8.5-6.5" /></svg>
+                <span className="m-mail">{person.public_email}</span>
               </a>
             )}
           </span>

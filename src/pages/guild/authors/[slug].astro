@@ -33,7 +33,7 @@ const items: DispatchItem[] = pieces.map((g) => ({
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
       {a.bio && <p class="au-bio">{a.bio}</p>}
-      <span class="au-links"><AuthorLinks website={a.website} instagram={a.instagram} tone="dark" /></span>
+      <span class="au-links"><AuthorLinks website={a.website} instagram={a.instagram} email={a.email} tone="dark" /></span>
     </div>
   </section>
   <section class="sec paper">

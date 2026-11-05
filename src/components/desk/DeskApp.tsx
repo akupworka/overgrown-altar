@@ -669,6 +669,14 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     portrait_path: profile.portrait_path,
   });
   const [msg, setMsg] = useState('');
+  // Showing an email is a choice: off unless they turn it on. It can be any address, not only the one they sign in with.
+  const [showEmail, setShowEmail] = useState(!!profile.public_email);
+  const [email, setEmail] = useState(profile.public_email ?? '');
+  const [emailMsg, setEmailMsg] = useState('');
+  async function toggleEmail(on: boolean) {
+    setShowEmail(on); setEmailMsg('');
+    if (on && !email) { const { data } = await supabase.auth.getSession(); setEmail(data.session?.user.email ?? ''); }
+  }
   // The portrait: shrunk in the browser first (any phone photo works), then uploaded. Its messages show right under it.
   const [portraitMsg, setPortraitMsg] = useState('');
   async function uploadPortrait(file: File) {
@@ -684,7 +692,9 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
   }
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const clean = { ...f, instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim() };
+    const shown = showEmail ? email.trim() : '';
+    if (shown && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(shown)) { setEmailMsg('That email address doesn’t look complete. Please check it.'); return; }
+    const clean = { ...f, instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim(), public_email: shown || null };
     if (clean.website && !/^https?:\/\//.test(clean.website)) clean.website = 'https://' + clean.website;
     const { error } = await supabase.from('profiles').update(clean).eq('id', profile.id);
     setMsg(error ? error.message : 'Saved. Members now see this on your page.'); if (!error) onSaved();
@@ -711,6 +721,16 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       <div className="d-two">
         <label className="d-lbl"><span className="lab">Website</span><input className="field" inputMode="url" placeholder="yoursite.com" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></label>
         <label className="d-lbl"><span className="lab">Instagram</span><input className="field" placeholder="@yourname" value={f.instagram} onChange={(e) => setF({ ...f, instagram: e.target.value })} /></label>
+      </div>
+      <div className="d-email">
+        <label className="d-check"><input type="checkbox" checked={showEmail} onChange={(e) => toggleEmail(e.target.checked)} /><span>Show an email address on my work and pages</span></label>
+        {showEmail && (
+          <label className="d-lbl d-email-field"><span className="lab">The email readers will see</span>
+            <input className="field" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailMsg(''); }} />
+            <span className="d-hint">Shown beside your website and Instagram, on your pieces and your page. Anyone who reads them can see it.</span>
+          </label>
+        )}
+        {emailMsg && <p className="d-photo-msg" role="alert">{emailMsg}</p>}
       </div>
       <label className="d-check"><input type="checkbox" checked={f.listed} onChange={(e) => setF({ ...f, listed: e.target.checked })} /><span>Show me in the Guild directory</span></label>
       <p className="it d-notice" role="status">{msg}</p>

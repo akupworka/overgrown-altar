@@ -624,3 +624,7 @@
   .m-act { padding: 9px 13px; font-size: 9.5px; letter-spacing: .14em; }
   .m-act.primary { flex-basis: 100%; justify-content: center; padding: 13px 16px; }
 }
+.m-mail { text-transform: none; letter-spacing: .06em; font-size: 12px; }
+.d-email { display: flex; flex-direction: column; gap: 12px; }
+.d-email-field { margin-left: 34px; }
+@media (max-width: 700px) { .d-email-field { margin-left: 0; } }

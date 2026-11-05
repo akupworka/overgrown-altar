@@ -20,6 +20,7 @@ export interface Piece {
 export interface Profile {
   id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor';
   website: string; instagram: string; listed: boolean; created_at?: string;
+  public_email?: string | null;   // shown on their work and pages only when they choose to
 }
 
 /** A member's portrait, from the public "portraits" store. */
