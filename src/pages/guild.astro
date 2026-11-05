@@ -3,33 +3,117 @@
 // The page's shared look comes from src/styles/global.css.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
-import DoorwayFrame from '../components/DoorwayFrame.astro';
+import '../styles/doorway.css';
 ---
 <BaseLayout title="Join the Guild">
 <section class="hero" style="height:820px"><img src="/images/format-guild.jpg" srcset="/images/format-guild-1200.jpg 1200w, /images/format-guild.jpg 2576w" sizes="100vw" alt="Altar of Our Lady between stained-glass windows" style="object-position:center 40%;filter:brightness(.6)" fetchpriority="high" /><div class="veil"></div><SiteNav />
-<div class="hero-c" style="top:250px"><span class="eb">The Inklings’ Table</span><h1 class="h1" style="margin-top:22px">Join the Guild</h1><p class="it" style="margin:24px 0 0;max-width:640px;font-size:26px;line-height:1.4;color:#E6DFD0">A structured round-table guild for creative believers.</p></div></section>
+<div class="hero-c" style="top:250px"><span class="eb">The Inklings’ Table</span><h1 class="h1" style="margin-top:22px">Join the Guild</h1><p class="it" style="margin:24px 0 0;max-width:640px;font-size:26px;line-height:1.4;color:#E6DFD0">A structured round-table guild for creative believers.</p><div style="margin-top:36px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px"><a class="btn" href="#apply">Apply to the Guild</a><a class="ghost" href="#expectations">What we ask of members</a></div></div></section>
 <section class="sec paper"><div class="g3"><div class="center" style="gap:16px"><span class="num" style="font-size:64px;color:#62372D">I</span><span class="cg" style="font-size:36px;letter-spacing:.08em;text-transform:uppercase">Write</span><span class="it mut" style="font-size:20px;max-width:300px">Bring essays, poems, chapters and photographs to the table, finished or still on the anvil.</span></div><div class="center" style="gap:16px"><span class="num" style="font-size:64px;color:#62372D">II</span><span class="cg" style="font-size:36px;letter-spacing:.08em;text-transform:uppercase">Sharpen</span><span class="it mut" style="font-size:20px;max-width:300px">Members read closely and answer honestly. As iron sharpeneth iron.</span></div><div class="center" style="gap:16px"><span class="num" style="font-size:64px;color:#62372D">III</span><span class="cg" style="font-size:36px;letter-spacing:.08em;text-transform:uppercase">Discern</span><span class="it mut" style="font-size:20px;max-width:300px">We weigh every work against Scripture and against beauty, and we pray over what we make.</span></div></div>
 <div style="margin-top:70px"><div style="display:flex;align-items:center;gap:18px;justify-content:center"><span style="width:80px;height:1px;background:#9F945E"></span><svg width="18" height="26" viewBox="0 0 603 883" aria-hidden="true" style="display:block"><path fill="#9F945E" d="M302.5,874.8C301.9,872.7 300.2,850.6 298.0,817.0C296.9,799.7 295.1,774.0 294.0,760.0C292.9,746.0 291.5,725.5 291.0,714.5C289.8,689.3 289.8,594.6 291.0,552.5C292.6,497.2 293.3,386.5 292.2,375.7C290.3,358.2 281.5,345.0 268.5,340.0C261.2,337.3 237.4,336.2 182.5,336.1C135.1,336.0 120.4,337.5 102.9,344.2C96.1,346.8 87.9,352.3 85.7,355.7C84.1,358.2 81.2,356.9 77.5,352.2C67.3,339.4 56.9,335.0 27.4,331.5C9.1,329.3 8.0,329.1 8.0,327.6C8.0,326.5 16.9,325.0 40.5,322.3C52.6,320.9 65.5,314.4 77.5,303.6C83.4,298.2 84.2,298.1 87.9,301.8C92.4,306.2 105.2,312.0 115.3,314.1C129.1,317.0 184.3,318.6 230.0,317.4C265.1,316.5 265.6,316.4 269.5,314.0C282.5,306.1 289.0,298.7 291.2,289.0C292.2,284.8 292.5,268.4 292.4,220.5C292.3,131.8 291.4,123.6 278.4,103.2C276.5,100.3 275.0,97.5 275.0,97.0C275.0,96.5 277.4,93.7 280.4,90.7C292.3,78.8 297.1,63.6 301.6,23.8C303.9,3.2 305.5,2.7 306.3,22.2C307.5,50.2 313.0,69.5 324.9,86.9C327.1,90.0 330.0,93.6 331.4,94.9C334.5,97.8 334.7,100.1 332.0,102.5C328.8,105.4 322.2,118.0 320.6,124.4C316.6,139.5 315.7,157.2 315.6,218.0C315.5,281.4 315.9,287.1 320.8,296.3C327.0,307.8 338.1,314.7 353.3,316.2C369.6,317.8 476.5,316.6 486.5,314.7C501.2,311.8 507.7,309.2 516.3,302.6C521.4,298.7 523.4,298.2 524.7,300.4C526.1,302.8 536.4,310.6 541.5,313.2C554.5,319.7 574.7,325.5 587.7,326.6C594.7,327.2 596.0,327.6 595.8,328.9C595.5,330.2 593.4,330.6 584.5,331.3C557.6,333.2 536.0,340.9 526.6,352.0C523.6,355.6 522.0,355.7 519.1,352.6C517.9,351.3 513.7,348.7 509.7,346.7C503.2,343.4 497.5,341.7 479.5,337.8C471.7,336.1 359.8,336.2 350.5,337.9C347.2,338.5 342.2,340.2 339.3,341.6C332.8,344.7 322.7,354.9 319.5,361.5C314.8,371.1 314.7,372.8 316.5,503.5C318.2,631.1 318.3,696.5 316.6,718.5C315.7,730.6 314.1,754.9 313.0,772.5C311.9,790.1 310.5,809.5 310.0,815.5C309.4,821.5 308.7,836.6 308.4,849.0C308.0,861.4 307.3,872.5 306.9,873.8C306.0,876.2 303.2,876.8 302.5,874.8Z"></path></svg><span style="width:80px;height:1px;background:#9F945E"></span></div></div>
 <p class="lede center" style="margin:50px auto 0;max-width:980px;font-size:34px">We do not build digital stages for central gurus or performative influencers. We cultivate a guild—a gathering of sharp minds, soft hearts, and unyielding spirits who gather around the hearth to write, sharpen, and discern together.</p></section>
+<!-- What the Guild is -->
+<section class="sec dark gd-what">
+  <div class="gd-in gd-two">
+    <div class="gd-k"><span class="eb">What the Guild is</span><h2 class="h2">An editorial guild, not a social network.</h2></div>
+    <div class="gd-body">
+      <p class="body">Overgrown Altar is written by its Guild: essayists, poets, storytellers, photographers and makers who believe that craft is a form of worship and that truth is worth the work. There are no feeds, followers or likes here. There is a table, and the work brought to it.</p>
+      <p class="body">Members write in three rooms. <a href="/watchtower">The Watchtower</a> holds essays and cultural audits. <a href="/hearth">The Hearth</a> holds prose, poetry, fiction, photographs and studies. <a href="/perimeter">The Perimeter</a> holds testimony: deliverance, recovery and the unseen. Every piece is read by the Editor in Chief before it is published, and most are made better by the reading.</p>
+      <p class="body">We keep the Guild small on purpose. We are looking for people whose work is serious and whose spirit is teachable.</p>
+    </div>
+  </div>
+</section>
+
+<!-- What we ask -->
+<section class="sec paper gd-ask" id="expectations">
+  <div class="gd-in">
+    <div class="gd-head"><span class="eb">What we ask of members</span><h2 class="h2">Six things we hold each other to.</h2></div>
+    <ol class="gd-list">
+      <li><span class="num">I</span><div><h3>Craft over content</h3><p>Bring finished, revised work, not first drafts. We publish fewer pieces, and better ones.</p></div></li>
+      <li><span class="num">II</span><div><h3>Truth with charity</h3><p>Name the idol, never mock the person. Write within <a href="/beliefs">What We Believe</a>, and argue as one who hopes to be wrong about nothing but their own pride.</p></div></li>
+      <li><span class="num">III</span><div><h3>Your own hand</h3><p>Your words, your images, your experience. Tools may assist you; they may not author for you. Quote and credit others honestly.</p></div></li>
+      <li><span class="num">IV</span><div><h3>A teachable spirit</h3><p>Every piece is read, and may be edited, returned with notes, or declined. Receive the notes as gifts; that is what the table is for.</p></div></li>
+      <li><span class="num">V</span><div><h3>Faithful presence</h3><p>Bring work regularly, monthly or each season, and read the work of others. A guild is kept alive by those who show up.</p></div></li>
+      <li><span class="num">VI</span><div><h3>Discretion</h3><p>Testimony is holy ground. Tell your own story; tell another’s only with their consent, and protect those who cannot speak for themselves.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- What members receive -->
+<section class="sec dark gd-get">
+  <div class="gd-in">
+    <div class="gd-head"><span class="eb">What members receive</span><h2 class="h2">A desk, a reader, and a room to grow in.</h2></div>
+    <div class="gd-grid">
+      <div><h3>The Guild Desk</h3><p>A quiet place to write, shape and send your work, on any device.</p></div>
+      <div><h3>A real editor</h3><p>Every piece read closely by the Editor in Chief, with notes when it needs them.</p></div>
+      <div><h3>Your own page</h3><p>A portfolio of your published work, your portrait and your craft, open to every reader.</p></div>
+      <div><h3>Publication</h3><p>Your work in The Watchtower, The Hearth or The Perimeter, beside writers who share your convictions.</p></div>
+      <div><h3>The monthly table</h3><p>One reading and one open table each month, where members sharpen one another.</p></div>
+      <div><h3>Prestige &amp; trophies</h3><p>Ten ranks, from Inkling to Seraph, and trophies that grow with your work.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- How joining works -->
+<section class="sec paper gd-how">
+  <div class="gd-in">
+    <div class="gd-head"><span class="eb">How joining works</span><h2 class="h2">From application to first piece.</h2></div>
+    <ol class="gd-steps">
+      <li><span class="num">1</span><h3>Apply</h3><p>About ten minutes: who you are, a sample of your work, your faith, a reference.</p></li>
+      <li><span class="num">2</span><h3>We read it</h3><p>The Editor in Chief reads every application. You’ll hear back within three days.</p></li>
+      <li><span class="num">3</span><h3>An invitation</h3><p>If there is a seat for you, an invitation arrives by email.</p></li>
+      <li><span class="num">4</span><h3>Take your seat</h3><p>Choose a password, then fill in your page: portrait, craft, a few lines.</p></li>
+      <li><span class="num">5</span><h3>Your first piece</h3><p>Write at the Desk, preview it, and send it to the editor.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- Questions -->
+<section class="sec dark gd-faq">
+  <div class="gd-in gd-two">
+    <div class="gd-k"><span class="eb">Questions</span><h2 class="h2">Before you apply.</h2></div>
+    <div class="gd-qs">
+      <details><summary>Do I need to be published already?</summary><p>No. We read the work, not the résumé. A strong sample and a teachable spirit matter more than a list of credits.</p></details>
+      <details><summary>What if my piece is returned?</summary><p>You’ll receive the editor’s notes at your Desk. Revise it and send it again; many of the best pieces go round twice.</p></details>
+      <details><summary>Can I change a piece after it is published?</summary><p>Yes. Edit it at your Desk; your changes go to the editor, and the live piece stays as it is until they are approved.</p></details>
+      <details><summary>Which room should I write for?</summary><p>Essays and cultural audits belong in The Watchtower; creative work in The Hearth; testimony in The Perimeter. You can write for more than one.</p></details>
+      <details><summary>I make photographs or design, not writing. Can I join?</summary><p>Yes. The Hearth holds photography, architectural studies and design teardowns. Link to your work in the application.</p></details>
+      <details><summary>What if I don’t hear back?</summary><p>You will within three days. If not, check your spam folder, then <a href="/contact">write to us</a>.</p></details>
+    </div>
+  </div>
+</section>
+
 <!-- Applications arrive in Netlify > Forms ("guild-application"). You then invite the people you choose. -->
-<DoorwayFrame kicker="Apply" title="Pull up a chair." image="/images/tall-windows-dark-vault-1200.jpg"
-  lead="Every application is read by the Editor in Chief. It takes about ten minutes; answer as you would at the table.">
-<form name="guild-application" method="POST" action="/thanks/?for=guild" data-netlify="true" netlify-honeypot="company" class="dw-form ap" novalidate>
+<section class="apply" id="apply">
+  <img class="apply-bg" src="/images/tall-windows-dark-vault-1200.jpg" alt="" aria-hidden="true" loading="lazy" />
+  <div class="apply-in">
+    <aside class="apply-side">
+      <span class="eb">Apply</span>
+      <h2 class="h2 apply-title">Pull up a chair.</h2>
+      <p class="it apply-lead">Every application is read by the Editor in Chief. Answer as you would at the table; it takes about ten minutes.</p>
+      <ol class="apply-steps">
+        <li class="on"><span class="num">I</span><span><b>About you</b><em>Who you are and where to find you.</em></span></li>
+        <li><span class="num">II</span><span><b>Your work</b><em>What you make, and a sample of it.</em></span></li>
+        <li><span class="num">III</span><span><b>Faith &amp; commitment</b><em>Your walk, a reference, and a few agreements.</em></span></li>
+      </ol>
+      <span class="apply-bar" aria-hidden="true"><i></i></span>
+      <p class="apply-promise">You’ll hear back from us <b>within three days</b>. If there is a seat for you, your invitation will arrive by email.</p>
+    </aside>
+    <div class="apply-card">
+<form name="guild-application" method="POST" action="/thanks/?for=guild" data-netlify="true" netlify-honeypot="company" class="ap" novalidate>
 <input type="hidden" name="form-name" value="guild-application" />
 <p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
-<div class="ap-steps" aria-hidden="true"><span class="on">I · You</span><span>II · Your work</span><span>III · Faith</span></div>
 
 <fieldset class="ap-step" data-step="0">
-  <legend class="visually-hidden">About you</legend>
-  <label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
-  <label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label>
-  <label class="dw-field"><span class="dw-label">Where you are based</span><span class="dw-line-row"><input name="location" placeholder="City, country" required /></span></label>
-  <label class="dw-field"><span class="dw-label">Website or portfolio (optional)</span><span class="dw-line-row"><input name="website" type="url" inputmode="url" placeholder="https://" /></span></label>
+  <legend class="ap-h"><span class="num">I</span>About you</legend>
+  <div class="ap-row"><label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label></div>
+  <div class="ap-row"><label class="dw-field"><span class="dw-label">Where you are based</span><span class="dw-line-row"><input name="location" placeholder="City, country" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Website or portfolio (optional)</span><span class="dw-line-row"><input name="website" type="url" inputmode="url" placeholder="https://" /></span></label></div>
   <label class="dw-field"><span class="dw-label">How you heard of the Guild</span><span class="dw-line-row"><input name="heard" placeholder="A friend, Instagram, a piece you read…" /></span></label>
 </fieldset>
 
 <fieldset class="ap-step" data-step="1" hidden>
-  <legend class="visually-hidden">Your work</legend>
+  <legend class="ap-h"><span class="num">II</span>Your work</legend>
   <label class="dw-field"><span class="dw-label">What you make</span><span class="dw-line-row"><input name="craft" placeholder="Essays, poems, fiction, photographs…" required /></span></label>
   <div class="dw-field"><span class="dw-label">Which rooms you would write for</span>
     <div class="dw-topics ap-pillars" data-need-one>
@@ -43,7 +127,7 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
 </fieldset>
 
 <fieldset class="ap-step" data-step="2" hidden>
-  <legend class="visually-hidden">Faith and commitment</legend>
+  <legend class="ap-h"><span class="num">III</span>Faith &amp; commitment</legend>
   <label class="dw-field"><span class="dw-label">Your walk with Christ</span><span class="dw-line-row"><textarea name="faith" rows="4" required placeholder="A few honest lines, and where you worship."></textarea></span></label>
   <label class="dw-field"><span class="dw-label">Why this table?</span><span class="dw-line-row"><textarea name="why" rows="3" required placeholder="What you hope to bring, and to be sharpened in."></textarea></span></label>
   <label class="dw-field"><span class="dw-label">A reference</span><span class="dw-line-row"><input name="reference" required placeholder="Someone who knows you or your work: name and how to reach them" /></span><span class="ap-hint">A pastor, an editor, a teacher, a friend in the faith.</span></label>
@@ -68,25 +152,29 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
   <button type="submit" class="dw-send ap-submit" hidden>Send my application <span aria-hidden="true">→</span></button>
 </div>
 </form>
-<Fragment slot="foot">You’ll hear back from us within three days. If there is a seat for you, your invitation will arrive by email.</Fragment>
-</DoorwayFrame>
+    </div>
+  </div>
+</section>
 
 <script>
   // The application in three steps. Each step checks its own answers before moving on; everything is sent together.
   const form = document.querySelector<HTMLFormElement>('form.ap');
   if (form) {
     const steps = [...form.querySelectorAll<HTMLFieldSetElement>('.ap-step')];
-    const marks = [...form.querySelectorAll<HTMLElement>('.ap-steps span')];
+    const marks = [...document.querySelectorAll<HTMLElement>('.apply-steps li')];
+    const bar = document.querySelector<HTMLElement>('.apply-bar i');
     const back = form.querySelector<HTMLButtonElement>('.ap-back')!, next = form.querySelector<HTMLButtonElement>('.ap-next')!, send = form.querySelector<HTMLButtonElement>('.ap-submit')!;
     const msg = form.querySelector<HTMLElement>('.ap-msg')!;
     let at = 0;
+    if (bar) bar.style.width = `${Math.round(100 / steps.length)}%`;
     const show = (i: number) => {
       at = i;
       steps.forEach((s, j) => (s.hidden = j !== i));
-      marks.forEach((m, j) => m.classList.toggle('on', j <= i));
+      marks.forEach((m, j) => { m.classList.toggle('on', j === i); m.classList.toggle('done', j < i); });
+      if (bar) bar.style.width = `${Math.round(((i + 1) / steps.length) * 100)}%`;
       back.hidden = i === 0; next.hidden = i === steps.length - 1; send.hidden = i !== steps.length - 1;
       msg.hidden = true;
-      form.closest('.dw-inline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (matchMedia('(max-width: 900px)').matches) form.closest('.apply-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     const ok = (i: number) => {
       const step = steps[i];
@@ -106,6 +194,108 @@ import DoorwayFrame from '../components/DoorwayFrame.astro';
 </script>
 
 <style>
+  /* The educational sections */
+  .gd-in { max-width: 1180px; margin: 0 auto; }
+  .gd-two { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 80px; align-items: start; }
+  .gd-k { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 120px; }
+  .gd-body { display: flex; flex-direction: column; gap: 22px; }
+  .gd-body .body { margin: 0; font-size: 21px !important; color: #E6DFD0; }
+  .gd-body a, .gd-list a, .gd-qs a { color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); }
+  .paper .gd-list a { color: var(--oxblood); border-color: rgba(98,55,45,.4); }
+  .gd-head { display: flex; flex-direction: column; gap: 16px; max-width: 760px; margin-bottom: 52px; }
+  .gd-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 64px; border-top: 1px solid rgba(42,32,23,.25); }
+  .gd-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 30px 0; border-bottom: 1px solid rgba(42,32,23,.15); }
+  .gd-list .num { font-size: 40px !important; color: var(--oxblood); line-height: 1; }
+  .gd-list h3, .gd-grid h3, .gd-steps h3 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 26px; line-height: 1.15; }
+  .gd-list p, .gd-grid p, .gd-steps p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.55; }
+  .gd-list p { color: #4A3E33; }
+  .gd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(243,236,220,.12); }
+  .gd-grid > div { padding: 30px 28px 30px 0; border-bottom: 1px solid rgba(243,236,220,.08); }
+  .gd-grid > div:not(:nth-child(3n + 1)) { padding-left: 28px; border-left: 1px solid rgba(243,236,220,.08); }
+  .gd-grid h3 { color: var(--ember); font-size: 23px; }
+  .gd-grid p { color: #CFC8B8; font-size: 17px; }
+  .gd-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; counter-reset: s; }
+  .gd-steps li { position: relative; padding-top: 22px; border-top: 2px solid var(--brass); }
+  .gd-steps li:first-child { border-top-color: var(--oxblood); }
+  .gd-steps .num { display: block; margin-bottom: 10px; font-size: 34px !important; color: var(--oxblood); line-height: 1; }
+  .gd-steps h3 { font-size: 22px; }
+  .gd-steps p { font-size: 16px; color: #4A3E33; }
+  .gd-qs { display: flex; flex-direction: column; border-top: 1px solid rgba(243,236,220,.12); }
+  .gd-qs details { border-bottom: 1px solid rgba(243,236,220,.1); }
+  .gd-qs summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 22px 0; font-family: var(--serif); font-size: 22px; color: var(--bone); }
+  .gd-qs summary::-webkit-details-marker { display: none; }
+  .gd-qs summary::after { content: '+'; color: var(--ember); font-family: var(--sans); font-size: 20px; transition: transform .3s; }
+  .gd-qs details[open] summary::after { transform: rotate(45deg); }
+  .gd-qs p { margin: 0 0 24px; font-family: var(--serif); font-size: 18px; line-height: 1.6; color: #CFC8B8; max-width: 680px; }
+  @media (max-width: 1000px) {
+    .gd-two { grid-template-columns: 1fr; gap: 28px; }
+    .gd-k { position: static; }
+    .gd-steps { grid-template-columns: 1fr 1fr; }
+    .gd-grid { grid-template-columns: 1fr 1fr; }
+    .gd-grid > div, .gd-grid > div:not(:nth-child(3n + 1)) { padding: 24px 20px 24px 0; border-left: 0; }
+    .gd-grid > div:nth-child(2n) { padding-left: 20px; border-left: 1px solid rgba(243,236,220,.08); }
+  }
+  @media (max-width: 700px) {
+    .gd-body .body { font-size: 18px !important; }
+    .gd-head { margin-bottom: 30px; }
+    .gd-list { grid-template-columns: 1fr; }
+    .gd-list li { grid-template-columns: 40px minmax(0, 1fr); padding: 22px 0; }
+    .gd-list .num { font-size: 30px !important; }
+    .gd-list h3, .gd-steps h3 { font-size: 21px; }
+    .gd-list p, .gd-steps p { font-size: 16px; }
+    .gd-grid { grid-template-columns: 1fr; }
+    .gd-grid > div, .gd-grid > div:nth-child(2n) { padding: 20px 0; border-left: 0; }
+    .gd-steps { grid-template-columns: 1fr; gap: 20px; }
+    .gd-qs summary { font-size: 19px; padding: 18px 0; }
+    .gd-qs p { font-size: 16px; }
+  }
+
+  /* The application: a calm side panel and a wide card, one step at a time */
+  .apply { position: relative; overflow: hidden; background: #0A0C0A; color: var(--bone); padding: 120px 48px; }
+  .apply-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: brightness(.18) saturate(.8); }
+  .apply-in { position: relative; max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; }
+  .apply-side { position: sticky; top: 120px; display: flex; flex-direction: column; gap: 18px; }
+  .apply-title { margin: 0; }
+  .apply-lead { margin: 0; font-size: 19px; line-height: 1.5; color: #CFC8B8; }
+  .apply-steps { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid rgba(243,236,220,.12); }
+  .apply-steps li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid rgba(243,236,220,.08); opacity: .45; transition: opacity .4s; }
+  .apply-steps li.on, .apply-steps li.done { opacity: 1; }
+  .apply-steps .num { font-size: 26px !important; color: var(--brass); }
+  .apply-steps li.on .num { color: var(--ember); }
+  .apply-steps b { display: block; font-family: var(--serif); font-weight: 500; font-size: 20px; color: var(--bone); }
+  .apply-steps em { display: block; margin-top: 2px; font-family: var(--serif); font-size: 15px; color: #8C8679; }
+  .apply-steps li.done b::after { content: ' ✓'; color: var(--ember); font-size: 15px; }
+  .apply-bar { height: 2px; border-radius: 2px; background: rgba(243,236,220,.1); overflow: hidden; }
+  .apply-bar i { display: block; height: 100%; width: 33%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); transition: width .7s cubic-bezier(.16,1,.3,1); }
+  .apply-promise { margin: 4px 0 0; font-family: var(--serif); font-style: italic; font-size: 16px; line-height: 1.5; color: #8C8679; }
+  .apply-promise b { font-weight: 500; font-style: normal; color: var(--ember); }
+  .apply-card { padding: 44px 48px 36px; border-radius: 8px; background: linear-gradient(180deg, rgba(20,24,18,.88), rgba(12,15,11,.92));
+    box-shadow: inset 0 0 0 1px rgba(243,236,220,.12), 0 40px 80px -40px rgba(0,0,0,.9); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .ap-h { display: flex; align-items: baseline; gap: 14px; padding: 0; margin: 0 0 26px; font-family: var(--serif); font-size: 30px; color: var(--bone); }
+  .ap-h .num { font-size: 22px !important; color: var(--ember); }
+  .apply .dw-topics { justify-content: flex-start; }
+  .ap-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  .apply .dw-field { margin-bottom: 22px; }
+  .apply .dw-line-row input, .apply .dw-field textarea { font-size: 19px; }
+  .ap-nav { padding-top: 22px; border-top: 1px solid rgba(243,236,220,.08); }
+  @media (max-width: 900px) {
+    .apply { padding: 72px 18px; }
+    .apply-in { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .apply-side { position: static; gap: 12px; }
+    .apply-lead { font-size: 17px; }
+    .apply-steps { flex-direction: row; border-top: 0; gap: 6px; margin-top: 6px; }
+    .apply-steps li { display: flex; gap: 6px; padding: 8px 12px; border: 0; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(243,236,220,.14); opacity: .5; }
+    .apply-steps li.on { box-shadow: inset 0 0 0 1px rgba(255,227,163,.55); }
+    .apply-steps em { display: none; }
+    .apply-steps b { font-size: 13px; }
+    .apply-steps .num { font-size: 15px !important; }
+    .apply-steps li.done b::after { font-size: 12px; }
+    .apply-promise { font-size: 15px; }
+    .apply-card { padding: 28px 20px 24px; }
+    .ap-h { font-size: 24px; margin-bottom: 18px; }
+    .ap-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 420px) { .apply-steps li:not(.on) b { display: none; } }
   .ap-steps { display: flex; justify-content: center; gap: 6px; margin: 0 0 26px; }
   .ap-steps span { font-family: var(--sans); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: #6F6A60; padding: 5px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(243,236,220,.12); transition: color .3s, box-shadow .3s; }
   .ap-steps span.on { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.5); }
