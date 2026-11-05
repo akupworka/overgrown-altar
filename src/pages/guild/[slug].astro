@@ -8,6 +8,7 @@ import Cross from '../../components/Cross.astro';
 import AuthorLinks from '../../components/AuthorLinks.astro';
 import PrestigeBadge from '../../components/PrestigeBadge.astro';
 import { Body, wantsDropCap } from '../../lib/marks';
+import { PhotoPlate } from '../../components/PhotoPlate';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
 import '../../styles/desk.css';
 import '../../styles/guild-piece.css';
@@ -23,6 +24,8 @@ const date = new Date(p.published_at).toLocaleDateString('en-US', { month: 'long
 const first = a.display_name.split(' ')[0];
 const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
 const aUrl = authorUrl(a);
+// A photograph is shown whole, with what's behind the lens; any words follow it.
+const isPhoto = p.medium === 'photograph';
 const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).length;
 ---
 <BaseLayout title={p.title} image={p.image || undefined} description={p.standfirst || `${MEDIUM_LABEL[p.medium] ?? ''} by ${a.display_name}`}>
@@ -37,15 +40,16 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
       <h1 class="h1 gp-title">{p.title}</h1>
       <span class="gp-by">
         <a class="gp-by-who" href={aUrl}><Avatar name={a.display_name} src={a.portrait || undefined} size={30} id={a.id} /><span class="lab">{a.display_name}</span></a>
-        <span class="lab">· {date} · {readingMinutes(p.body)} min read</span>
+        <span class="lab">· {date}{isPhoto ? '' : ` · ${readingMinutes(p.body)} min read`}</span>
       </span>
     </div>
   </section>
 
   <article class="sec paper gp-article">
-    <div class:list={['narrow gp-flow', { 'gp-drop': wantsDropCap(p.medium, p.body) }]}>
+    <div class:list={['narrow gp-flow', { 'gp-drop': !isPhoto && wantsDropCap(p.medium, p.body), 'gp-photo': isPhoto }]}>
       {p.standfirst && <p class="lede gp-standfirst">{p.standfirst}</p>}
-      <Body body={p.body} />
+      {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} />}
+      {p.body.trim() && <Body body={p.body} />}
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>
 
       <aside class="gp-author" aria-label="About the author">

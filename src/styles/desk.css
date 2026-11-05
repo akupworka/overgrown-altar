@@ -841,3 +841,26 @@
   .pf-whole img { max-height: 340px; }
 }
 .m-work { scroll-margin-top: 100px; }
+
+/* ---- A photograph's own form in the Desk */
+.d-begins { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.d-begin-photo { display: inline-flex; align-items: center; gap: 8px; }
+.d-ph-kicker { color: var(--oxblood); }
+.d-ph-sec { display: flex; flex-direction: column; gap: 14px; padding-top: 26px; margin-top: 8px; border-top: 1px solid rgba(42, 32, 23, .14); }
+.d-ph-h { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 24px; color: var(--ink); display: flex; align-items: baseline; gap: 10px; }
+.d-ph-h .d-opt { font-family: var(--sans); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted-paper, #6E6658); }
+.d-paper-photo .pf-help, .d-paper-photo .pf-shape figcaption { color: var(--muted-paper, #6E6658); }
+.d-paper-photo .pf-help b { color: var(--ink); }
+.d-paper-photo .d-textbtn { color: var(--ink); border-bottom-color: rgba(42, 32, 23, .35); }
+.d-paper-photo .d-photo-frame { background: rgba(42, 32, 23, .05); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .2); }
+.d-paper-photo .d-hint { color: var(--muted-paper, #6E6658); }
+.d-lens { display: flex; flex-direction: column; gap: 16px; }
+.d-lens-format { display: flex; gap: 10px; }
+.d-lens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+@media (max-width: 700px) { .d-lens-grid { grid-template-columns: 1fr; } .d-ph-h { font-size: 21px; } }
+/* Digital or film: two pills on the paper sheet */
+.d-lens-format .d-medium { position: relative; cursor: pointer; padding: 9px 18px; border-radius: 999px; font-family: var(--sans); font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink); background: none; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .3); transition: background-color .25s, color .25s; }
+.d-lens-format .d-medium input { position: absolute; opacity: 0; pointer-events: none; }
+.d-lens-format .d-medium.on { background: var(--ink); color: var(--bone); box-shadow: none; }
+.d-lens-format .d-medium:has(input:focus-visible) { outline: 2px solid var(--oxblood); outline-offset: 3px; }

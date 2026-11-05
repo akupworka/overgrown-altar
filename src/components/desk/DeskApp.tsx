@@ -15,6 +15,8 @@ import { prestigeFor } from '../../lib/prestige';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
+import { PhotoPlate } from '../PhotoPlate';
+import { LENS_FIELDS, type PhotoMeta } from '../../lib/photo';
 import '../../styles/guild-piece.css';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -169,6 +171,7 @@ function Desk({ session }: { session: Session }) {
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
+  const [newMedium, setNewMedium] = useState<string | null>(null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = profile?.role === 'editor';
 
@@ -203,12 +206,12 @@ function Desk({ session }: { session: Session }) {
     if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
     // "My page" is your own page in the Guild (with Edit my page on it), not the form.
     if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
-    if (t === 'write' && tab !== 'write') { setEditing(null); history.pushState({ desk: 'write' }, '', '#write'); }
+    if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const open = (p: Piece | null) => {
+  const open = (p: Piece | null, medium?: string) => {
     if (tab !== 'write') history.pushState({ desk: 'write' }, '', '#write');
-    setEditing(p); setTab('write'); window.scrollTo({ top: 0 });
+    setNewMedium(p ? null : medium ?? null); setEditing(p); setTab('write'); window.scrollTo({ top: 0 });
   };
   // Arrived straight at the sheet: put "my pieces" underneath it, so Back lands there.
   useEffect(() => {
@@ -219,7 +222,7 @@ function Desk({ session }: { session: Session }) {
   }, []);
   useEffect(() => {
     const onPop = () => {
-      if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') setEditing(null); setTab('write'); return; }
+      if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
       setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
@@ -263,7 +266,7 @@ function Desk({ session }: { session: Session }) {
 
       <div className="d-main">
         {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} isEditor={isEditor} onReview={() => go('review')} onOpen={open} onChanged={load} />}
-        {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} author={profile} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
+        {tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
@@ -340,7 +343,7 @@ function StatusChip({ status }: { status: Piece['status'] }) {
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
-function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
+function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -353,7 +356,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
   async function duplicate(p: Piece) {
     const { data, error } = await supabase.from('pieces').insert({
       title: `${p.title || 'Untitled'} (copy)`.slice(0, 200), standfirst: p.standfirst, body: p.body, pillar: p.pillar, medium: p.medium,
-      image_path: p.image_path, image_alt: p.image_alt, image_focus: p.image_focus ?? '', status: 'draft',
+      image_path: p.image_path, image_alt: p.image_alt, image_focus: p.image_focus ?? '', photo_meta: p.photo_meta ?? {}, status: 'draft',
     }).select().single();
     if (error) { alert('The copy couldn’t be made: ' + error.message); return; }
     onChanged(); onOpen(data as Piece);
@@ -372,7 +375,12 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
             <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
           </p>
         </div>
-        <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
+        <div className="d-begins">
+          <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
+          <button type="button" className="ghost d-btn d-begin-photo" onClick={() => onOpen(null, 'photograph')}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            Submit a photograph</button>
+        </div>
       </header>
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {} }} uid={profile?.id} />
       {waiting > 0 && (
@@ -413,7 +421,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
   );
 }
 
-function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }: { uid: string; author?: Profile | null; piece: Piece | null; isEditor?: boolean; onSaved: (p: Piece) => void; onDone: () => void }) {
+function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSaved, onDone }: { uid: string; author?: Profile | null; piece: Piece | null; isEditor?: boolean; startMedium?: string | null; onSaved: (p: Piece) => void; onDone: () => void }) {
   const phone = useMedia('(max-width: 700px)');
   // A published piece: the editor's changes go live directly; a member's go to the editor as a revision.
   const live = piece?.status === 'approved';
@@ -421,8 +429,8 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
   const [showPreview, setShowPreview] = useState(false);
   const [form, setForm] = useState({
     title: start?.title ?? '', standfirst: start?.standfirst ?? '', body: start?.body ?? '',
-    pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? 'prose'),
-    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '', image_focus: start?.image_focus ?? '',
+    pillar: piece?.pillar ?? 'hearth', medium: fitMedium(piece?.pillar ?? 'hearth', piece?.medium ?? startMedium ?? 'prose'),
+    image_path: start?.image_path ?? null as string | null, image_alt: start?.image_alt ?? '', image_focus: start?.image_focus ?? '', photo_meta: (start?.photo_meta ?? {}) as PhotoMeta,
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
@@ -437,6 +445,9 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
   // Choosing a pillar narrows the kinds of piece to the ones it takes.
   const choosePillar = (v: string) => { setForm((f) => ({ ...f, pillar: v, medium: fitMedium(v, f.medium) })); setState('idle'); };
   const kinds = mediumsFor(form.pillar);
+  // A photograph has its own form: the photograph, what was behind the lens, and words only if the photographer wants them.
+  const isPhoto = form.medium === 'photograph';
+  const setMeta = (k: keyof PhotoMeta, v: string) => set('photo_meta', { ...form.photo_meta, [k]: v });
   // The sheet grows with the writing, like paper, instead of scrolling inside a box.
   useEffect(() => {
     for (const el of [bodyRef.current, document.getElementById('d-title') as HTMLTextAreaElement | null]) {
@@ -457,7 +468,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
         if (res.error) { setState('error'); setMsg(res.error.message); return null; }
         setState('saved'); onSaved(res.data as Piece); return res.data as Piece;
       }
-      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt, image_focus: form.image_focus } });
+      const { error } = await supabase.rpc('propose_revision', { p_id: id, p_rev: { title: form.title, standfirst: form.standfirst, body: form.body, image_path: form.image_path, image_alt: form.image_alt, image_focus: form.image_focus, photo_meta: form.photo_meta } });
       if (error) { setState('error'); setMsg(error.message); return null; }
       setState('saved'); return piece;
     }
@@ -522,7 +533,9 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
   }
 
   async function submit() {
-    if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
+    if (isPhoto) {
+      if (!form.title.trim() || !form.image_path) { setMsg('Give it a title and add the photograph before sending it to the editor.'); return; }
+    } else if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
     if (live) {
       if (!confirm(isEditor ? 'Update the live piece on the site now?' : 'Send these changes to the editor? The live piece stays as it is until they are approved.')) return;
       if (await save()) onDone();
@@ -561,31 +574,6 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
     : piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
   const sendLabel = live ? (isEditor ? 'Update live piece' : 'Send changes') : (isEditor ? 'Publish' : 'Send to the editor');
 
-  const paper = (
-    <article className="d-paper">
-      <label className="visually-hidden" htmlFor="d-title">Title</label>
-      <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
-        onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
-      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
-      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
-      <div className="d-tools-wrap" data-end="false">
-      <div className="d-paper-tools" role="toolbar" aria-label="Formatting" onScroll={(e) => { const el = e.currentTarget; if (el.parentElement) el.parentElement.dataset.end = String(el.scrollLeft + el.clientWidth >= el.scrollWidth - 6); }}>
-        {TOOL_LABELS.map((t) => (
-          <button key={t.tool} type="button" title={t.hint} className={isOn(rich, t.tool) ? 'on' : ''} aria-pressed={isOn(rich, t.tool)}
-            onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(rich, t.tool)}>{t.label}</button>
-        ))}
-        <button type="button" className="d-tool-photo" title="Put a photograph here, in the piece" onMouseDown={(e) => e.preventDefault()} onClick={() => inlineInput.current?.click()}>+ Photo</button>
-        <input ref={inlineInput} type="file" accept="image/*" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addInlinePhoto(f); }} />
-
-      </div>
-        {/* Phones: the bar scrolls sideways; this arrow says so, and slides it along. */}
-        <button type="button" className="d-tools-more" aria-label="More formatting" onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => e.currentTarget.parentElement?.querySelector('.d-paper-tools')?.scrollBy({ left: 170, behavior: 'smooth' })}><span aria-hidden="true">›</span></button>
-      </div>
-      <RichBody editor={rich} />
-      <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
-    </article>
-  );
   const photo = (
     <>
       {preview && form.image_path
@@ -598,9 +586,83 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
       {photoMsg && <p className="d-photo-msg" role="status">{photoMsg}</p>}
     </>
   );
+  const toolsBar = (
+      <div className="d-tools-wrap" data-end="false">
+      <div className="d-paper-tools" role="toolbar" aria-label="Formatting" onScroll={(e) => { const el = e.currentTarget; if (el.parentElement) el.parentElement.dataset.end = String(el.scrollLeft + el.clientWidth >= el.scrollWidth - 6); }}>
+        {TOOL_LABELS.map((t) => (
+          <button key={t.tool} type="button" title={t.hint} className={isOn(rich, t.tool) ? 'on' : ''} aria-pressed={isOn(rich, t.tool)}
+            onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(rich, t.tool)}>{t.label}</button>
+        ))}
+        {!isPhoto && <button type="button" className="d-tool-photo" title="Put a photograph here, in the piece" onMouseDown={(e) => e.preventDefault()} onClick={() => inlineInput.current?.click()}>+ Photo</button>}
+        <input ref={inlineInput} type="file" accept="image/*" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addInlinePhoto(f); }} />
+
+      </div>
+        {/* Phones: the bar scrolls sideways; this arrow says so, and slides it along. */}
+        <button type="button" className="d-tools-more" aria-label="More formatting" onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => e.currentTarget.parentElement?.querySelector('.d-paper-tools')?.scrollBy({ left: 170, behavior: 'smooth' })}><span aria-hidden="true">›</span></button>
+      </div>
+  );
+  const lensForm = (
+    <div className="d-lens">
+      <div className="d-lens-format" role="radiogroup" aria-label="Digital or film">
+        {(['digital', 'film'] as const).map((v) => (
+          <label key={v} className={`d-medium ${form.photo_meta.format === v ? 'on' : ''}`}>
+            <input type="radio" name="lens-format" checked={form.photo_meta.format === v} onChange={() => setMeta('format', v)} />{v === 'film' ? 'Film' : 'Digital'}
+          </label>
+        ))}
+      </div>
+      <div className="d-lens-grid">
+        {LENS_FIELDS.filter((f) => !f.filmOnly || form.photo_meta.format === 'film').map((f) => (
+          <label key={f.key} className="d-lbl"><span className="lab">{f.label}</span>
+            <input className="field" maxLength={120} placeholder={f.hint} value={form.photo_meta[f.key] ?? ''} onChange={(e) => setMeta(f.key, e.target.value)} />
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+  const paper = isPhoto ? (
+    <article className="d-paper d-paper-photo">
+      <span className="eb d-ph-kicker">A photograph for the Hearth</span>
+      <label className="visually-hidden" htmlFor="d-title">Title</label>
+      <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
+        onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
+      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
+      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'One sentence: what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+      <section className="d-ph-sec">
+        <h2 className="d-ph-h">The photograph</h2>
+        {photo}
+        <span className="d-hint">One photograph, your own, at least 1600 pixels wide. Its page shows it whole; the framing you choose is for the banner and the lists.</span>
+        <label className="d-lbl"><span className="lab">Caption · also read aloud for readers who can’t see it</span>
+          <input className="field" maxLength={200} placeholder="What, or who, is in the photograph" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
+        </label>
+      </section>
+      <section className="d-ph-sec">
+        <h2 className="d-ph-h">Behind the lens <span className="d-opt">optional</span></h2>
+        {lensForm}
+      </section>
+      <section className="d-ph-sec">
+        <h2 className="d-ph-h">Words <span className="d-opt">optional</span></h2>
+        <span className="d-hint">As short or as long as you like: the story behind it, your camera, your process, why this light. Or let it speak for itself.</span>
+        {toolsBar}
+      <RichBody editor={rich} />
+      <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
+      </section>
+    </article>
+  ) : (
+    <article className="d-paper">
+      <label className="visually-hidden" htmlFor="d-title">Title</label>
+      <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
+        onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
+      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
+      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'One sentence: what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+      {toolsBar}
+      <RichBody editor={rich} />
+      <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
+    </article>
+  );
 
   if (phone) {
-    const titles = ['Write', 'Label it', 'Review'];
+    const titles = [isPhoto ? 'Photograph' : 'Write', 'Label it', 'Review'];
     const pillar = PILLARS.find((x) => x.value === form.pillar);
     const firstPara = form.body.split(/\n\s*\n/).find((x) => x.trim() && !/^[#>+]/.test(x.trim())) ?? '';
     return (
@@ -643,6 +705,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
               ))}
             </div>}
             <KindNote value={form.medium} />
+            {!isPhoto && (<>
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
             {photo}
             <span className="d-hint">At least 1600 pixels wide, so it looks sharp on the site. Photos from a phone camera are perfect; large ones are resized automatically.</span>
@@ -651,6 +714,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
                 <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
               </label>
             )}
+            </>)}
             <button type="button" className="btn d-btn d-step-go" onClick={() => toStep(2)}>Next: review</button>
           </div>
         )}
@@ -714,6 +778,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
                 </select>
               </label>}
           <KindNote value={form.medium} />
+          {!isPhoto && (<>
           <div className="d-lbl">
             <span className="lab">Featured photograph</span>
             {photo}
@@ -722,6 +787,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
           <label className="d-lbl"><span className="lab">Describe the photograph</span>
             <input className="field" maxLength={200} placeholder="For readers who can’t see it" value={form.image_alt} onChange={(e) => set('image_alt', e.target.value)} />
           </label>
+          </>)}
           <details className="d-guide">
             <summary className="lab">Typing shortcuts</summary>
             <p><b>Enter</b> starts a new line; an <b>empty line</b> starts a new paragraph or stanza</p>
@@ -738,7 +804,7 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
 }
 
 // The full page, exactly as the site will draw it (same styles as /guild/<piece>/), before anything is sent.
-function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string; image_focus?: string }; photo: string | null; author: Profile | null; onClose: () => void }) {
+function PiecePreview({ form, photo, author, onClose }: { form: { title: string; standfirst: string; body: string; pillar: string; medium: string; image_alt: string; image_focus?: string; photo_meta?: PhotoMeta }; photo: string | null; author: Profile | null; onClose: () => void }) {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.documentElement.classList.add('menu-open');
@@ -767,14 +833,15 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
             <h1 className="h1 gp-title">{form.title || 'Untitled'}</h1>
             <span className="gp-by">
               <span className="avatar-live">{portrait ? <img src={portrait} alt="" /> : initials}</span>
-              <span className="lab">{name} · {date} · {Math.max(1, Math.round(words(form.body) / 230))} min read</span>
+              <span className="lab">{name} · {date}{form.medium === 'photograph' ? '' : ` · ${Math.max(1, Math.round(words(form.body) / 230))} min read`}</span>
             </span>
           </div>
         </section>
         <article className="sec paper gp-article">
-          <div className={`narrow gp-flow${wantsDropCap(form.medium, form.body) ? ' gp-drop' : ''}`}>
+          <div className={`narrow gp-flow${form.medium === 'photograph' ? ' gp-photo' : wantsDropCap(form.medium, form.body) ? ' gp-drop' : ''}`}>
             {form.standfirst && <p className="lede gp-standfirst">{form.standfirst}</p>}
-            <Body body={form.body} />
+            {form.medium === 'photograph' && photo && <PhotoPlate src={photo} alt={form.image_alt} meta={form.photo_meta} />}
+            {form.body.trim() && <Body body={form.body} />}
             <div className="gp-sign"><span>{name.split(' ')[0]}</span></div>
           </div>
         </article>
@@ -813,6 +880,12 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [msg, setMsg] = useState('');
   const rev = piece.status === 'approved' ? piece.revision ?? null : null;
   const shown = rev ? { ...piece, ...rev } : piece;
+  // The piece's photograph, so the editor sees what readers will see.
+  const [photo, setPhoto] = useState('');
+  useEffect(() => {
+    if (!shown.image_path) return setPhoto('');
+    supabase.storage.from('guild').createSignedUrl(shown.image_path, 3600).then(({ data }) => setPhoto(data?.signedUrl ?? ''));
+  }, [shown.image_path]);
   async function applyChanges(accept: boolean) {
     setBusy(true); setMsg('');
     const { error } = await supabase.from('pieces').update(accept && rev ? { ...rev, revision: null, revision_at: null } : { revision: null, revision_at: null }).eq('id', piece.id);
@@ -835,7 +908,10 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
         {rev && <span className="lab d-rev-tag">Proposed changes to a published piece. The live version stays until you approve.</span>}
         <h2 className="h1 d-reader-title">{shown.title}</h2>
         {shown.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{shown.standfirst}</p>}
-        <div className="gp-body-in-desk"><Body body={shown.body} /></div>
+        {photo && (shown.medium === 'photograph'
+          ? <PhotoPlate src={photo} alt={shown.image_alt} meta={shown.photo_meta} />
+          : <img className="m-photo" src={photo} alt={shown.image_alt} />)}
+        {shown.body.trim() ? <div className="gp-body-in-desk"><Body body={shown.body} /></div> : shown.medium === 'photograph' ? <p className="it mut">No words with this photograph.</p> : null}
       </article>
       <div className="d-decide">
         {rev && (<>

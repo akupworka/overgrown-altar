@@ -7,7 +7,7 @@ import { SUPABASE_URL, SUPABASE_KEY } from './supabase';
 export interface GuildAuthor { id: string; slug?: string; display_name: string; craft: string; bio: string; portrait: string; website: string; instagram: string; email?: string; role?: string; created_at?: string | null }
 export interface GuildPiece {
   id: string; slug: string; title: string; standfirst: string; body: string; pillar: 'watchtower' | 'hearth' | 'perimeter';
-  medium: string; image: string; image_alt: string; imagePos?: string; published_at: string; author: GuildAuthor;
+  medium: string; image: string; image_alt: string; imagePos?: string; photoMeta?: import('./photo').PhotoMeta; published_at: string; author: GuildAuthor;
 }
 
 let cache: Promise<GuildPiece[]> | null = null;
@@ -21,7 +21,7 @@ async function load(): Promise<GuildPiece[]> {
   try {
     const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     const { data, error } = await db.from('pieces')
-      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, published_at, author:profiles(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
+      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, published_at, author:profiles(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
       .eq('status', 'approved').not('slug', 'is', null).order('published_at', { ascending: false });
     if (error) throw error;
     const paths = (data ?? []).map((p: any) => p.image_path).filter(Boolean);
@@ -29,7 +29,7 @@ async function load(): Promise<GuildPiece[]> {
     const photo = new Map(signed.map((s: any) => [s.path, s.signedUrl]));
     return (data ?? []).map((p: any) => ({
       id: p.id, slug: p.slug, title: p.title, standfirst: p.standfirst, body: p.body, pillar: p.pillar, medium: p.medium,
-      image: p.image_path ? photo.get(p.image_path) ?? '' : '', image_alt: p.image_alt, imagePos: p.image_focus || '', published_at: p.published_at,
+      image: p.image_path ? photo.get(p.image_path) ?? '' : '', image_alt: p.image_alt, imagePos: p.image_focus || '', photoMeta: p.photo_meta ?? {}, published_at: p.published_at,
       author: {
         id: p.author?.id, display_name: p.author?.display_name ?? 'A member', craft: p.author?.craft ?? '', bio: p.author?.bio ?? '',
         portrait: p.author?.portrait_path ? db.storage.from('portraits').getPublicUrl(p.author.portrait_path).data.publicUrl : '',

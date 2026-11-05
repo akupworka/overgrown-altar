@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
 import { Body } from '../../lib/marks';
+import { PhotoPlate } from '../PhotoPlate';
 import { Initials, Icon } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
@@ -245,11 +246,12 @@ function Reading({ id }: { id: string }) {
     <div className="m-reading">
       <Link className="d-link" to={`/guild/members/?m=${piece.author_id}`}>← {author?.display_name ?? 'Back'}</Link>
       <article className="d-paper">
-        {photo && <img className="m-photo" src={photo} alt={piece.image_alt} />}
+        {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
         <span className="eb">{pillarName(piece.pillar)} · {mediumName(piece.medium)}</span>
         <h1 className="h1">{piece.title}</h1>
         {piece.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{piece.standfirst}</p>}
-        <Body body={piece.body} />
+        {photo && piece.medium === 'photograph' && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} />}
+        {piece.body.trim() && <Body body={piece.body} />}
         {author && (
           <div className="m-byline">
             <Initials name={author.display_name} size={36} src={portraitUrl(author.portrait_path)} />

@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, portraitUrl } from '../../lib/supabase';
 import { Body, wantsDropCap } from '../../lib/marks';
+import { PhotoPlate } from '../PhotoPlate';
 
 const PILLAR = { watchtower: 'The Watchtower', hearth: 'The Hearth', perimeter: 'The Perimeter' } as Record<string, string>;
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photographs', study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol', recovery: 'Recovery story', testimony: 'Testimony', deliverance: 'Deliverance story', personal: 'Personal' };
@@ -16,7 +17,7 @@ export default function LivePiece() {
     if (!m || ['desk', 'members'].includes(m[1])) return;
     (async () => {
       const { data } = await supabase.from('pieces')
-        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
+        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
         .eq('slug', m[1]).eq('status', 'approved').maybeSingle();
       if (!data) return;
       if (data.image_path) {
@@ -36,6 +37,7 @@ export default function LivePiece() {
   const date = new Date(piece.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   // The writer's page, at the same address the site gives it (/guild/authors/eden-albright/).
   const aUrl = `/guild/authors/${(a.display_name || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'member'}/`;
+  const isPhoto = piece.medium === 'photograph';
   const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
   return (
     <>
@@ -47,14 +49,15 @@ export default function LivePiece() {
           <h1 className="h1 gp-title">{piece.title}</h1>
           <span className="gp-by">
             <a className="gp-by-who" href={aUrl}><span className="avatar-live">{portrait ? <img src={portrait} alt="" /> : initials}</span><span className="lab">{a.display_name}</span></a>
-            <span className="lab">· {date} · {Math.max(1, Math.round(piece.body.split(/\s+/).length / 230))} min read</span>
+            <span className="lab">· {date}{isPhoto ? '' : ` · ${Math.max(1, Math.round(piece.body.split(/\s+/).length / 230))} min read`}</span>
           </span>
         </div>
       </section>
       <article className="sec paper gp-article">
-        <div className={`narrow gp-flow${wantsDropCap(piece.medium, piece.body) ? ' gp-drop' : ''}`}>
+        <div className={`narrow gp-flow${isPhoto ? ' gp-photo' : wantsDropCap(piece.medium, piece.body) ? ' gp-drop' : ''}`}>
           {piece.standfirst && <p className="lede gp-standfirst">{piece.standfirst}</p>}
-          <Body body={piece.body} />
+          {isPhoto && photo && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} />}
+          {piece.body.trim() && <Body body={piece.body} />}
           <div className="gp-sign"><span>{(a.display_name || '').split(' ')[0]}</span></div>
           <aside className="gp-author" aria-label="About the author">
             <a className="gp-arch" href={aUrl} aria-hidden="true" tabIndex={-1}>{portrait ? <img src={portrait} alt="" /> : initials}</a>
