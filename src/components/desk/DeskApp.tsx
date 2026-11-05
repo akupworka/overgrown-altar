@@ -240,10 +240,16 @@ function Desk({ session }: { session: Session }) {
           ))}
         </nav>
         <div className="d-side-links">
-          <a className="d-side-link" href={`/guild/members/?m=${uid}`}>View my page</a>
-          <a className="d-side-link" href="/guild/members/">The Guild</a>
+          <a className="d-side-link" href={`/guild/members/?m=${uid}`}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>
+            View my page<span aria-hidden="true">→</span></a>
+          <a className="d-side-link" href="/guild/members/">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
+            The Guild<span aria-hidden="true">→</span></a>
         </div>
-        <button type="button" className="lab d-textbtn d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>Sign out</button>
+        <button type="button" className="d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
+          Sign out</button>
       </aside>
 
       <div className="d-main">

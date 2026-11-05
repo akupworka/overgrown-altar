@@ -749,3 +749,35 @@
 @media (max-width: 700px) { .pv-page .gp-hero { height: 480px; } .pv-page .gp-hero-c { top: 110px; } }
 /* Queue: changes to a published piece */
 .d-rev-tag { color: var(--ember); }
+
+/* The small toolbar above selected text */
+.d-bubble { display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 999px; background: #12150F;
+  box-shadow: 0 0 0 1px rgba(243,236,220,.14), 0 14px 30px -8px rgba(0,0,0,.6); }
+.d-bubble button { background: none; border: 0; cursor: pointer; color: #E6DFD0; padding: 8px 12px; min-height: 36px; border-radius: 999px;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; transition: background-color .2s, color .2s; }
+.d-bubble button:hover { background: rgba(243,236,220,.08); }
+.d-bubble button.on { color: #12150F; background: var(--ember); }
+.d-bubble .d-bub-bold { font-family: var(--serif); font-weight: 700; font-size: 16px; letter-spacing: 0; text-transform: none; }
+.d-bubble .d-bub-italic { font-family: var(--serif); font-style: italic; font-size: 17px; letter-spacing: 0; text-transform: none; }
+.d-bub-sep { width: 1px; height: 18px; background: rgba(243,236,220,.18); margin: 0 4px; }
+@media (max-width: 700px) { .d-bubble button { padding: 8px 9px; font-size: 9px; letter-spacing: .1em; } }
+
+/* Desktop: the formatting bar stays pinned under the writing bar as you scroll */
+@media (min-width: 701px) {
+  .d-room.writing .d-paper-tools { position: sticky; top: 156px; z-index: 4; background: #F1ECE2; margin-left: -72px; margin-right: -72px; padding: 12px 72px; box-shadow: 0 1px 0 rgba(42,32,23,.1); transition: top .5s var(--ease, ease); }
+  body:has(.site-header.tucked) .d-room.writing .d-paper-tools { top: 72px; }
+}
+
+/* Sidebar: View my page, The Guild, Sign out as proper buttons */
+.d-side-links { gap: 10px !important; }
+.d-side-link { display: flex !important; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 10px; font-style: normal !important;
+  font-family: var(--serif); font-size: 18px !important; color: var(--bone) !important; background: rgba(243,236,220,.03);
+  box-shadow: inset 0 0 0 1px rgba(243,236,220,.12); transition: box-shadow .3s, background-color .3s, color .3s; }
+.d-side-link svg { color: var(--ember); flex: none; }
+.d-side-link span { margin-left: auto; color: var(--muted-dark); transition: transform .4s cubic-bezier(.16,1,.3,1), color .3s; }
+.d-side-link:hover { background: rgba(255,227,163,.05); box-shadow: inset 0 0 0 1px rgba(255,227,163,.5); color: var(--ember) !important; }
+.d-side-link:hover span { transform: translateX(3px); color: var(--ember); }
+.d-signout { align-self: stretch !important; display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; padding: 11px 16px; border-radius: 999px;
+  background: none; border: 0; cursor: pointer; color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243,236,220,.12);
+  font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; transition: color .3s, box-shadow .3s; }
+.d-signout:hover { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230,169,154,.5); }

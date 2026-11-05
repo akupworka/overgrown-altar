@@ -2,11 +2,11 @@
 // Underneath, the piece is still kept in the Desk's simple writing marks (see src/lib/marks.tsx),
 // so saved and published pieces read exactly as before:
 //   ## Heading   > Pull quote   + Verse — Reference   *italic*   **bold**
-import { useEditor, EditorContent, type Editor as TipTap } from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu, type Editor as TipTap } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Node, mergeAttributes, textblockTypeInputRule } from '@tiptap/core';
-import type { Node as PMNode } from '@tiptap/pm/model';
+import { DOMParser as PMDOMParser, type Node as PMNode } from '@tiptap/pm/model';
 import { parseBody } from '../../lib/marks';
 
 // A pull quote and a verse: one line of text each, set in the site's own style.
@@ -119,11 +119,42 @@ export function useRichBody(initial: string, onChange: (marks: string) => void) 
       Placeholder.configure({ placeholder: 'Begin here. Enter starts a new line; leave an empty line between paragraphs or stanzas.' }),
     ],
     content: marksToHtml(initial),
-    editorProps: { attributes: { class: 'd-rich-in', 'aria-label': 'The piece', 'aria-multiline': 'true', role: 'textbox' } },
+    editorProps: {
+      attributes: { class: 'd-rich-in', 'aria-label': 'The piece', 'aria-multiline': 'true', role: 'textbox' },
+      // Pasted text written with *asterisks*, **double asterisks**, ## headings or > quotes arrives formatted,
+      // unless the copy already carries real formatting of its own.
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData('text/plain') ?? '';
+        const html = event.clipboardData?.getData('text/html') ?? '';
+        const marked = /\*[^*\n]+\*|(^|\n)(## |> |\+ )/.test(text);
+        if (!marked || /<(em|i|strong|b|h[1-6]|blockquote)[\s>]/i.test(html)) return false;
+        const box = document.createElement('div');
+        box.innerHTML = marksToHtml(text.replace(/\r\n/g, '\n'));
+        view.dispatch(view.state.tr.replaceSelection(PMDOMParser.fromSchema(view.state.schema).parseSlice(box)).scrollIntoView());
+        return true;
+      },
+    },
     onUpdate: ({ editor }) => onChange(docToMarks(editor.state.doc)),
   });
 }
 
 export function RichBody({ editor }: { editor: TipTap | null }) {
-  return <EditorContent editor={editor} className="d-paper-body d-rich" />;
+  return (
+    <>
+      {editor && (
+        // A small toolbar right above whatever you select, so formatting is always at hand however far down you are.
+        <BubbleMenu editor={editor} tippyOptions={{ duration: 160, placement: 'top', maxWidth: 'none' }} className="d-bubble"
+          shouldShow={({ editor: e, state }) => !state.selection.empty && !e.isActive('photo')}>
+          {([['bold', 'B', 'Bold'], ['italic', 'I', 'Italic'], ['heading', 'Heading', 'Section heading'], ['pullquote', 'Quote', 'Pull quote'], ['verse', 'Scripture', 'Scripture']] as [Tool, string, string][]).map(([tool, label, title]) => (
+            <button key={tool} type="button" title={title} className={`d-bub-${tool}${isOn(editor, tool) ? ' on' : ''}`} aria-pressed={isOn(editor, tool)}
+              onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(editor, tool)}>{label}</button>
+          ))}
+          <span className="d-bub-sep" aria-hidden="true" />
+          <button type="button" title="Remove formatting" onMouseDown={(e) => e.preventDefault()}
+            onClick={() => editor.chain().focus().unsetAllMarks().setParagraph().run()}>Clear</button>
+        </BubbleMenu>
+      )}
+      <EditorContent editor={editor} className="d-paper-body d-rich" />
+    </>
+  );
 }
