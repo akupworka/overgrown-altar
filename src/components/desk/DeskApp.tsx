@@ -558,13 +558,19 @@ function Editor({ uid, author = null, piece, isEditor = false, onSaved, onDone }
         onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
       <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
       <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder="One sentence: what this piece is" maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
-      <div className="d-paper-tools" role="toolbar" aria-label="Formatting">
+      <div className="d-tools-wrap" data-end="false">
+      <div className="d-paper-tools" role="toolbar" aria-label="Formatting" onScroll={(e) => { const el = e.currentTarget; if (el.parentElement) el.parentElement.dataset.end = String(el.scrollLeft + el.clientWidth >= el.scrollWidth - 6); }}>
         {TOOL_LABELS.map((t) => (
           <button key={t.tool} type="button" title={t.hint} className={isOn(rich, t.tool) ? 'on' : ''} aria-pressed={isOn(rich, t.tool)}
             onMouseDown={(e) => e.preventDefault()} onClick={() => applyTool(rich, t.tool)}>{t.label}</button>
         ))}
         <button type="button" className="d-tool-photo" title="Put a photograph here, in the piece" onMouseDown={(e) => e.preventDefault()} onClick={() => inlineInput.current?.click()}>+ Photo</button>
         <input ref={inlineInput} type="file" accept="image/*" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) addInlinePhoto(f); }} />
+
+      </div>
+        {/* Phones: the bar scrolls sideways; this arrow says so, and slides it along. */}
+        <button type="button" className="d-tools-more" aria-label="More formatting" onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => e.currentTarget.parentElement?.querySelector('.d-paper-tools')?.scrollBy({ left: 170, behavior: 'smooth' })}><span aria-hidden="true">›</span></button>
       </div>
       <RichBody editor={rich} />
       <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
