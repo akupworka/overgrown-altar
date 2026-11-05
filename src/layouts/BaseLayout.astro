@@ -46,6 +46,17 @@ const imageUrl = new URL(image, site).toString();
     <meta name="theme-color" content="#060806" />
 
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
+    {Astro.url.pathname === '/' && (
+      <!-- Members arriving at the front door (typed, bookmarked, or from another site) go straight to their Desk,
+           before anything is drawn. Coming from inside the site, or with ?home, the homepage shows as usual. -->
+      <script is:inline>
+        try {
+          var t = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || 'null');
+          var fromSite = document.referrer && new URL(document.referrer).origin === location.origin;
+          if (t && t.refresh_token && !fromSite && !/[?&]home\b/.test(location.search)) location.replace('/guild/desk/');
+        } catch (e) {}
+      </script>
+    )}
     {arrival && (
       <script is:inline>
         try {
