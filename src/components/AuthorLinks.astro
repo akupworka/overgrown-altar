@@ -1,6 +1,6 @@
 ---
 // A writer's website and Instagram as two small hairline pills, each with a drawn icon
-// (never an emoji, which phones would turn into coloured boxes).
+// (never an emoji, which phones would turn into colored boxes).
 interface Props { website?: string; instagram?: string; email?: string; tone?: 'paper' | 'dark' }
 const { website = '', instagram = '', email = '', tone = 'paper' } = Astro.props;
 const site = website.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');

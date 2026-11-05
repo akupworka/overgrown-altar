@@ -47,8 +47,9 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
 
   <section class="paper blog">
     <div class="blog-col">
+      {!latest && <p class="it mut" style="font-size:22px;margin:0">The first dispatches are being written.</p>}
       <!-- The latest dispatch -->
-      <article class="latest">
+      {latest && <article class="latest">
         <a class="latest-img" href={latest.href}><img src={latest.image} alt="" style={latest.imagePos ? `object-position:${latest.imagePos}` : undefined} /></a>
         <div class="latest-text">
           <span class="eb">Latest · {latest.kicker}</span>
@@ -62,7 +63,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
           </div>
           <a class="btn" href={latest.href}>Read the dispatch</a>
         </div>
-      </article>
+      </article>}
 
       <!-- Also new: two more, as large features -->
       {alsoNew.length > 0 && (
@@ -96,7 +97,6 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
       <li><span class="num">II</span><span class="method-k">The Fracture</span><span class="method-d">Where that insight broke, for lack of a divine keystone, and what it cost those who followed it.</span></li>
       <li><span class="num">III</span><span class="method-k">The Anchor</span><span class="method-d">How the same truth holds again, whole, in the resurrection of Christ.</span></li>
     </ol>
-    <a class="ghost method-go" href="/watchtower/nietzsche-surrendered">See it in a dispatch: Nietzsche Surrendered</a>
   </section>
 
   <!-- A line from the newest dispatches, set large -->

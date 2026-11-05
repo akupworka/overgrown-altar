@@ -128,7 +128,7 @@ p, .body { text-wrap: pretty; }
 .veil   { position: absolute; inset: 0; background: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(6,8,6,.15) 0%, rgba(6,8,6,.85) 100%); }
 .veil-l { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,10,8,.92) 0%, rgba(8,10,8,.72) 50%, rgba(8,10,8,.3) 100%); }
 .hin { position: relative; z-index: 1; }
-/* A hero with its text centred (hero-c) or at the bottom left (pill-in). */
+/* A hero with its text centered (hero-c) or at the bottom left (pill-in). */
 .hero-c { position: absolute; left: 0; right: 0; top: 230px; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .pill-h { height: 860px; }
 .pill-in { position: absolute; left: 120px; bottom: 110px; width: 820px; z-index: 1; display: flex; flex-direction: column; gap: 22px; }
@@ -275,7 +275,7 @@ textarea.field { resize: vertical; }
 }
 
 /* Browsers paint auto-filled fields pale blue or yellow. Keep every field in the site's own look:
-   the fill colour is held off indefinitely and the text keeps its own colour. */
+   the fill color is held off indefinitely and the text keeps its own color. */
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus,
 textarea:-webkit-autofill, select:-webkit-autofill {
   -webkit-text-fill-color: currentColor;

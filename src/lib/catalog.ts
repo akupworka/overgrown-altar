@@ -12,12 +12,6 @@ export interface CatalogItem {
 
 const FOUNDATIONS: CatalogItem[] = [
   {
-    href: '/watchtower/nietzsche-surrendered', title: 'Nietzsche Surrendered: The Übermensch at the Foot of the Cross',
-    standfirst: 'Nietzsche correctly diagnosed the spiritual rot of modern society, but his solution was an exercise in human pride that collapsed into madness.',
-    date: '2026-09-22', pillar: 'watchtower', medium: 'essay', thinkers: ['nietzsche'], minutes: 12,
-    kicker: 'Dispatch 1 · Will to Power → Surrender & Divine Authority', image: '/images/format-dispatches-1200.jpg', author: { name: 'Ainslie Willson' },
-  },
-  {
     href: '/perimeter/untangling-mental-strongholds', title: 'Untangling Mental Strongholds',
     standfirst: 'A recovery manual in five movements for bringing a stronghold under the obedience of Christ.',
     date: '2026-09-29', pillar: 'perimeter', medium: 'recovery', thinkers: [], minutes: 8,

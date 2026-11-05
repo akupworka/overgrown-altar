@@ -122,7 +122,7 @@
 @media (max-width: 700px) { .dw-inline .dw-foot a { display: inline-block; margin: 10px 6px 0; } .dw-topic { padding: 9px 11px; letter-spacing: .14em; } }
 
 /* The header's sliver of glass light, carried into the doorway: under the buttons, along the field you're writing in,
-   and across the threshold of the arch. Colour enters only through glass, so it stays a thin line. */
+   and across the threshold of the arch. Color enters only through glass, so it stays a thin line. */
 .dw-send, .dw-go { position: relative; }
 .dw-send { border-bottom-color: transparent; }
 .dw-send::after, .dw-go::after, .dw-line-row::after, .dw-arch-wrap::after {

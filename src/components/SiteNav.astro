@@ -15,9 +15,11 @@ const links = [
   { href: '/about', label: 'About' },
 ];
 const current = Astro.url.pathname;
+// Inside the members' area (the Desk and the Guild's pages) the header is always the solid bar, never see-through.
+const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/members');
 ---
 <div class="nav-shade" aria-hidden="true"></div>
-<header class="site-header" data-header>
+<header class:list={['site-header', { solid: inside }]} data-header data-always-solid={inside ? '' : undefined}>
   <div class="bar" aria-hidden="true"></div>
   <nav class="nav lab" aria-label="Main">
     <a href="/" class="nav-home" aria-label="Overgrown Altar, home">
@@ -71,10 +73,10 @@ const current = Astro.url.pathname;
   // scroll down. Only flips a class when something changes, so scrolling stays smooth.
   const header = document.querySelector<HTMLElement>('[data-header]');
   if (header) {
-    let lastY = scrollY, solid = false, hidden = false, ticking = false;
+    let lastY = scrollY, solid = header.classList.contains('solid'), hidden = false, ticking = false;
     const update = () => {
       const y = scrollY;
-      const nowSolid = y > 40;
+      const nowSolid = y > 40 || header.hasAttribute('data-always-solid');
       const nowHidden = y > 320 && y > lastY + 4 && !header.contains(document.activeElement);
       const showing = y < lastY - 4;
       if (nowSolid !== solid) { solid = nowSolid; header.classList.toggle('solid', solid); }
@@ -124,7 +126,7 @@ const current = Astro.url.pathname;
   .burger span { display: block; height: 1.5px; background: currentColor; }
 
   /* Sign in: the brand's own outlined button, with a single sliver of glass light
-     along its threshold. Colour enters only through glass. */
+     along its threshold. Color enters only through glass. */
   .signin {
     position: relative; display: inline-flex; align-items: center; height: 40px; padding: 0 20px;
     border: 1px solid rgba(243, 236, 220, .38); color: var(--bone);

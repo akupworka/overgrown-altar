@@ -6,7 +6,7 @@
 //   - the other trophies are won once, at a fixed tier.
 // Each trophy has its own emblem; its tier sets the shape and the metal:
 //   bronze  = a round medal          silver = a cathedral-window arch
-//   gold    = a shield               rainbow = a rose window in coloured glass
+//   gold    = a shield               rainbow = a rose window in colored glass
 // They are worked out from what the site already knows (published pieces and the member's page), so they
 // update by themselves. Reading and commenting trophies can join once those features exist.
 
@@ -16,7 +16,7 @@ export interface TrophyMember { portrait_path?: string | null; portrait?: string
 export interface TrophyCtx { pieces: TrophyPiece[]; member: TrophyMember }
 export interface Trophy {
   id: string; name: string; tier: Tier; note: string; glyph: string; earned: (c: TrophyCtx) => boolean;
-  count?: (c: TrophyCtx) => number;   // set for category trophies: how many pieces count towards it
+  count?: (c: TrophyCtx) => number;   // set for category trophies: how many pieces count toward it
   unit?: string;                      // what is counted, e.g. "dispatches"
   at?: Record<Tier, number>;          // category trophies: pieces needed for each metal (harder ones need more)
 }
@@ -131,10 +131,10 @@ export function trophiesFor(c: TrophyCtx) {
 
 // ---- drawing
 // Each tier is a different made object, drawn at 80×80:
-//   bronze  — a struck medal: bevelled rim, a ring of engraved notches, a dark enamel field
+//   bronze  — a struck medal: beveled rim, a ring of engraved notches, a dark enamel field
 //   silver  — a lancet window: keystone, sill and inner tracery, the emblem standing inside
 //   gold    — a shield: three studs along the crest, a laurel wreath around the emblem
-//   rainbow — a rose window: twelve petals of coloured glass set in lead, ringed in gold
+//   rainbow — a rose window: twelve petals of colored glass set in lead, ringed in gold
 // The emblem itself is drawn in the tier's own metal, with a faint glow.
 
 const METAL: Record<Tier, [string, string, string]> = {   // shadow, light, mid
@@ -170,7 +170,7 @@ function laurel() {   // two sprays of leaves, rising from the base around the e
   let d = '';
   for (const side of [-1, 1]) {
     for (let i = 0; i < 7; i++) {
-      const a = 180 + side * (28 + i * 17);              // degrees around the centre, from the bottom up each side
+      const a = 180 + side * (28 + i * 17);              // degrees around the center, from the bottom up each side
       const [x, y] = polar(23.5, a);
       const rot = a + (side < 0 ? -55 : 55);
       d += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="3.1" ry="1.25" transform="rotate(${f(rot)} ${f(x)} ${f(y)})"/>`;

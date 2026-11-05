@@ -55,7 +55,7 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
 
 const TIERS: Tier[] = ['bronze', 'silver', 'gold', 'rainbow'];
 
-/** Every trophy, for the catalogue on the prestiges page: the growing ones in all four metals, then the rest. */
+/** Every trophy, for the catalog on the prestiges page: the growing ones in all four metals, then the rest. */
 export function TrophyCatalogue() {
   const growing = TROPHIES.filter((t) => t.count);
   const once = TROPHIES.filter((t) => !t.count);

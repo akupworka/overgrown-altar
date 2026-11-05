@@ -26,11 +26,11 @@
   .tr-name { font-size: 15px; }
   .tr-note { display: none; }
 }
-/* Progress towards the next metal */
+/* Progress toward the next metal */
 .tr-bar { width: 90px; height: 2px; border-radius: 2px; background: rgba(128,128,128,.25); overflow: hidden; }
 .tr-bar i { display: block; height: 100%; background: linear-gradient(90deg, #C98A5B, #AEB8C3, #D2A23A, #B05BFF); }
 .tr-next { font-family: var(--serif); font-style: italic; font-size: 14px; opacity: .8; }
-/* The catalogue */
+/* The catalog */
 .tcat { display: flex; flex-direction: column; gap: 18px; text-align: left; }
 .tcat-h { margin-top: 20px; }
 .tcat-p { margin: 0; font-size: 17px; color: var(--muted-dark); max-width: 640px; }

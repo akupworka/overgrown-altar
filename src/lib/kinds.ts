@@ -27,7 +27,7 @@ export const ROOMS: Room[] = [
         what: 'Short stories, flash fiction and self-contained chapters that tell the truth slant.',
         lookFor: 'A story that moves; characters with weight; grace that is not sentimental.', length: '500–6,000 words' },
       { value: 'photograph', name: 'Photographs', plural: 'Photographs', pillar: 'hearth',
-        what: 'Dark, atmospheric photography: stone in monochrome, colour through glass. A single image or a short series with a few lines of context.',
+        what: 'Dark, atmospheric photography: stone in monochrome, color through glass. A single image or a short series with a few lines of context.',
         lookFor: 'A considered eye; light used as meaning; images at least 1600 pixels wide, your own.', length: '1–12 images' },
       { value: 'study', name: 'Architectural study', plural: 'Architectural studies', pillar: 'hearth',
         what: 'A close reading of sacred or significant space: a window, a nave, a doorway, a ruin.',
@@ -42,7 +42,7 @@ export const ROOMS: Room[] = [
     kinds: [
       { value: 'testimony', name: 'Testimony', plural: 'Testimonies', pillar: 'perimeter',
         what: 'What God has done, told by the one it happened to.',
-        lookFor: 'Honesty over drama; Christ at the centre, not the story; others protected by name and consent.', length: '600–3,000 words' },
+        lookFor: 'Honesty over drama; Christ at the center, not the story; others protected by name and consent.', length: '600–3,000 words' },
       { value: 'deliverance', name: 'Deliverance story', plural: 'Deliverance stories', pillar: 'perimeter',
         what: 'An account of freedom from what was binding: the fight, the turning, and what came after.',
         lookFor: 'Sobriety and care; no sensationalism; Scripture handled faithfully; the long road after, not only the moment.', length: '800–4,000 words' },

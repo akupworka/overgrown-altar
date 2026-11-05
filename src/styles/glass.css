@@ -1,7 +1,7 @@
 /* The glowing glass card (used by components/GlassCard.astro and the Guild Desk). */
 .glass-card { --r: 22px; position: relative; border-radius: var(--r); isolation: isolate; }
 
-/* 1. Halo: the colour ring, blurred into a glow just outside the card. */
+/* 1. Halo: the color ring, blurred into a glow just outside the card. */
 .gc-halo {
   position: absolute; inset: -6px; z-index: -1; border-radius: calc(var(--r) + 6px);
   filter: blur(30px); opacity: .22; will-change: opacity;
@@ -33,7 +33,7 @@
     inset 0 -30px 60px rgba(0, 0, 0, .25),
     0 30px 80px rgba(0, 0, 0, .5);
 }
-/* Fine grain, so the glass reads as a material rather than a flat colour. */
+/* Fine grain, so the glass reads as a material rather than a flat color. */
 .gc-pane::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .07;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");

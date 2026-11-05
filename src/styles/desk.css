@@ -249,7 +249,7 @@
   .m-reading .d-paper p.body { font-size: 18px !important; }
 }
 
-/* On the paper sheet, labels and soft text use the paper colours. */
+/* On the paper sheet, labels and soft text use the paper colors. */
 .d-paper .eb { color: var(--oxblood); }
 .d-paper .mut, .d-paper .lab { color: var(--muted-paper); }
 

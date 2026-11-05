@@ -1,6 +1,6 @@
 ---
-// Stained light: colour that enters only through glass.
-// The prism is the five glass colours from the brand cover (red, gold, green, blue, violet),
+// Stained light: color that enters only through glass.
+// The prism is the five glass colors from the brand cover (red, gold, green, blue, violet),
 // softly blurred and slowly turning. The beams are light falling from a window.
 //
 // Built for smoothness: each layer is drawn once, and the animation only rotates, moves
@@ -31,7 +31,7 @@ const { prism = true, beams = false, size = 520, intensity = 1, style = '' } = A
     background: radial-gradient(closest-side, rgba(255, 214, 140, .26), rgba(255, 196, 77, .08) 55%, rgba(255, 196, 77, 0));
     animation: breathe 9s ease-in-out infinite;
   }
-  /* The prism: a turning wheel of the five glass colours. */
+  /* The prism: a turning wheel of the five glass colors. */
   .prism {
     inset: 8%; border-radius: 50%;
     background: conic-gradient(from 20deg,
@@ -40,7 +40,7 @@ const { prism = true, beams = false, size = 520, intensity = 1, style = '' } = A
     filter: blur(50px);
     animation: turn 48s linear infinite;
   }
-  /* The beams: four soft coloured shafts, faded out at the top, bottom and sides. */
+  /* The beams: four soft colored shafts, faded out at the top, bottom and sides. */
   .beams {
     inset: -10% -25% -60% -25%;
     -webkit-mask-image: radial-gradient(ellipse 55% 60% at 50% 35%, #000 25%, transparent 75%);
