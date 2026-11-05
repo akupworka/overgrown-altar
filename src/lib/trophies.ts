@@ -105,8 +105,17 @@ export const TROPHIES: Trophy[] = [
   { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every category trophy raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && !['years', 'unbroken'].includes(t.id)).every((t) => t.count!(c) >= t.at!.gold) },
 ];
 
+const RANK: Record<Tier, number> = { rainbow: 4, gold: 3, silver: 2, bronze: 1 };
+/** Earned trophies, finest first: by metal, then by how far a growing trophy has gone. */
+export function finestFirst<T extends { tier: Tier; n: number }>(list: T[]) {
+  return [...list].sort((a, b) => RANK[b.tier] - RANK[a.tier] || b.n - a.n);
+}
 /** "1 year at the table", "3 years at the table": the unit, made singular for one. */
-export const unitFor = (n: number, unit = '') => (n === 1 ? unit.replace(/^(\w+?)s\b/, '$1') : unit);
+const ONE: Record<string, string> = {
+  dispatches: 'dispatch', testimonies: 'testimony', 'visual works': 'visual work', 'long-form pieces': 'long-form piece',
+  poems: 'poem', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
+};
+export const unitFor = (n: number, unit = '') => (n === 1 ? ONE[unit] ?? unit : unit);
 export const TIER_LABEL: Record<Tier, string> = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', rainbow: 'Rainbow' };
 
 /** Where a member stands with each trophy: earned or not, its metal now, and (for category trophies) the next metal. */

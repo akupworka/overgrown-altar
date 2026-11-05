@@ -690,3 +690,38 @@
 .pz-cat { margin-top: 30px; width: 100%; }
 .pz-cat .tr-name { color: var(--bone); }
 @media (max-width: 700px) { .m-trophies:not(:empty) { margin-bottom: 44px; } .pz-trophies { margin-top: 56px; } }
+.m-vault { width: 100vw; margin: 0 calc(50% - 50vw); }
+.m-vault:empty { display: none; }
+
+/* ---- Your standing, on the Desk home: prestige and vault, side by side ---- */
+.d-standing { margin: 26px 0 8px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border-radius: 6px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(243,236,220,.045), rgba(243,236,220,.015)); box-shadow: inset 0 0 0 1px rgba(243,236,220,.12), 0 30px 60px -40px rgba(0,0,0,.8); }
+.d-standing > div { padding: 28px 30px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.d-standing-vault { border-left: 1px solid rgba(243,236,220,.1); background: radial-gradient(ellipse 80% 70% at 70% 0%, rgba(255,214,140,.06), transparent 70%); }
+.d-standing-k { color: var(--ember); font-size: 9.5px; }
+.d-standing-none { font-size: 17px; color: var(--muted-dark); }
+.d-standing-prog { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+.d-standing-bar { height: 3px; border-radius: 3px; background: rgba(243,236,220,.1); overflow: hidden; }
+.d-standing-bar i { display: block; height: 100%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
+.d-standing-prog .it { font-size: 16px; color: var(--muted-dark); }
+.d-standing-prog b { font-style: normal; font-weight: 500; color: var(--bone); }
+.d-standing-link { margin-top: auto; color: var(--muted-dark); border-bottom: 1px solid rgba(243,236,220,.2); padding-bottom: 3px; transition: color .3s, border-color .3s; }
+.d-standing-link:hover { color: var(--ember); border-color: var(--ember); }
+.d-standing-medals { display: flex; align-items: flex-end; gap: 10px; }
+.d-standing-medal { display: inline-flex; transition: transform .4s cubic-bezier(.16,1,.3,1); filter: drop-shadow(0 8px 12px rgba(0,0,0,.4)); }
+.d-standing-medal:first-child :is(svg) { width: 72px; height: 72px; }
+.d-standing-medal:hover { transform: translateY(-3px); }
+.d-standing-tally { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-family: var(--sans); font-size: 10px; letter-spacing: .14em; color: #CFC8B8; }
+.d-standing-tally span { display: inline-flex; align-items: center; gap: 6px; }
+.d-standing-tally i { width: 8px; height: 8px; border-radius: 50%; }
+.d-standing-tally [data-tier='bronze'] i { background: linear-gradient(135deg, #F0B67A, #8A5228); }
+.d-standing-tally [data-tier='silver'] i { background: linear-gradient(135deg, #FBFCFD, #7E8893); }
+.d-standing-tally [data-tier='gold'] i { background: linear-gradient(135deg, #FFF0B8, #B58718); }
+.d-standing-tally [data-tier='rainbow'] i { background: conic-gradient(#3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF); }
+.d-standing-tally em { font-style: normal; color: var(--muted-dark); text-transform: uppercase; }
+@media (max-width: 700px) {
+  .d-standing { grid-template-columns: 1fr; margin-top: 18px; }
+  .d-standing > div { padding: 22px 20px; }
+  .d-standing-vault { border-left: 0; border-top: 1px solid rgba(243,236,220,.1); }
+  .d-standing-link { margin-top: 4px; }
+}

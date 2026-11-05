@@ -40,10 +40,10 @@ const items: DispatchItem[] = pieces.map((g) => ({
     </div>
   </section>
   <section class="sec paper">
-    <div class="au-trophies"><TrophyCase ctx={{ pieces, member: { portrait: a.portrait, bio: a.bio, craft: a.craft, role: a.role, created_at: a.created_at } }} /></div>
     <div class="au-head"><span class="eb">The work</span><span class="lab mut">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
     <DispatchList items={items} />
   </section>
+  <TrophyCase name={a.display_name} ctx={{ pieces, member: { portrait: a.portrait, bio: a.bio, craft: a.craft, role: a.role, created_at: a.created_at } }} />
   <Subscribe />
 </BaseLayout>
 

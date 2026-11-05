@@ -155,7 +155,6 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
       </header>
       <section className="m-work">
-        <div className="m-trophies"><TrophyCase ctx={{ pieces: work, member: person }} mine={person.id === me} /></div>
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{work.length} {work.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
         {work.length === 0 ? (
           <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
@@ -177,6 +176,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
           </ol>
         )}
       </section>
+      <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person }} mine={person.id === me} name={person.display_name} /></div>
     </div>
   );
 }

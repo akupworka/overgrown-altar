@@ -1,23 +1,48 @@
 ---
-// A writer's trophies, earned ones only (public pages). Category trophies show their metal now and the next one.
-import { trophiesFor, trophySvg, TIER_LABEL, unitFor, type TrophyCtx } from '../lib/trophies';
+// The Vault: a writer's trophies, at the foot of their page. A tally by metal, their three finest on a lit shelf,
+// and the rest beneath, finest first. Public pages show earned trophies only.
+import { trophiesFor, finestFirst, trophySvg, TIER_LABEL, unitFor, type Tier, type TrophyCtx } from '../lib/trophies';
 import '../styles/trophies.css';
-interface Props { ctx: TrophyCtx; tone?: 'dark' | 'paper' }
-const { ctx, tone = 'paper' } = Astro.props;
-const earned = trophiesFor(ctx).filter((t) => t.earned);
+interface Props { ctx: TrophyCtx; name?: string }
+const { ctx, name = '' } = Astro.props;
+const earned = finestFirst(trophiesFor(ctx).filter((t) => t.earned));
+const shelf = earned.slice(0, 3), rest = earned.slice(3);
+const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ t, n: earned.filter((x) => x.tier === t).length })).filter((x) => x.n);
 ---
 {earned.length > 0 && (
-  <section class:list={['tc', { 'paper-tone': tone === 'paper' }]}>
-    <div class="tc-head"><span class="eb">Trophies</span><a class="lab mut" href="/guild/members/?view=prestige#trophies">{earned.length} earned · see all</a></div>
-    <div class="tc-grid">
-      {earned.map(({ trophy: t, tier, n, next }) => (
-        <figure class="tr" data-tier={tier} title={t.note}>
-          <Fragment set:html={trophySvg(t, 76, tier)} />
-          <span class="tr-name">{t.name}</span>
-          <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
-          {t.count && next ? <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
-        </figure>
-      ))}
+  <section class="vault">
+    <div class="vault-in">
+      <header class="vault-head">
+        <span class="eb">The Vault</span>
+        <h2 class="h2 vault-title">{name ? `${name.split(' ')[0]}’s trophies` : 'Trophies'}</h2>
+        <div class="vault-tally">
+          {tally.map(({ t, n }) => <span class="vault-chip" data-tier={t}><i></i>{`${n} ${TIER_LABEL[t].toLowerCase()}`}</span>)}
+        </div>
+      </header>
+      <div class="vault-shelf">
+        {shelf.map(({ trophy: t, tier, n, next }) => (
+          <figure class="tr tr-big" data-tier={tier} title={t.note}>
+            <span class="tr-light" aria-hidden="true"></span>
+            <Fragment set:html={trophySvg(t, 112, tier)} />
+            <span class="tr-name">{t.name}</span>
+            <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
+            {t.count && next ? <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
+          </figure>
+        ))}
+      </div>
+      {rest.length > 0 && (
+        <div class="tc-grid vault-rest">
+          {rest.map(({ trophy: t, tier, n, next }) => (
+            <figure class="tr" data-tier={tier} title={t.note}>
+              <Fragment set:html={trophySvg(t, 72, tier)} />
+              <span class="tr-name">{t.name}</span>
+              <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
+              {t.count && next && <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span>}
+            </figure>
+          ))}
+        </div>
+      )}
+      <a class="vault-all lab" href="/guild/members/?view=prestige#trophies">See every trophy →</a>
     </div>
   </section>
 )}

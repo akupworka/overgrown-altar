@@ -54,3 +54,58 @@
   .tr-mini-name { display: none; }
   .tr-mini .tr-tier { font-size: 10px; letter-spacing: .08em; }
 }
+
+/* ---- The Vault: a dark display at the foot of a writer's page ---- */
+.vault { position: relative; overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 0%, #1A1E16 0%, #0A0C0A 70%); color: var(--bone); padding: 96px 24px 90px; }
+.vault::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 40% 35% at 50% 38%, rgba(255, 214, 140, .07), transparent 70%); }
+.vault-in { position: relative; max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0; }
+.vault-head { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.vault-title { margin: 0; }
+.vault-tally { margin-top: 6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.vault-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px; border-radius: 999px; font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: #CFC8B8; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); }
+.vault-chip i { width: 8px; height: 8px; border-radius: 50%; }
+.vault-chip[data-tier='bronze'] i { background: linear-gradient(135deg, #F0B67A, #8A5228); }
+.vault-chip[data-tier='silver'] i { background: linear-gradient(135deg, #FBFCFD, #7E8893); }
+.vault-chip[data-tier='gold'] i { background: linear-gradient(135deg, #FFF0B8, #B58718); box-shadow: 0 0 6px rgba(231,195,90,.6); }
+.vault-chip[data-tier='rainbow'] i { background: conic-gradient(#3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF); box-shadow: 0 0 6px rgba(176,91,255,.6); }
+.vault-of { color: var(--ember); }
+.vault-empty { margin: 40px 0 0; font-size: 19px; color: var(--muted-dark); }
+
+/* The shelf: their three finest, lit from above */
+.vault-shelf { position: relative; margin-top: 56px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 56px; padding-bottom: 28px; }
+.vault-shelf::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 227, 163, .45), transparent); box-shadow: 0 6px 24px 2px rgba(255, 214, 140, .12); }
+.tr-big { width: 220px; position: relative; gap: 10px; }
+.tr-big .tr-light { position: absolute; left: 50%; top: -40px; width: 180px; height: 200px; translate: -50% 0; pointer-events: none;
+  background: radial-gradient(ellipse 50% 60% at 50% 40%, rgba(255, 227, 163, .14), transparent 70%); }
+.tr-big[data-tier='rainbow'] .tr-light { background: radial-gradient(ellipse 50% 60% at 50% 40%, rgba(176, 91, 255, .16), transparent 70%); }
+.tr-big .tr-name { font-size: 22px; color: var(--bone); }
+.tr-big .tr-note { font-size: 15px; max-width: 220px; color: var(--muted-dark); opacity: 1; }
+.tr-big:first-child { order: 2; }
+.tr-big:nth-child(2) { order: 1; }
+.tr-big:nth-child(3) { order: 3; }
+.tr-big:first-child .tr-svg { width: 132px; height: 132px; }
+.vault-rest { margin-top: 48px; width: 100%; }
+.vault .tr-name { color: var(--bone); }
+.vault-locked { margin-top: 44px; width: 100%; }
+.vault-locked summary { cursor: pointer; list-style: none; display: inline-block; color: var(--muted-dark); border-bottom: 1px solid rgba(243, 236, 220, .2); padding-bottom: 4px; }
+.vault-locked summary::-webkit-details-marker { display: none; }
+.vault-locked summary:hover { color: var(--ember); }
+.vault-locked .tc-grid { margin-top: 28px; }
+.vault-all { margin-top: 44px; color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; }
+@media (max-width: 700px) {
+  .vault { padding: 64px 18px 60px; }
+  .vault-shelf { margin-top: 40px; gap: 10px; }
+  .tr-big { width: 33%; }
+  .tr-big .tr-svg { width: 84px; height: 84px; }
+  .tr-big:first-child .tr-svg { width: 100px; height: 100px; }
+  .tr-big .tr-name { font-size: 16px; }
+  .tr-big .tr-note, .tr-big .tr-next { display: none; }
+  .tr-big .tr-tier { font-size: 8px; letter-spacing: .14em; }
+  .vault-rest { margin-top: 36px; }
+}
+.vault-rest { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 30px 26px !important; }
+.vault-rest .tr { width: 150px; }
+@media (max-width: 700px) { .vault-rest .tr { width: calc(33% - 10px); } .vault-rest { gap: 22px 10px !important; } }

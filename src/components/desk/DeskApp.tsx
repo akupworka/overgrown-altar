@@ -9,7 +9,8 @@ import { shrinkImage, TooSmall } from '../../lib/shrink';
 // Featured photographs fill the width of the page, so they need to be at least this many pixels wide.
 const MIN_PHOTO_WIDTH = 1600;
 import { PrestigeBadge } from './Prestige';
-import { PRESTIGES, prestigeFor } from '../../lib/prestige';
+import { prestigeFor } from '../../lib/prestige';
+import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn } from './RichBody';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -244,7 +245,7 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} pieces={pieces} waiting={isEditor ? queue.length : 0} onReview={() => go('review')} onOpen={open} onChanged={load} />}
+        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} onReview={() => go('review')} onOpen={open} onChanged={load} />}
         {tab === 'write' && <Editor key={editing?.id ?? 'new'} uid={uid} piece={editing} isEditor={isEditor} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
@@ -265,26 +266,38 @@ function Desk({ session }: { session: Session }) {
   );
 }
 
-// Where you stand among the ten prestiges, what the next one is, and all ten behind a small "see all".
-function DeskPrestige({ published }: { published: number }) {
+// Your standing: the prestige you hold and how close the next is, beside your finest trophies.
+function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; uid?: string }) {
   const { current, next, toNext } = prestigeFor(published);
+  const from = current?.at ?? 0;
+  const pct = next ? Math.max(4, Math.round(((published - from) / (next.at - from)) * 100)) : 100;
+  const earned = finestFirst(trophiesFor(ctx).filter((t) => t.earned));
+  const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ t, n: earned.filter((x) => x.tier === t).length })).filter((x) => x.n);
   return (
-    <div className="d-prestige">
-      {current ? <PrestigeBadge published={published} size="lg" /> : <span className="lab mut">Your first published piece earns your first prestige.</span>}
-      {next && <span className="it d-prestige-next">{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b>{next.name}</b></span>}
-      <a className="d-prestige-page lab" href="/guild/members/?view=prestige">See the ladder and who holds each rank →</a>
-      <details className="d-prestige-all">
-        <summary className="lab">The ten prestiges</summary>
-        <ol>
-          {PRESTIGES.map((p) => (
-            <li key={p.level} className={current && p.level <= current.level ? 'won' : ''}>
-              <PrestigeBadge published={p.at} />
-              <span className="it">{p.note}</span>
-              <span className="lab mut">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
-            </li>
-          ))}
-        </ol>
-      </details>
+    <div className="d-standing">
+      <div className="d-standing-rank">
+        <span className="lab d-standing-k">Your prestige</span>
+        {current ? <PrestigeBadge published={published} size="lg" /> : <span className="it d-standing-none">Your first published piece makes you an Inkling.</span>}
+        {next && (
+          <div className="d-standing-prog">
+            <span className="d-standing-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></span>
+            <span className="it">{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b>{next.name}</b></span>
+          </div>
+        )}
+        <a className="lab d-standing-link" href="/guild/members/?view=prestige">The ladder →</a>
+      </div>
+      <div className="d-standing-vault">
+        <span className="lab d-standing-k">Your vault</span>
+        {earned.length ? (
+          <div className="d-standing-medals">
+            {earned.slice(0, 3).map(({ trophy: t, tier }) => (
+              <span key={t.id} className="d-standing-medal" title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: trophySvg(t, 60, tier) }} />
+            ))}
+          </div>
+        ) : <span className="it d-standing-none">Trophies gather here as your work is published.</span>}
+        <span className="d-standing-tally">{tally.map(({ t, n }) => <span key={t} data-tier={t}><i />{n}</span>)}{earned.length > 0 && <em>{earned.length} of {TROPHIES.length}</em>}</span>
+        {uid && <a className="lab d-standing-link" href={`/guild/members/?m=${uid}#vault`}>Open your vault →</a>}
+      </div>
     </div>
   );
 }
@@ -293,7 +306,10 @@ function StatusChip({ status }: { status: Piece['status'] }) {
   return <span className={`d-status s-${status}`}><i aria-hidden="true" />{STATUS_LABEL[status]}</span>;
 }
 
-function Pieces({ name, pieces, waiting = 0, onReview, onOpen, onChanged }: { name: string; pieces: Piece[]; waiting?: number; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
+// "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
+const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
+
+function Pieces({ name, profile, pieces, waiting = 0, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; onReview?: () => void; onOpen: (p: Piece | null) => void; onChanged: () => void }) {
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -311,14 +327,14 @@ function Pieces({ name, pieces, waiting = 0, onReview, onOpen, onChanged }: { na
       <header className="d-home-head">
         <div className="d-home-hello">
           <span className="eb">The Guild Desk</span>
-          <h1 className="h1 d-hello">{greeting()}, {name.split(' ')[0]}</h1>
+          <h1 className="h1 d-hello">{greeting()}, {firstName(name)}</h1>
           <p className="d-tally">
             <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
           </p>
-          <DeskPrestige published={counts.published} />
         </div>
         <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
       </header>
+      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {} }} uid={profile?.id} />
       {waiting > 0 && (
         <button type="button" className="d-waiting" onClick={onReview}>
           <span className="d-waiting-dot" aria-hidden="true" />
