@@ -55,7 +55,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
           <span class="h2 he-feat-title">{featured.title}</span>
           {featured.standfirst && <span class="it he-feat-sf">{featured.standfirst}</span>}
           <span class="he-feat-by"><Avatar name={featured.author.display_name} src={featured.author.portrait || undefined} size={30} id={featured.author.id} /><span class="lab mut">{featured.author.display_name} · {fmt(featured.date)}</span></span>
-          <span class="lab he-feat-go">Read <span aria-hidden="true">→</span></span>
+          <span class="lab he-feat-go">{featured.kind === 'photograph' ? 'See the photograph' : 'Read'} <span aria-hidden="true">→</span></span>
         </span>
       </a>
     </section>
