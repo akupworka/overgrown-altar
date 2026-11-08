@@ -978,3 +978,36 @@
   .d-room.writing .d-paper-count { margin-top: auto; padding-top: 12px; }
   .d-room.writing #d-title, .d-room.writing #d-standfirst, .d-room.writing .ProseMirror { scroll-margin-top: calc(var(--hdr) + 110px); }
 }
+
+/* ---- The Guild's members page on phones -------------------------------------------------------------------- */
+.g-search { display: flex; align-items: center; gap: 10px; padding: 0 16px; min-height: 48px; border-radius: 999px; color: var(--muted-dark);
+  background: rgba(243, 236, 220, .04); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); max-width: 420px; }
+.g-search:focus-within { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .5); color: var(--ember); }
+.g-search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; color: var(--bone); font-family: var(--serif); font-size: 18px; padding: 10px 0; }
+.g-search input::placeholder { color: #8C8679; font-style: italic; }
+@media (max-width: 700px) {
+  .g-wrap { gap: 22px; }
+  .g-head .d-sub { font-size: 16px; }
+  /* The rooms: the forum in full, then the other three as one tidy row of tiles */
+  .g-rooms { gap: 10px; }
+  .g-room { border-radius: 14px; }
+  .g-room-side { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .g-room-small { padding: 14px 10px 12px; gap: 6px; align-items: center; text-align: center; justify-content: center; min-height: 92px; }
+  .g-room-small .eb { font-size: 9px; letter-spacing: .14em; }
+  .g-room-small .g-room-line { display: none; }
+  .g-room-small .g-room-go { align-self: center; font-size: 8.5px; }
+  .g-search { max-width: none; }
+  /* Members: a compact directory, like a phone's contacts */
+  .g-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .g-card { display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; min-height: 76px; grid-template-rows: auto auto; column-gap: 14px; row-gap: 3px;
+    align-items: center; justify-items: start; text-align: left !important; padding: 10px 14px 10px 10px !important; border-radius: 14px;
+    background: rgba(243, 236, 220, .035); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); position: relative; }
+  .g-card:active { background: rgba(255, 227, 163, .06); }
+  .g-card .g-arch { grid-row: 1 / span 2; width: 46px !important; height: 58px !important; font-size: 16px !important; margin: 0 0 0 4px !important; box-shadow: 0 0 0 1px var(--brass) !important; }
+  .g-card .g-arch::before, .g-card .g-arch::after { display: none !important; }
+  .g-card .g-name { grid-column: 2; font-size: 19px !important; line-height: 1.2; margin: 0 !important; }
+  .g-card .g-role { grid-column: 2; font-size: 8.5px !important; letter-spacing: .14em; margin: 0 !important; }
+  .g-card .g-count { display: none; }
+  .g-card .pr { grid-column: 3; grid-row: 1 / span 2; margin: 0 22px 0 0 !important; transform: scale(.88); transform-origin: right center; }
+  .g-card::after { content: '›'; position: absolute; right: 14px; top: 50%; transform: translateY(-52%); color: #8C8679; font-size: 22px; }
+}

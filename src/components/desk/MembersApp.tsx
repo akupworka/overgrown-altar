@@ -46,6 +46,7 @@ function Arch({ p, big = false }: { p: Pick<Profile, 'display_name' | 'portrait_
 
 function Directory() {
   const [members, setMembers] = useState<(Profile & { count: number })[] | null>(null);
+  const [q, setQ] = useState('');   // find a member by name or craft
   useEffect(() => {
     (async () => {
       const [{ data: people }, { data: work }] = await Promise.all([
@@ -93,16 +94,23 @@ function Directory() {
         </div>
       </div>
       <div className="g-people-head"><span className="eb">Members</span>{members && <span className="lab mut">{members.length} at the table</span>}</div>
+      {members && members.length > 3 && (
+        <label className="g-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          <span className="visually-hidden">Find a member</span>
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a member by name or craft" />
+        </label>
+      )}
       {!members ? <p className="lab mut">Gathering the Guild…</p>
         : members.length === 0 ? <p className="it mut d-empty">No one is listed yet.</p>
         : (
           <div className="g-grid">
-            {members.map((m) => (
+            {members.filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).map((m) => (
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft">{[m.role === 'editor' ? 'Editor in Chief' : 'Writer', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
-                <span className="lab mut g-craft">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
+                <span className="lab mut g-craft g-role">{[m.role === 'editor' ? 'Editor in Chief' : 'Writer', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
+                <span className="lab mut g-craft g-count">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
             ))}
