@@ -16,6 +16,7 @@ import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, t
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
 import { ForumLatest, useForumTally } from './Forum';
+import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
@@ -351,6 +352,21 @@ function StatusChip({ status }: { status: Piece['status'] }) {
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
+// Six to a page, with numbered pages below (the same row as the writer pages and the forum).
+const DESK_PER = 6;
+function DeskPages({ cur, pages, onGo }: { cur: number; pages: number; onGo: (n: number) => void }) {
+  if (pages < 2) return null;
+  const go = (n: number) => { onGo(n); document.querySelector('.d-row-head, .d-page-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  return (
+    <nav className="pager d-pager" aria-label="Pages">
+      <button type="button" className="pg-step" disabled={cur === 1} onClick={() => go(cur - 1)} aria-label="Newer">‹<span className="pg-word">Newer</span></button>
+      {pageList(cur, pages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+        : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} onClick={() => go(n)}>{n}</button>)}
+      <button type="button" className="pg-step" disabled={cur === pages} onClick={() => go(cur + 1)} aria-label="Older"><span className="pg-word">Older</span>›</button>
+    </nav>
+  );
+}
+
 // The editor's own tools on the Desk home: invite a writer, and put the latest changes on the site now.
 function EditorTools() {
   const [email, setEmail] = useState('');
@@ -408,7 +424,15 @@ function KindMark({ medium }: { medium: string }) {
 }
 
 function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
-  const tally = useForumTally(profile?.id);   // their part in the forum, for its trophies
+  const tally = useForumTally(profile?.id);
+  // Which pieces to show: all, or one state; six to a page, newest first.
+  const [show, setShow] = useState<'all' | 'drafts' | 'with' | 'live'>('all');
+  const [page, setPage] = useState(1);
+  const inShow = (p: Piece) => show === 'all' ? true : show === 'drafts' ? (p.status === 'draft' || p.status === 'returned') : show === 'with' ? p.status === 'submitted' : p.status === 'approved';
+  const listed = pieces.filter(inShow);
+  const pages = Math.max(1, Math.ceil(listed.length / DESK_PER));
+  const cur = Math.min(page, pages);
+  const onPage = listed.slice((cur - 1) * DESK_PER, cur * DESK_PER);   // their part in the forum, for its trophies
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -461,7 +485,14 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <span className="lab">Review →</span>
         </button>
       )}
-      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{pieces.length} in all · newest first</span>}</div>
+      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' ? 'in all' : 'shown'} · newest first</span>}</div>
+      {pieces.length > 3 && (
+        <div className="filters d-filters" role="group" aria-label="Show">
+          {([['all', 'All', pieces.length], ['drafts', 'Drafts', counts.drafts], ['with', 'With the editor', counts.waiting], ['live', 'Published', counts.published]] as const).map(([k, label, n]) => (
+            <button key={k} type="button" className="chip" aria-pressed={show === k} onClick={() => { setShow(k); setPage(1); }}>{label}<span className="chip-n">{n}</span></button>
+          ))}
+        </div>
+      )}
       {pieces.length === 0 ? (
         <button type="button" className="d-first" onClick={() => onOpen(null)}>
           <span className="it">Every piece begins with a title.</span>
@@ -469,7 +500,8 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         </button>
       ) : (
         <ul className="d-list">
-          {pieces.map((p) => (
+          {onPage.length === 0 && <li className="it mut d-empty">Nothing here yet.</li>}
+          {onPage.map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
@@ -488,6 +520,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           ))}
         </ul>
       )}
+      <DeskPages cur={cur} pages={pages} onGo={setPage} />
     </section>
   );
 }
@@ -970,12 +1003,15 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
 }
 
 function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name: string } })[]; onRead: (p: Piece) => void }) {
+  const [page, setPage] = useState(1);
+  const pages = Math.max(1, Math.ceil(queue.length / DESK_PER));
+  const cur = Math.min(page, pages);
   return (
     <section className="d-section">
       <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces members have sent to your table, and changes to published pieces, oldest first.</p></header>
       {queue.length === 0 ? <p className="it mut d-empty">Nothing is waiting. The table is quiet.</p> : (
         <ul className="d-list">
-          {queue.map((p) => (
+          {queue.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
                 <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
@@ -987,6 +1023,7 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
           ))}
         </ul>
       )}
+      <DeskPages cur={cur} pages={pages} onGo={setPage} />
     </section>
   );
 }

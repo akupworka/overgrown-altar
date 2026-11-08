@@ -1011,3 +1011,11 @@
   .g-card .pr { grid-column: 3; grid-row: 1 / span 2; margin: 0 22px 0 0 !important; transform: scale(.88); transform-origin: right center; }
   .g-card::after { content: '›'; position: absolute; right: 14px; top: 50%; transform: translateY(-52%); color: #8C8679; font-size: 22px; }
 }
+/* Pages in the Desk (dark room) */
+.d-pager { color: var(--bone); margin-top: 24px; }
+.d-pager .pg-n[aria-current='page'] { background: var(--bone); color: #12160F; }
+.d-pager .pg-step { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3); }
+.d-pager .pg-n:hover, .d-pager .pg-step:hover:not(:disabled) { color: var(--ember); }
+.d-filters { margin: -4px 0 14px; }
+.d-filters .chip { border-color: rgba(243, 236, 220, .3); color: var(--bone); }
+.d-filters .chip[aria-pressed='true'] { background: var(--bone); color: #12160F; border-color: var(--bone); }
