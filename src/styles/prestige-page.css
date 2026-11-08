@@ -120,25 +120,21 @@
 .pzx-crest { display: inline-flex; line-height: 0; }
 .pzx-crest svg { width: 100%; height: auto; overflow: visible; }
 /* the ring holds your crest */
-.pzx-ring-crest { position: absolute; left: 50%; top: 50%; width: 150px; transform: translate(-50%, -52%); filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .6)); }
+.pzx-ring-crest { position: absolute; left: 50%; top: 50%; width: 150px; transform: translate(-50%, -52%); }
 .pzx-rank-of { color: #8C8679; font-size: 9px; }
 /* the row of crests, rising with rank */
 .pzx-lancets { align-items: end; }
 @media (max-width: 700px) { .pzx-lancets { align-items: stretch; } }
 .pzx-crest-slot { display: flex; align-items: flex-end; justify-content: center; width: 100%; height: 190px; }
-.pzx-crest-slot .pzx-crest { width: calc(90% + var(--lv) * 6%); max-width: 180px; transition: transform .5s cubic-bezier(.16, 1, .3, 1), filter .5s; }
-.pzx-l:not(.reached) .pzx-crest-slot .pzx-crest { filter: grayscale(1) brightness(.32) contrast(1.1); }
-.pzx-l:not(.reached) .pzx-l-btn:hover .pzx-crest { filter: grayscale(.55) brightness(.6); }
-/* tap a rank you haven't reached and it shows itself in full radiance */
-.pzx-l:not(.reached).chosen .pzx-crest-slot .pzx-crest { filter: drop-shadow(0 0 22px color-mix(in srgb, var(--ink) 55%, transparent)); }
+.pzx-crest-slot .pzx-crest { width: calc(90% + var(--lv) * 6%); max-width: 180px; transition: transform .5s cubic-bezier(.16, 1, .3, 1); }
+/* ranks not yet reached are drawn in dark iron (crestSvg locked); tap one and it shows itself in full radiance */
 .pzx-l:not(.reached).chosen .pzx-l-num { color: var(--ink); }
 .pzx-l:not(.reached).chosen .pzx-l-note { color: inherit; }
 .pzx-l-btn:hover .pzx-crest-slot .pzx-crest, .pzx-l.chosen .pzx-crest-slot .pzx-crest { transform: translateY(-6px) scale(1.04); }
-.pzx-l.here .pzx-crest-slot .pzx-crest { filter: drop-shadow(0 0 22px color-mix(in srgb, var(--ink) 55%, transparent)); }
 .pzx-l.chosen .pzx-l-name { color: var(--ink); }
 .pzx-you { top: auto; bottom: 74px; }
 .pzx-detail { grid-template-columns: 150px minmax(0, 1fr); }
-.pzx-detail-crest { width: 150px; display: flex; justify-content: center; filter: drop-shadow(0 10px 28px rgba(0, 0, 0, .6)); }
+.pzx-detail-crest { width: 150px; display: flex; justify-content: center; }
 /* life in the higher crests */
 .crest-spin { animation: crest-spin 90s linear infinite; transform-box: view-box; transform-origin: 100px 104px; }
 @keyframes crest-spin { to { transform: rotate(360deg); } }
@@ -163,5 +159,5 @@
 .pzx-l-badge { display: none; }
 @media (max-width: 700px) {
   .pzx-l-badge { display: block; margin-top: 6px; line-height: 0; }
-  .pzx-l:not(.reached):not(.chosen) .pzx-l-badge { opacity: .45; filter: grayscale(.6); }
+  .pzx-l:not(.reached):not(.chosen) .pzx-l-badge { opacity: .45; }
 }

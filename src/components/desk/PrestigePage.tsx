@@ -10,13 +10,13 @@ import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
 import { TrophyCatalogue } from './Trophies';
 import { PrestigeBadge } from './Prestige';
-import { crestSvg } from '../../lib/crests';
+import { crestSvg, type CrestOpts } from '../../lib/crests';
 
 // A rank's crest (drawn once per rank and size).
 const crestCache = new Map<string, string>();
-function Crest({ lv, size, className = '' }: { lv: number; size: number; className?: string }) {
-  const key = `${lv}-${size}`;
-  if (!crestCache.has(key)) crestCache.set(key, crestSvg(lv, size));
+function Crest({ lv, size, className = '', ...opts }: { lv: number; size: number; className?: string } & CrestOpts) {
+  const key = `${lv}-${size}-${opts.locked ? 'l' : ''}${opts.glow ? 'g' : ''}`;
+  if (!crestCache.has(key)) crestCache.set(key, crestSvg(lv, size, opts));
   return <span className={`pzx-crest ${className}`} dangerouslySetInnerHTML={{ __html: crestCache.get(key)! }} />;
 }
 import '../../styles/prestige-page.css';
@@ -82,7 +82,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
             <circle cx="90" cy="90" r={R} className="pzx-ring-fill" stroke="url(#pzx-g)" strokeDasharray={`${C * pct} ${C}`} />
           </svg>
           <div className="pzx-ring-in">
-            {current ? <Crest lv={current.level} size={112} className="pzx-ring-crest" /> : <span className="pzx-ring-num">·</span>}
+            {current ? <Crest lv={current.level} size={112} className="pzx-ring-crest" glow /> : <span className="pzx-ring-num">·</span>}
           </div>
         </div>
         <div className="pzx-stand-text">
@@ -115,7 +115,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
             return (
               <li key={p.level} className={`pzx-l${reached ? ' reached' : ''}${here ? ' here' : ''}${pick === p.level ? ' chosen' : ''}`} style={{ '--lv': p.level, '--ink': inkOf(p) } as CSSProperties}>
                 <button type="button" className="pzx-l-btn" onClick={() => setChosen(p.level)} aria-pressed={pick === p.level} aria-label={`${p.name}, rank ${p.level}: ${p.at} published ${p.at === 1 ? 'piece' : 'pieces'}${here ? ', you are here' : reached ? ', reached' : ''}`}>
-                  <span className="pzx-crest-slot"><Crest lv={p.level} size={160} /></span>
+                  <span className="pzx-crest-slot"><Crest lv={p.level} size={160} locked={!reached && pick !== p.level} glow={here || pick === p.level} /></span>
                   <span className="pzx-l-text">
                     <span className="pzx-l-num">{p.numeral}</span>
                     <span className="pzx-l-name">{p.name}</span>
@@ -132,7 +132,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
         </ol>
         {/* The chosen window, in full (computers) */}
         <div className="pzx-detail" style={{ '--ink': inkOf(sel) } as CSSProperties}>
-          <span className="pzx-detail-crest" aria-hidden="true"><Crest lv={sel.level} size={150} /></span>
+          <span className="pzx-detail-crest" aria-hidden="true"><Crest lv={sel.level} size={150} glow /></span>
           <div className="pzx-detail-text">
             <span className="lab mut">Rank {sel.level} of 10 · {sel.at} published {sel.at === 1 ? 'piece' : 'pieces'}</span>
             <h3 className="pzx-detail-name">{sel.numeral}&nbsp; {sel.name}</h3>

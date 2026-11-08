@@ -45,12 +45,18 @@ const PRISM = ['#3E7BFF', '#8A5BF0', '#E0457A', '#FF3B4E', '#FF8A3D', '#FFC44D',
 const CY = 104; // where the shapes are centered
 
 let n = 0;
-export function crestSvg(level: number, size = 120): string {
+// Options: locked draws the crest in dark iron (a rank not yet reached; no CSS filters, which phones draw as boxes);
+// glow lights it from behind (any rank); mini leaves out the glow and the rays (for the small name badges).
+export interface CrestOpts { locked?: boolean; glow?: boolean; mini?: boolean }
+const IRON = ['#56595F', '#34373C', '#16171A'];
+export function crestSvg(level: number, size = 120, opts: CrestOpts = {}): string {
   const lv = Math.max(1, Math.min(10, level));
+  const { locked = false, glow = false, mini = false } = opts;
   const id = `cr${lv}-${++n}`;
-  const [ml, mb, md] = metalFor(lv);
-  const gem = gemFor(lv);
-  const [f1, f2] = fieldFor(lv);
+  const [ml, mb, md] = locked ? IRON : metalFor(lv);
+  const gem = locked ? ['#3C3F44', '#2C2E32', '#1E1F22', '#131416'] : gemFor(lv);
+  const [f1, f2] = locked ? ['#141517', '#0A0A0B'] : fieldFor(lv);
+  const prism = lv === 10 && !locked;
   const shape = shapeFor(lv);
   const out: string[] = [];
 
@@ -60,28 +66,28 @@ export function crestSvg(level: number, size = 120): string {
     <linearGradient id="${id}-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${f1}"/><stop offset="1" stop-color="${f2}"/></linearGradient>
     <radialGradient id="${id}-g"><stop offset="0" stop-color="${gem[1]}" stop-opacity=".55"/><stop offset="1" stop-color="${gem[1]}" stop-opacity="0"/></radialGradient>
     <radialGradient id="${id}-r"><stop offset=".15" stop-color="${ml}" stop-opacity=".9"/><stop offset="1" stop-color="${mb}" stop-opacity="0"/></radialGradient>
-    ${lv === 10 ? `<linearGradient id="${id}-rb" x1="0" y1="0" x2="1" y2="1">${PRISM.map((c, i) => `<stop offset="${f(i / (PRISM.length - 1))}" stop-color="${c}"/>`).join('')}</linearGradient>${PRISM.map((c, i) => `<radialGradient id="${id}-r${i}" cx="100" cy="${CY}" r="96" gradientUnits="userSpaceOnUse"><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join('')}` : ''}
+    ${prism ? `<linearGradient id="${id}-rb" x1="0" y1="0" x2="1" y2="1">${PRISM.map((c, i) => `<stop offset="${f(i / (PRISM.length - 1))}" stop-color="${c}"/>`).join('')}</linearGradient>${PRISM.map((c, i) => `<radialGradient id="${id}-r${i}" cx="100" cy="${CY}" r="96" gradientUnits="userSpaceOnUse"><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join('')}` : ''}
     <clipPath id="${id}-c"><path d="${shape}"/></clipPath>
   </defs>`);
 
   // Glow (VII+)
-  if (lv >= 7) out.push(`<circle class="crest-aura" cx="100" cy="${CY}" r="${lv >= 9 ? 96 : 84}" fill="url(#${id}-g)"/>`);
+  if (!locked && !mini && (lv >= 7 || glow)) out.push(`<circle class="crest-aura" cx="100" cy="${CY}" r="${lv >= 9 ? 96 : lv >= 7 ? 84 : 72}" fill="url(#${id}-g)"/>`);
 
   // Sunburst (IX+): long thin rays that turn slowly
-  if (lv >= 9) {
+  if (lv >= 9 && !mini) {
     const rays = lv === 10 ? 16 : 12;
     let r = '';
     for (let i = 0; i < rays; i++) {
       const a = (i / rays) * Math.PI * 2, w = lv === 10 ? 0.1 : 0.07, len = i % 2 ? 76 : 94;
       const p = (ang: number, d: number) => `${f(100 + Math.cos(ang) * d)} ${f(CY + Math.sin(ang) * d)}`;
-      r += `<path d="M${p(a - w, 30)} L${p(a, len)} L${p(a + w, 30)} Z"${lv === 10 ? ` fill="url(#${id}-r${i % PRISM.length})"` : ''}/>`;
+      r += `<path d="M${p(a - w, 30)} L${p(a, len)} L${p(a + w, 30)} Z"${prism ? ` fill="url(#${id}-r${i % PRISM.length})"` : ''}/>`;
     }
-    out.push(`<g class="crest-spin" fill="url(#${id}-r)">${r}</g>`);
+    out.push(`<g class="${locked ? '' : 'crest-spin'}" opacity="${locked ? .5 : 1}" fill="url(#${id}-r)">${r}</g>`);
   }
 
   // Halo (IX+), double at X
   if (lv >= 9) {
-    out.push(`<circle cx="100" cy="${CY}" r="70" fill="none" stroke="url(#${id}-${lv === 10 ? 'rb' : 'b'})" stroke-width="${lv === 10 ? 3.6 : 3}"/>`);
+    out.push(`<circle cx="100" cy="${CY}" r="70" fill="none" stroke="url(#${id}-${prism ? 'rb' : 'b'})" stroke-width="${prism ? 3.6 : 3}"/>`);
   }
 
   // Blades (IV+): clean angular wings, longest on top
@@ -102,7 +108,7 @@ export function crestSvg(level: number, size = 120): string {
     for (const dx of xs) {
       const h = dx === 0 ? 30 : Math.abs(dx) <= 18 ? 22 : 15, x = 100 + dx, base = 62 - (dx === 0 ? 8 : 0) + Math.abs(dx) * 0.08;
       out.push(`<path d="M${x - 6} ${f(base)} L${x} ${f(base - h)} L${x + 6} ${f(base)} Z" fill="url(#${id}-m)" stroke="${md}" stroke-width="1.4" stroke-linejoin="round"/>`);
-      if (lv >= 10 && dx === 0) out.push(`<circle cx="${x}" cy="${f(base - h)}" r="3.4" fill="#FFFFFF" stroke="${md}" stroke-width="1"/>`);
+      if (lv >= 10 && dx === 0) out.push(`<circle cx="${x}" cy="${f(base - h)}" r="3.4" fill="${locked ? mb : '#FFFFFF'}" stroke="${md}" stroke-width="1"/>`);
     }
   }
 
@@ -115,12 +121,12 @@ export function crestSvg(level: number, size = 120): string {
 
   // The frame: metal rim, dark field inside, one bevel of light
   out.push(`<path d="${shape}" fill="url(#${id}-m)" stroke="${md}" stroke-width="2" stroke-linejoin="round"/>`);
-  out.push(`<rect x="0" y="0" width="100" height="200" fill="#FFFFFF" opacity=".16" clip-path="url(#${id}-c)"/>`);
+  out.push(`<rect x="0" y="0" width="100" height="200" fill="#FFFFFF" opacity="${locked ? .06 : .16}" clip-path="url(#${id}-c)"/>`);
   const inset = (s: number) => `transform="translate(100 ${CY}) scale(${s}) translate(-100 -${CY})"`;
   out.push(`<path d="${shape}" ${inset(.8)} fill="url(#${id}-f)" stroke="${md}" stroke-width="1.6"/>`);
-  out.push(`<path d="${shape}" ${inset(.72)} fill="none" stroke="${lv === 10 ? `url(#${id}-rb)` : ml}" stroke-opacity="${lv === 10 ? .9 : .28}" stroke-width="${lv === 10 ? 1.8 : 1.2}"/>`);
+  out.push(`<path d="${shape}" ${inset(.72)} fill="none" stroke="${prism ? `url(#${id}-rb)` : ml}" stroke-opacity="${prism ? .9 : .28}" stroke-width="${prism ? 1.8 : 1.2}"/>`);
   // II: an outer ring around the medallion
-  if (lv === 2) out.push(`<circle cx="100" cy="${CY - 2}" r="46" fill="none" stroke="url(#${id}-${lv === 10 ? 'rb' : 'b'})" stroke-width="${lv === 10 ? 3.6 : 3}"/>`);
+  if (lv === 2) out.push(`<circle cx="100" cy="${CY - 2}" r="46" fill="none" stroke="url(#${id}-b)" stroke-width="3"/>`);
 
   // The gem: four facets to a center point, growing a little with rank
   const g = 0.78 + lv * 0.04, gy = CY - 2;
@@ -128,7 +134,7 @@ export function crestSvg(level: number, size = 120): string {
   const T = P(0, -24), R = P(17, 0), B = P(0, 26), L = P(-17, 0), C = P(0, -2);
   out.push(`<path d="M${T} L${R} L${C} Z" fill="${gem[1]}"/><path d="M${T} L${L} L${C} Z" fill="${gem[0]}"/><path d="M${L} L${B} L${C} Z" fill="${gem[2]}"/><path d="M${R} L${B} L${C} Z" fill="${gem[3]}"/>`);
   out.push(`<path d="M${T} L${R} L${B} L${L} Z" fill="none" stroke="${mix(md, '#000000', .3)}" stroke-width="1.6" stroke-linejoin="round"/>`);
-  out.push(`<path d="M${P(-4, -14)} L${P(0, -20)} L${P(1, -12)} Z" fill="#FFFFFF" opacity=".75"/>`);
+  out.push(`<path d="M${P(-4, -14)} L${P(0, -20)} L${P(1, -12)} Z" fill="#FFFFFF" opacity="${locked ? .12 : .75}"/>`);
 
   return `<svg class="crest crest-${lv}" viewBox="0 0 200 200" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${out.join('')}</svg>`;
 }
