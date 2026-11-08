@@ -123,7 +123,7 @@ export function ForumIndex({ me }: { me?: string } = {}) {
         supabase.from('forum_boards').select('*').order('position'),
         supabase.from('forum_threads').select('*').order('last_post_at', { ascending: false }),
       ]);
-      setBoards((b as Board[]) ?? []); setThreads(Array.isArray(t) ? (t as Thread[]) : []);
+      setBoards(Array.isArray(b) ? (b as Board[]) : []); setThreads(Array.isArray(t) ? (t as Thread[]) : []);
       setPeople(await loadPeople((Array.isArray(t) ? t : []).map((x: any) => x.last_author_id)));
     })();
   }, []);
@@ -325,7 +325,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
       supabase.from('forum_boards').select('*').eq('id', t.board_id).maybeSingle(),
       supabase.from('forum_posts').select('*').eq('thread_id', id).order('created_at'),
     ]);
-    setBoard((b as Board) ?? null); setPosts((p as Post[]) ?? []);
+    setBoard((b as Board) ?? null); setPosts(Array.isArray(p) ? (p as Post[]) : []);
     const authors = [...new Set((Array.isArray(p) ? p : []).map((x: any) => x.author_id))];
     setPeople(await loadPeople(authors));
     if (authors.length) {

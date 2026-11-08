@@ -457,10 +457,10 @@
 .d-decide .d-notice:empty { display: none; }
 .d-waiting .lab { white-space: nowrap; }
 
-/* Phones, while writing: the site header steps away so it never covers the page; the writing tools
-   stay pinned to the top of the screen, and "Back to my desk" is the way out. */
+/* Phones, while writing: the site header and the members' bar stay in place (every page still one tap away);
+   the writing bar sits just beneath them, and the formatting tools beneath that. --hdr is the header's height. */
 @media (max-width: 700px) {
-  body:has(.d-room.writing) .site-header, body:has(.d-room.writing) .nav-shade { transform: translateY(-110%); opacity: 0; pointer-events: none; }
+  :root { --hdr: 102px; }
   .d-room.writing .d-paper-tools { position: sticky; top: 0; z-index: 4; background: #F1ECE2; box-shadow: 0 1px 0 rgba(42,32,23,.08); }
 }
 
@@ -469,8 +469,8 @@
 @media (max-width: 700px) {
   .d-room.writing .d-back { display: none !important; }
   .d-room.writing .d-write-bar {
-    top: 0 !important; bottom: auto !important; left: 0; right: 0; border-radius: 0; gap: 10px;
-    padding: calc(8px + env(safe-area-inset-top)) 12px 8px 6px; min-height: 52px;
+    top: var(--hdr) !important; bottom: auto !important; left: 0; right: 0; border-radius: 0; gap: 10px;
+    padding: 8px 12px 8px 6px; min-height: 52px; z-index: 45;
     background: rgba(10, 12, 10, .96); box-shadow: 0 1px 0 rgba(243, 236, 220, .08);
   }
   .d-room.writing .d-write-bar .d-close { display: inline-flex !important; align-items: center; justify-content: center; flex: none;
@@ -479,9 +479,9 @@
   .d-room.writing .d-write-actions { gap: 4px !important; }
   .d-room.writing .d-write-actions .ghost { border: 0 !important; padding: 9px 10px !important; color: var(--muted-dark); }
   .d-room.writing .d-write-actions .btn { padding: 9px 14px !important; font-size: 9.5px; border-radius: 999px; }
-  .d-room.writing .d-paper-tools { top: calc(52px + env(safe-area-inset-top)); gap: 16px; padding: 10px 20px; }
+  .d-room.writing .d-paper-tools { top: calc(var(--hdr) + 52px); gap: 16px; padding: 10px 20px; }
   .d-room.writing .d-paper-tools button { font-size: 9px; }
-  .desk-in:has(.d-room.writing) { padding-top: 108px; padding-bottom: 60px; }
+  .desk-in:has(.d-room.writing) { padding-top: calc(var(--hdr) + 66px); padding-bottom: 60px; }
 }
 
 /* ---- Phones: writing in three pages (Write · Label it · Review) ---- */
@@ -528,7 +528,7 @@
   .d-edit { align-self: flex-start; font-size: 10px; padding: 8px 0; }
   .d-step-note { margin: 16px 0 0; font-size: 16px; color: #8C8679; }
   .d-step .d-step-go + .d-later { align-self: center; margin-top: 6px; font-size: 10px; }
-  .d-step-0 .d-paper-tools, .step-0 .d-paper-tools { top: calc(52px + env(safe-area-inset-top)); }
+  .d-step-0 .d-paper-tools, .step-0 .d-paper-tools { top: calc(var(--hdr, 0px) + 52px); }
 }
 @media (max-width: 700px) { .d-step .d-textbtn { font-family: var(--sans); letter-spacing: .2em; text-transform: uppercase; } }
 
@@ -805,7 +805,7 @@
 @media (max-width: 700px) {
   .d-tools-wrap { display: block; position: relative; margin: 4px -20px; }
   .d-tools-wrap .d-paper-tools { margin: 0 !important; position: static !important; }
-  .d-room.writing .d-tools-wrap { position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 4; background: #F1ECE2; box-shadow: 0 1px 0 rgba(42,32,23,.08); }
+  .d-room.writing .d-tools-wrap { position: sticky; top: calc(var(--hdr, 0px) + 52px); z-index: 4; background: #F1ECE2; box-shadow: 0 1px 0 rgba(42,32,23,.08); }
   .d-tools-more { display: flex; position: absolute; top: 1px; bottom: 1px; right: 0; width: 76px; align-items: center; justify-content: flex-end; padding: 0 18px 0 0;
     border: 0; cursor: pointer; color: var(--oxblood); background: linear-gradient(90deg, rgba(241,236,226,0), #F1ECE2 52%); font-size: 26px; line-height: 1; transition: opacity .3s; }
   .d-tools-more span { display: inline-block; animation: d-nudge 2.4s ease-in-out infinite; }
