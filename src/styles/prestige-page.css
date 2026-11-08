@@ -120,13 +120,13 @@
 .pzx-crest { display: inline-flex; line-height: 0; }
 .pzx-crest svg { width: 100%; height: auto; overflow: visible; }
 /* the ring holds your crest */
-.pzx-ring-crest { position: absolute; left: 50%; top: 50%; width: 112px; transform: translate(-50%, -54%); filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .6)); }
+.pzx-ring-crest { position: absolute; left: 50%; top: 50%; width: 150px; transform: translate(-50%, -52%); filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .6)); }
 .pzx-rank-of { color: #8C8679; font-size: 9px; }
 /* the row of crests, rising with rank */
 .pzx-lancets { align-items: end; }
 @media (max-width: 700px) { .pzx-lancets { align-items: stretch; } }
 .pzx-crest-slot { display: flex; align-items: flex-end; justify-content: center; width: 100%; height: 190px; }
-.pzx-crest-slot .pzx-crest { width: calc(52% + var(--lv) * 5%); max-width: 150px; transition: transform .5s cubic-bezier(.16, 1, .3, 1), filter .5s; }
+.pzx-crest-slot .pzx-crest { width: calc(90% + var(--lv) * 6%); max-width: 180px; transition: transform .5s cubic-bezier(.16, 1, .3, 1), filter .5s; }
 .pzx-l:not(.reached) .pzx-crest-slot .pzx-crest { filter: grayscale(1) brightness(.32) contrast(1.1); }
 .pzx-l:not(.reached) .pzx-l-btn:hover .pzx-crest, .pzx-l:not(.reached).chosen .pzx-crest { filter: grayscale(.55) brightness(.6); }
 .pzx-l-btn:hover .pzx-crest-slot .pzx-crest, .pzx-l.chosen .pzx-crest-slot .pzx-crest { transform: translateY(-6px) scale(1.04); }
@@ -136,9 +136,9 @@
 .pzx-detail { grid-template-columns: 150px minmax(0, 1fr); }
 .pzx-detail-crest { width: 150px; display: flex; justify-content: center; filter: drop-shadow(0 10px 28px rgba(0, 0, 0, .6)); }
 /* life in the higher crests */
-.crest-spin { animation: crest-spin 80s linear infinite; }
+.crest-spin { animation: crest-spin 90s linear infinite; transform-box: view-box; transform-origin: 100px 104px; }
 @keyframes crest-spin { to { transform: rotate(360deg); } }
-.crest-aura { animation: crest-breathe 5s ease-in-out infinite; transform-origin: 100px 112px; }
+.crest-aura { animation: crest-breathe 5s ease-in-out infinite; transform-box: view-box; transform-origin: 100px 104px; }
 @keyframes crest-breathe { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
 .crest-star { animation: crest-twinkle 3.2s ease-in-out infinite; }
 .crest-star:nth-of-type(2n) { animation-delay: 1.4s; }
@@ -147,9 +147,9 @@
 @media (prefers-reduced-motion: reduce) { .crest-spin, .crest-aura, .crest-star { animation: none; } }
 @media (max-width: 900px) { .pzx-crest-slot { height: 150px; } }
 @media (max-width: 700px) {
-  .pzx-crest-slot { width: 64px; height: 74px; flex: none; align-items: center; }
-  .pzx-crest-slot .pzx-crest { width: 64px !important; max-width: none; }
+  .pzx-crest-slot { width: 76px; height: 76px; flex: none; align-items: center; }
+  .pzx-crest-slot .pzx-crest { width: 84px !important; max-width: none; }
   .pzx-l-btn:hover .pzx-crest-slot .pzx-crest, .pzx-l.chosen .pzx-crest-slot .pzx-crest { transform: none; }
-  .pzx-ring-crest { width: 96px; }
+  .pzx-ring-crest { width: 128px; }
   .pzx-you { bottom: auto; }
 }
