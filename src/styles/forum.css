@@ -272,3 +272,18 @@
   .fo-bubble { display: block; }
   .fo-thread-n-word { display: none; }
 }
+
+/* The reply bar is always at the bottom of the screen on a thread, however short the thread, like a message app.
+   The page leaves room beneath the last post so it can always scroll clear of the bar. */
+.fo-reply { position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+  width: min(1100px, calc(100% - 48px)); margin: 0 !important; }
+.fo:has(.fo-reply) { padding-bottom: 150px; }
+@media (max-width: 700px) {
+  .fo-reply { width: auto; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); transform: none;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .fo:has(.fo-reply) { padding-bottom: 130px; }
+  /* a soft fade behind it, so posts melt away before they reach the bar */
+  .fo-reply::before { content: ''; position: absolute; z-index: -1; pointer-events: none; left: -12px; right: -12px; top: -44px; bottom: calc(-10px - env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(10, 12, 10, 0), rgba(10, 12, 10, .9) 45%, #0A0C0A 70%); }
+}
+.desk-in:has(.fo-reply) { padding-bottom: 0 !important; }
