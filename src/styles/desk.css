@@ -965,3 +965,16 @@
   .pz-ladder { display: flex; flex-direction: column; gap: 10px; border: 0 !important; }
   .pz-ladder > li { border: 0 !important; border-radius: 14px; background: rgba(243, 236, 220, .03); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); padding: 14px 16px !important; }
 }
+
+/* Phones, writing: the sheet fits the screen it's on. Empty, it fills exactly the space below the bars
+   (using the phone's real visible height, which also shrinks when the keyboard opens); as you write, it grows.
+   The title can never scroll in under the bars. */
+@media (max-width: 700px) {
+  .desk-in:has(.d-room.writing) { padding-top: calc(var(--hdr) + 52px) !important; padding-bottom: 0 !important; }
+  .d-room.writing .d-paper { display: flex; flex-direction: column; min-height: calc(100vh - var(--hdr) - 52px) !important;
+    min-height: calc(100dvh - var(--hdr) - 52px) !important; padding-top: 22px !important; }
+  .d-room.writing .d-rich, .d-room.writing .d-paper-body { flex: 1 1 auto; min-height: 6em !important; }
+  .d-room.writing .d-rich .ProseMirror { min-height: 100%; }
+  .d-room.writing .d-paper-count { margin-top: auto; padding-top: 12px; }
+  .d-room.writing #d-title, .d-room.writing #d-standfirst, .d-room.writing .ProseMirror { scroll-margin-top: calc(var(--hdr) + 110px); }
+}
