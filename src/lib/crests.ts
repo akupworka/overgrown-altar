@@ -4,7 +4,7 @@
 //   III  a steel shield                       IV   silver, and the first pair of blades
 //   V    a second pair of blades, a chevron   VI   a crowned shield, three points
 //   VII  gold, a third pair of blades, a glow VIII five points, a fourth pair, a second chevron
-//   IX   a prism gem, a halo, a slow sunburst X    white gold, five pairs of blades, an ember field, a jeweled crown
+//   IX   a prism gem, a halo, a slow sunburst X    white gold, five pairs of blades, an ember field, a jeweled crown, rainbow rays and halo
 // crestSvg(level, size) returns an <svg> string (viewBox 200 x 200). Moving parts are styled in prestige-page.css.
 import { PRESTIGES } from './prestige';
 
@@ -41,6 +41,7 @@ const MEDAL = 'M100 64 a38 38 0 1 1 -0.01 0 Z';
 const SHIELD = 'M100 56 L138 68 V104 C138 130 121 147 100 156 C79 147 62 130 62 104 V68 Z';
 const CROWNED = 'M62 66 L86 60 L100 50 L114 60 L138 66 V104 C138 131 121 149 100 158 C79 149 62 131 62 104 Z';
 const shapeFor = (lv: number) => (lv <= 2 ? MEDAL : lv <= 5 ? SHIELD : CROWNED);
+const PRISM = ['#3E7BFF', '#8A5BF0', '#E0457A', '#FF3B4E', '#FF8A3D', '#FFC44D', '#7BD94A', '#2EC4C9'];
 const CY = 104; // where the shapes are centered
 
 let n = 0;
@@ -59,6 +60,7 @@ export function crestSvg(level: number, size = 120): string {
     <linearGradient id="${id}-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${f1}"/><stop offset="1" stop-color="${f2}"/></linearGradient>
     <radialGradient id="${id}-g"><stop offset="0" stop-color="${gem[1]}" stop-opacity=".55"/><stop offset="1" stop-color="${gem[1]}" stop-opacity="0"/></radialGradient>
     <radialGradient id="${id}-r"><stop offset=".15" stop-color="${ml}" stop-opacity=".9"/><stop offset="1" stop-color="${mb}" stop-opacity="0"/></radialGradient>
+    ${lv === 10 ? `<linearGradient id="${id}-rb" x1="0" y1="0" x2="1" y2="1">${PRISM.map((c, i) => `<stop offset="${f(i / (PRISM.length - 1))}" stop-color="${c}"/>`).join('')}</linearGradient>${PRISM.map((c, i) => `<radialGradient id="${id}-r${i}" cx="100" cy="${CY}" r="96" gradientUnits="userSpaceOnUse"><stop offset=".45" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join('')}` : ''}
     <clipPath id="${id}-c"><path d="${shape}"/></clipPath>
   </defs>`);
 
@@ -70,16 +72,16 @@ export function crestSvg(level: number, size = 120): string {
     const rays = lv === 10 ? 16 : 12;
     let r = '';
     for (let i = 0; i < rays; i++) {
-      const a = (i / rays) * Math.PI * 2, w = 0.07, len = i % 2 ? 76 : 94;
+      const a = (i / rays) * Math.PI * 2, w = lv === 10 ? 0.1 : 0.07, len = i % 2 ? 76 : 94;
       const p = (ang: number, d: number) => `${f(100 + Math.cos(ang) * d)} ${f(CY + Math.sin(ang) * d)}`;
-      r += `<path d="M${p(a - w, 30)} L${p(a, len)} L${p(a + w, 30)} Z"/>`;
+      r += `<path d="M${p(a - w, 30)} L${p(a, len)} L${p(a + w, 30)} Z"${lv === 10 ? ` fill="url(#${id}-r${i % PRISM.length})"` : ''}/>`;
     }
     out.push(`<g class="crest-spin" fill="url(#${id}-r)">${r}</g>`);
   }
 
   // Halo (IX+), double at X
   if (lv >= 9) {
-    out.push(`<circle cx="100" cy="${CY}" r="70" fill="none" stroke="url(#${id}-b)" stroke-width="3"/>`);
+    out.push(`<circle cx="100" cy="${CY}" r="70" fill="none" stroke="url(#${id}-${lv === 10 ? 'rb' : 'b'})" stroke-width="${lv === 10 ? 3.6 : 3}"/>`);
   }
 
   // Blades (IV+): clean angular wings, longest on top
@@ -116,9 +118,9 @@ export function crestSvg(level: number, size = 120): string {
   out.push(`<rect x="0" y="0" width="100" height="200" fill="#FFFFFF" opacity=".16" clip-path="url(#${id}-c)"/>`);
   const inset = (s: number) => `transform="translate(100 ${CY}) scale(${s}) translate(-100 -${CY})"`;
   out.push(`<path d="${shape}" ${inset(.8)} fill="url(#${id}-f)" stroke="${md}" stroke-width="1.6"/>`);
-  out.push(`<path d="${shape}" ${inset(.72)} fill="none" stroke="${ml}" stroke-opacity=".28" stroke-width="1.2"/>`);
+  out.push(`<path d="${shape}" ${inset(.72)} fill="none" stroke="${lv === 10 ? `url(#${id}-rb)` : ml}" stroke-opacity="${lv === 10 ? .9 : .28}" stroke-width="${lv === 10 ? 1.8 : 1.2}"/>`);
   // II: an outer ring around the medallion
-  if (lv === 2) out.push(`<circle cx="100" cy="${CY - 2}" r="46" fill="none" stroke="url(#${id}-b)" stroke-width="3"/>`);
+  if (lv === 2) out.push(`<circle cx="100" cy="${CY - 2}" r="46" fill="none" stroke="url(#${id}-${lv === 10 ? 'rb' : 'b'})" stroke-width="${lv === 10 ? 3.6 : 3}"/>`);
 
   // The gem: four facets to a center point, growing a little with rank
   const g = 0.78 + lv * 0.04, gy = CY - 2;
