@@ -28,7 +28,9 @@ const arrivedToSetPassword = /type=(invite|recovery)/.test(startHash);
 // so the link always lands on "choose your password", whatever the project's default address is.
 const startQuery = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
 const linkToken = startQuery.get('token_hash');
-const linkType = startQuery.get('type') as 'invite' | 'recovery' | 'signup' | 'magiclink' | 'email' | null;
+// invite → choose a password; recovery → choose a new one; magiclink / signup / email → simply signed in;
+// email_change → signed in, with a word that the new address is confirmed.
+const linkType = startQuery.get('type') as 'invite' | 'recovery' | 'signup' | 'magiclink' | 'email' | 'email_change' | null;
 
 // ---------------------------------------------------------------- small pieces
 
@@ -1146,12 +1148,16 @@ export default function DeskApp() {
   const [setting, setSetting] = useState<null | 'invite' | 'recovery'>(arrivedToSetPassword ? (startHash.includes('type=invite') ? 'invite' : 'recovery') : null);
 
   const [linkError, setLinkError] = useState('');
+  const [linkNote, setLinkNote] = useState('');
   useEffect(() => {
     if (linkToken && linkType) {
       history.replaceState(null, '', location.pathname);   // the link works once; don't leave it in the address bar
       supabase.auth.verifyOtp({ token_hash: linkToken, type: linkType }).then(({ data, error }) => {
         if (error) { setLinkError('This link has expired or was already used. Ask the Editor in Chief for a new invitation, or use “Forgot your password?” below.'); setReady(true); return; }
-        setSession(data.session); setSetting(linkType === 'recovery' ? 'recovery' : 'invite'); setReady(true);
+        setSession(data.session);
+        if (linkType === 'invite' || linkType === 'recovery') setSetting(linkType);
+        if (linkType === 'email_change') setLinkNote('Your new email address is confirmed. Use it to sign in from now on.');
+        setReady(true);
       });
     } else {
       supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
@@ -1167,5 +1173,5 @@ export default function DeskApp() {
   if (!ready) return <p className="lab mut d-loading">Opening the desk…</p>;
   if (session && setting) return <SetPassword invited={setting === 'invite'} onDone={() => setSetting(null)} />;
   if (!session) return <>{linkError && <p className="d-photo-msg" role="alert" style={{ maxWidth: 520, margin: '0 auto 20px' }}>{linkError}</p>}<SignIn /></>;
-  return <Desk session={session} />;
+  return <>{linkNote && <p className="d-photo-msg" role="status" style={{ maxWidth: 620, margin: '0 auto 20px' }}>{linkNote}</p>}<Desk session={session} /></>;
 }
