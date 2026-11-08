@@ -26,7 +26,7 @@ export function freshSince(built: string, pillar?: string): Promise<FreshPiece[]
       .eq('status', 'approved').not('slug', 'is', null).gt('published_at', since).order('published_at', { ascending: false }).limit(12);
     if (pillar) q = q.eq('pillar', pillar);
     const { data } = await q;
-    const rows = (data ?? []) as any[];
+    const rows = (Array.isArray(data) ? data : []).filter((r: any) => r && r.slug && r.title) as any[];   // only complete pieces
     const paths = rows.map((r) => r.image_path).filter(Boolean);
     const signed = paths.length ? (await supabase.storage.from('guild').createSignedUrls(paths, 60 * 60 * 24)).data ?? [] : [];
     const url = new Map(signed.map((s: any) => [s.path, s.signedUrl]));

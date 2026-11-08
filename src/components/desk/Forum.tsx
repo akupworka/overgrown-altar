@@ -5,6 +5,7 @@
 // Each board keeps its most recently active threads (40 by default); quieter ones are cleared away
 // by the database when new ones arrive. Pinned threads always stay.
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { pageList } from '../../lib/pager';
 import { Initials } from './DeskApp';
@@ -40,6 +41,8 @@ async function loadPeople(ids: (string | null | undefined)[]): Promise<People> {
   const { data } = await supabase.from('profiles').select('id, display_name, portrait_path, role').in('id', want);
   return Object.fromEntries((Array.isArray(data) ? data : []).map((p: any) => [p.id, p]));
 }
+/** A writing box that grows with what's in it, up to a point. */
+const grow = (el?: HTMLTextAreaElement | null) => { if (!el) return; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 220) + 'px'; };
 const nameOf = (people: People, id?: string | null) => (id && people[id]?.display_name) || 'A member';
 
 // ---- What's new since you last looked (kept on this device): each thread's last visit, and when you first came.
@@ -92,13 +95,19 @@ export function PostBody({ body }: { body: string }) {
 }
 
 function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
+  // Phones get one plain way back (the full trail wraps onto several lines there).
+  const back = thread && board ? { to: `/guild/members/?board=${board.slug}`, label: board.name }
+    : board ? { to: '/guild/members/?view=forum', label: 'All boards' } : { to: '/guild/members/', label: 'The Guild' };
   return (
-    <nav className="fo-crumbs lab" aria-label="Where you are">
-      <Link to="/guild/members/">The Guild</Link><span aria-hidden="true">›</span>
-      <Link to="/guild/members/?view=forum">The Forum</Link>
-      {board && <><span aria-hidden="true">›</span><Link to={`/guild/members/?board=${board.slug}`}>{board.name}</Link></>}
-      {thread && <><span aria-hidden="true">›</span><span className="fo-crumb-here">{thread}</span></>}
-    </nav>
+    <>
+      <nav className="fo-crumbs lab" aria-label="Where you are">
+        <Link to="/guild/members/">The Guild</Link><span aria-hidden="true">›</span>
+        <Link to="/guild/members/?view=forum">The Forum</Link>
+        {board && <><span aria-hidden="true">›</span><Link to={`/guild/members/?board=${board.slug}`}>{board.name}</Link></>}
+        {thread && <><span aria-hidden="true">›</span><span className="fo-crumb-here">{thread}</span></>}
+      </nav>
+      <Link to={back.to} className="fo-back lab"><span aria-hidden="true">←</span> {back.label}</Link>
+    </>
   );
 }
 
@@ -180,6 +189,7 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
   if (board === undefined) return <p className="lab mut d-loading">Opening the board…</p>;
   if (board === null) return <div className="fo"><Crumbs /><p className="it mut">This board isn’t here any more.</p></div>;
   const canStart = isEditor || !board.editor_only;
+  const closeSheet = () => setWriting(false);
   const pages = Math.max(1, Math.ceil(threads.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const onPage = threads.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
@@ -198,7 +208,9 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
           <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'} · keeps the {board.keep_threads} most active</span>
         </div>
       </header>
-      {writing && <NewThread board={board} me={me} onDone={(id) => { setWriting(false); go(`/guild/members/?t=${id}`); }} />}
+      {writing && <NewThread board={board} me={me} onCancel={closeSheet} onDone={(id) => { setWriting(false); go(`/guild/members/?t=${id}`); }} />}
+      {/* Phones: a floating button, always in reach however far down the board you are */}
+      {canStart && !writing && <button type="button" className="fo-fab" onClick={() => setWriting(true)}><span aria-hidden="true">+</span> New thread</button>}
       {threads.length === 0 ? <p className="it mut fo-empty">No threads yet. {canStart ? 'Start the first.' : ''}</p> : (
         <ol className="fo-threads">
           <li className="fo-threads-head lab mut" aria-hidden="true"><span>Thread</span><span>Replies</span><span>Latest</span></li>
@@ -233,7 +245,7 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
   );
 }
 
-function NewThread({ board, me, onDone }: { board: Board; me: string; onDone: (id: string) => void }) {
+function NewThread({ board, me, onDone, onCancel }: { board: Board; me: string; onDone: (id: string) => void; onCancel: () => void }) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
@@ -250,16 +262,32 @@ function NewThread({ board, me, onDone }: { board: Board; me: string; onDone: (i
     if (e2) { await supabase.from('forum_threads').delete().eq('id', t.id); return setMsg('The thread couldn’t be started. ' + e2.message); }
     onDone(t.id);
   }
-  return (
-    <form className="fo-compose" onSubmit={send}>
+  // Phones: a full-screen sheet with Cancel and Post at the top, like writing a message. Larger screens: in place.
+  const [phone] = useState(() => matchMedia('(max-width: 700px)').matches);
+  useEffect(() => {
+    if (phone) document.documentElement.classList.add('fo-sheet-open');
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    addEventListener('keydown', key);
+    return () => { document.documentElement.classList.remove('fo-sheet-open'); removeEventListener('keydown', key); };
+  }, [onCancel, phone]);
+  const form = (
+    <form className="fo-compose fo-sheet" onSubmit={send} id="fo-new" role="dialog" aria-label={`New thread in ${board.name}`}>
+      <div className="fo-sheet-bar">
+        <button type="button" className="fo-sheet-cancel" onClick={onCancel}>Cancel</button>
+        <span className="fo-sheet-title"><span className="lab mut">New thread</span><span>{board.name}</span></span>
+        <button type="submit" className="fo-sheet-post" disabled={busy || title.trim().length < 3 || !body.trim()}>{busy ? 'Posting…' : 'Post'}</button>
+      </div>
       <label className="d-lbl"><span className="lab">Title</span>
         <input className="field" maxLength={140} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What is it about?" autoFocus /></label>
       <label className="d-lbl"><span className="lab">Opening post</span>
         <textarea className="field" rows={7} maxLength={6000} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Say what’s on your mind. Be generous, be honest, be kind." /></label>
       {msg && <p className="d-photo-msg" role="alert">{msg}</p>}
       <div className="fo-compose-acts"><button className="btn d-btn" type="submit" disabled={busy}>{busy ? 'Starting…' : 'Start the thread'}</button><span className="lab mut">{6000 - body.length} characters left</span></div>
+      <p className="lab mut fo-sheet-hint">*italic* · **bold** · links work · {6000 - body.length} characters left</p>
     </form>
   );
+  // On phones the sheet is drawn above everything (the site header included).
+  return phone ? createPortal(form, document.body) : form;
 }
 
 // ---------------------------------------------------------------- one thread
@@ -269,7 +297,11 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [board, setBoard] = useState<Board | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [people, setPeople] = useState<People>({});
-  const [reply, setReply] = useState('');
+  // Your reply is kept on this device as you type, so leaving the page never loses it.
+  const DRAFT = `oa_forum_draft_${id}`;
+  const [reply, setReply] = useState(() => { try { return localStorage.getItem(DRAFT) ?? ''; } catch { return ''; } });
+  useEffect(() => { try { if (reply.trim()) localStorage.setItem(DRAFT, reply); else localStorage.removeItem(DRAFT); } catch {} }, [reply, DRAFT]);
+  const [pillGone, setPillGone] = useState(false);
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -300,7 +332,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     const text = p.body.split('\n').filter((l) => !l.startsWith('>')).join('\n').trim().slice(0, 600);
     setReply((r) => `> ${who} wrote:\n${text.split('\n').map((l) => `> ${l}`).join('\n')}\n\n${r}`);
     const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea');
-    box?.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => box?.focus(), 400);
+    setTimeout(() => { box?.focus(); grow(box); }, 50);
   }
   useEffect(() => { if (thread) document.title = `${thread.title} · The Forum · Overgrown Altar`; }, [thread]);
 
@@ -309,15 +341,20 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     <div className="fo"><Crumbs /><p className="it mut fo-empty">This thread isn’t here any more. It may have been cleared away to make room, or taken down.</p></div>
   );
   const open = !thread.locked || isEditor;
+  const fresh = posts.filter((p) => p.created_at > since && p.author_id !== me);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!reply.trim()) return;
-    setBusy(true); setMsg('');
-    const { error } = await supabase.from('forum_posts').insert({ thread_id: id, author_id: me, body: reply.trim() });
+    const text = reply.trim();
+    if (!text) return;
+    // It appears at once; the forum confirms it a moment later.
+    const temp: Post = { id: 'sending-' + Date.now(), thread_id: id, author_id: me, body: text, created_at: new Date().toISOString(), edited_at: null };
+    setPosts((ps) => [...ps, temp]); setReply(''); setBusy(true); setMsg('');
+    const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea'); if (box) box.style.height = '';
+    requestAnimationFrame(() => document.getElementById(`post-${temp.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    const { error } = await supabase.from('forum_posts').insert({ thread_id: id, author_id: me, body: text });
     setBusy(false);
-    if (error) return setMsg('Your reply couldn’t be posted. ' + error.message);
-    setReply(''); await load();
-    requestAnimationFrame(() => document.querySelector('.fo-post:last-of-type')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    if (error) { setPosts((ps) => ps.filter((p) => p.id !== temp.id)); setReply(text); return setMsg('Your reply couldn’t be posted, so it’s back in the box. ' + error.message); }
+    load();
   }
   async function saveEdit() {
     if (!editing || !editing.body.trim()) return;
@@ -352,11 +389,14 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'} · started {ago(thread.created_at)}
         </span>
         {(isEditor || thread.author_id === me) && (
-          <div className="fo-mod">
-            {isEditor && <button type="button" className="d-textbtn" onClick={() => flag('pinned')}>{thread.pinned ? 'Unpin' : 'Pin to the top'}</button>}
-            {isEditor && <button type="button" className="d-textbtn" onClick={() => flag('locked')}>{thread.locked ? 'Reopen' : 'Close to replies'}</button>}
-            <button type="button" className="d-textbtn d-danger" onClick={removeThread}>Delete thread</button>
-          </div>
+          <details className="fo-mod">
+            <summary className="lab"><span aria-hidden="true">⋯</span> Manage this thread</summary>
+            <div className="fo-mod-menu">
+              {isEditor && <button type="button" onClick={() => flag('pinned')}>{thread.pinned ? 'Unpin' : 'Pin to the top'}</button>}
+              {isEditor && <button type="button" onClick={() => flag('locked')}>{thread.locked ? 'Reopen to replies' : 'Close to replies'}</button>}
+              <button type="button" className="fo-danger" onClick={removeThread}>Delete thread</button>
+            </div>
+          </details>
         )}
       </header>
       {msg && <p className="d-photo-msg" role="alert">{msg}</p>}
@@ -365,28 +405,28 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           const who = people[p.author_id];
           const mine = p.author_id === me;
           return (
-            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}${p.created_at > since && !mine ? ' fresh' : ''}`} id={`post-${p.id}`}>
-              <aside className="fo-who">
+            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}${p.created_at > since && !mine ? ' fresh' : ''}${p.id.startsWith('sending-') ? ' sending' : ''}`} id={`post-${p.id}`}>
+              <div className="fo-who">
                 <Link to={`/guild/members/?m=${p.author_id}`} className="fo-who-link">
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
                   <span className="fo-who-name">{who?.display_name || 'A member'}</span>
                 </Link>
                 <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : 'Writer'}</span>
                 <PrestigeBadge published={pieces[p.author_id] ?? 0} />
-              </aside>
+              </div>
               <div className="fo-post-main">
-                <span className="lab mut fo-post-when">{ago(p.created_at)}{p.edited_at ? ' · edited' : ''}{i === 0 ? ' · opening post' : ''}</span>
+                <span className="lab mut fo-post-when">{p.id.startsWith('sending-') ? 'Posting…' : ago(p.created_at)}{p.edited_at ? ' · edited' : ''}{i === 0 ? ' · opening post' : ''}</span>
                 {editing?.id === p.id ? (
                   <div className="fo-edit">
                     <textarea className="field" rows={6} maxLength={6000} value={editing.body} onChange={(e) => setEditing({ id: p.id, body: e.target.value })} />
                     <span className="fo-post-acts"><button type="button" className="btn d-btn" onClick={saveEdit}>Save</button><button type="button" className="d-textbtn" onClick={() => setEditing(null)}>Cancel</button></span>
                   </div>
                 ) : <PostBody body={p.body} />}
-                {editing?.id !== p.id && (
+                {editing?.id !== p.id && !p.id.startsWith('sending-') && (
                   <span className="fo-post-acts">
-                    {open && <button type="button" className="d-textbtn" onClick={() => quote(p)}>Quote</button>}
-                    {mine && <button type="button" className="d-textbtn" onClick={() => setEditing({ id: p.id, body: p.body })}>Edit</button>}
-                    {i > 0 && (mine || isEditor) && <button type="button" className="d-textbtn d-danger" onClick={() => removePost(p)}>Delete</button>}
+                    {open && <button type="button" className="fo-act" onClick={() => quote(p)}><span aria-hidden="true">❝</span> Quote</button>}
+                    {mine && <button type="button" className="fo-act" onClick={() => setEditing({ id: p.id, body: p.body })}>Edit</button>}
+                    {i > 0 && (mine || isEditor) && <button type="button" className="fo-act fo-danger" onClick={() => removePost(p)}>Delete</button>}
                   </span>
                 )}
               </div>
@@ -394,11 +434,24 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           );
         })}
       </ol>
+      {/* New since you last looked: one tap takes you there */}
+      {fresh.length > 0 && !pillGone && (
+        <button type="button" className="fo-pill" onClick={() => { document.getElementById(`post-${fresh[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setPillGone(true); }}>
+          <span aria-hidden="true">↓</span> {fresh.length} new {fresh.length === 1 ? 'post' : 'posts'}
+        </button>
+      )}
       {open ? (
-        <form className="fo-compose fo-reply" onSubmit={send}>
-          <label className="d-lbl"><span className="lab">{thread.locked ? 'Reply (the thread is closed; only you can post)' : 'Your reply'}</span>
-            <textarea className="field" rows={5} maxLength={6000} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Add to the conversation." /></label>
-          <div className="fo-compose-acts"><button className="btn d-btn" type="submit" disabled={busy || !reply.trim()}>{busy ? 'Posting…' : 'Post reply'}</button><span className="lab mut fo-hint">*italic* · **bold** · links work</span></div>
+        // The reply bar stays at the bottom of the screen, like a message app, and grows as you write.
+        <form className="fo-reply" onSubmit={send}>
+          <label className="visually-hidden" htmlFor="fo-reply-box">{thread.locked ? 'Reply (the thread is closed; only you can post)' : 'Your reply'}</label>
+          <textarea id="fo-reply-box" className="fo-reply-box" rows={1} maxLength={6000} value={reply}
+            onChange={(e) => { setReply(e.target.value); grow(e.currentTarget); }} onFocus={(e) => grow(e.currentTarget)}
+            onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') (e.currentTarget.form as HTMLFormElement).requestSubmit(); }}
+            placeholder={thread.locked ? 'Closed to replies (you can still post)' : 'Add to the conversation…'} />
+          <button className="fo-send" type="submit" disabled={busy || !reply.trim()} aria-label="Post reply">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+          </button>
+          <span className="lab mut fo-reply-hint">{reply.trim() ? 'Draft kept on this device · ' : ''}*italic* · **bold** · links work</span>
         </form>
       ) : <p className="it mut fo-empty">This thread is closed to new replies.</p>}
     </div>

@@ -50,7 +50,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
       {!latest && <p class="it mut" style="font-size:22px;margin:0">The first dispatches are being written.</p>}
       <!-- The latest dispatch -->
       {latest && <article class="latest">
-        <a class="latest-img" href={latest.href}><img src={latest.image} alt="" style={latest.imagePos ? `object-position:${latest.imagePos}` : undefined} /></a>
+        <a class="latest-img" href={latest.href} aria-label={latest.title} tabindex="-1"><img src={latest.image} alt="" style={latest.imagePos ? `object-position:${latest.imagePos}` : undefined} /></a>
         <div class="latest-text">
           <span class="eb">Latest · {latest.kicker}</span>
           <h2 class="h2 latest-title"><a href={latest.href}>{latest.title}</a></h2>

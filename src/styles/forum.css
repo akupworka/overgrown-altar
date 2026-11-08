@@ -136,3 +136,109 @@
 .fo-quote-who { font-style: normal; font-size: 8.5px; color: var(--ember); margin-bottom: 6px; }
 .fo-who .pr { margin-top: 2px; }
 .fo-hint { font-size: 8.5px; }
+
+/* ---- Made for the thumb ----------------------------------------------------------------------------------- */
+.fo-back { display: none; align-self: flex-start; color: var(--muted-dark); padding: 10px 0; min-height: 44px; align-items: center; gap: 8px; }
+.fo-back:hover { color: var(--ember); }
+
+/* Managing a thread: one quiet menu instead of a row of buttons */
+.fo-mod { margin-top: 2px; }
+.fo-mod > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; min-height: 40px; border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .2); color: var(--muted-dark); font-size: 9.5px; }
+.fo-mod > summary::-webkit-details-marker { display: none; }
+.fo-mod[open] > summary { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); }
+.fo-mod-menu { margin-top: 8px; display: inline-flex; flex-direction: column; min-width: 220px; border-radius: 10px; overflow: hidden; background: #171A12; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14), 0 20px 40px rgba(0, 0, 0, .5); }
+.fo-mod-menu button { text-align: left; padding: 14px 18px; min-height: 48px; background: none; border: 0; color: var(--bone); font-family: var(--serif); font-size: 17px; cursor: pointer; }
+.fo-mod-menu button + button { border-top: 1px solid rgba(243, 236, 220, .08); }
+.fo-mod-menu button:hover { background: rgba(255, 227, 163, .06); color: var(--ember); }
+.fo-danger { color: #E8A091 !important; }
+
+/* Post actions: thumb-sized pills */
+.fo-post-acts { flex-wrap: wrap; gap: 8px; }
+.fo-act { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: rgba(243, 236, 220, .05);
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); color: #CFC8B8; font-family: var(--sans); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+.fo-act:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .4); }
+.fo-post.sending { opacity: .6; }
+
+/* The reply bar: kept at the bottom of the screen, like a message app */
+.fo-reply { position: sticky; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; align-items: end;
+  padding: 10px 10px 8px 14px; border-radius: 18px; background: rgba(20, 23, 17, .96); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25), 0 18px 40px rgba(0, 0, 0, .55);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.fo-reply-box { resize: none; border: 0; outline: none; background: none; color: var(--bone); font-family: var(--serif); font-size: 18px; line-height: 1.45; padding: 8px 0; min-height: 40px; max-height: 220px; }
+.fo-reply-box::placeholder { color: #8C8679; font-style: italic; }
+.fo-reply:focus-within { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55), 0 18px 40px rgba(0, 0, 0, .55); }
+.fo-send { width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer; background: var(--bone); color: #12160F; display: inline-flex; align-items: center; justify-content: center; transition: background-color .2s, opacity .2s; }
+.fo-send:hover { background: var(--ember); }
+.fo-send:disabled { opacity: .35; cursor: default; }
+.fo-reply-hint { grid-column: 1 / -1; font-size: 8px; padding-bottom: 2px; }
+
+/* New since you last looked */
+.fo-pill { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; min-height: 40px; border-radius: 999px; border: 0; cursor: pointer; background: #7FE0B0; color: #0B1A12; font-family: var(--sans); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 20px rgba(127, 224, 176, .35); animation: fo-pill-in .4s ease both; }
+@keyframes fo-pill-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Writing a new thread: in place on larger screens; on phones, a full-screen sheet (below) */
+.fo-sheet-bar, .fo-sheet-hint { display: none; }
+.fo-fab { display: none; }
+
+@media (max-width: 700px) {
+  .fo-crumbs { display: none; }
+  .fo-back { display: inline-flex; }
+
+  /* The board list: one tight row per board, the whole forum in about two screens */
+  .fo-head { gap: 8px; }
+  .fo-head .h1 { font-size: 40px !important; }
+  .fo-sub { font-size: 16px; }
+  .fo-boards { border-radius: 14px; }
+  .fo-board { grid-template-columns: 56px minmax(0, 1fr); gap: 4px 14px; padding: 12px 14px 12px 12px; align-items: center; }
+  .fo-board-img { width: 56px; height: 56px; border-radius: 10px; grid-row: span 2; align-self: start; }
+  .fo-board-name { font-size: 19px; }
+  .fo-chev { display: none; }
+  .fo-board-desc { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .fo-board-stats { grid-column: 2; padding: 2px 0 0; border: 0; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .fo-board-stats > .lab { font-size: 8.5px; }
+  .fo-latest-t { font-size: 14px; max-width: 100%; }
+  .fo-board-latest { flex-direction: row; gap: 8px; align-items: baseline; min-width: 0; }
+  .fo-board-latest .lab { white-space: nowrap; }
+  .fo-quiet { font-size: 13px; }
+  .fo-note { font-size: 14px; }
+
+  /* A board: a smaller banner, the floating button always in reach */
+  .fo-board-head { padding: 20px 18px 22px; border-radius: 14px; }
+  .fo-board-head .h1 { font-size: 34px !important; }
+  .fo-head-acts .btn { display: none; }
+  .fo-thread { padding: 14px 2px; }
+  .fo-fab { display: inline-flex; align-items: center; gap: 8px; position: fixed; z-index: 30; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    padding: 0 22px; height: 52px; border-radius: 999px; border: 0; cursor: pointer; background: var(--bone); color: #12160F; font-family: var(--sans); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 227, 163, .3); }
+  .fo-fab span { font-size: 20px; letter-spacing: 0; margin-top: -2px; }
+
+  /* The sheet */
+  html.fo-sheet-open, html.fo-sheet-open body { overflow: hidden; }
+  .fo-sheet { position: fixed; inset: 0; z-index: 120; border-radius: 0; margin: 0; padding: calc(env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: #0E110C; box-shadow: none; overflow-y: auto; gap: 14px; animation: fo-sheet-up .28s cubic-bezier(.16, 1, .3, 1) both; }
+  @keyframes fo-sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .fo-sheet-bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1; margin: 0 -16px; padding: 10px 12px;
+    background: #0E110C; border-bottom: 1px solid rgba(243, 236, 220, .1); }
+  .fo-sheet-title { display: flex; flex-direction: column; align-items: center; min-width: 0; font-family: var(--serif); font-size: 17px; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fo-sheet-title .lab { font-size: 8px; }
+  .fo-sheet-cancel, .fo-sheet-post { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 0; cursor: pointer; font-family: var(--sans); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+  .fo-sheet-cancel { background: none; color: #CFC8B8; }
+  .fo-sheet-post { background: var(--bone); color: #12160F; }
+  .fo-sheet-post:disabled { opacity: .35; }
+  .fo-sheet .fo-compose-acts { display: none; }
+  .fo-sheet-hint { display: block; margin: 0; font-size: 8.5px; }
+  .fo-sheet .field { font-size: 18px !important; }
+  .fo-sheet textarea { min-height: 45vh; }
+
+  /* A thread */
+  .fo-thread-title { font-size: 30px !important; }
+  .fo-post { padding: 16px 14px; gap: 12px; border-radius: 14px; }
+  .fo-reply { margin: 0 -6px; }
+  .fo-pill { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 700px) {
+  .fo-board-latest { flex-direction: column; gap: 1px; }
+  .fo-board-latest .lab { font-size: 8px; }
+}
