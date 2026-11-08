@@ -96,7 +96,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
           {me && <span className="lab pzx-count">{mine} published {mine === 1 ? 'piece' : 'pieces'}</span>}
           {me && next && (
             <span className="pzx-next">
-              <span className="pzx-next-glass" style={{ background: glassOf(next) }} aria-hidden="true" />
+              <Crest lv={next.level} size={40} className="pzx-next-crest" />
               <span><b>{toNext}</b> more to <b className="pzx-next-name" style={{ color: inkOf(next) }}>{next.name}</b></span>
             </span>
           )}
