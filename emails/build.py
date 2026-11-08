@@ -1,9 +1,11 @@
 # Builds the Guild's account emails (paste each into Supabase > Authentication > Emails > Templates).
 # Run:  python3 emails/build.py      The writer emails (netlify/functions/notify-writer.mts) use the same frame.
-# Headers live in public/images/email/ (outside the site's password gate, so mail apps can load them).
+# Header photographs (backgrounds only; the words are real text) live in public/images/email/ (outside the site's password gate, so mail apps can load them).
 SITE = 'https://overgrownaltar.com'
 SERIF = "Georgia,'Times New Roman',serif"
 SANS = "Arial,Helvetica,sans-serif"
+# The header: the wordmark set in type over a darkened photograph, so it reads even where pictures are blocked.
+LABEL = {'welcome': 'The Guild', 'account': 'Your Guild Desk', 'published': 'Published', 'editor': 'From the editor'}
 
 def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, href=None, steps=None, code=None, fine=''):
     btn = f'''
@@ -40,8 +42,11 @@ def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, hre
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0A0C0A;">
     <tr><td align="center" style="padding:32px 12px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#12150F;border:1px solid #2C2E25;border-radius:8px;overflow:hidden;">
-        <tr><td style="padding:0;background:#12150F;line-height:0;font-size:0;">
-          <img src="{SITE}/images/email/{header}.jpg" width="560" alt="Overgrown Altar" style="display:block;width:100%;max-width:560px;height:auto;border:0;color:#F3ECDC;font-family:{SERIF};font-size:28px;letter-spacing:6px;text-align:center;">
+        <tr><td align="center" background="{SITE}/images/email/bg-{header}.jpg" bgcolor="#16190F" style="background:#16190F url('{SITE}/images/email/bg-{header}.jpg') center center / cover no-repeat;padding:46px 20px 42px 20px;">
+          <div style="font-family:{SERIF};font-size:22px;line-height:1;color:#E9C77A;">&#8224;</div>
+          <div style="padding-top:14px;font-family:{SERIF};font-size:30px;line-height:1;letter-spacing:9px;color:#F3ECDC;">OVERGROWN</div>
+          <div style="padding-top:4px;font-family:{SERIF};font-style:italic;font-size:36px;line-height:1.1;color:#E9C77A;">Altar</div>
+          <div style="padding-top:16px;font-family:{SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#CFC8B8;">{LABEL[header]}</div>
         </td></tr>
         <tr><td style="height:1px;line-height:1px;font-size:0;background:#6B5A2E;">&nbsp;</td></tr>
         <tr><td>

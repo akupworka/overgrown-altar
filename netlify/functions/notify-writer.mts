@@ -17,7 +17,8 @@ const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 const SITE = 'https://overgrownaltar.com';
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-// The same frame as the account emails (emails/build.py): a header picture with the wordmark, then the words.
+// The same frame as the account emails (emails/build.py): the wordmark set in type over a darkened photograph
+// (it reads even where pictures are blocked), then the words.
 const SERIF = "Georgia,'Times New Roman',serif", SANS = 'Arial,Helvetica,sans-serif';
 export function letter({ header, eyebrow, heading, lines, note, button, href, preview }: { header: 'published' | 'editor'; eyebrow: string; heading: string; lines: string; note?: string; button: string; href: string; preview: string }) {
   const noteHtml = note ? `
@@ -34,8 +35,11 @@ export function letter({ header, eyebrow, heading, lines, note, button, href, pr
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0A0C0A;">
     <tr><td align="center" style="padding:32px 12px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#12150F;border:1px solid #2C2E25;border-radius:8px;overflow:hidden;">
-        <tr><td style="padding:0;background:#12150F;line-height:0;font-size:0;">
-          <img src="${SITE}/images/email/${header}.jpg" width="560" alt="Overgrown Altar" style="display:block;width:100%;max-width:560px;height:auto;border:0;color:#F3ECDC;font-family:${SERIF};font-size:28px;letter-spacing:6px;text-align:center;">
+        <tr><td align="center" background="${SITE}/images/email/bg-${header}.jpg" bgcolor="#16190F" style="background:#16190F url('${SITE}/images/email/bg-${header}.jpg') center center / cover no-repeat;padding:46px 20px 42px 20px;">
+          <div style="font-family:${SERIF};font-size:22px;line-height:1;color:#E9C77A;">&#8224;</div>
+          <div style="padding-top:14px;font-family:${SERIF};font-size:30px;line-height:1;letter-spacing:9px;color:#F3ECDC;">OVERGROWN</div>
+          <div style="padding-top:4px;font-family:${SERIF};font-style:italic;font-size:36px;line-height:1.1;color:#E9C77A;">Altar</div>
+          <div style="padding-top:16px;font-family:${SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#CFC8B8;">${header === 'published' ? 'Published' : 'From the editor'}</div>
         </td></tr>
         <tr><td style="height:1px;line-height:1px;font-size:0;background:#6B5A2E;">&nbsp;</td></tr>
         <tr><td><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
