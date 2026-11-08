@@ -997,19 +997,13 @@
   .g-room-small .g-room-line { display: none; }
   .g-room-small .g-room-go { align-self: center; font-size: 8.5px; }
   .g-search { max-width: none; }
-  /* Members: a compact directory, like a phone's contacts */
-  .g-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
-  .g-card { display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; min-height: 76px; grid-template-rows: auto auto; column-gap: 14px; row-gap: 3px;
-    align-items: center; justify-items: start; text-align: left !important; padding: 10px 14px 10px 10px !important; border-radius: 14px;
-    background: rgba(243, 236, 220, .035); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); position: relative; }
-  .g-card:active { background: rgba(255, 227, 163, .06); }
-  .g-card .g-arch { grid-row: 1 / span 2; width: 46px !important; height: 58px !important; font-size: 16px !important; margin: 0 0 0 4px !important; box-shadow: 0 0 0 1px var(--brass) !important; }
-  .g-card .g-arch::before, .g-card .g-arch::after { display: none !important; }
-  .g-card .g-name { grid-column: 2; font-size: 19px !important; line-height: 1.2; margin: 0 !important; }
-  .g-card .g-role { grid-column: 2; font-size: 8.5px !important; letter-spacing: .14em; margin: 0 !important; }
-  .g-card .g-count { display: none; }
-  .g-card .pr { grid-column: 3; grid-row: 1 / span 2; margin: 0 22px 0 0 !important; transform: scale(.88); transform-origin: right center; }
-  .g-card::after { content: '›'; position: absolute; right: 14px; top: 50%; transform: translateY(-52%); color: #8C8679; font-size: 22px; }
+  /* Members: the arch grid, a little smaller on phones */
+  .g-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 26px 14px !important; }
+  .g-card { gap: 6px !important; }
+  .g-card .g-arch { width: 96px !important; height: 124px !important; font-size: 28px !important; margin-bottom: 4px !important; }
+  .g-card .g-name { font-size: 18px !important; }
+  .g-card .g-craft { font-size: 8.5px !important; letter-spacing: .14em; }
+  .g-card .pr { transform: scale(.9); }
 }
 /* Pages in the Desk (dark room) */
 .d-pager { color: var(--bone); margin-top: 24px; }

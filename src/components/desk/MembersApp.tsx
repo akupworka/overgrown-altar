@@ -15,6 +15,7 @@ import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, useForumTally } from './Forum';
+import { PrestigePage } from './PrestigePage';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -304,88 +305,6 @@ function Reading({ id }: { id: string }) {
 // ---------------------------------------------------------------- the prestiges
 
 // The ten prestiges as a ladder: where you stand, how far to the next, and who holds each rank.
-function Prestiges({ me }: { me: string }) {
-  const [people, setPeople] = useState<(Profile & { count: number })[] | null>(null);
-  useEffect(() => {
-    (async () => {
-      const [{ data: ps }, { data: work }] = await Promise.all([
-        supabase.from('profiles').select('*'),
-        supabase.from('pieces').select('author_id').eq('status', 'approved'),
-      ]);
-      const counts = new Map<string, number>();
-      (work ?? []).forEach((w: any) => counts.set(w.author_id, (counts.get(w.author_id) ?? 0) + 1));
-      setPeople(((ps as Profile[]) ?? []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 })));
-    })();
-  }, []);
-  if (!people) return <p className="lab mut d-loading">Opening…</p>;
-  const mine = people.find((p) => p.id === me)?.count ?? 0;
-  const { current, next, toNext } = prestigeFor(mine);
-  const from = current?.at ?? 0;
-  const pct = next ? Math.round(((mine - from) / (next.at - from)) * 100) : 100;
-  const holders = (level: number) => people.filter((p) => (p.listed || p.id === me) && prestigeFor(p.count).current?.level === level);
-  return (
-    <div className="pz">
-      <header className="pz-head">
-        {me && <Link className="m-back lab" to="/guild/members/">← The Guild</Link>}
-        <span className="eb">The Guild</span>
-        <h1 className="h1">The ten prestiges</h1>
-        <p className="it pz-lead">Every published piece raises a member through the ranks of the Guild, from a first inkling to the burning ones. Badges update the moment the editor publishes.</p>
-      </header>
-
-      {!me ? (
-        <section className="pz-you">
-          <span className="lab mut">Earn your first</span>
-          <span className="it pz-none">Members of the Guild rise through these ranks with every piece they publish.</span>
-          <a className="m-act primary pz-write" href="/guild">Join the Guild</a>
-        </section>
-      ) : (
-      <section className="pz-you">
-        <span className="lab mut">Where you stand</span>
-        {current ? <PrestigeBadge published={mine} size="lg" link={false} /> : <span className="it pz-none">Your first published piece makes you an Inkling.</span>}
-        <span className="pz-count">{mine} published {mine === 1 ? 'piece' : 'pieces'}</span>
-        {next && (
-          <>
-            <span className="pz-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></span>
-            <span className="it pz-next">{toNext} more to <b>{next.name}</b></span>
-          </>
-        )}
-        <a className="m-act primary pz-write" href="/guild/desk/#write">Write a piece</a>
-      </section>
-      )}
-
-      <ol className="pz-ladder">
-        {[...PRESTIGES].reverse().map((p) => {
-          const who = holders(p.level);
-          const reached = current ? p.level <= current.level : false;
-          return (
-            <li key={p.level} className={`pz-rung${reached ? ' reached' : ''}${current?.level === p.level ? ' here' : ''}`}>
-              <div className="pz-rung-badge"><PrestigeBadge published={p.at} size="lg" link={false} /></div>
-              <div className="pz-rung-text">
-                <span className="it pz-note">{p.note}</span>
-                <span className="lab mut">{p.at} published {p.at === 1 ? 'piece' : 'pieces'}{current?.level === p.level ? ' · you are here' : ''}</span>
-              </div>
-              <div className="pz-who">
-                {who.slice(0, 6).map((h) => (
-                  me
-                    ? <Link key={h.id} to={`/guild/members/?m=${h.id}`} className="pz-face"><Initials name={h.display_name} size={30} src={portraitUrl(h.portrait_path)} /></Link>
-                    : <a key={h.id} href={`/guild/authors/${authorSlug(h.display_name)}/`} className="pz-face" title={h.display_name}><Initials name={h.display_name} size={30} src={portraitUrl(h.portrait_path)} /></a>
-                ))}
-                {who.length > 6 && <span className="lab mut">+{who.length - 6}</span>}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-
-      <section className="pz-trophies" id="trophies">
-        <span className="eb">Beside the prestiges</span>
-        <h2 className="h2">The trophies</h2>
-        <p className="it pz-lead">Prestiges count everything you publish. Trophies mark the work in each category, raised from bronze to silver, gold and rainbow glass as it grows, and a few things done once and done well.</p>
-        <div className="pz-cat"><TrophyCatalogue /></div>
-      </section>
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------- the app
 
@@ -414,7 +333,7 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;
-  if (route.view === 'prestige') return <Prestiges me={session?.user.id ?? ''} />;
+  if (route.view === 'prestige') return <PrestigePage me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
       <span className="eb">Members of the Guild</span>

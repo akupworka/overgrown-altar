@@ -56,11 +56,12 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
 const TIERS: Tier[] = ['bronze', 'silver', 'gold', 'rainbow'];
 
 /** Every trophy, for the catalog on the prestiges page: the growing ones in all four metals, then the rest. */
-export function TrophyCatalogue() {
+export function TrophyCatalogue({ only }: { only?: 'growing' | 'once' } = {}) {
   const growing = TROPHIES.filter((t) => t.count);
   const once = TROPHIES.filter((t) => !t.count);
   return (
     <div className="tcat">
+      {only !== 'once' && <>
       <span className="eb tcat-h">Trophies that grow</span>
       <p className="it tcat-p">The same trophy, raised from bronze to silver, gold and rainbow glass as the articles in its category grow, or as the years and the unbroken months add up. The easier a thing is, the more it takes; rainbow is rare.</p>
       <div className="tcat-rows">
@@ -78,6 +79,8 @@ export function TrophyCatalogue() {
           </div>
         ))}
       </div>
+      </>}
+      {only !== 'growing' && <>
       <span className="eb tcat-h">Won once</span>
       <div className="tc-grid">
         {once.map((t) => (
@@ -89,6 +92,7 @@ export function TrophyCatalogue() {
           </figure>
         ))}
       </div>
+      </>}
     </div>
   );
 }
