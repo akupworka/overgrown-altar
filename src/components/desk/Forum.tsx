@@ -218,20 +218,29 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
             <li key={t.id}>
               <Link to={`/guild/members/?t=${t.id}`} className={`fo-thread${t.pinned ? ' pinned' : ''}`}>
                 <span className="fo-thread-main">
-                  <span className="fo-thread-t">
-                    {t.pinned && <span className="lab fo-tag">Pinned</span>}
-                    {t.locked && <span className="lab fo-tag fo-tag-dim">Closed</span>}
-                    {isNew(t, me) && <span className="lab fo-new">New</span>}
-                    {t.title}
-                  </span>
-                  <span className="lab mut">Started by {nameOf(people, t.author_id)} · {ago(t.created_at)}</span>
+                  {(t.pinned || t.locked || isNew(t, me)) && (
+                    <span className="fo-thread-tags">
+                      {t.pinned && <span className="lab fo-tag">Pinned</span>}
+                      {t.locked && <span className="lab fo-tag fo-tag-dim">Closed</span>}
+                      {isNew(t, me) && <span className="lab fo-new">New</span>}
+                    </span>
+                  )}
+                  <span className="fo-thread-t">{t.title}</span>
+                  <span className="lab mut fo-thread-by">{nameOf(people, t.author_id)} · {ago(t.created_at)}<span className="fo-thread-last-m">Last reply {ago(t.last_post_at)}</span></span>
                 </span>
-                <span className="fo-thread-n"><b>{t.reply_count}</b><span className="lab mut"> {t.reply_count === 1 ? 'reply' : 'replies'}</span></span>
+                <span className="fo-thread-n" aria-label={`${t.reply_count} ${t.reply_count === 1 ? 'reply' : 'replies'}`}>
+                  <svg className="fo-bubble" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4v-4z" /></svg>
+                  <b>{t.reply_count}</b><span className="lab mut fo-thread-n-word"> {t.reply_count === 1 ? 'reply' : 'replies'}</span>
+                </span>
                 <span className="fo-thread-last lab mut">{nameOf(people, t.last_author_id)}<br />{ago(t.last_post_at)}</span>
               </Link>
             </li>
           ))}
         </ol>
+      )}
+      {/* A quiet word under a short board, so the page doesn't trail off into nothing */}
+      {threads.length > 0 && threads.length < 4 && (
+        <p className="it mut fo-board-end">{canStart ? 'That’s everything so far. Start the next conversation whenever you’re ready.' : 'That’s everything so far. Replies are welcome on any thread.'}</p>
       )}
       {pages > 1 && (
         <nav className="pager fo-pager" aria-label="Pages of threads">

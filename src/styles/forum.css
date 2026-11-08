@@ -242,3 +242,33 @@
   .fo-board-latest { flex-direction: column; gap: 1px; }
   .fo-board-latest .lab { font-size: 8px; }
 }
+
+/* Thread rows: tags above the title, so a long title never wraps around them */
+.fo-thread-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.fo-thread-tags .fo-tag, .fo-thread-tags .fo-new { margin: 0; }
+.fo-bubble { display: none; }
+.fo-thread-last-m { display: none; }
+.fo-board-end { margin: 0; font-size: 16px; text-align: center; padding: 18px 0 90px; }
+@media (min-width: 701px) { .fo-board-end { padding-bottom: 10px; } }
+
+@media (max-width: 700px) {
+  /* A board on a phone: a calmer banner, then each thread as its own card */
+  .fo-board-head { gap: 6px; padding: 18px 18px 20px; }
+  .fo-board-head .eb { display: none; }
+  .fo-board-head .fo-sub { font-size: 15px; line-height: 1.45; }
+  .fo-board-head .fo-head-acts .lab { font-size: 8.5px; letter-spacing: .16em; }
+  .fo-threads { border: 0; display: flex; flex-direction: column; gap: 10px; }
+  .fo-threads > li { border: 0; }
+  .fo-thread { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px;
+    background: rgba(243, 236, 220, .035); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); }
+  .fo-thread.pinned { background: rgba(255, 227, 163, .04); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .22); }
+  .fo-thread:active { background: rgba(255, 227, 163, .07); }
+  .fo-thread-main { gap: 6px; }
+  .fo-thread-t { font-size: 20px; line-height: 1.25; }
+  .fo-thread-by { font-size: 8.5px; line-height: 1.6; }
+  .fo-thread-last-m { display: block; }
+  .fo-thread-n { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-width: 36px; color: var(--muted-dark); }
+  .fo-thread-n b { font-size: 17px; }
+  .fo-bubble { display: block; }
+  .fo-thread-n-word { display: none; }
+}
