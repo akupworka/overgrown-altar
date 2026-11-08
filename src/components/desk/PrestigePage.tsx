@@ -9,6 +9,15 @@ import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
 import { TrophyCatalogue } from './Trophies';
+import { crestSvg } from '../../lib/crests';
+
+// A rank's crest (drawn once per rank and size).
+const crestCache = new Map<string, string>();
+function Crest({ lv, size, className = '' }: { lv: number; size: number; className?: string }) {
+  const key = `${lv}-${size}`;
+  if (!crestCache.has(key)) crestCache.set(key, crestSvg(lv, size));
+  return <span className={`pzx-crest ${className}`} dangerouslySetInnerHTML={{ __html: crestCache.get(key)! }} />;
+}
 import '../../styles/prestige-page.css';
 
 const authorSlug = (name: string) => name.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'member';
@@ -72,11 +81,12 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
             <circle cx="90" cy="90" r={R} className="pzx-ring-fill" stroke="url(#pzx-g)" strokeDasharray={`${C * pct} ${C}`} />
           </svg>
           <div className="pzx-ring-in">
-            {current ? <><span className="pzx-ring-num">{current.numeral}</span><span className="lab">Rank {current.level} of 10</span></> : <span className="pzx-ring-num">·</span>}
+            {current ? <Crest lv={current.level} size={112} className="pzx-ring-crest" /> : <span className="pzx-ring-num">·</span>}
           </div>
         </div>
         <div className="pzx-stand-text">
           <span className="lab mut">{me ? 'Where you stand' : 'Earn your first'}</span>
+          {me && current && <span className="lab pzx-rank-of">Rank {current.numeral} of X</span>}
           {me ? (current
             ? <h2 className="pzx-rank">{current.name}</h2>
             : <h2 className="pzx-rank">Not yet ranked</h2>)
@@ -95,7 +105,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
 
       {/* The climb: ten lancets of glass */}
       <section className="pzx-climb" aria-label="The ten ranks">
-        <div className="pzx-climb-head"><span className="eb">The climb</span><span className="it mut">Choose a window to see what it takes, and who holds it.</span></div>
+        <div className="pzx-climb-head"><span className="eb">The crests</span><span className="it mut">Each rank keeps the crest below it and adds to it. Choose one to see what it takes, and who holds it.</span></div>
         <ol className="pzx-lancets">
           {PRESTIGES.map((p) => {
             const reached = !!current && p.level <= current.level;
@@ -104,7 +114,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
             return (
               <li key={p.level} className={`pzx-l${reached ? ' reached' : ''}${here ? ' here' : ''}${pick === p.level ? ' chosen' : ''}`} style={{ '--lv': p.level, '--ink': inkOf(p) } as CSSProperties}>
                 <button type="button" className="pzx-l-btn" onClick={() => setChosen(p.level)} aria-pressed={pick === p.level} aria-label={`${p.name}, rank ${p.level}: ${p.at} published ${p.at === 1 ? 'piece' : 'pieces'}${here ? ', you are here' : reached ? ', reached' : ''}`}>
-                  <span className="pzx-glass" style={{ background: glassOf(p) }}><span className="pzx-leading" /></span>
+                  <span className="pzx-crest-slot"><Crest lv={p.level} size={160} /></span>
                   <span className="pzx-l-text">
                     <span className="pzx-l-num">{p.numeral}</span>
                     <span className="pzx-l-name">{p.name}</span>
@@ -120,7 +130,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
         </ol>
         {/* The chosen window, in full (computers) */}
         <div className="pzx-detail" style={{ '--ink': inkOf(sel) } as CSSProperties}>
-          <span className="pzx-detail-glass" style={{ background: glassOf(sel) }} aria-hidden="true"><span className="pzx-leading" /></span>
+          <span className="pzx-detail-crest" aria-hidden="true"><Crest lv={sel.level} size={150} /></span>
           <div className="pzx-detail-text">
             <span className="lab mut">Rank {sel.level} of 10 · {sel.at} published {sel.at === 1 ? 'piece' : 'pieces'}</span>
             <h3 className="pzx-detail-name">{sel.numeral}&nbsp; {sel.name}</h3>
