@@ -9,6 +9,7 @@ import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
 import { TrophyCatalogue } from './Trophies';
+import { PrestigeBadge } from './Prestige';
 import { crestSvg } from '../../lib/crests';
 
 // A rank's crest (drawn once per rank and size).
@@ -120,6 +121,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
                     <span className="pzx-l-name">{p.name}</span>
                     <span className="lab pzx-l-at">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
                     <span className="it pzx-l-note">{p.note}</span>
+                    <span className="pzx-l-badge"><PrestigeBadge published={p.at} link={false} /></span>
                     {who.length > 0 && <span className="pzx-l-who" aria-hidden="true">{who.slice(0, 4).map((h) => <Initials key={h.id} name={h.display_name} size={22} src={portraitUrl(h.portrait_path)} />)}{who.length > 4 && <span className="lab">+{who.length - 4}</span>}</span>}
                   </span>
                   {here && <span className="lab pzx-you">You</span>}
@@ -135,6 +137,7 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
             <span className="lab mut">Rank {sel.level} of 10 · {sel.at} published {sel.at === 1 ? 'piece' : 'pieces'}</span>
             <h3 className="pzx-detail-name">{sel.numeral}&nbsp; {sel.name}</h3>
             <p className="it">{sel.note}</p>
+            <div className="pzx-detail-badge"><span className="lab mut">The badge beside your name</span><PrestigeBadge published={sel.at} link={false} size="lg" /></div>
             {(() => { const who = holders(sel.level); return who.length
               ? <div className="pzx-detail-who"><span className="lab mut">Who holds it</span><div>{who.slice(0, 12).map(face)}</div></div>
               : <span className="lab mut">No one holds it yet{current && sel.level > current.level ? '. It could be you.' : '.'}</span>; })()}

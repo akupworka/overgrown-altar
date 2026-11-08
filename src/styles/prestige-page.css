@@ -157,3 +157,11 @@
   .pzx-ring-crest { width: 128px; }
   .pzx-you { bottom: auto; }
 }
+
+/* the badge each rank puts beside a name (in the forum, on member pages) */
+.pzx-detail-badge { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 2px 0 4px; }
+.pzx-l-badge { display: none; }
+@media (max-width: 700px) {
+  .pzx-l-badge { display: block; margin-top: 6px; line-height: 0; }
+  .pzx-l:not(.reached):not(.chosen) .pzx-l-badge { opacity: .45; filter: grayscale(.6); }
+}
