@@ -37,7 +37,8 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
     <div class="veil"></div>
     <SiteNav />
     <div class="hero-c gp-hero-c">
-      <span class="eb"><a href={`/${p.pillar}`}>{PILLAR_LABEL[p.pillar]}</a> · {MEDIUM_LABEL[p.medium] ?? ''}</span>
+      <a class="lab gp-back" href={`/${p.pillar}`}><span aria-hidden="true">←</span> {PILLAR_LABEL[p.pillar]}</a>
+      <span class="eb"><a class="gp-eb-room" href={`/${p.pillar}`}>{PILLAR_LABEL[p.pillar]}</a><span class="gp-eb-dot"> · </span>{MEDIUM_LABEL[p.medium] ?? ''}</span>
       <h1 class="h1 gp-title">{p.title}</h1>
       <span class="gp-by">
         <a class="gp-by-who" href={aUrl}><Avatar name={a.display_name} src={a.portrait || undefined} size={30} id={a.id} /><span class="lab">{a.display_name}</span></a>
@@ -93,3 +94,19 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
   <Subscribe />
 </BaseLayout>
 
+<!-- How far through the piece you are: a fine gold line along the top of the screen -->
+<div class="gp-progress" aria-hidden="true"><i></i></div>
+<script>
+  const bar = document.querySelector<HTMLElement>('.gp-progress i');
+  const article = document.querySelector<HTMLElement>('.gp-article');
+  if (bar && article) {
+    let ticking = false;
+    const update = () => {
+      const r = article.getBoundingClientRect();
+      const k = Math.min(1, Math.max(0, (innerHeight - r.top) / (r.height + innerHeight * 0.4)));
+      bar.style.transform = `scaleX(${k})`; ticking = false;
+    };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+</script>

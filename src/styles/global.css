@@ -261,7 +261,7 @@ textarea.field { resize: vertical; }
   .field { font-size: 17px; padding: 13px 16px; }
   .field.search { font-size: 18px !important; padding: 14px 16px !important; }
 
-  .chip { font-size: 9.5px; letter-spacing: .16em; padding: 7px 13px; min-height: 34px; white-space: nowrap; flex: none; }
+  .chip { font-size: 9.5px; letter-spacing: .16em; padding: 8px 15px; min-height: 40px; white-space: nowrap; flex: none; }
   .filters { flex-wrap: nowrap; overflow-x: auto; gap: 8px; margin: 0 -24px; padding: 2px 24px; scrollbar-width: none;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent);
     mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); }
