@@ -93,7 +93,9 @@ const imageUrl = new URL(image, site).toString();
         ring.innerHTML = '<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="15" class="ptr-track"/><circle cx="20" cy="20" r="15" class="ptr-fill" pathLength="1"/><path d="M20 12v16M14.5 17.5h11" class="ptr-cross"/></svg>';
         document.body.append(ring);
         const FULL = 90;
-        let startY = 0, pull = 0, active = false;
+        let startY = 0, startX = 0, pull = 0, active = false, decided = false;
+        // Rows that scroll sideways (the members' bar, filters, the formatting tools…): a swipe there is never a pull.
+        const SIDEWAYS = '.inner, .filters, .filters-wrap, .d-paper-tools, .d-tools-wrap, .ga-filters, .shelf-filters, .pager, .home-plates-row, .d-tabbar';
         const busy = () => {
           const el = document.activeElement as HTMLElement | null;
           return document.documentElement.classList.contains('menu-open') || !!document.querySelector('.d-room.writing, .pv')
@@ -107,14 +109,21 @@ const imageUrl = new URL(image, site).toString();
           ring.classList.toggle('ready', k >= 1);
         };
         addEventListener('touchstart', (e) => {
-          active = scrollY <= 0 && e.touches.length === 1 && !busy();
-          startY = e.touches[0].clientY; pull = 0;
+          const onSideways = !!(e.target as Element | null)?.closest?.(SIDEWAYS);
+          active = scrollY <= 0 && e.touches.length === 1 && !busy() && !onSideways;
+          startY = e.touches[0].clientY; startX = e.touches[0].clientX; pull = 0; decided = false;
         }, { passive: true });
         addEventListener('touchmove', (e) => {
           if (!active) return;
-          const d = e.touches[0].clientY - startY;
+          const d = e.touches[0].clientY - startY, dx = Math.abs(e.touches[0].clientX - startX);
+          // Decide once, after the finger has moved a little: only a clearly downward pull counts; a sideways swipe never does.
+          if (!decided && (d > 12 || dx > 12)) {
+            decided = true;
+            if (dx > d * 0.6) { active = false; pull = 0; draw(); return; }
+          }
+          if (!decided) return;
           if (d <= 0 || scrollY > 0) { pull = 0; draw(); return; }
-          pull = d * 0.55; draw();
+          pull = (d - 12) * 0.55; draw();
         }, { passive: true });
         addEventListener('touchend', () => {
           if (!active) return; active = false;
