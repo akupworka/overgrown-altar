@@ -287,3 +287,9 @@
     background: linear-gradient(180deg, rgba(10, 12, 10, 0), rgba(10, 12, 10, .9) 45%, #0A0C0A 70%); }
 }
 .desk-in:has(.fo-reply) { padding-bottom: 0 !important; }
+
+/* The reply box sits in place at the end of the thread, right after the last post (not floating over the page). */
+.fo-reply { position: static !important; transform: none !important; width: auto !important; left: auto !important; right: auto !important; bottom: auto !important; margin: 4px 0 0 !important; }
+.fo-reply::before { display: none !important; }
+.fo:has(.fo-reply) { padding-bottom: 40px !important; }
+.fo-pill { bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important; }

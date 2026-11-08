@@ -171,7 +171,7 @@ function Desk({ session }: { session: Session }) {
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
   const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : 'pieces');
-  useEffect(() => { if (startHash === '#my-page' || startHash === '#review') history.replaceState(null, '', location.pathname + location.search); }, []);
+  // (#review and #my-page stay in the address, so the members' bar and a reload both know which room you're in.)
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
@@ -211,6 +211,9 @@ function Desk({ session }: { session: Session }) {
     // "My page" is your own page in the Guild (with Edit my page on it), not the form.
     if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
+    // Keep the address in step with the room, so the members' bar lights the right one.
+    else if (t === 'review') history.replaceState(history.state, '', location.pathname + location.search + '#review');
+    else if (t === 'pieces' && /^#(review|my-page)$/.test(location.hash)) history.replaceState(history.state, '', location.pathname + location.search);
     setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const open = (p: Piece | null, medium?: string) => {
@@ -454,6 +457,33 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
     if (!confirm(`Delete “${p.title || 'Untitled'}”? This cannot be undone.`)) return;
     await supabase.from('pieces').delete().eq('id', p.id); onChanged();
   }
+  // The groups My pieces is organized into (newest first in each).
+  const GROUPS: { key: string; label: string; note?: string; has: (p: Piece) => boolean; filter?: 'drafts' | 'with' | 'live' }[] = [
+    { key: 'returned', label: 'Returned with a note', note: 'The editor has read these and asked for a little more.', has: (p) => p.status === 'returned', filter: 'drafts' },
+    { key: 'drafts', label: 'Drafts', has: (p) => p.status === 'draft', filter: 'drafts' },
+    { key: 'with', label: 'With the editor', note: 'Being read. You’ll hear by email.', has: (p) => p.status === 'submitted', filter: 'with' },
+    { key: 'live', label: 'Published', has: (p) => p.status === 'approved', filter: 'live' },
+    { key: 'declined', label: 'Declined', has: (p) => p.status === 'declined' },
+  ];
+  // One piece, as a card.
+  const card = (p: Piece) => (
+            <li key={p.id} className="d-item">
+              <div className="d-item-main">
+                <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
+              </div>
+              <div className="d-item-actions">
+                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
+                {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
+                {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
+                {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
+                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
+              </div>
+            </li>
+  );
+
   return (
     <section className="d-section d-home">
       <header className="d-home-head">
@@ -499,28 +529,34 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <span className="lab">Begin writing →</span>
         </button>
       ) : (
-        <ul className="d-list">
-          {onPage.length === 0 && <li className="it mut d-empty">Nothing here yet.</li>}
-          {onPage.map((p) => (
-            <li key={p.id} className="d-item">
-              <div className="d-item-main">
-                <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
-                {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
-              </div>
-              <div className="d-item-actions">
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
-                {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
-                {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
-                {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
-                {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
-              </div>
-            </li>
-          ))}
-        </ul>
+        show === 'all' ? (
+          // Everything, organized: what needs you first, then drafts, then what the editor has, then what's live.
+          <div className="d-groups">
+            {GROUPS.map((g) => {
+              const list = pieces.filter(g.has);
+              if (!list.length) return null;
+              return (
+                <section key={g.key} className={`d-group d-group-${g.key}`}>
+                  <header className="d-group-head">
+                    <h3 className="lab">{g.label} <span className="d-group-n">{list.length}</span></h3>
+                    {g.note && <span className="it mut d-group-note">{g.note}</span>}
+                  </header>
+                  <ul className="d-list">{list.slice(0, 3).map(card)}</ul>
+                  {list.length > 3 && g.filter && (
+                    <button type="button" className="d-group-more lab" onClick={() => { setShow(g.filter!); setPage(1); }}>See all {list.length} <span aria-hidden="true">→</span></button>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <ul className="d-list">
+            {onPage.length === 0 && <li className="it mut d-empty">Nothing here yet.</li>}
+            {onPage.map(card)}
+          </ul>
+        )
       )}
-      <DeskPages cur={cur} pages={pages} onGo={setPage} />
+      {show !== 'all' && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
     </section>
   );
 }
