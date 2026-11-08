@@ -914,3 +914,54 @@
 @media (max-width: 900px) { .d-editor-tools { grid-template-columns: 1fr; } .d-invite-row { grid-template-columns: 1fr; } .d-invite-row .d-btn { justify-self: start; } }
 @media (max-width: 700px) { .d-invite, .d-rebuild { padding: 18px 16px; } }
 .d-invite-row .d-btn { white-space: nowrap; }
+
+/* ---- The members' area on phones: the forum's patterns everywhere ---------------------------------------------
+   Lists are cards; actions are thumb-sized pills; the one decision on a page (Save, Approve…) is pinned to the
+   bottom of the screen, above the tab bar; a plain "←" leads back. */
+@media (max-width: 700px) {
+  /* My pieces, and Waiting for you: each piece a card */
+  .d-list { border: 0 !important; display: flex; flex-direction: column; gap: 10px; }
+  .d-list > .d-item { border: 0 !important; padding: 16px !important; border-radius: 14px; background: rgba(243, 236, 220, .035);
+    box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); display: flex; flex-direction: column; gap: 12px; }
+  .d-item-title { font-size: 21px !important; line-height: 1.2; }
+  .d-item-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start !important; }
+  .d-item-actions .d-link, .d-item-actions .d-textbtn, .d-item-actions a {
+    display: inline-flex; align-items: center; min-height: 38px; padding: 6px 14px !important; border-radius: 999px; border: 0 !important;
+    background: rgba(243, 236, 220, .05); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); font-size: 10px !important; letter-spacing: .14em; text-decoration: none; }
+  .d-item-actions .d-danger { color: #E8A091 !important; }
+
+  /* Back links: one clear tap */
+  .d-back-link, .m-back { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 !important; border: 0 !important; background: none; }
+
+  /* Reading a submission: the decision is pinned above the tab bar */
+  .d-reader { padding-bottom: 150px; }
+  .d-reader .d-decide { position: fixed; z-index: 35; left: 12px; right: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 18px;
+    background: rgba(20, 23, 17, .97); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25), 0 18px 40px rgba(0, 0, 0, .55);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); max-height: 60vh; overflow-y: auto; }
+  .d-reader .d-decide .btn { flex: 1 1 100%; justify-content: center; border-radius: 999px; padding: 12px 16px !important; }
+  .d-reader .d-decide .d-link { flex: 1; text-align: center; min-height: 40px; border-radius: 999px; padding: 8px 12px !important;
+    box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); border: 0 !important; font-size: 10px; }
+  .d-reader .d-decide-note { flex: 1 1 100%; }
+  .d-reader .d-decide-note textarea { height: 110px !important; }
+
+  /* My page: Save is always in reach, above the tab bar */
+  .d-form-page { padding-bottom: 120px; }
+  .d-form-page > .d-actions { position: fixed; z-index: 35; left: 12px; right: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); margin: 0;
+    display: flex; padding: 8px; border-radius: 18px; background: rgba(20, 23, 17, .97);
+    box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25), 0 18px 40px rgba(0, 0, 0, .55); }
+  .d-form-page > .d-actions .btn { flex: 1; justify-content: center; border-radius: 999px; }
+  .d-form-page > .d-notice:not(:empty) { position: fixed; z-index: 36; left: 20px; right: 20px; bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    margin: 0; padding: 10px 14px; border-radius: 12px; background: #1B2016; box-shadow: inset 0 0 0 1px rgba(127, 224, 176, .35); color: #CFE9DA; }
+
+  /* A member's work (on the paper section): each piece a card */
+  .m-list { border: 0 !important; display: flex; flex-direction: column; gap: 10px; }
+  .m-list > li { border: 0 !important; }
+  .m-piece { border-radius: 14px; padding: 14px 14px 14px 16px !important; background: rgba(42, 32, 23, .045); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .12); }
+  .m-piece:active { background: rgba(98, 55, 45, .07); }
+  .m-thumb { border-radius: 10px; overflow: hidden; }
+
+  /* The prestige ladder: each rank a card */
+  .pz-ladder { display: flex; flex-direction: column; gap: 10px; border: 0 !important; }
+  .pz-ladder > li { border: 0 !important; border-radius: 14px; background: rgba(243, 236, 220, .03); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); padding: 14px 16px !important; }
+}
