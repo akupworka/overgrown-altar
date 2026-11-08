@@ -234,7 +234,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <li key={w.id}>
                 <button type="button" className="m-piece" onClick={() => go(`/guild/members/?p=${w.id}`)}>
                   <span className="m-piece-text">
-                    <span className="lab m-kicker">{pillarName(w.pillar)} · {mediumName(w.medium)}</span>
+                    <span className="lab m-kicker"><b>{mediumName(w.medium)}</b><span className="m-room"> · {pillarName(w.pillar)}</span></span>
                     <span className="h3">{w.title}</span>
                     {w.standfirst && <span className="it m-sf">{w.standfirst}</span>}
                     {w.published_at && <span className="lab m-date">{fmt(w.published_at)}</span>}

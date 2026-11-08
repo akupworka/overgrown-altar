@@ -1026,3 +1026,18 @@
 .d-group-more { align-self: flex-start; color: var(--ember); background: none; border: 0; cursor: pointer; padding: 10px 0; min-height: 40px; border-bottom: 1px solid rgba(255, 227, 163, .35); }
 .d-group-more:hover { color: var(--bone); }
 .d-group .d-list { margin: 0; }
+/* A member's work: a clear order. The kind, quietly; the title leads; the line beneath, softer; the date, smallest. */
+.m-list .m-piece-text { gap: 6px; }
+.m-kicker { font-size: 9.5px; letter-spacing: .16em; color: var(--muted-paper); }
+.m-kicker b { font-weight: 600; color: var(--oxblood); }
+.m-list .m-piece .h3 { font-style: normal; font-weight: 500; letter-spacing: -.005em; line-height: 1.15; }
+.m-sf { color: #7A7062; }
+.m-date { font-size: 9px; letter-spacing: .14em; color: #9A9080; margin-top: 2px; }
+@media (max-width: 700px) {
+  .m-kicker { font-size: 8.5px; letter-spacing: .14em; }
+  .m-list .m-piece .h3 { font-size: 22px !important; }
+  .m-sf { font-size: 15px !important; line-height: 1.4; }
+  .m-date { font-size: 8px; }
+  .m-list .m-thumb { width: 76px; aspect-ratio: 1; justify-self: end; }
+  .m-list .m-piece { grid-template-columns: minmax(0, 1fr) 76px; gap: 14px; }
+}
