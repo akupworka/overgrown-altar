@@ -1,5 +1,6 @@
 # Builds the Guild's account emails (paste each into Supabase > Authentication > Emails > Templates).
 # Run:  python3 emails/build.py      The writer emails (netlify/functions/notify-writer.mts) use the same frame.
+# A dark stained-glass band at the top, then a paper-light letter (light on purpose: mail apps re-color dark emails).
 # Header photographs (backgrounds only; the words are real text) live in public/images/email/ (outside the site's password gate, so mail apps can load them).
 SITE = 'https://overgrownaltar.com'
 SERIF = "Georgia,'Times New Roman',serif"
@@ -10,62 +11,62 @@ LABEL = {'welcome': 'The Guild', 'account': 'Your Guild Desk', 'published': 'Pub
 def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, href=None, steps=None, code=None, fine=''):
     btn = f'''
           <tr><td align="center" style="padding:30px 44px 6px 44px;">
-            <a href="{href}" style="display:inline-block;background:#F3ECDC;color:#12160F;text-decoration:none;font-family:{SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">{button}&nbsp;&rarr;</a>
+            <a href="{href}" style="display:inline-block;background:#1F1A14;color:#F8F4EC;text-decoration:none;font-family:{SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">{button}&nbsp;&rarr;</a>
           </td></tr>''' if button else ''
     codebox = f'''
           <tr><td align="center" style="padding:30px 44px 6px 44px;">
-            <div style="display:inline-block;padding:18px 30px;border:1px solid #6B5A2E;border-radius:4px;background:#171A12;font-family:'Courier New',Courier,monospace;font-size:34px;letter-spacing:10px;color:#FFE3A3;">{code}</div>
+            <div style="display:inline-block;padding:18px 30px;border:1px solid #B8A05E;border-radius:4px;background:#F1EBDF;font-family:'Courier New',Courier,monospace;font-size:34px;letter-spacing:10px;color:#1F1A14;">{code}</div>
           </td></tr>''' if code else ''
     steps_html = ''
     if steps:
         rows = ''.join(f'''
                 <tr>
-                  <td valign="top" style="width:34px;padding:0 0 14px 0;font-family:{SERIF};font-size:18px;color:#D2A23A;">{n}</td>
-                  <td valign="top" style="padding:0 0 14px 0;font-family:{SERIF};font-size:16px;line-height:1.5;color:#CFC8B8;"><span style="color:#F3ECDC;">{a}</span> {b}</td>
+                  <td valign="top" style="width:34px;padding:0 0 14px 0;font-family:{SERIF};font-size:18px;color:#9A7B2E;">{n}</td>
+                  <td valign="top" style="padding:0 0 14px 0;font-family:{SERIF};font-size:16px;line-height:1.5;color:#4A4236;"><span style="color:#1F1A14;">{a}</span> {b}</td>
                 </tr>''' for n, (a, b) in zip(['I', 'II', 'III', 'IV'], steps))
         steps_html = f'''
           <tr><td style="padding:34px 44px 0 44px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#171A12;border:1px solid #2C2E25;border-radius:4px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F1EBDF;border:1px solid #DED4C2;border-radius:4px;">
               <tr><td style="padding:22px 24px 8px 24px;">
-                <div style="font-family:{SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#8C8679;padding-bottom:16px;">What happens next</div>
+                <div style="font-family:{SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#7A7062;padding-bottom:16px;">What happens next</div>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">{rows}
                 </table>
               </td></tr>
             </table>
           </td></tr>'''
-    direct = f' If the button doesn&rsquo;t open, use <a href="{href}" style="color:#D2A23A;text-decoration:underline;">this direct link</a>.' if button else ''
+    direct = f' If the button doesn&rsquo;t open, use <a href="{href}" style="color:#9A7B2E;text-decoration:underline;">this direct link</a>.' if button else ''
     return f'''<!doctype html>
 <!-- Subject: {subject} -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><title>Overgrown Altar</title></head>
-<body style="margin:0;padding:0;background:#0A0C0A;">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><style>:root{{color-scheme:light only;supported-color-schemes:light;}}</style><title>Overgrown Altar</title></head>
+<body style="margin:0;padding:0;background:#ECE6DA;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{preview}</div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0A0C0A;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ECE6DA;">
     <tr><td align="center" style="padding:32px 12px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#12150F;border:1px solid #2C2E25;border-radius:8px;overflow:hidden;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#F8F4EC;border:1px solid #DED4C2;border-radius:8px;overflow:hidden;">
         <tr><td align="center" background="{SITE}/images/email/bg-{header}.jpg" bgcolor="#16190F" style="background:#16190F url('{SITE}/images/email/bg-{header}.jpg') center center / cover no-repeat;padding:46px 20px 42px 20px;">
           <div style="font-family:{SERIF};font-size:22px;line-height:1;color:#E9C77A;">&#8224;</div>
           <div style="padding-top:14px;font-family:{SERIF};font-size:30px;line-height:1;letter-spacing:9px;color:#F3ECDC;">OVERGROWN</div>
           <div style="padding-top:4px;font-family:{SERIF};font-style:italic;font-size:36px;line-height:1.1;color:#E9C77A;">Altar</div>
           <div style="padding-top:16px;font-family:{SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#CFC8B8;">{LABEL[header]}</div>
         </td></tr>
-        <tr><td style="height:1px;line-height:1px;font-size:0;background:#6B5A2E;">&nbsp;</td></tr>
+        <tr><td style="height:1px;line-height:1px;font-size:0;background:#B8A05E;">&nbsp;</td></tr>
         <tr><td>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-          <tr><td align="center" style="padding:38px 44px 0 44px;font-family:{SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#E9C77A;">{eyebrow}</td></tr>
-          <tr><td align="center" style="padding:14px 40px 0 40px;font-family:{SERIF};font-size:38px;line-height:1.1;color:#F3ECDC;">{heading}</td></tr>
-          <tr><td align="center" style="padding:18px 48px 0 48px;font-family:{SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#CFC8B8;">{lines}</td></tr>{btn}{codebox}{steps_html}
-          <tr><td style="padding:30px 44px 34px 44px;font-family:{SANS};font-size:12px;line-height:1.7;color:#8C8679;">{fine}{direct}</td></tr>
+          <tr><td align="center" style="padding:38px 44px 0 44px;font-family:{SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7A3B2E;">{eyebrow}</td></tr>
+          <tr><td align="center" style="padding:14px 40px 0 40px;font-family:{SERIF};font-size:38px;line-height:1.1;color:#1F1A14;">{heading}</td></tr>
+          <tr><td align="center" style="padding:18px 48px 0 48px;font-family:{SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#4A4236;">{lines}</td></tr>{btn}{codebox}{steps_html}
+          <tr><td style="padding:30px 44px 34px 44px;font-family:{SANS};font-size:12px;line-height:1.7;color:#7A7062;">{fine}{direct}</td></tr>
           </table>
         </td></tr>
       </table>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;">
-        <tr><td align="center" style="padding:26px 20px 0 20px;font-family:{SERIF};font-style:italic;font-size:15px;color:#8C8679;">We light the signal fires on the perimeter.</td></tr>
+        <tr><td align="center" style="padding:26px 20px 0 20px;font-family:{SERIF};font-style:italic;font-size:15px;color:#7A7062;">We light the signal fires on the perimeter.</td></tr>
         <tr><td align="center" style="padding:12px 20px 0 20px;font-family:{SANS};font-size:10px;letter-spacing:2px;text-transform:uppercase;">
-          <a href="{SITE}" style="color:#6E6A5E;text-decoration:none;">overgrownaltar.com</a>
-          <span style="color:#3E3C35;">&nbsp;&middot;&nbsp;</span>
-          <a href="{SITE}/guild/desk/" style="color:#6E6A5E;text-decoration:none;">Your Desk</a>
-          <span style="color:#3E3C35;">&nbsp;&middot;&nbsp;</span>
-          <a href="{SITE}/contact" style="color:#6E6A5E;text-decoration:none;">Contact</a>
+          <a href="{SITE}" style="color:#7A7062;text-decoration:none;">overgrownaltar.com</a>
+          <span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span>
+          <a href="{SITE}/guild/desk/" style="color:#7A7062;text-decoration:none;">Your Desk</a>
+          <span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span>
+          <a href="{SITE}/contact" style="color:#7A7062;text-decoration:none;">Contact</a>
         </td></tr>
       </table>
     </td></tr>
@@ -74,7 +75,7 @@ def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, hre
 '''
 
 link = lambda t: f'{SITE}/guild/desk/?token_hash={{{{ .TokenHash }}}}&type={t}'
-B = lambda t: f'<span style="color:#F3ECDC;font-style:normal;">{t}</span>'
+B = lambda t: f'<span style="color:#1F1A14;font-style:normal;">{t}</span>'
 
 EMAILS = {
   'invite.html': dict(subject='A seat at the table: welcome to the Guild', preview='Your application has been read, and there is a seat for you at the table.',
