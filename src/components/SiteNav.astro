@@ -123,7 +123,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       const uid = inner.querySelector<HTMLAnchorElement>('[data-my-page]')!.href.split('m=')[1];
       return path.startsWith('/guild/desk')
         ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
-        : q.get('view') === 'forum' || q.get('board') || q.get('t') ? 'forum'
+        : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('board') || q.get('t') ? 'forum'
         : q.get('view') === 'prestige' ? 'prestige'
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };

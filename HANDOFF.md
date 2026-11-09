@@ -138,3 +138,10 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   read from Netlify Forms by `netlify/functions/forms.mts` after it checks the caller is the editor. Read only.
 - Needs `NETLIFY_FORMS_TOKEN` (a Netlify personal access token: User settings > Applications > New access token) in
   Netlify > Site configuration > Environment variables. Until it's set, the room says it isn't switched on yet.
+
+## Forums
+- Boards are called "forums" on the site (tables keep their names: `forum_boards`, `forum_threads`, `forum_posts`).
+- Any member may open a forum (Forum page → Open a new forum); `private.guard_board()` sets its address, place and
+  creator, and keeps the editor's settings (`editor_only`, `keep_threads`) the editor's. Members may rename their own;
+  only the editor deletes forums (deleting removes every thread in it). From the Editor's Desk is `editor_only`.
+- Every forum keeps 400 threads (20 pages of 20); threads show 20 posts per page. Rules page: `?view=rules` (Forum.tsx).

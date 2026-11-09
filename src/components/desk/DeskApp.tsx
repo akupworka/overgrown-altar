@@ -634,7 +634,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
       {isEditor && <EditorTools />}
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
-        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
+        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All forums →</a></div>
         <ForumLatest count={3} plain />
       </section>
       <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
