@@ -211,7 +211,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         {person.id === me && (
           <nav className="d-tabbar" aria-label="Desk">
             {((person.role === 'editor'
-              ? [['pieces', 'Desk', '/guild/desk/'], ['review', 'Waiting', '/guild/desk/#review'], ['write', 'Write', '/guild/desk/#write'], ['forms', 'Forms', '/guild/desk/#forms']]
+              ? [['pieces', 'Desk', '/guild/desk/'], ['review', 'Waiting', '/guild/desk/#review'], ['write', 'Write', '/guild/desk/#write'], ['forms', 'Arrivals', '/guild/desk/#forms']]
               : [['pieces', 'Pieces', '/guild/desk/'], ['write', 'Write', '/guild/desk/#write']]).concat([
               ['profile', 'My page', '']]) as [string, string, string][]).map(([t, label, href]) => t === 'profile'
               ? <span key={t} className="on" aria-current="page"><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></span>

@@ -243,10 +243,10 @@ function Desk({ session }: { session: Session }) {
   }, [load]);
   const items: [Tab, string, number?][] = [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
-    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Forms'] as [Tab, string]] : []),
+    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'My page'],
   ];
-  const short: Record<Tab, string> = { pieces: isEditor ? 'Desk' : 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page', forms: 'Forms' };
+  const short: Record<Tab, string> = { pieces: isEditor ? 'Desk' : 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page', forms: 'Arrivals' };
 
   if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
@@ -1196,7 +1196,7 @@ function FormsRoom() {
         setWhy(res.status === 404 ? 'The site’s forms helper wasn’t found (404).' : `${out.error || 'Not switched on yet.'} (503)`);
         setSample(true); setRooms(SAMPLE_FORMS); setPick(SAMPLE_FORMS[0].key); return;
       }
-      if (!res?.ok) { setErr(out.error || 'The forms couldn’t be fetched. Check your connection.'); setRooms([]); return; }
+      if (!res?.ok) { setErr(out.error || 'Arrivals couldn’t be fetched. Check your connection.'); setRooms([]); return; }
       setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
     })();
   }, []);
@@ -1244,17 +1244,17 @@ function FormsRoom() {
   const cur = Math.min(page, pages);
   return (
     <section className="d-section d-forms">
-      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Forms</h1>
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Arrivals</h1>
         <p className="it mut d-sub">What visitors have sent through the site: applications to the Guild, letters, and sign-ups for the Dispatches. Newest first.</p></header>
-      {!rooms ? <p className="lab mut">Opening the forms…</p>
+      {!rooms ? <p className="lab mut">Opening Arrivals…</p>
         : err ? <p className="d-photo-msg" role="alert">{err}</p>
-        : !rooms.length ? <p className="it mut d-empty">No forms have been sent yet.</p>
+        : !rooms.length ? <p className="it mut d-empty">Nothing has arrived yet.</p>
         : <>
           {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
           {/* The message always has its place, and the tab row its own box: the site's script wraps filter rows, so nothing is inserted beside them. */}
           <p className="d-photo-msg" role="status" hidden={!note}>{note}</p>
           <div>
-            <div className="filters d-filters" role="tablist" aria-label="Forms">
+            <div className="filters d-filters" role="tablist" aria-label="Arrivals">
               {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); setNote(''); }}>{r.label}<span className="chip-n">{r.count}</span>{r.items.some((x) => !read.has(x.id)) && <span className="d-form-unread-n" aria-label={`${r.items.filter((x) => !read.has(x.id)).length} unread`}>{r.items.filter((x) => !read.has(x.id)).length} new</span>}</button>)}
             </div>
           </div>
