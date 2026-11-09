@@ -1306,3 +1306,17 @@
   .d-form-acts .d-btn { text-align: center; justify-content: center; }
   .d-form-del { margin: 4px auto 0; }
 }
+/* Forms: unread entries carry a small gold dot and a brighter name; read ones settle back */
+.d-form-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); margin-right: 12px; vertical-align: 4px; }
+.d-form-item:not(.unread) .d-form-who { color: #CFC8B8; }
+.d-form-item.unread .d-form-who { color: #FFF6E2; }
+.d-form-item.unread { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.22); }
+.d-form-unread-n { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 7px; margin-left: 8px; border-radius: 999px;
+  background: var(--ember); color: #12160F; font-size: 9px; letter-spacing: 0; }
+.d-form-mark { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; margin-left: auto; }
+.d-form-mark + .d-form-del { margin-left: 18px; }
+@media (max-width: 700px) {
+  .d-form-mark { margin: 4px auto 0; }
+  .d-form-mark + .d-form-del { margin: 0 auto; }
+  .d-form-dot { margin-right: 10px; vertical-align: 3px; }
+}

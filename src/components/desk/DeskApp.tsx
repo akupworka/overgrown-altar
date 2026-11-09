@@ -1202,6 +1202,15 @@ function FormsRoom() {
   }, []);
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
+  // Read or not: kept in the Guild's database (form_reads), so phone and computer agree. Examples are marked here only.
+  const [read, setRead] = useState<Set<string>>(new Set());
+  useEffect(() => { supabase.from('form_reads').select('submission_id').then(({ data }) => setRead(new Set((data ?? []).map((r: any) => r.submission_id)))); }, []);
+  const mark = async (id: string, on: boolean) => {
+    setRead((r) => { const n = new Set(r); on ? n.add(id) : n.delete(id); return n; });
+    if (sample) return;
+    if (on) await supabase.from('form_reads').upsert({ submission_id: id }, { onConflict: 'submission_id', ignoreDuplicates: true });
+    else await supabase.from('form_reads').delete().eq('submission_id', id);
+  };
   const call = async (url: string, body: unknown) => {
     const { data: s } = await supabase.auth.getSession();
     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session?.access_token ?? ''}` }, body: JSON.stringify(body) }).catch(() => null);
@@ -1246,7 +1255,7 @@ function FormsRoom() {
           <p className="d-photo-msg" role="status" hidden={!note}>{note}</p>
           <div>
             <div className="filters d-filters" role="tablist" aria-label="Forms">
-              {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); setNote(''); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
+              {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); setNote(''); }}>{r.label}<span className="chip-n">{r.count}</span>{r.items.some((x) => !read.has(x.id)) && <span className="d-form-unread-n" aria-label={`${r.items.filter((x) => !read.has(x.id)).length} unread`}>{r.items.filter((x) => !read.has(x.id)).length} new</span>}</button>)}
             </div>
           </div>
           {items.length === 0 ? <p className="it mut d-empty">Nothing here yet.</p> : (
@@ -1255,9 +1264,9 @@ function FormsRoom() {
                 const long = f.fields.filter(([k]) => !/^(name|email)$/i.test(k));
                 return (
                   <li key={f.id}>
-                    <details className="d-form-item">
+                    <details className={`d-form-item${read.has(f.id) ? '' : ' unread'}`} onToggle={(e) => { if (e.currentTarget.open && !read.has(f.id)) mark(f.id, true); }}>
                       <summary>
-                        <span className="d-form-who">{f.name || f.email || 'Someone'}</span>
+                        <span className="d-form-who">{!read.has(f.id) && <i className="d-form-dot" aria-label="Unread" />}{f.name || f.email || 'Someone'}</span>
                         <span className="lab mut d-form-when">{fmt(f.at)}</span>
                         {long[0] && <span className="it d-form-peek">{long[0][1]}</span>}
                       </summary>
@@ -1267,6 +1276,7 @@ function FormsRoom() {
                         <div className="d-form-acts">
                           {room?.key === 'guild-application' && <button type="button" className="btn d-btn" disabled={busy === f.id} onClick={() => accept(room.key, f)}>{busy === f.id ? 'Sending…' : 'Accept & invite'}</button>}
                           {f.email && <a className="ghost d-btn" href={`mailto:${f.email}`}>Reply by email</a>}
+                          <button type="button" className="d-textbtn d-form-mark" onClick={(e) => { const d = e.currentTarget.closest('details'); mark(f.id, !read.has(f.id)); if (d && read.has(f.id)) d.open = false; }}>{read.has(f.id) ? 'Mark as unread' : 'Mark as read'}</button>
                           <button type="button" className="d-textbtn d-danger d-form-del" disabled={busy === f.id} onClick={() => room && remove(room.key, f)}>Delete</button>
                         </div>
                       </div>
