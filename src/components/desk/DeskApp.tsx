@@ -168,6 +168,8 @@ function Desk({ session }: { session: Session }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [queue, setQueue] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
+  // Nothing is drawn until the first load is in, so a refresh never flashes an email address and zeros.
+  const [loaded, setLoaded] = useState(false);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
   const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : 'pieces');
@@ -191,6 +193,7 @@ function Desk({ session }: { session: Session }) {
       const { data: q } = await supabase.from('pieces').select('*, profiles(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
+    setLoaded(true);
   }, [uid]);
   useEffect(() => { load(); }, [load]);
 
@@ -243,6 +246,7 @@ function Desk({ session }: { session: Session }) {
   ];
   const short: Record<Tab, string> = { pieces: 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page' };
 
+  if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
     <div className={`d-room ${tab === 'write' ? 'writing' : ''}`}>
       <aside className="d-side">
