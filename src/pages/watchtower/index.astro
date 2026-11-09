@@ -1,7 +1,7 @@
 ---
 // The Watchtower: the dispatches, laid out like a journal's blog section.
 //   - the header, with how many dispatches and writers
-//   - the latest dispatch, large, and two more beside it ("Also new")
+//   - the three newest dispatches under arched windows, then six more ("Also new")
 //   - how a dispatch works: Thinker, Fracture, Anchor
 //   - a line from the newest dispatches, set large
 //   - every earlier dispatch, with a search that filters as you type
@@ -17,9 +17,9 @@ import { parseBody } from '../../lib/marks';
 
 // Every dispatch: real pieces only (the design's complete essay, plus pieces published at the Guild Desk).
 const newestFirst: DispatchItem[] = await inPillar('watchtower');
-const latest = newestFirst[0];
-const alsoNew = newestFirst.slice(1, 3);           // two more, as large features
-const rest = newestFirst.slice(3);                 // everything earlier, as a searchable list
+const newest = newestFirst.slice(0, 3);           // the three newest, under arched windows
+const alsoNew = newestFirst.slice(3, 9);           // six more, three to a row
+const rest = newestFirst.slice(9);                 // everything earlier, as a searchable list
 
 // The writers of The Watchtower, and a line worth pausing on: the first pull quote (a "> " line) in the newest dispatches.
 const guildPieces = await guildPillar('watchtower');
@@ -47,25 +47,31 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
 
   <section class="paper blog">
     <div class="blog-col">
-      {!latest && <p class="it mut" style="font-size:22px;margin:0">The first dispatches are being written.</p>}
-      <!-- The latest dispatch -->
-      {latest && <article class="latest">
-        <a class="latest-img" href={latest.href} aria-label={latest.title} tabindex="-1"><img src={latest.image} alt="" style={latest.imagePos ? `object-position:${latest.imagePos}` : undefined} /></a>
-        <div class="latest-text">
-          <span class="eb">Latest · {latest.kicker}</span>
-          <h2 class="h2 latest-title"><a href={latest.href}>{latest.title}</a></h2>
-          <p class="body mut latest-sum">{latest.standfirst}</p>
-          <div class="latest-by">
-            {latest.author.href
-              ? <a class="latest-who" href={latest.author.href}><Avatar name={latest.author.name} src={latest.author.portrait} size={34} id={latest.author.id} /><span class="lab mut">{latest.author.name}</span></a>
-              : <span class="latest-who"><Avatar name={latest.author.name} src={latest.author.portrait} size={34} /><span class="lab mut">{latest.author.name}</span></span>}
-            <span class="lab mut">· <time datetime={latest.date}>{fmt(latest.date)}</time></span>
+      {!newest.length && <p class="it mut" style="font-size:22px;margin:0">The first dispatches are being written.</p>}
+      <!-- The three newest dispatches -->
+      {newest.length > 0 && (
+        <div class="newest">
+          <h2 class="eb newest-h">The newest</h2>
+          <div class="newest-grid">
+            {newest.map((d, i) => (
+              <article class:list={['nw', { 'nw-first': i === 0 }]}>
+                <a class="nw-img" href={d.href} aria-label={d.title} tabindex="-1"><img src={d.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} style={d.imagePos ? `object-position:${d.imagePos}` : undefined} /></a>
+                <span class="lab nw-k">{i === 0 ? 'Latest · ' : ''}{d.kicker}</span>
+                <h3 class="nw-t"><a href={d.href}>{d.title}</a></h3>
+                {d.standfirst && <p class="it nw-sf">{d.standfirst}</p>}
+                <div class="nw-by">
+                  {d.author.href
+                    ? <a class="latest-who" href={d.author.href}><Avatar name={d.author.name} src={d.author.portrait} size={28} id={d.author.id} /><span class="lab mut">{d.author.name}</span></a>
+                    : <span class="latest-who"><Avatar name={d.author.name} src={d.author.portrait} size={28} /><span class="lab mut">{d.author.name}</span></span>}
+                  <span class="lab mut"><span class="nw-dot">· </span><time datetime={d.date}>{fmt(d.date)}</time></span>
+                </div>
+              </article>
+            ))}
           </div>
-          <a class="btn" href={latest.href}>Read the dispatch</a>
         </div>
-      </article>}
+      )}
 
-      <!-- Also new: two more, as large features -->
+      <!-- Also new: six more, three to a row -->
       {alsoNew.length > 0 && (
         <div class="also">
           <h2 class="eb also-h">Also new</h2>
@@ -193,10 +199,27 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
 
   .wt-stats { margin-top: 6px; color: var(--ember); }
 
-  /* Also new */
+  /* The three newest: arched windows side by side */
+  .newest { padding-bottom: 64px; }
+  .newest-h { margin: 0 0 28px; }
+  .newest-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; align-items: start; }
+  .nw { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .nw-img { display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 999px 999px 0 0; box-shadow: 0 0 0 1px var(--brass); margin-bottom: 8px; }
+  .nw-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s var(--ease, ease); }
+  .nw-img:hover img { transform: scale(1.04); }
+  .nw-k { color: var(--oxblood); font-size: 10px; }
+  .nw-t { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.1; }
+  .nw-t a:hover { color: var(--oxblood); }
+  .nw-sf { margin: 0; font-size: 18px; line-height: 1.45; color: var(--muted-paper); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .nw-by { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 2px; }
+  .nw-by .lab { font-size: 9.5px; white-space: nowrap; }
+
+  /* Also new: six, three to a row */
   .also { padding-top: 8px; border-top: 1px solid rgba(42, 32, 23, .25); }
   .also-h { margin: 26px 0 24px; }
-  .also-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .also-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 30px; }
+  .also-t { font-size: 24px !important; }
+  .also-sf { font-size: 16px !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .also-card { display: flex; flex-direction: column; gap: 10px; }
   .also-img { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #DDD5C6; margin-bottom: 6px; }
   .also-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease, ease); }
@@ -260,6 +283,30 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .latest-by .lab { white-space: nowrap; }
   a.latest-who:hover .lab { color: var(--oxblood); }
 
+  @media (max-width: 900px) and (min-width: 701px) { .newest-grid, .also-grid { gap: 26px 20px; } .nw-t { font-size: 24px; } }
+  /* Phones: the newest full width, the next two side by side; Also new two to a row */
+  @media (max-width: 700px) {
+    .newest { padding-bottom: 44px; }
+    .newest-h { margin-bottom: 20px; }
+    .newest-grid { grid-template-columns: 1fr 1fr; gap: 30px 14px; }
+    .nw-first { grid-column: 1 / -1; }
+    .nw-first .nw-img { aspect-ratio: 5 / 6; }
+    .nw-first .nw-t { font-size: 30px; }
+    .nw-first .nw-sf { font-size: 17px; }
+    .nw { gap: 8px; }
+    .nw-t { font-size: 20px; line-height: 1.15; }
+    .nw-sf { font-size: 14.5px; -webkit-line-clamp: 2; }
+    .nw:not(.nw-first) .nw-by .latest-who .avatar { display: none; }
+    .nw:not(.nw-first) .nw-by { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .nw:not(.nw-first) .nw-by .lab { font-size: 8.5px; }
+    .nw:not(.nw-first) .nw-dot { display: none; }
+    .nw:not(.nw-first) .nw-k { font-size: 8.5px; letter-spacing: .14em; }
+    .also-grid { grid-template-columns: 1fr 1fr !important; gap: 26px 14px !important; }
+    .also-card { gap: 6px; }
+    .also-t { font-size: 19px !important; }
+    .also-sf { font-size: 14px !important; }
+    .also-k, .also-by { font-size: 8.5px !important; }
+  }
   @media (max-width: 700px) {
     .wt-hero { height: 460px; }
     .wt-in { bottom: 40px; }
