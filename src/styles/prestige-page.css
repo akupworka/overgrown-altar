@@ -310,3 +310,26 @@
   .pzv-pane, .pzv-pane-btn { width: 100%; }
   .pzv-pane-text { min-height: 0; }
 }
+
+/* No glass windows: the crests stand on the dark, quietly. */
+.pzv-window { aspect-ratio: 1 !important; border-radius: 0 !important; box-shadow: none !important; overflow: visible !important; }
+.pzv-window-glass, .pzv-window-lead { display: none !important; }
+.pzv-window-ring, .pzv-window-crest { top: 50% !important; }
+.pzv-window-ring { width: 92% !important; height: 92% !important; }
+.pzv-ring-fill { stroke: var(--ink) !important; }
+.pzv-window .pzx-ring-track { stroke: rgba(243,236,220,.08) !important; }
+.pzv-stand { background: linear-gradient(180deg, #14170F, #0A0C09) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.12) !important; }
+.pzv-panes { background: none !important; box-shadow: none !important; padding: 0 !important; gap: 10px !important; align-items: stretch !important; }
+.pzv-pane-glass, .pzv-pane.lit .pzv-pane-glass { height: 120px !important; border-radius: 14px !important; align-items: center !important; padding: 0 !important;
+  background: rgba(243,236,220,.03) !important; box-shadow: inset 0 0 0 1px rgba(243,236,220,.08) !important; }
+.pzv-pane.here .pzv-pane-glass { box-shadow: inset 0 0 0 1px var(--ink) !important; background: rgba(243,236,220,.05) !important; }
+.pzv-pane-lead { display: none !important; }
+.pzv-pane-crest { width: 76px !important; }
+.pzv-pane-btn:hover .pzv-pane-glass { transform: translateY(-3px); }
+.pzv-you { top: 8px !important; }
+@media (max-width: 700px) {
+  .pzv-window { width: 190px !important; }
+  .pzv-pane-glass, .pzv-pane.lit .pzv-pane-glass { width: 64px !important; height: 64px !important; background: none !important; box-shadow: none !important; }
+  .pzv-pane.here .pzv-pane-glass { box-shadow: none !important; }
+  .pzv-pane-crest { width: 56px !important; }
+}
