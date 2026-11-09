@@ -109,3 +109,12 @@
 .vault-rest { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 30px 26px !important; }
 .vault-rest .tr { width: 150px; }
 @media (max-width: 700px) { .vault-rest .tr { width: calc(33% - 10px); } .vault-rest { gap: 22px 10px !important; } }
+/* Phones: the rest of the vault five to a row: just the medal and its name (the medal's metal shows the tier).
+   Tap a medal for its name in full and what it marks (its title). */
+@media (max-width: 700px) {
+  .vault-rest, .vault-locked .tc-grid { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px 6px !important; }
+  .vault-rest .tr, .vault-locked .tc-grid .tr { width: auto !important; gap: 6px !important; padding: 0 !important; }
+  .vault-rest .tr svg, .vault-locked .tc-grid .tr svg { width: 54px !important; height: 54px !important; }
+  .vault-rest .tr-name, .vault-locked .tc-grid .tr-name { font-size: 11.5px !important; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .vault-rest :is(.tr-tier, .tr-next, .tr-bar, .tr-note), .vault-locked .tc-grid :is(.tr-tier, .tr-next, .tr-bar, .tr-note) { display: none !important; }
+}
