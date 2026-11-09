@@ -553,6 +553,16 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
         <ForumLatest count={3} plain />
       </section>
+      {/* Read the Guild's work: the three pillars, one tap each */}
+      <nav className="d-pillars-row" aria-label="Read">
+        {([['/watchtower/', 'The Watchtower', 'Prophetic audits of the age.'], ['/hearth/', 'The Hearth', 'The creative guild: prose, poetry, photographs.'], ['/perimeter/', 'The Perimeter', 'Testimony and the unseen.']] as const).map(([href, name, line]) => (
+          <a key={href} className="g-room g-room-small" href={href}>
+            <span className="eb"><span className="d-pl-the">The </span>{name.replace(/^The /, '')}</span>
+            <span className="g-room-line">{line}</span>
+            <span className="lab g-room-go">Read →</span>
+          </a>
+        ))}
+      </nav>
       {waiting > 0 && (
         <button type="button" className="d-waiting" onClick={onReview}>
           <span className="d-waiting-dot" aria-hidden="true" />
