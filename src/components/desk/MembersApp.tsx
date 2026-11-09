@@ -5,6 +5,7 @@
 // What anyone can see is enforced by the database's rules; this only presents it.
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
+import { WayPage, WayCard } from './Way';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
@@ -464,19 +465,22 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
+  // The Fellowship: their own room (The Way) instead of the Guild's rooms
+  const [isFellow, setIsFellow] = useState(() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').fellow; } catch { return false; } });
   useEffect(() => {
     if (!session) return setIsEditor(false);
     supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(({ data }) => {
-      setIsEditor(data?.role === 'editor');
+      setIsEditor(data?.role === 'editor'); setIsFellow(data?.role === 'fellow');
       document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = data?.role !== 'editor'));   // the members' bar's Review
     });
   }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;
+  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox'].includes(route.view ?? '')))) return <WayPage me={session.user.id} />;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
@@ -504,6 +508,7 @@ function FellowCollection({ id, first, mine }: { id: string; first: string; mine
   const items = useCollection(id);
   return (
     <section className="m-work m-coll">
+      <div className="m-way"><WayCard member={id} mine={mine} /></div>
       <div className="m-work-head"><span className="eb">{mine ? 'Your collection' : `${first}’s collection`}</span>
         <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
       <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />

@@ -48,7 +48,8 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
   document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));
   const home = document.querySelector<HTMLAnchorElement>('.nav-home');
-  if (home) { home.href = p ? '/guild/members/' : '/'; home.setAttribute('aria-label', p ? 'The Guild, home for members' : 'Overgrown Altar, home'); }
+  const fel = p?.role === 'fellow';
+  if (home) { home.href = !p ? '/' : fel ? '/guild/desk/' : '/guild/members/'; home.setAttribute('aria-label', !p ? 'Overgrown Altar, home' : fel ? 'Your Desk' : 'The Guild, home for members'); }
   if (!p) return;
   const src = portraitUrl(p.portrait_path);
   document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {

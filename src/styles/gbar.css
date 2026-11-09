@@ -75,3 +75,6 @@
 /* The Fellowship: no writing tools anywhere; the phone bar's centre button explores instead */
 html[data-fellow] :is(.gbar .t-write:not(.t-explore), .inner-write, .inner-photo, [data-writer]) { display: none !important; }
 html:not([data-fellow]) .gbar .t-explore { display: none !important; }
+/* The Fellowship has The Way instead of the Guild's rooms (Members, Prestiges); the Guild doesn't see The Way */
+html[data-fellow] .for-guild { display: none !important; }
+html:not([data-fellow]) .for-fellow { display: none !important; }

@@ -297,10 +297,13 @@ function Desk({ session }: { session: Session }) {
           <a className="d-side-link" href="/guild/members/?view=forum">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>
             The Forum<span aria-hidden="true">→</span></a>
-          <a className="d-side-link" href="/guild/members/">
+          <a className="d-side-link for-fellow" href="/guild/members/?view=way">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M12 18c-4 0-6.5-3.5-6.5-7 0 0 2.5-4 6.5-4s6.5 4 6.5 4c0 3.5-2.5 7-6.5 7z" /><path d="M12 18V7.5M9 17l-1.5-8M15 17l1.5-8" /></svg>
+            The Way<span aria-hidden="true">→</span></a>
+          <a className="d-side-link for-guild" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
-          <a className="d-side-link" href="/crafts/">
+          <a className="d-side-link for-guild" href="/crafts/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M4 5h11l5 5v9H4zM15 5v5h5M8 13h8M8 16h6" /></svg>
             The Crafts<span aria-hidden="true">→</span></a>
         </div>
