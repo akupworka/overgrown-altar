@@ -1565,3 +1565,7 @@
 .d-reports li { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .d-rep-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
 .d-rep-text .it { font-size: 17px; color: var(--bone); }
+/* Guild page: "Show more" members, a quiet dark pill */
+.g-more { padding-top: 36px; }
+.g-more .d-link { padding: 13px 28px; border: 0 !important; border-radius: 999px; color: var(--ember) !important; font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer;
+  background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45); }

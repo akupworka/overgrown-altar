@@ -77,7 +77,7 @@ const dm_messages = [
 // --heavy: a very busy member and a crowded Guild, to see the pages hold up (use with --pieces 150).
 if (flag('heavy')) {
   const names = ['Ainslie Willson', 'Marcus Vale', 'Ruth Calloway', 'Benedict Hart', 'Clara Penhallow', 'Silas Thorne', 'Margaret O’Rourke-Fitzgerald', 'Isaiah Bell', 'Hannah Greaves', 'Tobias Wren'];
-  for (let i = 4; i <= 40; i++) profiles.push({ id: 'm' + i, display_name: names[i % names.length] + (i >= 10 ? ' ' + i : ''), craft: ['Poetry', 'Fiction', 'Essays · Photographs', 'Testimony'][i % 4], bio: 'A long bio about stone, light and the slow work of words. '.repeat(3), portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) });
+  for (let i = 4; i <= 60; i++) profiles.push({ id: 'm' + i, display_name: names[i % names.length] + (i >= 10 ? ' ' + i : ''), craft: ['Poetry', 'Fiction', 'Essays · Photographs', 'Testimony'][i % 4], bio: 'A long bio about stone, light and the slow work of words. '.repeat(3), portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) });
   const long = 'Hey how are you? This is a test of a very long message that keeps going. '.repeat(8);
   for (let c = 0; c < 25; c++) {
     const other = 'm' + (4 + c), [a, b] = lo(ME, other), id = 'hv' + c;

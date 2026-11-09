@@ -52,6 +52,9 @@ function Arch({ p, big = false }: { p: Pick<Profile, 'display_name' | 'portrait_
 function Directory() {
   const [members, setMembers] = useState<(Profile & { count: number })[] | null>(null);
   const [q, setQ] = useState('');   // find a member by name or craft
+  // Members shown before "Show more": 25 on a computer (five full rows of five), 24 on a phone (six rows of four)
+  const STEP = typeof window !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 24 : 25;
+  const [seen, setSeen] = useState(STEP);
   const [mine, setMine] = useState<number | null>(null);   // your own published count, for your crest on the Prestiges tile
   // For the rooms: your own work (Desk counts, trophies), and the newest photographs (the Gallery's mosaic).
   const [myPieces, setMyPieces] = useState<Piece[]>([]);
@@ -66,7 +69,9 @@ function Directory() {
       ]);
       const counts = new Map<string, number>();
       (work ?? []).forEach((w: any) => counts.set(w.author_id, (counts.get(w.author_id) ?? 0) + 1));
-      setMembers(((people as Profile[]) ?? []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 })));
+      // Highest rank first (the prestiges climb with published pieces), then by name
+      setMembers(((people as Profile[]) ?? []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 }))
+        .sort((a, b) => b.count - a.count || (a.display_name || '').localeCompare(b.display_name || '')));
       const { data: s } = await supabase.auth.getSession();
       if (s.session) {
         setMine(counts.get(s.session.user.id) ?? 0); setMeId(s.session.user.id);
@@ -162,7 +167,7 @@ function Directory() {
         : members.length === 0 ? <p className="it mut d-empty">No one is listed yet.</p>
         : (
           <div className="g-grid">
-            {members.filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).map((m) => (
+            {members.filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).slice(0, q.trim() ? undefined : seen).map((m) => (
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
@@ -173,6 +178,9 @@ function Directory() {
             ))}
           </div>
         )}
+      {members && !q.trim() && members.length > seen && (
+        <div className="m-grid-more g-more"><button type="button" className="d-link" onClick={() => setSeen((n) => n + STEP)}>Show more · {members.length - seen} more</button></div>
+      )}
     </div>
   );
 }
