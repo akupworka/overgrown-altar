@@ -176,3 +176,9 @@
   .trc-name { font-size: 25px; }
 }
 @media (prefers-reduced-motion: reduce) { .trc, .trc-veil, .vault-locked .tc-grid { animation: none; } }
+/* Phones, signed in: the Vault is often the end of the page, so it leaves room to scroll clear of the bottom bar */
+@media (max-width: 700px) {
+  html[data-member] .vault { padding-bottom: 150px !important; }
+  .vault-locked { margin-top: 40px !important; }
+  .vault-all { margin-top: 34px !important; }
+}
