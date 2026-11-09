@@ -1522,3 +1522,8 @@
   .d-standing-medal svg, .d-standing-medal:first-child svg { width: 50px !important; height: 50px !important; }
   .d-standing-tally { margin-top: 6px; }
 }
+/* Computers too: the rooms right under the greeting; Begin and Submit step aside (the Guild bar has Write and Photograph) */
+.d-home .d-begins { display: none !important; }
+.d-home > .d-home-head { order: -2; }
+.d-home > .d-pillars-row { order: -1; }
+@media (min-width: 701px) { .d-pl { height: 150px; } }

@@ -621,7 +621,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {/* Read the Guild's work: the three pillars, one tap each */}
       <nav className="d-pillars-row" aria-label="Read">
-        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry, photographs', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg'], ['/gallery/', 'Gallery', 'Photographs, newest first', '/images/bay-window-of-stained-glass-1200.jpg']] as const).map(([href, name, line, img]) => (
+        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry and fiction', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg'], ['/gallery/', 'Gallery', 'Photographs, newest first', '/images/bay-window-of-stained-glass-1200.jpg']] as const).map(([href, name, line, img]) => (
           <a key={href} className="d-pl" href={href}>
             <img src={img} alt="" loading="lazy" />
             <span className="d-pl-text">

@@ -155,6 +155,15 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     vv?.addEventListener('resize', anchor); vv?.addEventListener('scroll', anchor);
     addEventListener('scroll', anchor, { passive: true }); addEventListener('resize', anchor); addEventListener('pageshow', anchor);
     addEventListener('orientationchange', () => setTimeout(anchor, 300));
+    // ?barcheck: show what the phone measures, so a fault can be diagnosed from a screenshot.
+    if (/[?&]barcheck\b/.test(location.search) && gbar) {
+      const box = document.createElement('pre');
+      box.style.cssText = 'position:fixed;z-index:999;top:70px;left:8px;right:8px;margin:0;padding:10px;font:12px/1.5 monospace;color:#FFE3A3;background:rgba(0,0,0,.85);border:1px solid #FFE3A3;border-radius:8px;white-space:pre-wrap';
+      document.body.append(box);
+      const show = () => { const r = gbar.getBoundingClientRect(); box.textContent =
+        `innerHeight ${innerHeight}\nclientHeight ${document.documentElement.clientHeight}\nvisual ${vv ? Math.round(vv.height) + ' @' + Math.round(vv.offsetTop) + ' scale ' + vv.scale.toFixed(2) : 'none'}\nscreen ${screen.height}\nbar top ${Math.round(r.top)} bottom ${Math.round(r.bottom)}\nshift ${getComputedStyle(document.documentElement).getPropertyValue('--gbar-shift')}\nposition ${getComputedStyle(gbar).position}\nparent ${gbar.parentElement?.tagName}\nstandalone ${(navigator as any).standalone ?? matchMedia('(display-mode: standalone)').matches}`; };
+      show(); addEventListener('scroll', show, { passive: true }); vv?.addEventListener('resize', show); vv?.addEventListener('scroll', show);
+    }
     // When the keyboard closes, ask the phone to measure again.
     addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); anchor(); }, 120));
     const mark = () => {
