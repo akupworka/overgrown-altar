@@ -142,6 +142,21 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     if (gbar && gbar.parentElement !== document.body) document.body.append(gbar);
     const chooser = document.querySelector<HTMLElement>('[data-gbar-choose]');
     if (chooser && chooser.parentElement !== document.body) document.body.append(chooser);
+    // iPhone fault: after the keyboard has been up, the phone can keep measuring the screen as if it still were, and
+    // anything pinned to the bottom floats up by the keyboard's height. Measure the real visible screen and, when the
+    // phone has it wrong, pull the bar back down to the true bottom. (It only ever moves down, never above a keyboard.)
+    const vv = window.visualViewport;
+    const anchor = () => {
+      if (!vv || !gbar) return;
+      const gap = Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight));
+      document.documentElement.style.setProperty('--gbar-shift', gap + 'px');
+    };
+    anchor();
+    vv?.addEventListener('resize', anchor); vv?.addEventListener('scroll', anchor);
+    addEventListener('scroll', anchor, { passive: true }); addEventListener('resize', anchor); addEventListener('pageshow', anchor);
+    addEventListener('orientationchange', () => setTimeout(anchor, 300));
+    // When the keyboard closes, ask the phone to measure again.
+    addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); anchor(); }, 120));
     const mark = () => {
       const now = here();
       inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));
