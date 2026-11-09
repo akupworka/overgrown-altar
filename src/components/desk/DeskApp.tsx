@@ -647,19 +647,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
       )}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {/* Read the Guild's work: the three pillars, one tap each */}
-      <nav className="d-pillars-row" aria-label="Read">
-        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry and fiction', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg'], ['/gallery/', 'Gallery', 'Photographs, newest first', '/images/bay-window-of-stained-glass-1200.jpg']] as const).map(([href, name, line, img]) => (
-          <a key={href} className="d-pl" href={href}>
-            <img src={img} alt="" loading="lazy" />
-            <span className="d-pl-text">
-              <span className="lab d-pl-the">The</span>
-              <span className="d-pl-name">{name}</span>
-              <span className="it d-pl-line">{line}</span>
-            </span>
-            <span className="d-pl-go" aria-hidden="true">→</span>
-          </a>
-        ))}
-      </nav>
+      <PillarTiles />
       {isEditor && <EditorTools />}
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
@@ -1609,4 +1597,23 @@ export default function DeskApp() {
   if (session && setting) return <SetPassword invited={setting === 'invite'} onDone={() => setSetting(null)} />;
   if (!session) return <>{linkError && <p className="d-photo-msg" role="alert" style={{ maxWidth: 520, margin: '0 auto 20px' }}>{linkError}</p>}<SignIn /></>;
   return <>{linkNote && <p className="d-photo-msg" role="status" style={{ maxWidth: 620, margin: '0 auto 20px' }}>{linkNote}</p>}<Desk session={session} /></>;
+}
+
+/** The three pillars and the Gallery, one tap each (on both Desks). */
+export function PillarTiles() {
+  return (
+      <nav className="d-pillars-row" aria-label="Read">
+        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry and fiction', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg'], ['/gallery/', 'Gallery', 'Photographs, newest first', '/images/bay-window-of-stained-glass-1200.jpg']] as const).map(([href, name, line, img]) => (
+          <a key={href} className="d-pl" href={href}>
+            <img src={img} alt="" loading="lazy" />
+            <span className="d-pl-text">
+              <span className="lab d-pl-the">The</span>
+              <span className="d-pl-name">{name}</span>
+              <span className="it d-pl-line">{line}</span>
+            </span>
+            <span className="d-pl-go" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </nav>
+  );
 }

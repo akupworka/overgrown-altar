@@ -7,6 +7,7 @@ import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
 import { useCollection, CollectionWall } from './Collection';
 import { WayCard } from './Way';
+import { PillarTiles } from './DeskApp';
 
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
 
@@ -35,6 +36,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
           <a className="ghost d-btn" href="/search/">Search the altar</a>
         </div>
       </header>
+      <PillarTiles />
       <WayCard member={profile.id} mine />
       <Welcome fellow portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
         sent={!!items?.length} onWrite={() => {}} />
