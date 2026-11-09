@@ -42,7 +42,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
         </button>
       ))}
     </div>
-    <a class="lab room-forms" href="/crafts/#perimeter">What each craft is, and what the editor looks for →</a>
+    <a class="lab room-forms" href="/crafts/#perimeter"><span class="rf-long">What each craft is, and what the editor looks for →</span><span class="rf-short">Each craft, and what the editor looks for →</span></a>
   </section>
 
   <!-- Every story, newest first, with a filter -->
@@ -133,5 +133,21 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
     .pe-cta { flex-direction: column; align-items: stretch; }
     .pe-cta .btn { text-align: center; }
     .pe-total { display: none; }
+  }
+  .rf-short { display: none; }
+  /* Phones: the four kinds as glass cards, two by two; the craft link on one quiet line */
+  @media (max-width: 700px) {
+    .pe-kinds .eb { text-align: center; display: block; }
+    .pe-grid { border-top: 0 !important; gap: 8px !important; margin-top: 22px !important; }
+    .pe-kind { align-items: center !important; text-align: center !important; padding: 18px 10px 16px !important; border: 0 !important; border-radius: 14px; gap: 6px !important;
+      background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 45%), rgba(243,236,220,.03);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(243,236,220,.12); }
+    .pe-kind:active { box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(255,227,163,.5); }
+    .pe-kind .pe-n { display: none; }
+    .pe-k { font-size: 19px !important; line-height: 1.15; }
+    .pe-c { font-size: 8.5px !important; letter-spacing: .14em; margin-top: 2px !important; padding-top: 0 !important; }
+    .room-forms { display: block; text-align: center; margin-top: 22px; border: 0 !important; font-size: 9px; letter-spacing: .16em; }
+    .rf-long { display: none; }
+    .rf-short { display: inline; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; }
   }
 </style>
