@@ -30,6 +30,10 @@ const aUrl = authorUrl(a);
 // A photograph is shown whole, with what's behind the lens; any words follow it.
 const isPhoto = p.medium === 'photograph';
 const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).length;
+// Photographs sit in the Gallery's order (newest first): the one before and after this, to step or swipe between.
+const photos = isPhoto ? (await guildPillar('hearth')).filter((x) => x.medium === 'photograph' && x.image).sort((x, y) => y.published_at.localeCompare(x.published_at)) : [];
+const at = photos.findIndex((x) => x.id === p.id);
+const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.length - 1 ? photos[at + 1] : null;
 ---
 <BaseLayout title={p.title} image={p.image || undefined} description={p.standfirst || `${MEDIUM_LABEL[p.medium] ?? ''} by ${a.display_name}`}>
   <section class="hero gp-hero">
@@ -54,6 +58,13 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
       <PieceTools part="top" pieceId={p.id} authorId={a.id} first={first} isPhoto={isPhoto} />
       {p.standfirst && <p class="lede gp-standfirst">{p.standfirst}</p>}
       {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} gallery={p.gallery} />}
+      {isPhoto && (newer || older) && (
+        <nav class="gp-steps" aria-label="More photographs" data-newer={newer ? guildUrl(newer) : undefined} data-older={older ? guildUrl(older) : undefined}>
+          {newer ? <a class="gp-step" href={guildUrl(newer)} rel="prev"><span aria-hidden="true">←</span><span class="gp-step-t"><span class="lab">Newer</span><span class="gp-step-n">{newer.title}</span></span></a> : <span />}
+          <a class="lab gp-step-all" href="/gallery/">The Gallery</a>
+          {older ? <a class="gp-step gp-step-r" href={guildUrl(older)} rel="next"><span class="gp-step-t"><span class="lab">Older</span><span class="gp-step-n">{older.title}</span></span><span aria-hidden="true">→</span></a> : <span />}
+        </nav>
+      )}
       {p.body.trim() && <Body body={p.body} />}
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>
       <!-- Share: the phone's share sheet, or the link copied on a computer (BaseLayout's [data-share]). -->
@@ -98,6 +109,25 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
   )}
   <Subscribe />
 </BaseLayout>
+
+<script>
+  // Photographs: swipe sideways on the photograph to step to the newer or older one (arrow keys too).
+  const steps = document.querySelector<HTMLElement>('.gp-steps');
+  const plate = document.querySelector<HTMLElement>('.pp-fig');
+  if (steps && plate) {
+    const go = (dir: 'newer' | 'older') => { const to = steps.dataset[dir]; if (to) location.href = to; };
+    let x0 = 0, y0 = 0;
+    plate.addEventListener('touchstart', (t) => { x0 = t.touches[0].clientX; y0 = t.touches[0].clientY; }, { passive: true });
+    plate.addEventListener('touchend', (t) => {
+      const dx = t.changedTouches[0].clientX - x0, dy = t.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) go(dx < 0 ? 'older' : 'newer');
+    }, { passive: true });
+    addEventListener('keydown', (k) => {
+      if (document.querySelector('.zoom') || (k.target as HTMLElement).closest('input, textarea, [contenteditable]')) return;
+      if (k.key === 'ArrowLeft') go('newer'); else if (k.key === 'ArrowRight') go('older');
+    });
+  }
+</script>
 
 <!-- How far through the piece you are: a fine gold line along the top of the screen -->
 <div class="gp-progress" aria-hidden="true"><i></i></div>

@@ -8,7 +8,7 @@ export function PhotoPlate({ src, alt, meta, gallery }: { src: string; alt?: str
   return (
     <div className="pp">
       <figure className="pp-fig">
-        <img src={src} alt={alt || ''} loading="eager" />
+        <a className="pp-main" href={src} data-zoom data-caption={alt || ''} aria-label="Open the photograph full size"><img src={src} alt={alt || ''} loading="eager" /></a>
         {alt && <figcaption className="pp-cap">{alt}</figcaption>}
       </figure>
       {/* Up to four more, smaller, beneath it; each opens full size (BaseLayout's viewer). */}

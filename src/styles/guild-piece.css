@@ -160,3 +160,20 @@ html[data-night] .gp-article :is(.pt-btn, .gp-share-btn) { box-shadow: inset 0 0
 html[data-night] .gp-article .pt-box { background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .18); }
 html[data-night] .gp-article .pt-refl { border-top-color: rgba(243, 236, 220, .14); }
 html[data-night] .gp-article :is(.pt-send, .pt-follow:not([aria-pressed='true'])) { background: var(--bone); color: #12160F; }
+
+/* Photographs: the main one opens full size; step to the newer or older photograph beneath it */
+.pp-main { display: block; cursor: zoom-in; }
+.zoom-n { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; color: #A9A294; }
+.zoom-n[hidden], .zoom p[hidden] { display: none; }
+.gp-steps { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; margin: 26px 0 8px; padding: 16px 0; border-top: 1px solid rgba(42, 32, 23, .15); border-bottom: 1px solid rgba(42, 32, 23, .15); }
+.gp-step { display: inline-flex; align-items: center; gap: 12px; min-width: 0; color: var(--ink); }
+.gp-step-r { justify-self: end; text-align: right; }
+.gp-step > span[aria-hidden] { flex: none; width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .3); transition: box-shadow .3s, color .3s; }
+.gp-step:hover > span[aria-hidden] { color: var(--oxblood); box-shadow: inset 0 0 0 1px var(--oxblood); }
+.gp-step-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.gp-step-t .lab { font-size: 9px; color: var(--muted-paper); }
+.gp-step-n { font-family: var(--serif); font-size: 17px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.gp-step-all { color: var(--oxblood); font-size: 9.5px; }
+html[data-night] .gp-steps { border-color: rgba(243, 236, 220, .12); }
+html[data-night] .gp-step > span[aria-hidden] { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .25); }
+@media (max-width: 700px) { .gp-step-n { display: none; } .gp-steps { gap: 8px; } }
