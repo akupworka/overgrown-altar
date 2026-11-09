@@ -10,6 +10,7 @@
 //   --pieces N        how many published pieces the signed-in member has (default 12; prestige ranks follow)
 //   --only phone|computer        check one size only
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
+//   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank)
 //   --out <dir>       where screenshots go (default: a temporary folder; never inside the repo)
 //
@@ -73,9 +74,27 @@ const dm_messages = [
   { id: 'dm-2', thread_id: 'dm1', author_id: 'm2', body: 'That means a great deal. I nearly didn’t send it.', created_at: t(4) },
   { id: 'dm-3', thread_id: 'dm1', author_id: 'm2', body: 'Would you read my draft before I send it in?', created_at: t(5) },
 ];
+// --heavy: a very busy member and a crowded Guild, to see the pages hold up (use with --pieces 150).
+if (flag('heavy')) {
+  const names = ['Ainslie Willson', 'Marcus Vale', 'Ruth Calloway', 'Benedict Hart', 'Clara Penhallow', 'Silas Thorne', 'Margaret O’Rourke-Fitzgerald', 'Isaiah Bell', 'Hannah Greaves', 'Tobias Wren'];
+  for (let i = 4; i <= 40; i++) profiles.push({ id: 'm' + i, display_name: names[i % names.length] + (i >= 10 ? ' ' + i : ''), craft: ['Poetry', 'Fiction', 'Essays · Photographs', 'Testimony'][i % 4], bio: 'A long bio about stone, light and the slow work of words. '.repeat(3), portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) });
+  const long = 'Hey how are you? This is a test of a very long message that keeps going. '.repeat(8);
+  for (let c = 0; c < 25; c++) {
+    const other = 'm' + (4 + c), [a, b] = lo(ME, other), id = 'hv' + c;
+    const cnt = c === 0 ? 120 : 8;
+    for (let k = 0; k < cnt; k++) dm_messages.push({ id: id + '-' + k, thread_id: id, author_id: k % 3 === 0 ? other : ME, body: k % 5 === 0 ? long : ['Amen to that.', 'Sending you the draft tonight.', 'Did you see the new piece in the Watchtower?', 'Praying for you this week.'][k % 4], created_at: `2026-11-0${1 + (k % 8)}T${String(8 + (k % 12)).padStart(2, '0')}:${String(k % 60).padStart(2, '0')}:00Z` });
+    dm_threads.push({ id, a, b, last_at: `2026-11-08T${String(10 + (c % 12)).padStart(2, '0')}:00:00Z`, last_body: c % 3 ? long : 'Sending you the draft tonight.', last_from: c % 2 ? other : ME, a_read_at: c % 4 ? t(9) : t(1), b_read_at: c % 4 ? t(9) : t(1), a_cleared_at: '1970-01-01', b_cleared_at: '1970-01-01' });
+  }
+  for (let bi = 3; bi <= 6; bi++) boards.push({ id: 'b' + bi, slug: 'forum-' + bi, name: ['', '', '', 'The Common Room', 'The Watchtower Desk', 'Prayer and Petition', 'From the Editor’s Desk'][bi], description: 'A long description of what this forum is for, and what belongs here among the Guild.', image: '', position: bi, editor_only: false, keep_threads: 40 });
+  for (const bd of boards) for (let k = 0; k < 40; k++) {
+    const tid = 'ht-' + bd.id + '-' + k, replies = bd.id === 'b1' && k === 0 ? 200 : k % 7;
+    threads.push({ id: tid, board_id: bd.id, author_id: k % 3 ? ME : 'm' + (4 + k % 30), title: k % 4 ? `A question about the long road back, part ${k + 1}, and what holds on it when everything else gives way` : `Thread ${k + 1}`, pinned: false, locked: replies >= 200, reply_count: replies, created_at: t(1 + (k % 8)), last_post_at: `2026-11-0${1 + (k % 8)}T${String(8 + (k % 12)).padStart(2, '0')}:00:00Z`, last_author_id: 'm' + (4 + k % 30) });
+    for (let r = 0; r <= replies; r++) posts.push({ id: tid + '-p' + r, thread_id: tid, author_id: r % 2 ? ME : 'm' + (4 + r % 30), body: r % 6 === 0 ? long : 'Well said. I keep coming back to this.', created_at: `2026-11-0${1 + (r % 8)}T09:${String(r % 60).padStart(2, '0')}:00Z`, edited_at: null });
+  }
+}
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
-  forum_tallies: [{ member_id: ME, posts: 14, threads: 3, best_thread: 6, prayer: 1, boards: 2 }] };
+  forum_tallies: [{ member_id: ME, posts: flag('heavy') ? 1400 : 14, threads: flag('heavy') ? 160 : 3, best_thread: flag('heavy') ? 200 : 6, prayer: 1, boards: 2 }] };
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
 const test = (row, key, expr) => {
@@ -125,7 +144,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
       const req = route.request(), url = new URL(req.url());
       const one = (req.headers()['accept'] || '').includes('vnd.pgrst.object');
       if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
-      if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: 240, cap: 300 } });
+      if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: flag('heavy') ? 296 : 240, cap: 300 } });
       if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
       if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
       const table = url.pathname.split('/rest/v1/')[1];

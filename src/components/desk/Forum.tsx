@@ -483,7 +483,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         <h1 className="h1 fo-thread-title">{thread.title}</h1>
         <span className="lab mut">
           {thread.pinned && <span className="fo-tag">Pinned</span>}{thread.locked && <span className="fo-tag fo-tag-dim">Closed</span>}
-          {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'}{thread.reply_count >= MAX_REPLIES - 20 ? ` of ${MAX_REPLIES}` : ''} · started {ago(thread.created_at)}
+          <span className="fo-nw">{thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'}{thread.reply_count >= MAX_REPLIES - 20 ? ` of ${MAX_REPLIES}` : ''} ·</span> <span className="fo-nw">started {ago(thread.created_at)}</span>
         </span>
         {(isEditor || thread.author_id === me) && (
           <details className="fo-mod">

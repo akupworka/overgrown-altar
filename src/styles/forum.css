@@ -445,3 +445,5 @@
   background: rgba(243,236,220,.02); box-shadow: inset 0 0 0 1px rgba(243,236,220,.08); }
 .fo-empty-card p { margin: 6px 0 0; font-size: 22px; color: var(--bone); }
 .fo-empty-card .lab { font-size: 9px; }
+/* thread header line: break between the parts, never inside one */
+.fo-nw { white-space: nowrap; }
