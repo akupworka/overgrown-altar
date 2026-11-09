@@ -43,7 +43,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
       <a href="/guild/members/" class="online" data-member data-online hidden aria-label="Members online now"><i aria-hidden="true"></i><b data-online-n>1</b><span class="online-w">online</span></a>
       <a href="/guild/desk/" class="member" data-member aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
-        <span class="member-av" aria-hidden="true"></span><span class="member-label">My Desk</span>
+        <span class="member-av" aria-hidden="true"></span><span class="member-label">Profile</span>
       </a>
       <a href="/menu" class="menu-link" aria-label="Menu">
         <span class="menu-word">Menu</span>
@@ -129,12 +129,12 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         const img = new Image(); img.src = me.portrait || seatFor(name); img.alt = ''; av.append(img);
       });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
-      // Inside the Guild the Guild bar carries My Desk, so the picture pill becomes your Profile, to your page.
+      // The picture pill is your Profile everywhere: it opens your page (the Desk is in the Guild bar and on the Guild page).
       const uid0 = JSON.parse(token)?.user?.id;
-      if (document.querySelector('[data-inner]') && name && uid0) {
+      if (uid0) {
         const pill = document.querySelector<HTMLAnchorElement>('.member');
         const label = pill?.querySelector('.member-label');
-        if (pill && label) { label.textContent = 'Profile'; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', `My page, signed in as ${name}`); pill.removeAttribute('aria-current'); }
+        if (pill && label) { label.textContent = 'Profile'; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', name ? `My profile, signed in as ${name}` : 'My profile'); pill.removeAttribute('aria-current'); }
       }
       // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
       const home = document.querySelector<HTMLAnchorElement>('.nav-home');
