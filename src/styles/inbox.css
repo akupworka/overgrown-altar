@@ -133,3 +133,4 @@ html.ib-open .desk-in { padding: 0 !important; }
   .ib-thread .ib-thead { gap: 8px; padding-bottom: 10px; }
   .ib-thread .m-back { min-height: 36px; }
 }
+.ib-reply .fo-reply-box { max-height: 160px; overflow-y: auto; }

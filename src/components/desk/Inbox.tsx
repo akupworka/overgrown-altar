@@ -195,6 +195,7 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
     const body = text.trim(); if (!body) return;
     const temp: Message = { id: 'sending-' + Date.now(), thread_id: id, author_id: me, body, created_at: new Date().toISOString() };
     setMsgs((ms) => [...ms, temp]); setText(''); setBusy(true); setMsg('');
+    const box = document.getElementById('ib-box') as HTMLTextAreaElement | null; if (box) box.style.height = '';   // back to one line
     const { error } = await supabase.rpc('dm_send', { t: id, msg: body });
     setBusy(false);
     if (error) { setMsgs((ms) => ms.filter((x) => x.id !== temp.id)); setText(body); setMsg(error.message); }
