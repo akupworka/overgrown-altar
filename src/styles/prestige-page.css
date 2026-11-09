@@ -359,5 +359,3 @@
   .pzv-pane-st { margin-top: 0; font-size: 8.5px; }
   .pzv-pane-st::before { content: '· '; color: #8C8679; }
 }
-/* Each rank's name in its own color, beside its crest */
-.pzv-pane-name, .pzv-pane:not(.lit) .pzv-pane-name { color: var(--ink) !important; }
