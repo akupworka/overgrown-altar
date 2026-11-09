@@ -28,12 +28,26 @@ export default async (req: Request) => {
   const { data: prof } = await db.from('profiles').select('role').eq('id', me.user.id).maybeSingle();
   if (prof?.role !== 'editor') return json({ error: 'Only the editor can open the forms.' }, 403);
 
+  let body: { action?: string; id?: string } = {};
+  try { body = await req.json(); } catch {}
   const site = process.env.SITE_ID || 'overgrownaltar.com';
   const get = async (path: string) => {
     const r = await fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${netlify}` } });
     if (!r.ok) throw new Error(r.status === 401 ? 'Netlify didn’t accept the access key. Check NETLIFY_FORMS_TOKEN.' : `Netlify answered ${r.status}.`);
     return r.json();
   };
+  // Delete one entry (after an Accept, or when the editor clears it away). Only entries from the three forms above.
+  if (body.action === 'delete') {
+    const id = String(body.id ?? '');
+    if (!/^[a-f0-9]{24}$/i.test(id)) return json({ error: 'Bad request' }, 400);
+    try {
+      const sub = await get(`/submissions/${id}`);
+      if (!(sub?.form_name in ROOMS)) return json({ error: 'That entry isn’t one of the site’s forms.' }, 400);
+      const r = await fetch(`${API}/submissions/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${netlify}` } });
+      if (!r.ok && r.status !== 404) return json({ error: `Netlify couldn’t delete it (${r.status}).` }, 502);
+      return json({ ok: true });
+    } catch (e) { return json({ error: (e as Error).message }, 502); }
+  }
   try {
     const forms: { id: string; name: string; submission_count?: number }[] = await get(`/sites/${encodeURIComponent(site)}/forms`);
     const wanted = forms.filter((f) => f.name in ROOMS).sort((a, b) => Object.keys(ROOMS).indexOf(a.name) - Object.keys(ROOMS).indexOf(b.name));

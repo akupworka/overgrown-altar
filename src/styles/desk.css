@@ -1298,3 +1298,11 @@
   background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25); }
 .d-form-sample b { color: var(--ember); font-weight: 500; font-style: normal; }
 .d-form-why { display: block; margin-top: 10px; font-style: normal; font-size: 9px; letter-spacing: .14em; color: #8C8679; line-height: 1.6; }
+.d-form-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+.d-form-acts .d-btn { text-decoration: none; }
+.d-form-del { margin-left: auto; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+@media (max-width: 700px) {
+  .d-form-acts { flex-direction: column; align-items: stretch; }
+  .d-form-acts .d-btn { text-align: center; justify-content: center; }
+  .d-form-del { margin: 4px auto 0; }
+}

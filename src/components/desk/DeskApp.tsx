@@ -1200,6 +1200,35 @@ function FormsRoom() {
       setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
     })();
   }, []);
+  const [busy, setBusy] = useState('');
+  const [note, setNote] = useState('');
+  const call = async (url: string, body: unknown) => {
+    const { data: s } = await supabase.auth.getSession();
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session?.access_token ?? ''}` }, body: JSON.stringify(body) }).catch(() => null);
+    const out = res ? await res.json().catch(() => ({})) : { error: 'Check your connection.' };
+    return res?.ok ? null : (out.error || 'Something went wrong.');
+  };
+  // Take an entry off the list (here, and in Netlify unless these are the examples).
+  const drop = (key: string, id: string) => setRooms((rs) => (rs ?? []).map((r) => r.key === key ? { ...r, count: Math.max(0, r.count - 1), items: r.items.filter((x) => x.id !== id) } : r));
+  async function remove(key: string, f: FormItem) {
+    if (!confirm(`Delete this entry from ${f.name || f.email || 'someone'}? It can’t be brought back.`)) return;
+    setBusy(f.id); setNote('');
+    const err = sample ? null : await call('/.netlify/functions/forms', { action: 'delete', id: f.id });
+    setBusy('');
+    if (err) { setNote(err); return; }
+    drop(key, f.id); setNote('Deleted.');
+  }
+  // Accept an application: the Guild's welcome email (the same invitation as "Invite a writer"), then off the list.
+  async function accept(key: string, f: FormItem) {
+    if (!f.email) { setNote('This application has no email address to invite.'); return; }
+    if (!confirm(`Accept ${f.name || f.email}? They’ll get the Guild’s welcome email with a link to choose a password, and arrive as a Writer.`)) return;
+    setBusy(f.id); setNote('');
+    if (sample) { setBusy(''); drop(key, f.id); setNote(`An example, so no email was sent. A real one would go to ${f.email}.`); return; }
+    const err = await call('/.netlify/functions/invite-writer', { email: f.email, name: f.name });
+    if (err) { setBusy(''); setNote(err); return; }
+    await call('/.netlify/functions/forms', { action: 'delete', id: f.id });
+    setBusy(''); drop(key, f.id); setNote(`Accepted. The welcome email is on its way to ${f.email}.`);
+  }
   const room = rooms?.find((r) => r.key === pick);
   const items = room?.items ?? [];
   const pages = Math.max(1, Math.ceil(items.length / FORMS_PER));
@@ -1213,8 +1242,12 @@ function FormsRoom() {
         : !rooms.length ? <p className="it mut d-empty">No forms have been sent yet.</p>
         : <>
           {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
-          <div className="filters d-filters" role="tablist" aria-label="Forms">
-            {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
+          {/* The message always has its place, and the tab row its own box: the site's script wraps filter rows, so nothing is inserted beside them. */}
+          <p className="d-photo-msg" role="status" hidden={!note}>{note}</p>
+          <div>
+            <div className="filters d-filters" role="tablist" aria-label="Forms">
+              {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); setNote(''); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
+            </div>
           </div>
           {items.length === 0 ? <p className="it mut d-empty">Nothing here yet.</p> : (
             <ul className="d-form-list">
@@ -1231,7 +1264,11 @@ function FormsRoom() {
                       <div className="d-form-body">
                         {f.email && <p className="d-form-field"><span className="lab">Email</span><a href={`mailto:${f.email}`}>{f.email}</a></p>}
                         {long.map(([k, v]) => <p key={k} className="d-form-field"><span className="lab">{fieldName(k)}</span><span>{v}</span></p>)}
-                        {f.email && <a className="ghost d-btn d-form-reply" href={`mailto:${f.email}`}>Reply by email</a>}
+                        <div className="d-form-acts">
+                          {room?.key === 'guild-application' && <button type="button" className="btn d-btn" disabled={busy === f.id} onClick={() => accept(room.key, f)}>{busy === f.id ? 'Sending…' : 'Accept & invite'}</button>}
+                          {f.email && <a className="ghost d-btn" href={`mailto:${f.email}`}>Reply by email</a>}
+                          <button type="button" className="d-textbtn d-danger d-form-del" disabled={busy === f.id} onClick={() => room && remove(room.key, f)}>Delete</button>
+                        </div>
                       </div>
                     </details>
                   </li>
