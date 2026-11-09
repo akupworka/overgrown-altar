@@ -298,3 +298,8 @@
 .fo-back { display: inline-flex; margin-bottom: 4px; letter-spacing: .2em; border-bottom: 0; transition: color .3s; }
 .fo-back span { transition: transform .4s cubic-bezier(.16,1,.3,1); }
 .fo-back:hover span { transform: translateX(-3px); }
+/* Phones: New thread sits just above the Guild bar (it was hidden behind it), in the bar's dark glass, gold lettering */
+@media (max-width: 700px) {
+  .fo-fab { bottom: calc(104px + env(safe-area-inset-bottom, 0px)); z-index: 41; height: 46px; padding: 0 20px; color: var(--ember);
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 14px 34px rgba(0,0,0,.6); }
+}
