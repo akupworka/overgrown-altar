@@ -23,3 +23,11 @@ export function pagerHtml(page: number, pages: number, newer = 'Newer', older = 
       : `<button type="button" class="pg-n" data-go="${n}" ${n === page ? 'aria-current="page"' : ''} aria-label="Page ${n} of ${pages}">${n}</button>`).join('') +
     `<button type="button" class="pg-step" data-go="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="${older} pieces"><span class="pg-word">${older}</span>${arrow('r')}</button>`;
 }
+
+// The page a list is on, kept in the address (?page=3): coming back from a piece returns to the same page.
+export const pageFromUrl = () => Math.max(1, Number(new URL(location.href).searchParams.get('page')) || 1);
+export function rememberPage(page: number) {
+  const u = new URL(location.href);
+  page === 1 ? u.searchParams.delete('page') : u.searchParams.set('page', String(page));
+  history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+}

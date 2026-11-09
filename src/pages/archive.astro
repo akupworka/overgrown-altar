@@ -22,7 +22,7 @@ import { ROOMS, KINDS } from '../lib/kinds';
 <nav class="pager ar-pager" aria-label="Pages of the archive" hidden></nav>
 <p class="it mut empty" style="display:none;margin-top:40px;font-size:22px">Nothing here yet. Try another filter.</p></section>
 <script>
-  import { pagerHtml } from '../lib/pager';
+  import { pagerHtml, pageFromUrl, rememberPage } from '../lib/pager';
   // Archive search and filters. This runs in the visitor's browser.
   // Each result card carries data-pillar and data-medium tags;
   // we hide the cards that don't match the chosen chips and the search words.
@@ -38,13 +38,14 @@ import { ROOMS, KINDS } from '../lib/kinds';
 
   // Twelve to a page (four rows of three); a new search or filter starts again at page one.
   const PER = 12, pager = document.querySelector<HTMLElement>('.ar-pager')!;
-  let page = 1;
+  let page = pageFromUrl();
   function paginate(scroll = false) {
     const on = items.filter((i) => !i.hidden);
     const pages = Math.max(1, Math.ceil(on.length / PER)); page = Math.min(page, pages);
     items.forEach((i) => i.classList.remove('pg-off'));
     on.forEach((i, n) => i.classList.toggle('pg-off', n < (page - 1) * PER || n >= page * PER));
     pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
+    rememberPage(page);
     if (scroll) document.querySelector('.results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   pager.addEventListener('click', (e) => {

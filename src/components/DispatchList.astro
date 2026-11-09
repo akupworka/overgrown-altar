@@ -49,25 +49,28 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
 
 <script>
   import { freshSince } from '../lib/live';
-  import { pagerHtml } from '../lib/pager';
+  import { pagerHtml, pageFromUrl, rememberPage } from '../lib/pager';
   // Pages: rows a filter or search has hidden are skipped; any change to those starts again at page one.
   document.querySelectorAll<HTMLOListElement>('ol.dispatches[data-paged]').forEach((list) => {
     const per = Number(list.dataset.paged), pager = list.nextElementSibling as HTMLElement | null;
     if (!pager?.classList.contains('dl-pager')) return;
-    let page = 1;
+    let page = pageFromUrl();
     const draw = (scroll = false) => {
       const rows = [...list.children].filter((r) => !(r as HTMLElement).hidden) as HTMLElement[];
       const pages = Math.max(1, Math.ceil(rows.length / per)); page = Math.min(page, pages);
       [...list.children].forEach((r) => r.classList.remove('pg-off'));
       rows.forEach((r, i) => r.classList.toggle('pg-off', i < (page - 1) * per || i >= page * per));
       pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
+      rememberPage(page);
       if (scroll) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     pager.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
       if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
     });
-    new MutationObserver(() => { page = 1; draw(); }).observe(list, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+    // A search or filter (rows hidden or shown) starts again at page one; new stories arriving keep the page.
+    new MutationObserver((ms) => { if (ms.some((m) => m.type === 'attributes' && m.target.parentElement === list)) page = 1; draw(); })
+      .observe(list, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
     draw();
   });
   // New pieces approved since this page was built join the top of the list, drawn from its own first row.

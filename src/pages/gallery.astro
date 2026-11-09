@@ -2,7 +2,7 @@
 // The Gallery: every photograph the Guild has published, newest first, laid out like an explore page:
 // a tight wall of portrait tiles (3:4, as on Instagram), three across even on a phone, with a larger tile now and then to break the rhythm.
 // Hovering (or a first tap on a phone) shows the title and who made it; a second tap opens the photograph.
-// Thirty at a time, with "Show more" below.
+// Thirty to a page, with numbered pages below; the page is kept in the address, so coming back from a photograph returns to it.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Subscribe from '../components/Subscribe.astro';
@@ -51,7 +51,7 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
           ))}
         </ol>
         <p class="it mut gx-none" hidden>No photographs here yet.</p>
-        <div class="gx-more-row"><button type="button" class="gx-show" hidden>Show more</button></div>
+        <nav class="pager gx-pager" aria-label="Pages of photographs" hidden></nav>
       </>
     ) : (
       <p class="it mut gx-empty">The first photographs are being made. <a href="/guild/">Bring one to the fire →</a></p>
@@ -61,25 +61,40 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
 </BaseLayout>
 
 <script>
-  // Film or digital; thirty at a time. On touch screens, the first tap shows the caption, the second opens it.
-  const STEP = 30;
+  import { pagerHtml } from '../lib/pager';
+  // Film or digital; thirty to a page. On touch screens, the first tap shows the caption, the second opens it.
+  const PER = 30;
   const wall = document.querySelector<HTMLElement>('.gx-wall');
   if (wall) {
     const tiles = [...wall.querySelectorAll<HTMLElement>(':scope > li')];
     const chips = [...document.querySelectorAll<HTMLButtonElement>('.gx-filters .chip')];
-    const more = document.querySelector<HTMLButtonElement>('.gx-show')!;
+    const pager = document.querySelector<HTMLElement>('.gx-pager')!;
     const none = document.querySelector<HTMLElement>('.gx-none')!;
-    let format = 'all', shown = STEP;
-    const draw = () => {
+    const url = new URL(location.href);
+    let format = url.searchParams.get('format') || 'all', page = Math.max(1, Number(url.searchParams.get('page')) || 1);
+    if (!chips.some((c) => c.dataset.format === format)) format = 'all';
+    const remember = () => {
+      const u = new URL(location.href);
+      format === 'all' ? u.searchParams.delete('format') : u.searchParams.set('format', format);
+      page === 1 ? u.searchParams.delete('page') : u.searchParams.set('page', String(page));
+      history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+    };
+    const draw = (scroll = false) => {
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.format === format)));
       const match = tiles.filter((t) => format === 'all' || t.dataset.format === format);
+      const pages = Math.max(1, Math.ceil(match.length / PER)); page = Math.min(page, pages);
       tiles.forEach((t) => (t.hidden = true));
-      match.slice(0, shown).forEach((t) => (t.hidden = false));
-      more.hidden = match.length <= shown;
+      match.slice((page - 1) * PER, page * PER).forEach((t) => (t.hidden = false));
+      pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
       none.hidden = match.length > 0;
+      remember();
+      if (scroll) document.querySelector('.gx-head')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     };
-    chips.forEach((c) => c.addEventListener('click', () => { format = c.dataset.format!; shown = STEP; draw(); }));
-    more.addEventListener('click', () => { shown += STEP; draw(); });
+    chips.forEach((c) => c.addEventListener('click', () => { format = c.dataset.format!; page = 1; draw(); }));
+    pager.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
+      if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
+    });
     draw();
     if (matchMedia('(hover: none)').matches) {
       wall.addEventListener('click', (e) => {
@@ -116,10 +131,7 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
   .gx-tile a:hover img, .gx-tile a.peek img { transform: scale(1.04); }
   .gx-tile a:hover .gx-cap, .gx-tile a:focus-visible .gx-cap, .gx-tile a.peek .gx-cap { opacity: 1; transform: none; }
   .gx-tile a:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
-  .gx-more-row { display: flex; justify-content: center; padding-top: 34px; }
-  .gx-show { padding: 13px 28px; border-radius: 999px; border: 0; cursor: pointer; color: var(--ember); font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
-    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45); }
-  .gx-show[hidden] { display: none; }
+  .gx-pager { margin-top: 44px; color: var(--bone); }
   .gx-none, .gx-empty { font-size: 20px; text-align: center; padding: 40px 0; }
   .gx-empty a { color: var(--ember); }
   @media (max-width: 700px) {
