@@ -64,12 +64,13 @@ function markSeen(id: string) {
 // *italic* and **bold** are honored, and web addresses become links. (React escapes everything else.)
 function inline(text: string, key: string): ReactNode[] {
   const out: ReactNode[] = [];
-  const re = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*|https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g;
+  const re = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*|https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]|@[A-Z][\w’'-]*(?: [A-Z][\w’'-]*){0,2})/g;
   let last = 0, m: RegExpExecArray | null, i = 0;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
     const t = m[0];
-    out.push(t.startsWith('**') ? <strong key={key + i++}>{t.slice(2, -2)}</strong>
+    out.push(t.startsWith('@') ? <span key={key + i++} className="fo-at">{t}</span>
+      : t.startsWith('**') ? <strong key={key + i++}>{t.slice(2, -2)}</strong>
       : t.startsWith('*') ? <em key={key + i++}>{t.slice(1, -1)}</em>
       : <a key={key + i++} href={t} target="_blank" rel="noopener noreferrer nofollow">{t.replace(/^https?:\/\/(www\.)?/, '')}</a>);
     last = m.index + t.length;
@@ -390,7 +391,25 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [msg, setMsg] = useState('');
   const [pieces, setPieces] = useState<Record<string, number>>({});   // each poster's published pieces, for their prestige
   const [since] = useState(() => seenMap()[id] ?? firstVisit());
-  const [pPage, setPPage] = useState<number | null>(null);   // which page of twenty replies     // when you last looked, so newer posts can be marked
+  const [pPage, setPPage] = useState<number | null>(null);
+  // @mentions: everyone at the table, and what's being typed after an @
+  const [everyone, setEveryone] = useState<{ id: string; display_name: string }[]>([]);
+  const [atQ, setAtQ] = useState<string | null>(null);
+  useEffect(() => { supabase.from('profiles').select('id, display_name').order('display_name').then(({ data }) => setEveryone(((data ?? []) as any[]).filter((p) => p.display_name))); }, []);
+  const atMatches = atQ === null ? [] : everyone.filter((p) => p.id !== me && (p.display_name.toLowerCase().startsWith(atQ.toLowerCase()) || p.display_name.toLowerCase().split(/\s+/).some((w) => w.startsWith(atQ.toLowerCase())))).slice(0, 5);
+  const watchAt = (box: HTMLTextAreaElement) => {
+    const before = box.value.slice(0, box.selectionStart ?? box.value.length);
+    const m = /(?:^|\s)@([^\s@]{0,20}(?: [^\s@]{0,20})?)$/.exec(before);
+    setAtQ(m ? m[1] : null);
+  };
+  const pickAt = (name: string) => {
+    const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea'); if (!box) return;
+    const caret = box.selectionStart ?? reply.length;
+    const before = reply.slice(0, caret).replace(/@([^\s@]{0,20}(?: [^\s@]{0,20})?)$/, `@${name} `);
+    const next = before + reply.slice(caret);
+    setReply(next); setAtQ(null);
+    setTimeout(() => { box.focus(); box.setSelectionRange(before.length, before.length); }, 0);
+  };   // which page of twenty replies     // when you last looked, so newer posts can be marked
   useEffect(() => () => markSeen(id), [id]);
   const load = useCallback(async () => {
     const { data: t } = await supabase.from('forum_threads').select('*').eq('id', id).maybeSingle();
@@ -448,9 +467,13 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     setPPage(Math.floor(posts.length / FORUM_PER) + 1);   // your reply lands on the last page: go there
     const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea'); if (box) box.style.height = '';
     requestAnimationFrame(() => document.getElementById(`post-${temp.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-    const { error } = await supabase.from('forum_posts').insert({ thread_id: id, author_id: me, body: text });
+    const { data: made, error } = await supabase.from('forum_posts').insert({ thread_id: id, author_id: me, body: text }).select('id').single();
     setBusy(false);
     if (error) { setPosts((ps) => ps.filter((p) => p.id !== temp.id)); setReply(text); return setMsg('Your reply couldn’t be posted, so it’s back in the box. ' + error.message); }
+    // Anyone named with an @ is told (in their daily letter)
+    const named = everyone.filter((p) => p.id !== me && text.includes('@' + p.display_name));
+    if (made?.id && named.length) await supabase.from('forum_mentions').insert(named.map((p) => ({ post_id: made.id, member_id: p.id, by_id: me })));
+    setAtQ(null);
     load();
   }
   async function saveEdit() {
@@ -545,13 +568,23 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         <form className="fo-reply" onSubmit={send}>
           <label className="visually-hidden" htmlFor="fo-reply-box">{thread.locked ? 'Reply (the thread is closed; only you can post)' : 'Your reply'}</label>
           <textarea id="fo-reply-box" className="fo-reply-box" rows={1} maxLength={6000} value={reply}
-            onChange={(e) => { setReply(e.target.value); grow(e.currentTarget); }} onFocus={(e) => grow(e.currentTarget)}
+            onChange={(e) => { setReply(e.target.value); grow(e.currentTarget); watchAt(e.currentTarget); }} onFocus={(e) => grow(e.currentTarget)}
+            onBlur={() => setTimeout(() => setAtQ(null), 200)}
             onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') (e.currentTarget.form as HTMLFormElement).requestSubmit(); }}
             placeholder={thread.locked ? 'Closed to replies (you can still post)' : 'Add to the conversation…'} />
           <button className="fo-send" type="submit" disabled={busy || !reply.trim()} aria-label="Post reply">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
           </button>
-          <span className="lab mut fo-reply-hint">{reply.trim() ? 'Draft kept on this device · ' : ''}*italic* · **bold** · links work</span>
+          {atMatches.length > 0 && (
+            <ul className="fo-at-list" role="listbox" aria-label="Members">
+              {atMatches.map((p) => (
+                <li key={p.id}><button type="button" role="option" aria-selected="false" onMouseDown={(e) => e.preventDefault()} onClick={() => pickAt(p.display_name)}>
+                  <Initials name={p.display_name} size={26} src={portraitUrl(people[p.id]?.portrait_path)} /><span>{p.display_name}</span>
+                </button></li>
+              ))}
+            </ul>
+          )}
+          <span className="lab mut fo-reply-hint">{reply.trim() ? 'Draft kept on this device · ' : ''}*italic* · **bold** · @name to mention</span>
         </form>
       ) : <p className="it mut fo-empty">{thread.reply_count >= MAX_REPLIES ? `This thread has reached ${MAX_REPLIES} replies and is closed. Start a new thread to carry the conversation on.` : 'This thread is closed to new replies.'}</p>}
     </div>
