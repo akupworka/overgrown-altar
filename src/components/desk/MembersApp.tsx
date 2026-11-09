@@ -13,6 +13,7 @@ import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
+import { trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
 import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
@@ -51,6 +52,11 @@ function Directory() {
   const [members, setMembers] = useState<(Profile & { count: number })[] | null>(null);
   const [q, setQ] = useState('');   // find a member by name or craft
   const [mine, setMine] = useState<number | null>(null);   // your own published count, for your crest on the Prestiges tile
+  // For the rooms: your own work (Desk counts, trophies), and the newest photographs (the Gallery's mosaic).
+  const [myPieces, setMyPieces] = useState<Piece[]>([]);
+  const [meId, setMeId] = useState('');
+  const [shots, setShots] = useState<string[]>([]);
+  const myTally = useForumTally(meId || null);
   useEffect(() => {
     (async () => {
       const [{ data: people }, { data: work }] = await Promise.all([
@@ -61,7 +67,17 @@ function Directory() {
       (work ?? []).forEach((w: any) => counts.set(w.author_id, (counts.get(w.author_id) ?? 0) + 1));
       setMembers(((people as Profile[]) ?? []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 })));
       const { data: s } = await supabase.auth.getSession();
-      if (s.session) setMine(counts.get(s.session.user.id) ?? 0);
+      if (s.session) {
+        setMine(counts.get(s.session.user.id) ?? 0); setMeId(s.session.user.id);
+        const { data: mp } = await supabase.from('pieces').select('*').eq('author_id', s.session.user.id);
+        setMyPieces(Array.isArray(mp) ? (mp as Piece[]) : []);
+      }
+      const { data: ph } = await supabase.from('pieces').select('image_path').eq('status', 'approved').eq('medium', 'photograph').not('image_path', 'is', null).order('published_at', { ascending: false }).limit(4);
+      const paths = (Array.isArray(ph) ? ph : []).map((x: any) => x.image_path).filter(Boolean);
+      if (paths.length) {
+        const { data: su } = await supabase.storage.from('guild').createSignedUrls(paths, 3600);
+        setShots((su ?? []).map((x) => x.signedUrl).filter(Boolean) as string[]);
+      }
     })();
   }, []);
   return (
@@ -85,23 +101,36 @@ function Directory() {
           <a className="g-room g-room-small g-tile" href="/guild/desk/">
             <img className="g-tile-photo" src="/images/window-light-on-wall-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span>
-            <span className="g-tile-text"><span className="g-tile-name">Your Desk</span><span className="g-room-line">Write, send, and see where your pieces stand.</span></span>
+            <span className="g-tile-text"><span className="g-tile-name">Your Desk</span><span className="g-room-line">Write, send, and see where your pieces stand.</span>
+              {meId && <span className="g-tile-stats"><b>{myPieces.filter((p) => p.status === 'approved').length}</b> published<i>·</i><b>{myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length}</b> {myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length === 1 ? 'draft' : 'drafts'}</span>}</span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>
-          <Link className="g-room g-room-small g-tile g-tile-crest" to="/guild/members/?view=prestige">
-            <img className="g-tile-photo" src="/images/four-lancet-window-1200.jpg" alt="" loading="lazy" />
-            <span className="g-tile-mark g-tile-crest-mark" aria-hidden="true">{(() => { const r = prestigeFor(mine ?? 0).current; return r ? <span dangerouslySetInnerHTML={{ __html: crestSvg(r.level, 64, { glow: true }) }} /> : <span dangerouslySetInnerHTML={{ __html: crestSvg(1, 64, { locked: true }) }} />; })()}</span>
-            <span className="g-tile-text"><span className="g-tile-name">The Prestiges</span><span className="g-room-line">{(() => { const r = prestigeFor(mine ?? 0); return r.current ? `You are ${r.current.name}${r.next ? `, ${r.toNext} from ${r.next.name}` : ''}.` : 'Ten ranks of glass, earned piece by piece.'; })()}</span></span>
-            <span className="g-tile-go" aria-hidden="true">→</span>
-          </Link>
+          {(() => {
+            const r = prestigeFor(mine ?? 0);
+            const won = meId ? finestFirst(trophiesFor({ pieces: myPieces.filter((p) => p.status === 'approved'), member: members?.find((m) => m.id === meId) ?? {}, forum: myTally }).filter((x) => x.earned)) : [];
+            const ink = r.current ? (r.current.color === 'rainbow' ? '#C9A7FF' : r.current.color === 'gold' ? '#F2D27A' : `color-mix(in srgb, ${r.current.color} 70%, white)`) : '#CFC8B8';
+            return (
+              <Link className="g-room g-room-small g-tile g-tile-pz" to="/guild/members/?view=prestige">
+                <span className="g-pz-glow" aria-hidden="true" style={{ '--ink': ink } as any} />
+                <span className="g-pz-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: crestSvg(r.current?.level ?? 1, 96, r.current ? { glow: true } : { locked: true }) }} />
+                <span className="g-tile-text"><span className="g-tile-name">The Prestiges</span>
+                  <span className="g-pz-rank" style={{ color: ink }}>{r.current ? r.current.name : 'Not yet ranked'}</span>
+                  {won.length > 0 && <span className="g-pz-medals" aria-hidden="true">{won.slice(0, 3).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: trophySvg(t, 30, tier) }} />)}{won.length > 3 && <span className="g-pz-more">+{won.length - 3}</span>}</span>}
+                </span>
+                <span className="g-tile-go" aria-hidden="true">→</span>
+              </Link>
+            );
+          })()}
           <a className="g-room g-room-small g-tile" href="/crafts/">
             <img className="g-tile-photo" src="/images/faded-chapel-wall-with-a-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5z" /><path d="M12 6.5v13" /></svg></span>
             <span className="g-tile-text"><span className="g-tile-name">The Crafts</span><span className="g-room-line">Every kind of work the Guild publishes, and what the editor looks for.</span></span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>
-          <a className="g-room g-room-small g-tile" href="/gallery/">
-            <img className="g-tile-photo" src="/images/bay-window-of-stained-glass-1200.jpg" alt="" loading="lazy" />
+          <a className="g-room g-room-small g-tile g-tile-gal" href="/gallery/">
+            {shots.length > 0
+              ? <span className="g-gal-mosaic" aria-hidden="true">{[0, 1, 2, 3].map((i) => <img key={i} src={shots[i % shots.length]} alt="" loading="lazy" />)}</span>
+              : <img className="g-tile-photo" src="/images/bay-window-of-stained-glass-1200.jpg" alt="" loading="lazy" />}
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg></span>
             <span className="g-tile-text"><span className="g-tile-name">The Gallery</span><span className="g-room-line">Every photograph the Guild has made, newest first.</span></span>
             <span className="g-tile-go" aria-hidden="true">→</span>
