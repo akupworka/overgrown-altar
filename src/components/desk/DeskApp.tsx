@@ -476,8 +476,14 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
   // Which pieces to show: all, or one state; six to a page, newest first.
   const [show, setShow] = useState<'all' | 'drafts' | 'with' | 'live'>('all');
   const [page, setPage] = useState(1);
+  // With many pieces: find one by its words, or keep to one pillar.
+  const [q, setQ] = useState('');
+  const [pillar, setPillar] = useState('');
+  const needle = q.trim().toLowerCase();
+  const inFind = (p: Piece) => (!pillar || p.pillar === pillar) && (!needle || `${p.title} ${p.standfirst}`.toLowerCase().includes(needle));
+  const finding = !!needle || !!pillar;
   const inShow = (p: Piece) => show === 'all' ? true : show === 'drafts' ? (p.status === 'draft' || p.status === 'returned') : show === 'with' ? p.status === 'submitted' : p.status === 'approved';
-  const listed = pieces.filter(inShow);
+  const listed = pieces.filter((p) => inShow(p) && inFind(p));
   const pages = Math.max(1, Math.ceil(listed.length / DESK_PER));
   const cur = Math.min(page, pages);
   const onPage = listed.slice((cur - 1) * DESK_PER, cur * DESK_PER);   // their part in the forum, for its trophies
@@ -555,11 +561,15 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
       </section>
       {/* Read the Guild's work: the three pillars, one tap each */}
       <nav className="d-pillars-row" aria-label="Read">
-        {([['/watchtower/', 'The Watchtower', 'Prophetic audits of the age.'], ['/hearth/', 'The Hearth', 'The creative guild: prose, poetry, photographs.'], ['/perimeter/', 'The Perimeter', 'Testimony and the unseen.']] as const).map(([href, name, line]) => (
-          <a key={href} className="g-room g-room-small" href={href}>
-            <span className="eb"><span className="d-pl-the">The </span>{name.replace(/^The /, '')}</span>
-            <span className="g-room-line">{line}</span>
-            <span className="lab g-room-go">Read →</span>
+        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry, photographs', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg']] as const).map(([href, name, line, img]) => (
+          <a key={href} className="d-pl" href={href}>
+            <img src={img} alt="" loading="lazy" />
+            <span className="d-pl-text">
+              <span className="lab d-pl-the">The</span>
+              <span className="d-pl-name">{name}</span>
+              <span className="it d-pl-line">{line}</span>
+            </span>
+            <span className="d-pl-go" aria-hidden="true">→</span>
           </a>
         ))}
       </nav>
@@ -570,12 +580,25 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <span className="lab">Review →</span>
         </button>
       )}
-      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' ? 'in all' : 'shown'} · newest first</span>}</div>
+      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
       {pieces.length > 3 && (
         <div className="filters d-filters" role="group" aria-label="Show">
           {([['all', 'All', pieces.length], ['drafts', 'Drafts', counts.drafts], ['with', 'With the editor', counts.waiting], ['live', 'Published', counts.published]] as const).map(([k, label, n]) => (
             <button key={k} type="button" className="chip" aria-pressed={show === k} onClick={() => { setShow(k); setPage(1); }}>{label}<span className="chip-n">{n}</span></button>
           ))}
+        </div>
+      )}
+      {pieces.length > 6 && (
+        <div className="d-find">
+          <label className="g-search d-find-q">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+            <input type="search" placeholder="Find a piece by its title" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} aria-label="Find a piece" />
+            {q && <button type="button" className="d-find-clear" onClick={() => { setQ(''); setPage(1); }} aria-label="Clear">×</button>}
+          </label>
+          <select className="d-find-pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setPage(1); }} aria-label="Pillar">
+            <option value="">Every pillar</option>
+            {PILLARS.map((x) => <option key={x.value} value={x.value}>{x.label.split(' · ')[0]}</option>)}
+          </select>
         </div>
       )}
       {pieces.length === 0 ? (
@@ -584,7 +607,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <span className="lab">Begin writing →</span>
         </button>
       ) : (
-        show === 'all' ? (
+        show === 'all' && !finding ? (
           // Everything, organized: what needs you first, then drafts, then what the editor has, then what's live.
           <div className="d-groups">
             {GROUPS.map((g) => {
@@ -606,12 +629,12 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           </div>
         ) : (
           <ul className="d-list">
-            {onPage.length === 0 && <li className="it mut d-empty">Nothing here yet.</li>}
+            {onPage.length === 0 && <li className="it mut d-empty">{finding ? 'No piece matches. Try other words, or every pillar.' : 'Nothing here yet.'}</li>}
             {onPage.map(card)}
           </ul>
         )
       )}
-      {show !== 'all' && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
+      {(show !== 'all' || finding) && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
       {/* Phones: the side column is hidden, so Sign out lives at the foot of the Desk. */}
       <button type="button" className="d-signout-foot" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>

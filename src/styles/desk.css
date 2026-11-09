@@ -1168,3 +1168,44 @@
     font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; }
   .d-signout-foot:active { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230,169,154,.5); }
 }
+/* My pieces, when there are many: find by title, keep to one pillar */
+.d-find { display: flex; gap: 10px; align-items: stretch; margin: -2px 0 10px; }
+.d-find-q { flex: 1 1 auto; max-width: none; }
+.d-find-q input::-webkit-search-cancel-button { display: none; }
+.d-find-clear { background: none; border: 0; color: var(--muted-dark); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 2px; }
+.d-find-pillar { flex: none; min-height: 48px; padding: 0 38px 0 18px; border-radius: 999px; border: 0; color: var(--bone); cursor: pointer;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; -webkit-appearance: none; appearance: none;
+  background: rgba(243,236,220,.04) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23CFC8B8' stroke-width='1.3'/%3E%3C/svg%3E") no-repeat right 16px center;
+  box-shadow: inset 0 0 0 1px rgba(243,236,220,.14); }
+.d-find-pillar:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.d-find-pillar option { background: #12160F; color: var(--bone); text-transform: none; }
+@media (max-width: 700px) {
+  .d-find { flex-direction: column; gap: 8px; }
+  .d-find-pillar { width: 100%; }
+}
+/* The three pillars as windows: each its own photograph, dimmed, the name set large over it */
+.d-pillars-row { gap: 14px !important; }
+.d-pl { position: relative; display: block; height: 168px; border-radius: 10px; overflow: hidden; isolation: isolate; color: var(--bone); text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgba(243,236,220,.12), 0 34px 70px -38px rgba(0,0,0,.9); }
+.d-pl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .55; transform: scale(1.02);
+  transition: transform 1.2s cubic-bezier(.16,1,.3,1), opacity .6s; }
+.d-pl::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(8,10,8,.15) 0%, rgba(8,10,8,.55) 45%, rgba(8,10,8,.94) 100%); }
+.d-pl::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+.d-pl-text { position: absolute; left: 22px; right: 48px; bottom: 18px; display: flex; flex-direction: column; gap: 2px; }
+.d-pl-the { font-size: 8.5px; letter-spacing: .3em; color: var(--ember); }
+.d-pl-name { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.05; }
+.d-pl-line { font-size: 15px; color: #CFC8B8; margin-top: 2px; }
+.d-pl-go { position: absolute; right: 18px; bottom: 20px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.4); transition: transform .5s cubic-bezier(.16,1,.3,1), background-color .3s; }
+.d-pl:hover img { transform: scale(1.07); opacity: .7; }
+.d-pl:hover .d-pl-go { transform: translateX(3px); background: rgba(255,227,163,.1); }
+.d-pl:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .d-pillars-row { gap: 8px !important; }
+  .d-pl { height: 128px; border-radius: 14px; }
+  .d-pl-text { left: 12px; right: 10px; bottom: 12px; }
+  .d-pl-the { font-size: 7.5px; }
+  .d-pl-name { font-size: 19px; }
+  .d-pl-line, .d-pl-go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .d-pl img, .d-pl-go { transition: none; } }
