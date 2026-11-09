@@ -70,7 +70,7 @@ export default async (req: Request) => {
   if (!/^[0-9a-f-]{36}$/.test(id)) return new Response('Bad request', { status: 400 });
 
   const db = createClient(SUPABASE_URL, service, { auth: { persistSession: false } });
-  const { data: p } = await db.from('pieces').select('id, title, slug, status, editor_note, author_id, updated_at, writer_notified').eq('id', id).maybeSingle();
+  const { data: p } = await db.from('pieces').select('id, title, slug, status, editor_note, author_id, updated_at, writer_notified, published_at').eq('id', id).maybeSingle();
   if (!p || !['approved', 'returned', 'declined'].includes(p.status)) return new Response('nothing to send', { status: 200 });
   if (p.writer_notified === p.status) return new Response('already sent', { status: 200 });
   if (Date.now() - Date.parse(p.updated_at) > 10 * 60 * 1000) return new Response('too old', { status: 200 });
@@ -83,7 +83,14 @@ export default async (req: Request) => {
   if (!to) return new Response('no address', { status: 200 });
   const first = (prof?.display_name ?? '').split(/\s+/)[0] || 'friend';
   const title = p.title || 'your piece';
-  const mail = p.status === 'approved'
+  // Approved for a later date: the writer hears when it will go live.
+  const later = p.status === 'approved' && p.published_at && Date.parse(p.published_at) > Date.now() + 5 * 60 * 1000;
+  const when = later ? new Date(p.published_at).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' }) : '';
+  const mail = later
+    ? { subject: `Accepted: ${title}`, html: letter({ header: 'published', eyebrow: 'Accepted', heading: 'It has a date.', preview: `${title} goes live ${when}.`,
+        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and set it to go live on ${esc(when)}. Thank you for bringing it to the table.`,
+        button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
+    : p.status === 'approved'
     ? { subject: `Published: ${title}`, html: letter({ header: 'published', eyebrow: 'Published', heading: 'It is on the altar.', preview: `${title} is now published at Overgrown Altar.`,
         lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and published it. Thank you for bringing it to the table.`,
         button: 'Read it on the site', href: `${SITE}/guild/${p.slug}/` }) }

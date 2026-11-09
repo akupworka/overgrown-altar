@@ -23,7 +23,7 @@ export function freshSince(built: string, pillar?: string): Promise<FreshPiece[]
     const since = new Date(Date.parse(built) - 15 * 60 * 1000).toISOString();
     let q = supabase.from('pieces')
       .select('slug, title, standfirst, body, pillar, medium, image_path, image_focus, published_at, author:profiles(id, display_name, portrait_path)')
-      .eq('status', 'approved').not('slug', 'is', null).gt('published_at', since).order('published_at', { ascending: false }).limit(12);
+      .eq('status', 'approved').not('slug', 'is', null).gt('published_at', since).lte('published_at', new Date().toISOString()).order('published_at', { ascending: false }).limit(12);
     if (pillar) q = q.eq('pillar', pillar);
     const { data } = await q;
     const rows = (Array.isArray(data) ? data : []).filter((r: any) => r && r.slug && r.title) as any[];   // only complete pieces

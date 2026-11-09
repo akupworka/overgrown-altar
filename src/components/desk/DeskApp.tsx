@@ -409,8 +409,23 @@ function KindNote({ value }: { value: string }) {
   );
 }
 
-function StatusChip({ status }: { status: Piece['status'] }) {
+function StatusChip({ status, at }: { status: Piece['status']; at?: string | null }) {
+  // A piece the editor scheduled is approved, but not on the site until its time comes.
+  if (status === 'approved' && at && new Date(at) > new Date())
+    return <span className="d-status s-scheduled"><i aria-hidden="true" />Scheduled · {new Date(at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>;
   return <span className={`d-status s-${status}`}><i aria-hidden="true" />{STATUS_LABEL[status]}</span>;
+}
+// The editor's "publish on" choice: a date and time in the reader's own clock, or empty for now.
+const goLiveIso = (v: string) => (v ? new Date(v).toISOString() : null);
+const goLiveText = (v: string) => new Date(v).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+function GoLiveField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const min = new Date(Date.now() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
+  return (
+    <label className="d-lbl d-golive"><span className="lab">Publish on (optional)</span>
+      <input type="datetime-local" className="field" value={value} min={min} onChange={(e) => onChange(e.target.value)} />
+      <span className="it mut d-golive-n">{value ? `Goes live ${goLiveText(value)}, within the hour.` : 'Leave empty to publish straight away.'}</span>
+    </label>
+  );
 }
 
 // "Eden Albright" is greeted as Eden; a name that begins with an article ("The Watchman") is greeted whole.
@@ -561,7 +576,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
               {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
@@ -715,6 +730,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   });
   const [id, setId] = useState<string | null>(piece?.id ?? null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>(piece ? 'saved' : 'idle');
+  const [goLive, setGoLive] = useState('');   // the editor's own pieces: publish now, or on a date
   const [msg, setMsg] = useState('');
   const [photoMsg, setPhotoMsg] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
@@ -844,10 +860,10 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
       return;
     }
     if (isEditor) {
-      if (!confirm('Publish this piece to the site now?')) return;
+      if (!confirm(goLive ? `Schedule this piece to go live ${goLiveText(goLive)}?` : 'Publish this piece to the site now?')) return;
       const draft = await save('draft');
       if (!draft) return;
-      const { error } = await supabase.from('pieces').update({ status: 'approved' }).eq('id', draft.id);
+      const { error } = await supabase.from('pieces').update(goLive ? { status: 'approved', published_at: goLiveIso(goLive) } : { status: 'approved' }).eq('id', draft.id);
       if (error) { setMsg(error.message); return; }
       onDone(); return;
     }
@@ -890,7 +906,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
     ? <p className="d-note d-note-live"><span className="lab">This piece is live</span>{isEditor ? 'Your changes go live as soon as you update it.' : piece?.revision ? 'Your changes are with the editor. The live piece stays as it is until they approve them. You can keep editing, or withdraw them.' : 'Your changes go to the editor. The live piece stays as it is until they approve them.'}
         {!isEditor && piece?.revision && <button type="button" className="d-link" onClick={async () => { if (!confirm('Withdraw your changes? The live piece stays as it is.')) return; await supabase.rpc('propose_revision', { p_id: piece.id, p_rev: null }); onDone(); }}>Withdraw changes</button>}</p>
     : piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
-  const sendLabel = live ? (isEditor ? 'Update live piece' : 'Send changes') : (isEditor ? 'Publish' : 'Send to the editor');
+  const sendLabel = live ? (isEditor ? 'Update live piece' : 'Send changes') : (isEditor ? (goLive ? 'Schedule' : 'Publish') : 'Send to the editor');
 
   const photo = (
     <>
@@ -1078,9 +1094,10 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
             </article>
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(0)}>Edit the writing</button>
             <button type="button" className="d-textbtn d-edit" onClick={() => toStep(1)}>Change the labels or photograph</button>
-            <p className="d-step-note it">{isEditor ? 'Publishing puts it on the site straight away.' : 'The editor reads every piece before it goes on the site. You can withdraw it to keep editing.'}</p>
+            {isEditor && !live && <GoLiveField value={goLive} onChange={setGoLive} />}
+            <p className="d-step-note it">{isEditor ? (goLive ? 'It will go live at that time on its own.' : 'Publishing puts it on the site straight away.') : 'The editor reads every piece before it goes on the site. You can withdraw it to keep editing.'}</p>
             <button type="button" className="ghost d-btn d-step-go d-preview-go" onClick={() => setShowPreview(true)}>See the full page preview</button>
-            <button type="button" className="btn d-btn d-step-go" onClick={submit} disabled={state === 'saving'}>{live ? sendLabel : isEditor ? 'Publish to the site' : 'Send to the editor'}</button>
+            <button type="button" className="btn d-btn d-step-go" onClick={submit} disabled={state === 'saving'}>{live ? sendLabel : isEditor ? (goLive ? 'Schedule it' : 'Publish to the site') : 'Send to the editor'}</button>
             {!live && <button type="button" className="d-textbtn d-later" onClick={async () => { if (await save('draft')) onDone(); }}>Save as a draft and finish later</button>}
           </div>
         )}
@@ -1111,6 +1128,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         <details className="d-details" open>
           <summary><h2 className="eb">Details</h2></summary>
           <div className="d-details-in">
+          {isEditor && !live && <GoLiveField value={goLive} onChange={setGoLive} />}
           {isPhoto ? <div className="d-lbl"><span className="lab">Goes to</span><span className="d-medium-fixed">The Gallery</span></div> : <>
           <label className="d-lbl"><span className="lab">Pillar</span>
             <select className="field" value={form.pillar} onChange={(e) => choosePillar(e.target.value)}>
@@ -1376,7 +1394,7 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
 }
 
 function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void; onDecided: () => void }) {
-  const [mode, setMode] = useState<'read' | 'return' | 'decline'>('read');
+  const [mode, setMode] = useState<'read' | 'return' | 'decline' | 'schedule'>('read');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -1395,9 +1413,10 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
     if (error) return setMsg(error.message);
     onDecided();
   }
-  async function decide(status: 'approved' | 'returned' | 'declined') {
+  const [goLive, setGoLive] = useState('');
+  async function decide(status: 'approved' | 'returned' | 'declined', at?: string | null) {
     setBusy(true); setMsg('');
-    const { error } = await supabase.from('pieces').update({ status, editor_note: status === 'approved' ? '' : note.trim() }).eq('id', piece.id);
+    const { error } = await supabase.from('pieces').update({ status, editor_note: status === 'approved' ? '' : note.trim(), ...(at ? { published_at: at } : {}) }).eq('id', piece.id);
     setBusy(false);
     if (error) return setMsg(error.message);
     onDecided();
@@ -1422,10 +1441,20 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
         </>)}
         {!rev && mode === 'read' && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
+          <button type="button" className="d-link" onClick={() => setMode('schedule')}>Schedule</button>
           <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
           <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
         </>)}
-        {!rev && mode !== 'read' && (
+        {!rev && mode === 'schedule' && (
+          <div className="d-decide-note">
+            <GoLiveField value={goLive} onChange={setGoLive} />
+            <div className="d-decide-row">
+              <button type="button" className="btn d-btn" disabled={busy || !goLive} onClick={() => { if (confirm(`Approve now, and publish ${goLiveText(goLive)}?`)) decide('approved', goLiveIso(goLive)); }}>Approve &amp; schedule</button>
+              <button type="button" className="d-link" onClick={() => setMode('read')}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {!rev && mode !== 'read' && mode !== 'schedule' && (
           <div className="d-decide-note">
             <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
               <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}
