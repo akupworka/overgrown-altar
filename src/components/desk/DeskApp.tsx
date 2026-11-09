@@ -175,12 +175,12 @@ function Desk({ session }: { session: Session }) {
   const [loaded, setLoaded] = useState(false);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
-  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : startHash === '#forms' ? 'forms' : 'pieces');
+  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') || startHash === '#photograph' ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : startHash === '#forms' ? 'forms' : 'pieces');
   // (#review and #my-page stay in the address, so the members' bar and a reload both know which room you're in.)
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
-  const [newMedium, setNewMedium] = useState<string | null>(null);   // a new piece can start as a photograph
+  const [newMedium, setNewMedium] = useState<string | null>(startHash === '#photograph' ? 'photograph' : null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = profile?.role === 'editor';
   // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
@@ -249,13 +249,15 @@ function Desk({ session }: { session: Session }) {
   };
   // Arrived straight at the sheet: put "my pieces" underneath it, so Back lands there.
   useEffect(() => {
-    if (startHash.startsWith('#write') && history.state?.desk !== 'write') {
+    if ((startHash.startsWith('#write') || startHash === '#photograph') && history.state?.desk !== 'write') {
       history.replaceState(null, '', location.pathname + location.search);
       history.pushState({ desk: 'write' }, '', '#write');
     }
   }, []);
   useEffect(() => {
     const onPop = () => {
+      // "Photograph" in the members' bars: a fresh photograph sheet (the address then reads #write like any sheet).
+      if (location.hash === '#photograph') { history.replaceState({ desk: 'write' }, '', location.pathname + location.search + '#write'); setEditing(null); setNewMedium('photograph'); setTab('write'); window.scrollTo({ top: 0 }); return; }
       if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
       // The members' bar can open these directly, too.
       if (location.hash === '#review' || location.hash === '#my-page' || location.hash === '#forms') { setTab(location.hash === '#review' ? 'review' : location.hash === '#forms' ? 'forms' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }

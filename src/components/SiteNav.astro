@@ -61,6 +61,9 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <a href="/guild/members/?view=prestige" data-match="prestige" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</a>
         <a href="/guild/members/" data-match="me" data-spa data-my-page><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
       </div>
+      <a href="/guild/desk/#photograph" data-match="photograph" class="inner-photo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+        Photograph</a>
       <a href="/guild/desk/#write" data-match="write" class="inner-write">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
         Write</a>
@@ -73,10 +76,14 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     <nav class="d-tabbar gbar" aria-label="The Guild" data-gbar data-member>
       <a href="/guild/desk/" data-match="desk"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg><span class="gbar-dot" data-gbar-dot hidden></span></span><span>Desk</span></a>
       <a href="/guild/members/?view=forum" data-match="forum" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg></span><span>Forum</span></a>
-      <a href="/guild/desk/#write" data-match="write" class="t-write"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span><span>Write</span></a>
+      <a href="/guild/desk/#write" data-match="write" class="t-write" aria-haspopup="true" aria-expanded="false"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span><span>Write</span></a>
       <a href="/guild/members/" data-match="members" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span>Guild</span></a>
       <a href="/guild/members/" data-match="me" data-spa data-my-page><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg></span><span>Me</span></a>
     </nav>
+    <div class="gbar-choose" data-gbar-choose hidden>
+      <a href="/guild/desk/#write" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg><span><b>Write a piece</b><i>Prose, poetry, essays, testimony</i></span></a>
+      <a href="/guild/desk/#photograph" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg><span><b>Submit a photograph</b><i>For the Gallery</i></span></a>
+    </div>
 )}
 <MenuPanel />
 
@@ -162,6 +169,16 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         dispatchEvent(new PopStateEvent('popstate'));
       }
     };
+    const choose = document.querySelector<HTMLElement>('[data-gbar-choose]');
+    const writeTab = gbar?.querySelector<HTMLAnchorElement>('.t-write');
+    const shut = () => { if (choose) choose.hidden = true; writeTab?.setAttribute('aria-expanded', 'false'); };
+    writeTab?.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const open = !!choose?.hidden; if (choose) choose.hidden = !open; writeTab.setAttribute('aria-expanded', String(open));
+    }, true);
+    choose?.addEventListener('click', (e) => { shut(); onNav(e as MouseEvent); });
+    document.addEventListener('click', (e) => { if (choose && !choose.hidden && !choose.contains(e.target as Node)) shut(); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') shut(); });
     inner.addEventListener('click', onNav);
     gbar?.addEventListener('click', onNav);
   }
@@ -298,7 +315,10 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .inner-dot[hidden] { display: none; }
   .inner a[hidden] { display: none; }
   /* Write: a dark glass pill ringed in stained glass, the pen in candle gold (the phone's Write button, lying down) */
-  .inner .inner-write { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 20px; border-radius: 999px; color: var(--ember);
+  .inner .inner-photo { margin-left: auto; margin-right: 10px; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 18px; border-radius: 999px; color: #CFC8B8;
+    box-shadow: inset 0 0 0 1px rgba(243,236,220,.22); transition: color .25s, box-shadow .25s; }
+  .inner .inner-photo:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.5); }
+  .inner .inner-write { flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 20px; border-radius: 999px; color: var(--ember);
     border: 1.5px solid transparent;
     background: radial-gradient(120% 140% at 50% 0%, rgba(255,236,190,.12), rgba(255,236,190,0) 60%) padding-box, linear-gradient(180deg, #1C2017, #0B0D0A) padding-box,
       conic-gradient(from 200deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E) border-box;
