@@ -18,6 +18,12 @@ import SiteNav from '../components/SiteNav.astro';
   </section>
   <section class="dark sr-body">
     <div class="sr-results" aria-live="polite"></div>
+    <!-- Explore: with nothing typed, the altar's work in a new order every hour; keep scrolling for more -->
+    <div class="ex" hidden>
+      <div class="ex-head"><span class="eb">This hour at the altar</span><button type="button" class="lab ex-shuffle">Shuffle <span aria-hidden="true">↻</span></button></div>
+      <ol class="ex-wall"></ol>
+      <p class="it mut ex-foot">Keep going: the altar has more.</p>
+    </div>
   </section>
 </BaseLayout>
 
@@ -61,7 +67,8 @@ import SiteNav from '../components/SiteNav.astro';
   async function run() {
     const q = input.value.trim(), mine = ++turn;
     const u = new URL(location.href); q ? u.searchParams.set('q', q) : u.searchParams.delete('q'); history.replaceState(null, '', u.pathname + u.search);
-    if (q.length < 2) { out.innerHTML = ''; return; }
+    ex.hidden = q.length >= 2;
+    if (q.length < 2) { out.innerHTML = ''; if (!wall.children.length) explore(); return; }
     const w = words(q), idx = await load();
     const pieces = idx.pieces.filter((p) => fits(`${p.title} ${p.line ?? ''} ${p.who} ${p.label}`, w));
     const writing: Hit[] = pieces.filter((p) => p.kind === 'piece').map((p) => ({ href: p.href, title: p.title, line: p.line, meta: `${p.label} · ${p.who}`, image: p.image || '' }));
@@ -83,11 +90,47 @@ import SiteNav from '../components/SiteNav.astro';
     if (!parts.length) { const p = document.createElement('p'); p.className = 'it mut sr-none'; p.textContent = `Nothing on the altar matches “${q}” yet.`; out.append(p); return; }
     out.append(...parts);
   }
+  // ---- Explore: everything published, in an order that changes on the hour (the same for everyone that hour),
+  // laid out like a gallery wall: photographs as tiles, writing as cards, a larger tile now and then.
+  // Scrolling near the end brings the next handful; when everything has been shown, it reshuffles and carries on.
+  const ex = document.querySelector<HTMLElement>('.ex')!, wall = document.querySelector<HTMLOListElement>('.ex-wall')!;
+  let deck: any[] = [], at = 0, round = 0, seed = Math.floor(Date.now() / 3600e3), shown = 0;
+  const rand = (n: number) => () => { n = (n * 1664525 + 1013904223) % 4294967296; return n / 4294967296; };
+  const shuffle = (list: any[], s: number) => { const r = rand(s), a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const tile = (p: any) => {
+    const li = document.createElement('li');
+    const big = shown % 9 === 4;
+    li.className = `ex-t ${p.kind === 'photo' ? 'ex-photo' : 'ex-word'}${big ? ' ex-big' : ''}`; shown++;
+    const a = document.createElement('a'); a.href = p.href;
+    if (p.image) { const i = new Image(); i.src = p.image; i.alt = ''; i.loading = 'lazy'; a.append(i); }
+    const cap = document.createElement('span'); cap.className = 'ex-cap';
+    const k = document.createElement('span'); k.className = 'lab ex-k'; k.textContent = p.kind === 'photo' ? 'Photograph' : (p.label || '').split(' · ').pop();
+    const t = document.createElement('span'); t.className = 'ex-tt'; t.textContent = p.title;
+    const w = document.createElement('span'); w.className = 'lab ex-w'; w.textContent = p.who;
+    cap.append(k, t, w); a.append(cap); li.append(a); return li;
+  };
+  const more = (n = 18) => {
+    for (let i = 0; i < n && deck.length; i++) {
+      if (at >= deck.length) { round++; deck = shuffle(deck, seed + round * 7919); at = 0; }
+      wall.append(tile(deck[at++]));
+    }
+  };
+  async function explore(fresh = false) {
+    const idx = await load();
+    const all = idx.pieces.filter((p: any) => p.href);
+    if (!all.length) { ex.hidden = true; return; }
+    if (fresh) { seed = Math.floor(Math.random() * 1e9); }
+    deck = shuffle(all, seed); at = 0; round = 0; shown = 0; wall.innerHTML = ''; more(24);
+    ex.hidden = !!input.value.trim();
+  }
+  new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && !ex.hidden && deck.length) more(); }, { rootMargin: '600px 0px' }).observe(document.querySelector('.ex-foot')!);
+  document.querySelector('.ex-shuffle')!.addEventListener('click', () => { explore(true); ex.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
   let wait = 0;
   input.addEventListener('input', () => { clearTimeout(wait); wait = window.setTimeout(run, 220); });
   document.querySelector('.sr-form')!.addEventListener('submit', (e) => { e.preventDefault(); run(); input.blur(); });
   const start = new URLSearchParams(location.search).get('q');
-  if (start) { input.value = start; run(); } else input.focus();
+  if (start) { input.value = start; run(); } else { explore(); if (matchMedia('(hover: hover)').matches) input.focus(); }   // phones: don't open the keyboard over the wall
 </script>
 
 <style>
@@ -116,6 +159,37 @@ import SiteNav from '../components/SiteNav.astro';
   :global(.sr-l) { font-size: 16px; color: var(--muted-dark); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   :global(.sr-more) { align-self: flex-start; color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .4); padding-bottom: 3px; }
   :global(.sr-none) { font-size: 20px; text-align: center; padding: 30px 0; }
+  /* Explore wall */
+  .ex { max-width: 960px; margin: 0 auto; }
+  .ex[hidden] { display: none; }
+  .ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .ex-shuffle { background: none; border: 0; cursor: pointer; padding: 6px 0; color: var(--ember); font-size: 10px; }
+  .ex-wall { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; grid-auto-flow: dense; }
+  .ex-foot { text-align: center; padding: 30px 0 10px; font-size: 17px; }
+  :global(.ex-t) { position: relative; aspect-ratio: 3 / 4; }
+  :global(.ex-t.ex-big) { grid-column: span 2; grid-row: span 2; }
+  :global(.ex-t a) { position: absolute; inset: 0; overflow: hidden; border-radius: 6px; background: #14170F; color: var(--bone); display: block; }
+  :global(.ex-t img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  :global(.ex-t a:hover img) { transform: scale(1.05); }
+  :global(.ex-cap) { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 3px; padding: 30px 10px 10px; background: linear-gradient(180deg, rgba(8,10,8,0), rgba(8,10,8,.88)); }
+  :global(.ex-photo .ex-cap) { opacity: 0; transition: opacity .35s; }
+  :global(.ex-photo a:hover .ex-cap), :global(.ex-photo a:focus-visible .ex-cap) { opacity: 1; }
+  :global(.ex-word a) { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .18); }
+  :global(.ex-word img) { opacity: .42; }
+  :global(.ex-word .ex-cap) { top: 0; justify-content: flex-end; background: linear-gradient(180deg, rgba(8,10,8,.2), rgba(8,10,8,.85)); padding: 14px 12px; }
+  :global(.ex-k) { font-size: 8px; color: var(--ember); }
+  :global(.ex-tt) { font-family: var(--serif); font-size: 19px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  :global(.ex-big .ex-tt) { font-size: 28px; }
+  :global(.ex-w) { font-size: 8px; color: #A9A294; }
+  @media (max-width: 700px) {
+    .ex-wall { gap: 3px; }
+    :global(.ex-t a) { border-radius: 3px; }
+    :global(.ex-tt) { font-size: 14px; }
+    :global(.ex-big .ex-tt) { font-size: 21px; }
+    :global(.ex-cap) { padding: 22px 7px 7px; }
+    :global(.ex-word .ex-cap) { padding: 9px 8px; }
+    :global(.ex-k), :global(.ex-w) { font-size: 7px; }
+  }
   @media (max-width: 700px) {
     .sr-head { padding: 112px 16px 20px; }
     .sr-form { min-height: 56px; padding: 0 18px; }
