@@ -5,6 +5,8 @@
 //   The trophies: one set at a time (those that grow, those won once).
 // Used at /guild/members/?view=prestige (MembersApp). Open to visitors as well as members.
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { TROPHIES, trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
@@ -55,14 +57,12 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
   const from = current?.at ?? 0;
   const pct = next ? Math.max(0.04, (mine - from) / (next.at - from)) : 1;
   const holders = useMemo(() => (level: number) => (people ?? []).filter((p) => (p.listed || p.id === me) && prestigeFor(p.count).current?.level === level), [people, me]);
-  const pick = chosen ?? current?.level ?? 1;
-  const sel = PRESTIGES.find((p) => p.level === pick)!;
-  if (!people) return <p className="lab mut d-loading">Opening…</p>;
+    if (!people) return <p className="lab mut d-loading">Opening…</p>;
 
   const face = (h: Profile) => me
     ? <span key={h.id}>{link(`/guild/members/?m=${h.id}`, 'pzx-face', <><Initials name={h.display_name} size={34} src={portraitUrl(h.portrait_path)} /><span>{h.display_name}</span></>)}</span>
     : <a key={h.id} href={`/guild/authors/${authorSlug(h.display_name)}/`} className="pzx-face"><Initials name={h.display_name} size={34} src={portraitUrl(h.portrait_path)} /><span>{h.display_name}</span></a>;
-  const R = 74, C = 2 * Math.PI * R;
+  const R = 82, C = 2 * Math.PI * R;
 
   return (
     <div className="pzx">
@@ -80,84 +80,103 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
         </nav>
       </header>
       {section === 'prestige' && <>
-
-      {/* Where you stand */}
-      <section className="pzx-stand" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
-        <div className="pzx-ring" aria-hidden="true">
-          <svg viewBox="0 0 180 180" width="180" height="180">
-            <defs>
-              <linearGradient id="pzx-g" x1="0" y1="0" x2="1" y2="1">
-                {current?.color === 'rainbow'
-                  ? <><stop offset="0" stopColor="#3E7BFF" /><stop offset=".35" stopColor="#B05BFF" /><stop offset=".6" stopColor="#FF3B4E" /><stop offset=".8" stopColor="#FFC44D" /><stop offset="1" stopColor="#3DE0A0" /></>
-                  : <><stop offset="0" stopColor={current ? (current.color === 'gold' ? '#FFF0B8' : current.color) : '#8C8679'} /><stop offset="1" stopColor={current ? (current.color === 'gold' ? '#D2A23A' : current.color) : '#5E5A50'} /></>}
-              </linearGradient>
-            </defs>
+      {/* Where you stand: your crest in a window of your rank's own glass */}
+      <section className="pzv-stand" style={{ '--ink': current ? inkOf(current) : '#CFC8B8', '--glass': current ? glassOf(current) : 'linear-gradient(180deg,#2a2c2e,#121314)' } as CSSProperties}>
+        <div className="pzv-window" aria-hidden="true">
+          <span className="pzv-window-glass" />
+          <span className="pzv-window-lead" />
+          <svg className="pzv-window-ring" viewBox="0 0 180 180">
             <circle cx="90" cy="90" r={R} className="pzx-ring-track" />
-            <circle cx="90" cy="90" r={R} className="pzx-ring-fill" stroke="url(#pzx-g)" strokeDasharray={`${C * pct} ${C}`} />
+            <circle cx="90" cy="90" r={R} className="pzv-ring-fill" strokeDasharray={`${C * pct} ${C}`} />
           </svg>
-          <div className="pzx-ring-in">
-            {current ? <Crest lv={current.level} size={112} className="pzx-ring-crest" glow /> : <span className="pzx-ring-num">·</span>}
-          </div>
+          {current ? <Crest lv={current.level} size={180} className="pzv-window-crest" glow /> : <Crest lv={1} size={180} className="pzv-window-crest" locked />}
         </div>
-        <div className="pzx-stand-text">
-          <span className="lab mut">{me ? 'Where you stand' : 'Earn your first'}</span>
-          {me && current && <span className="lab pzx-rank-of">Rank {current.numeral} of X</span>}
-          {me ? (current
-            ? <h2 className="pzx-rank">{current.name}</h2>
-            : <h2 className="pzx-rank">Not yet ranked</h2>)
-            : <h2 className="pzx-rank">Take a seat</h2>}
-          <p className="it pzx-stand-note">{me ? (current ? current.note : 'Your first published piece makes you an Inkling.') : 'Members of the Guild rise through these ranks with every piece they publish.'}</p>
-          {me && <span className="lab pzx-count">{mine} published {mine === 1 ? 'piece' : 'pieces'}</span>}
-          {me && next && (
-            <span className="pzx-next">
-              <Crest lv={next.level} size={40} className="pzx-next-crest" />
-              <span><b>{toNext}</b> more to <b className="pzx-next-name" style={{ color: inkOf(next) }}>{next.name}</b></span>
-            </span>
+        <div className="pzv-stand-text">
+          <span className="lab pzv-k">{me ? 'Where you stand' : 'Earn your first'}</span>
+          {current && <span className="lab pzv-of">Rank {current.numeral} of X</span>}
+          <h2 className="pzv-rank">{me ? (current ? current.name : 'Not yet ranked') : 'Take a seat'}</h2>
+          <p className="it pzv-note">{me ? (current ? current.note : 'Your first published piece makes you an Inkling.') : 'Members of the Guild rise through these ranks with every piece they publish.'}</p>
+          {me && (
+            <div className="pzv-stats">
+              <span className="pzv-stat"><b>{mine}</b><span className="lab">published</span></span>
+              {next && <span className="pzv-stat"><b>{toNext}</b><span className="lab">to {next.name}</span></span>}
+              <span className="pzv-stat"><b>{current ? current.level : 0}<i>/10</i></b><span className="lab">ranks</span></span>
+            </div>
           )}
-          {me ? <a className="m-act primary pzx-cta" href="/guild/desk/#write">Write a piece</a> : <a className="m-act primary pzx-cta" href="/guild">Join the Guild</a>}
+          {me && next && (
+            <div className="pzv-toward">
+              <span className="pzv-bar" aria-hidden="true"><i style={{ width: `${Math.round(pct * 100)}%` }} /></span>
+              <span className="pzv-next"><Crest lv={next.level} size={44} className="pzv-next-crest" locked /><span>{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b style={{ color: inkOf(next) }}>{next.name}</b></span></span>
+            </div>
+          )}
+          {me ? <a className="pzv-cta" href="/guild/desk/#write">Write a piece <span aria-hidden="true">→</span></a> : <a className="pzv-cta" href="/guild">Join the Guild <span aria-hidden="true">→</span></a>}
         </div>
       </section>
 
-      {/* The climb: ten lancets of glass */}
-      <section className="pzx-climb" aria-label="The ten ranks">
-        <div className="pzx-climb-head"><span className="eb">The crests</span><span className="it mut">Each rank keeps the crest below it and adds to it. Choose one to see what it takes, and who holds it.</span></div>
-        <ol className="pzx-lancets">
+      {/* The climb: ten panes of one window, lit up to your rank */}
+      <section className="pzv-climb" aria-label="The ten ranks">
+        <div className="pzv-climb-head"><span className="eb">The climb</span><span className="it mut">Each rank keeps the crest below it and adds to it. Tap one to see what it takes, and who holds it.</span></div>
+        <ol className="pzv-panes">
           {PRESTIGES.map((p) => {
             const reached = !!current && p.level <= current.level;
             const here = current?.level === p.level;
             const who = holders(p.level);
             return (
-              <li key={p.level} className={`pzx-l${reached ? ' reached' : ''}${here ? ' here' : ''}${pick === p.level ? ' chosen' : ''}`} style={{ '--lv': p.level, '--ink': inkOf(p) } as CSSProperties}>
-                <button type="button" className="pzx-l-btn" onClick={() => setChosen(p.level)} aria-pressed={pick === p.level} aria-label={`${p.name}, rank ${p.level}: ${p.at} published ${p.at === 1 ? 'piece' : 'pieces'}${here ? ', you are here' : reached ? ', reached' : ''}`}>
-                  <span className="pzx-crest-slot"><Crest lv={p.level} size={160} locked={!reached && pick !== p.level} glow={here || pick === p.level} /></span>
-                  <span className="pzx-l-text">
-                    <span className="pzx-l-num">{p.numeral}</span>
-                    <span className="pzx-l-name">{p.name}</span>
-                    <span className="lab pzx-l-at">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
-                    <span className="it pzx-l-note">{p.note}</span>
-                    <span className="pzx-l-badge"><PrestigeBadge published={p.at} link={false} /></span>
-                    {who.length > 0 && <span className="pzx-l-who" aria-hidden="true">{who.slice(0, 4).map((h) => <Initials key={h.id} name={h.display_name} size={22} src={portraitUrl(h.portrait_path)} />)}{who.length > 4 && <span className="lab">+{who.length - 4}</span>}</span>}
+              <li key={p.level} className={`pzv-pane${reached ? ' lit' : ''}${here ? ' here' : ''}`} style={{ '--lv': p.level, '--ink': inkOf(p), '--glass': glassOf(p) } as CSSProperties}>
+                <button type="button" className="pzv-pane-btn" onClick={() => setChosen(p.level)} aria-label={`${p.name}, rank ${p.level}: ${p.at} published ${p.at === 1 ? 'piece' : 'pieces'}${here ? ', you are here' : reached ? ', reached' : ''}`}>
+                  <span className="pzv-pane-glass" aria-hidden="true"><span className="pzv-pane-lead" /><Crest lv={p.level} size={120} className="pzv-pane-crest" locked={!reached} glow={here} /></span>
+                  <span className="pzv-pane-text">
+                    <span className="pzv-pane-num">{p.numeral}</span>
+                    <span className="pzv-pane-name">{p.name}</span>
+                    <span className="lab pzv-pane-at">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
+                    {who.length > 0 && <span className="pzv-pane-who" aria-hidden="true">{who.slice(0, 3).map((h) => <Initials key={h.id} name={h.display_name} size={20} src={portraitUrl(h.portrait_path)} />)}{who.length > 3 && <span className="lab">+{who.length - 3}</span>}</span>}
                   </span>
-                  {here && <span className="lab pzx-you">You</span>}
+                  {here && <span className="lab pzv-you">You</span>}
                 </button>
               </li>
             );
           })}
         </ol>
-        {/* The chosen window, in full (computers) */}
-        <div className="pzx-detail" style={{ '--ink': inkOf(sel) } as CSSProperties}>
-          <span className="pzx-detail-crest" aria-hidden="true"><Crest lv={sel.level} size={150} glow /></span>
-          <div className="pzx-detail-text">
-            <span className="lab mut">Rank {sel.level} of 10 · {sel.at} published {sel.at === 1 ? 'piece' : 'pieces'}</span>
-            <h3 className="pzx-detail-name">{sel.numeral}&nbsp; {sel.name}</h3>
-            <p className="it">{sel.note}</p>
-            <div className="pzx-detail-badge"><span className="lab mut">The badge beside your name</span><PrestigeBadge published={sel.at} link={false} size="lg" /></div>
-            {(() => { const who = holders(sel.level); return who.length
-              ? <div className="pzx-detail-who"><span className="lab mut">Who holds it</span><div>{who.slice(0, 12).map(face)}</div></div>
-              : <span className="lab mut">No one holds it yet{current && sel.level > current.level ? '. It could be you.' : '.'}</span>; })()}
-          </div>
-        </div>
       </section>
+
+      {/* Beside the ranks: your trophies */}
+      {me && (() => {
+        const st = trophiesFor({ pieces: myWork, member: people.find((x) => x.id === me) ?? {}, forum: tally });
+        const won = finestFirst(st.filter((x) => x.earned));
+        return (
+          <section className="pzv-tro">
+            <div className="pzv-tro-medals" aria-hidden="true">{won.slice(0, 4).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: trophySvg(t, 56, tier) }} />)}</div>
+            <div className="pzv-tro-text"><span className="lab pzv-k">Beside the ranks</span><span className="pzv-tro-n"><b>{won.length}</b> of {TROPHIES.length} trophies won</span></div>
+            {link('/guild/members/?view=trophies', 'pzv-cta', <>See the trophies <span aria-hidden="true">→</span></>)}
+          </section>
+        );
+      })()}
+
+      {/* A rank, opened */}
+      {chosen !== null && (() => {
+        const sel = PRESTIGES.find((p) => p.level === chosen)!;
+        const reached = !!current && sel.level <= current.level;
+        const who = holders(sel.level);
+        const gap = Math.max(0, sel.at - mine);
+        const frac = Math.min(1, mine / sel.at);
+        return createPortal(
+          <div className="trc-veil" onClick={() => setChosen(null)}>
+            <div className="trc pzv-card" role="dialog" aria-modal="true" aria-label={sel.name} style={{ '--ink': inkOf(sel), '--glass': glassOf(sel) } as CSSProperties} onClick={(e) => e.stopPropagation()}>
+              <button type="button" className="trc-x" onClick={() => setChosen(null)} aria-label="Close">×</button>
+              <span className="pzv-card-crest" aria-hidden="true"><Crest lv={sel.level} size={150} glow /></span>
+              <span className="lab trc-state">Rank {sel.numeral} of X{current?.level === sel.level ? ' · You hold it' : reached ? ' · Reached' : ''}</span>
+              <h3 className="trc-name pzv-card-name">{sel.name}</h3>
+              <p className="it trc-note">{sel.note}</p>
+              <div className="trc-count"><b>{sel.at}</b> published {sel.at === 1 ? 'piece' : 'pieces'}</div>
+              {me && !reached && <><span className="trc-bar" aria-hidden="true"><i style={{ width: `${Math.round(frac * 100)}%` }} /></span><span className="trc-next">{gap} more {gap === 1 ? 'piece' : 'pieces'} to reach it</span></>}
+              <div className="pzv-card-badge"><span className="lab mut">The badge beside a name</span><PrestigeBadge published={sel.at} link={false} /></div>
+              <div className="pzv-card-who">
+                <span className="lab mut">{who.length ? 'Who holds it' : 'No one holds it yet'}</span>
+                {who.length > 0 && <div>{who.slice(0, 12).map(face)}</div>}
+              </div>
+            </div>
+          </div>, document.body);
+      })()}
 
       </>}
       {section === 'trophies' && (
