@@ -1452,3 +1452,17 @@
   .g-room-side .g-tile-crest-mark svg { width: 42px !important; height: 42px !important; }
 }
 @media (max-width: 700px) { .g-room-side .g-tile { min-height: 116px; } }
+/* Phones: the Guild's six rooms as small windows, two across: the glass shows, the mark and name sit low on the left */
+@media (max-width: 700px) {
+  .g-room-side { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .g-room-side .g-tile { display: flex !important; flex-direction: column; justify-content: flex-end; align-items: flex-start !important; text-align: left !important;
+    gap: 6px !important; min-height: 112px !important; padding: 12px 14px !important; border-radius: 14px; }
+  .g-room-side .g-tile .g-tile-photo { opacity: .6; }
+  .g-room-side .g-tile::before { background: linear-gradient(180deg, rgba(10,12,9,.05) 0%, rgba(10,12,9,.45) 45%, rgba(10,12,9,.9) 100%) !important; }
+  .g-room-side .g-tile-mark, .g-room-side .g-tile-crest-mark { width: 26px !important; height: 26px !important; justify-content: flex-start; }
+  .g-room-side .g-tile-mark svg { width: 20px !important; height: 20px !important; }
+  .g-room-side .g-tile-crest-mark > span { width: 26px; height: 26px; justify-content: flex-start; }
+  .g-room-side .g-tile-crest-mark svg { width: 26px !important; height: 26px !important; }
+  .g-room-side .g-tile-text { align-items: flex-start; }
+  .g-room-side .g-tile-name { font-size: 18px !important; line-height: 1.1; }
+}
