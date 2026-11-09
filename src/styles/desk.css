@@ -1492,3 +1492,33 @@
   .d-pl { height: 96px; }
   .d-pl-name { font-size: 19px; }
 }
+/* Phones: Your prestige and Your vault side by side, each a compact half */
+@media (max-width: 700px) {
+  .d-standing { grid-template-columns: 1fr 1fr !important; }
+  .d-standing > div { padding: 16px 12px 16px !important; gap: 10px !important; align-items: center !important; text-align: center; }
+  .d-standing-vault { border-top: 0 !important; border-left: 1px solid rgba(243,236,220,.08) !important; }
+  .d-standing-k { font-size: 8px !important; letter-spacing: .16em; }
+  .d-pz { flex-direction: column; gap: 8px !important; align-items: center; }
+  .d-pz-ring, .d-pz-ring > svg { width: 84px !important; height: 84px !important; }
+  .d-pz-crest { width: 64px !important; }
+  .d-pz-text { align-items: center !important; gap: 3px !important; }
+  .d-pz-of { font-size: 7.5px !important; }
+  .d-pz-name { font-size: 22px !important; }
+  .d-pz-note { display: none; }
+  .d-pz-next { font-size: 12.5px !important; gap: 6px !important; margin-top: 2px !important; }
+  .d-pz-next-crest { width: 20px !important; height: 20px !important; }
+  .d-pz-steps { gap: 3px !important; }
+  .d-pz-steps li { height: 4px !important; }
+  .d-standing-medals { gap: 6px !important; justify-content: center; flex-wrap: wrap; }
+  .d-standing-medal svg, .d-standing-medal:first-child svg { width: 42px !important; height: 42px !important; }
+  .d-standing-tally { justify-content: center; gap: 6px 8px !important; font-size: 8.5px !important; }
+  .d-standing-tally em { flex-basis: 100%; }
+  .d-standing-none { font-size: 13.5px !important; }
+  .d-standing-link { font-size: 8px !important; letter-spacing: .14em; margin-top: auto !important; }
+}
+@media (max-width: 700px) {
+  .d-standing-vault { justify-content: flex-start; }
+  .d-standing-vault .d-standing-medals { margin-top: 10px; }
+  .d-standing-medal svg, .d-standing-medal:first-child svg { width: 50px !important; height: 50px !important; }
+  .d-standing-tally { margin-top: 6px; }
+}
