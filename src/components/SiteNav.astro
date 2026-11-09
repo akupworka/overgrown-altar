@@ -137,6 +137,11 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };
     const gbar = document.querySelector<HTMLElement>('[data-gbar]');
+    // Pinned to the screen: move the bar (and its Write choice) to the page's outermost level, so no section it was
+    // written inside (a header photograph, a moving reveal) can carry it along as you scroll (iPhone Safari does).
+    if (gbar && gbar.parentElement !== document.body) document.body.append(gbar);
+    const chooser = document.querySelector<HTMLElement>('[data-gbar-choose]');
+    if (chooser && chooser.parentElement !== document.body) document.body.append(chooser);
     const mark = () => {
       const now = here();
       inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));
