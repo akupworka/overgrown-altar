@@ -146,3 +146,14 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - Names on the site: forums (rooms, `forum_boards`) · threads (`forum_threads`) · replies (`forum_posts`).
 - Every forum keeps its 40 most active threads (10 per page). A thread shows 20 replies per page and closes itself at
   200 replies (`private.after_post`). Rules page: `?view=rules` (Forum.tsx).
+
+## Readers and members (added Nov 2026)
+- **App install**: `public/manifest.webmanifest`, `icon-192/512.png`, apple meta in `BaseLayout`. iPhone home-screen apps keep their own sign-in.
+- **Pace rules** (trigger `private.submission_limits`): two pieces with the editor at once; five photograph posts a calendar month; the editor is exempt. The Desk checks first and keeps the piece as a draft.
+- **Scheduling**: the editor sets "Publish on" (own pieces, or Schedule in review). It's stored as a future `published_at` on an approved piece. `guild.ts`/`live.ts` hide it until then; `private.rebuild_if_pending` (hourly cron) rebuilds once the time passes.
+- **Reading tools** (`components/PieceTools.astro` on `guild/[slug]`): text size and night reading (`oa_read` in localStorage, set before paint), Save for later (`saves`), Follow (`follows`), "This stayed with me" (`piece_marks`), one reflection per member per piece (`piece_reflections`). Desk shelf: `desk/Reading.tsx`.
+- **Photographs**: the viewer in `BaseLayout` swipes through every `a[data-zoom]`; photo pages step/swipe to newer/older (Gallery order).
+- **Forum mentions**: `@Name` in replies → `forum_mentions`; highlighted by `inline()` in `Forum.tsx`.
+- **Search**: `/search/` reads `/search-index.json` (built) and, for members, profiles and thread titles live.
+- **Welcome**: `desk/Welcome.tsx`, first steps for members (not the editor); hidden once done or dismissed.
+- **Daily letter**: `netlify/functions/daily-letter.mts` (13:17 UTC). Messages, replies in your threads, mentions, marks/reflections on your pieces, new work from writers you follow. Off switch: `member_prefs.email_digest` on Edit my page. Uses the same Resend settings as the writer emails.
