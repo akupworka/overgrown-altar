@@ -85,7 +85,10 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
             {showLocked && <div className="tc-grid">{locked.map((s) => <Medal key={s.trophy.id} s={s} locked onOpen={setOpen} />)}</div>}
           </div>
         )}
-        <a className="vault-all lab" href="/guild/members/?view=prestige#trophies">See every trophy →</a>
+        <div className="vault-links">
+          <a className="vault-link" href="/guild/members/?view=prestige"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>The ten prestiges</a>
+          <a className="vault-link" href="/guild/members/?view=prestige#trophies"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Every trophy</a>
+        </div>
         {open && <TrophyCard s={open} onClose={() => setOpen(null)} />}
       </div>
     </section>
