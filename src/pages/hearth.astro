@@ -1,5 +1,5 @@
 ---
-// The Hearth: the Guild's creative room. Prose, poetry, fiction and photographs.
+// The Hearth: the Guild's creative room. Prose, poetry and fiction (photographs have the Gallery).
 //   - the four kinds of work, each a filter
 //   - the written work as a gallery of cards, newest first (photographs have their own section)
 //   - the makers, and an invitation to bring work to the table
@@ -26,14 +26,14 @@ const works = all.filter((w) => w.kind !== 'photograph');
 const count = (k: string) => all.filter((w) => w.kind === k).length;
 const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, GuildAuthor])).values()].slice(0, 8);
 ---
-<BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry, fiction and photographs.">
+<BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry and fiction.">
   <section class="hero pill-h">
     <img src="/images/ascension-window-wide.jpg" srcset="/images/ascension-window-wide-1200.jpg 1200w, /images/ascension-window-wide.jpg 2880w" sizes="100vw" alt="Stained-glass window of the Ascension in a warm stone vault" style="object-position:center 45%;" fetchpriority="high" />
     <div class="veil-l"></div><SiteNav />
     <div class="pill-in">
       <span class="eb">02 · Creative Guild</span>
       <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Hearth</h1>
-      <p class="body" style="color:#E6DFD0;max-width:720px">The Guild’s creative room, in the spirit of the Inklings: prose and poetry, fiction and photographs, made with reverence and brought to the fire to be read.</p>
+      <p class="body" style="color:#E6DFD0;max-width:720px">The Guild’s creative room, in the spirit of the Inklings: prose, poetry and fiction, made with reverence and brought to the fire to be read.</p>
     </div>
   </section>
 
@@ -57,7 +57,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
         </button>)
       ))}
     </div>
-    <a class="lab room-forms" href="/crafts/#hearth">What each craft is, and what the editor looks for →</a>
+    <a class="lab room-forms" href="/crafts/#hearth"><span class="rf-long">What each craft is, and what the editor looks for →</span><span class="rf-short">Each craft, and what the editor looks for →</span></a>
   </section>
 
   <!-- The work, as a gallery -->
@@ -243,5 +243,20 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     .he-total { display: none; }
     .he-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); margin-left: auto; margin-right: auto; }
     .he-cta .btn { text-align: center; }
+  }
+  .rf-short { display: none; }
+  /* Phones: the three kinds as glass cards, even and centered; the craft link on one quiet line */
+  @media (max-width: 700px) {
+    .he-kinds-sec .eb { text-align: center; display: block; }
+    .he-kinds { border-top: 0 !important; gap: 8px; margin-top: 22px; }
+    .he-kind { align-items: center !important; text-align: center !important; padding: 20px 6px 18px !important; border: 0 !important; border-radius: 14px; gap: 8px !important;
+      background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 45%), rgba(243,236,220,.03);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(243,236,220,.12); }
+    .he-kind:active { box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(255,227,163,.5); }
+    .he-k { font-size: 22px !important; }
+    .he-c { font-size: 8.5px !important; letter-spacing: .14em; }
+    .room-forms { display: block; text-align: center; margin-top: 22px; border: 0 !important; font-size: 9px; letter-spacing: .16em; }
+    .rf-long { display: none; }
+    .rf-short { display: inline; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; }
   }
 </style>
