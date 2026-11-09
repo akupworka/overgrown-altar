@@ -5,7 +5,7 @@ import { supabase, type Profile } from '../../lib/supabase';
 import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
-import { useCollection, CollectionWall } from './Collection';
+import { useCollection } from './Collection';
 import { WayCard } from './Way';
 import { PillarTiles } from './DeskApp';
 
@@ -15,14 +15,8 @@ export function FellowHome({ profile }: { profile: Profile }) {
   const items = useCollection(profile.id);
   const tally = useForumTally(profile.id);
   const [following, setFollowing] = useState(0);
-  const [copied, setCopied] = useState(false);
   useEffect(() => { supabase.from('follows').select('followed').eq('follower', profile.id).then(({ data }) => setFollowing((data ?? []).length)); }, [profile.id]);
   const first = (profile.display_name || '').split(/\s+/)[0];
-  const share = `${location.origin}/collection/?of=${profile.id}`;
-  async function shareIt() {
-    try { if (navigator.share) { await navigator.share({ title: `${profile.display_name}’s collection`, url: share }); return; } } catch { return; }
-    try { await navigator.clipboard.writeText(share); setCopied(true); setTimeout(() => setCopied(false), 2200); } catch {}
-  }
   return (
     <section className="d-section d-home fl-home">
       <header className="d-home-head">
@@ -45,15 +39,12 @@ export function FellowHome({ profile }: { profile: Profile }) {
         <ForumMineLatest me={profile.id} />
       </section>
       <ReadingShelf me={profile.id} freshOnly />
-      <div className="d-row-head fl-coll-head">
-        <h2 className="eb">Your collection</h2>
-        {!!items?.length && <button type="button" className="lab fl-share" onClick={shareIt}>{copied ? 'Link copied' : 'Share your collection →'}</button>}
-      </div>
-      <CollectionWall items={items} empty={<>
-        <p className="it">Your collection is waiting for its first piece.</p>
-        <span className="lab mut">Tap <b>Save</b> on any piece or photograph you love, and it gathers here.</span>
-        <a className="lab cl-empty-go" href="/gallery/">Begin in the Gallery →</a>
-      </>} />
+      {/* The collection itself lives on their page; here, one way to it */}
+      <a className="fl-coll-link" href={`/guild/members/?m=${profile.id}`}>
+        <span><span className="eb">Your collection</span>
+          <span className="it">{items?.length ? `${items.length} ${items.length === 1 ? 'piece' : 'pieces'} kept, on your page.` : 'Tap Save on anything you love; it gathers on your page.'}</span></span>
+        <span className="lab fl-coll-go">Open →</span>
+      </a>
     </section>
   );
 }
