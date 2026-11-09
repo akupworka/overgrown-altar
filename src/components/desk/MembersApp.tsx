@@ -118,7 +118,7 @@ function Directory() {
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft g-role">{[m.role === 'editor' ? 'Editor in Chief' : 'Writer', m.craft].filter(Boolean).join(' · ') || 'Member'}</span>
+                <span className="lab mut g-craft g-role">{m.role === 'editor' ? 'Editor in Chief' : 'Writer'}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
                 <span className="lab mut g-craft g-count">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
