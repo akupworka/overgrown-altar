@@ -139,3 +139,24 @@ a.gp-arch:hover { box-shadow: 0 0 0 1px var(--oxblood), 0 16px 40px -20px rgba(4
 .gp-progress i { display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(0);
   background: linear-gradient(90deg, #3E7BFF, #B05BFF 30%, #FF3B4E 55%, #FFC44D 80%, #3DE0A0); box-shadow: 0 0 10px rgba(255, 196, 77, .5); }
 @media (prefers-reduced-motion: reduce) { .gp-progress { display: none; } }
+
+/* Reading comfort: text size (−1 to +2) and night reading, chosen on the piece and remembered on this device */
+html[data-rs='-1'] .gp-flow p.body { font-size: 20px !important; }
+html[data-rs='1'] .gp-flow p.body { font-size: 25px !important; }
+html[data-rs='2'] .gp-flow p.body { font-size: 28px !important; }
+@media (max-width: 700px) {
+  html[data-rs='-1'] .gp-flow p.body { font-size: 16.5px !important; }
+  html[data-rs='1'] .gp-flow p.body { font-size: 20px !important; }
+  html[data-rs='2'] .gp-flow p.body { font-size: 22.5px !important; }
+}
+html[data-night] .gp-article { --ink: #E6DFD0; --muted-paper: #A39C8E; --oxblood: #E0AC93; --paper: #0E110C; background: #0E110C; color: #E6DFD0; transition: background .4s; }
+html[data-night] .gp-article :is(p, li, blockquote, h2, h3, figcaption, dd, span) { color: inherit; }
+html[data-night] .gp-article :is(.gp-standfirst, .pp-cap, .gp-craft, .pt-item-d, .pt-count, .pt-none) { color: var(--muted-paper); }
+html[data-night] .gp-article :is(.gp-bio, .pt-item-b) { color: #CFC8B8; }
+html[data-night] .gp-author { background: linear-gradient(180deg, #171B13, #12150F) !important; box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .18) !important; }
+html[data-night] .gp-arch:has(img) { background: #1A1E16; }
+html[data-night] .pp-lens { background: rgba(255, 255, 255, .03); border-color: rgba(243, 236, 220, .15); }
+html[data-night] .gp-article :is(.pt-btn, .gp-share-btn) { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .25); }
+html[data-night] .gp-article .pt-box { background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .18); }
+html[data-night] .gp-article .pt-refl { border-top-color: rgba(243, 236, 220, .14); }
+html[data-night] .gp-article :is(.pt-send, .pt-follow:not([aria-pressed='true'])) { background: var(--bone); color: #12160F; }

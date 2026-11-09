@@ -7,6 +7,7 @@ import Avatar from '../../components/Avatar.astro';
 import Cross from '../../components/Cross.astro';
 import AuthorLinks from '../../components/AuthorLinks.astro';
 import PrestigeBadge from '../../components/PrestigeBadge.astro';
+import PieceTools from '../../components/PieceTools.astro';
 import { Body, wantsDropCap } from '../../lib/marks';
 import { PhotoPlate } from '../../components/PhotoPlate';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
@@ -50,6 +51,7 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
 
   <article class="sec paper gp-article">
     <div class:list={['narrow gp-flow', { 'gp-drop': !isPhoto && wantsDropCap(p.medium, p.body), 'gp-photo': isPhoto }]}>
+      <PieceTools part="top" pieceId={p.id} authorId={a.id} first={first} isPhoto={isPhoto} />
       {p.standfirst && <p class="lede gp-standfirst">{p.standfirst}</p>}
       {isPhoto && p.image && <PhotoPlate src={p.image} alt={p.image_alt} meta={p.photoMeta} gallery={p.gallery} />}
       {p.body.trim() && <Body body={p.body} />}
@@ -72,8 +74,10 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
           {a.bio && <p class="gp-bio">{a.bio}</p>}
           <AuthorLinks website={a.website} instagram={a.instagram} email={a.email} />
           <a class="gp-all" href={aUrl}>All of {first}’s work <span aria-hidden="true">→</span></a>
+          <PieceTools part="follow" pieceId={p.id} authorId={a.id} first={first} />
         </div>
       </aside>
+      <PieceTools part="end" pieceId={p.id} authorId={a.id} first={first} isPhoto={isPhoto} />
     </div>
   </article>
 

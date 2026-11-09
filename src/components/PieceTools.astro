@@ -1,0 +1,247 @@
+---
+// The reader's tools around a published piece.
+//   part="top"     comfort for everyone (text size, night reading) and, for members, Save for later
+//   part="end"     for members: "This stayed with me", and the Guild's reflections (one short reflection each)
+//   part="follow"  for members: follow the writer
+// Members only see and use the Guild's parts; visitors see the reading comfort alone.
+interface Props { part: 'top' | 'end' | 'follow'; pieceId: string; authorId: string; first: string; isPhoto?: boolean }
+const { part, pieceId, authorId, first, isPhoto } = Astro.props;
+---
+{part === 'top' && (
+  <div class="pt-top" data-piece={pieceId} data-author={authorId}>
+    <div class="pt-read" role="group" aria-label="Reading comfort">
+      <button type="button" class="pt-btn pt-size" data-size="-1" aria-label="Smaller text">A<sup>−</sup></button>
+      <button type="button" class="pt-btn pt-size pt-size-up" data-size="1" aria-label="Larger text">A<sup>+</sup></button>
+      <button type="button" class="pt-btn pt-night" aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></svg>
+        <span class="pt-night-w">Night</span>
+      </button>
+    </div>
+    <button type="button" class="pt-btn pt-save" data-member aria-pressed="false" data-piece={pieceId}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
+      <span class="pt-save-w">Save for later</span>
+    </button>
+  </div>
+)}
+
+{part === 'end' && (
+  <section class="pt-end" data-member data-piece={pieceId} data-author={authorId} aria-label="The Guild's response">
+    <button type="button" class="pt-stay" aria-pressed="false" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M7 8h10" /></svg>
+      <span class="pt-stay-w">This stayed with me</span><span class="pt-stay-n"></span>
+    </button>
+    <p class="lab pt-stay-own" hidden></p>
+    <div class="pt-refl">
+      <span class="eb">Reflections from the Guild</span>
+      <ol class="pt-list"></ol>
+      <p class="it pt-none" hidden>No reflections yet. If this {isPhoto ? 'photograph' : 'piece'} stayed with you, say so in a line or two.</p>
+      <form class="pt-form" hidden>
+        <label class="visually-hidden" for={`pt-box-${pieceId}`}>Your reflection</label>
+        <textarea id={`pt-box-${pieceId}`} class="pt-box" maxlength="600" rows="3" placeholder={`A line or two for ${first} and the Guild…`}></textarea>
+        <div class="pt-form-row"><span class="lab pt-count">0 / 600</span><button type="submit" class="pt-send">Leave a reflection</button></div>
+        <p class="it pt-msg" role="status"></p>
+      </form>
+    </div>
+  </section>
+)}
+
+{part === 'follow' && (
+  <button type="button" class="pt-follow" data-member data-author={authorId} aria-pressed="false" hidden>
+    <span class="pt-follow-w">Follow {first}</span>
+  </button>
+)}
+
+<script>
+  import { supabase, portraitUrl } from '../lib/supabase';
+
+  // ---- Reading comfort (everyone): remembered on this device, set before paint by BaseLayout.
+  const html = document.documentElement;
+  const read = () => { try { return JSON.parse(localStorage.getItem('oa_read') || '{}'); } catch { return {}; } };
+  const keep = (r: { size?: number; night?: boolean }) => { try { localStorage.setItem('oa_read', JSON.stringify(r)); } catch {} };
+  const paint = () => {
+    const r = read();
+    const size = Math.max(-1, Math.min(2, Number(r.size) || 0));
+    size ? html.setAttribute('data-rs', String(size)) : html.removeAttribute('data-rs');
+    html.toggleAttribute('data-night', !!r.night);
+    document.querySelectorAll<HTMLButtonElement>('.pt-night').forEach((b) => b.setAttribute('aria-pressed', String(!!r.night)));
+    document.querySelectorAll<HTMLButtonElement>('.pt-size').forEach((b) => (b.disabled = Number(b.dataset.size) < 0 ? size <= -1 : size >= 2));
+  };
+  document.querySelectorAll<HTMLButtonElement>('.pt-size').forEach((b) => b.addEventListener('click', () => {
+    const r = read(); r.size = Math.max(-1, Math.min(2, (Number(r.size) || 0) + Number(b.dataset.size))); keep(r); paint();
+  }));
+  document.querySelectorAll<HTMLButtonElement>('.pt-night').forEach((b) => b.addEventListener('click', () => { const r = read(); r.night = !r.night; keep(r); paint(); }));
+  paint();
+
+  // ---- The Guild's parts (members only)
+  const ago = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  (async () => {
+    if (!html.hasAttribute('data-member')) return;
+    const { data: s } = await supabase.auth.getSession();
+    const me = s.session?.user.id; if (!me) return;
+    const top = document.querySelector<HTMLElement>('.pt-top');
+    const piece = top?.dataset.piece || document.querySelector<HTMLElement>('.pt-end')?.dataset.piece;
+    const author = top?.dataset.author || document.querySelector<HTMLElement>('.pt-end')?.dataset.author;
+    if (!piece || !author) return;
+    const mine = author === me;
+
+    // Save for later
+    const save = document.querySelector<HTMLButtonElement>('.pt-save');
+    if (save) {
+      const { data } = await supabase.from('saves').select('piece_id').eq('member_id', me).eq('piece_id', piece);
+      let on = !!(data && data.length);
+      const show = () => { save.setAttribute('aria-pressed', String(on)); save.querySelector('.pt-save-w')!.textContent = on ? 'Saved' : 'Save for later'; };
+      show();
+      save.addEventListener('click', async () => {
+        on = !on; show();
+        const { error } = on ? await supabase.from('saves').insert({ member_id: me, piece_id: piece }) : await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', piece);
+        if (error) { on = !on; show(); }
+      });
+    }
+
+    // Follow the writer
+    const follow = document.querySelector<HTMLButtonElement>('.pt-follow');
+    if (follow && !mine) {
+      const { data } = await supabase.from('follows').select('followed').eq('follower', me).eq('followed', author);
+      let on = !!(data && data.length);
+      const label = follow.querySelector('.pt-follow-w')!, base = label.textContent!.replace(/^Following /, 'Follow ');
+      const show = () => { follow.setAttribute('aria-pressed', String(on)); label.textContent = on ? base.replace(/^Follow /, 'Following ') : base; };
+      follow.hidden = false; show();
+      follow.addEventListener('click', async () => {
+        on = !on; show();
+        const { error } = on ? await supabase.from('follows').insert({ follower: me, followed: author }) : await supabase.from('follows').delete().eq('follower', me).eq('followed', author);
+        if (error) { on = !on; show(); }
+      });
+    }
+
+    // This stayed with me
+    const end = document.querySelector<HTMLElement>('.pt-end');
+    if (!end) return;
+    const stay = end.querySelector<HTMLButtonElement>('.pt-stay')!, stayN = end.querySelector<HTMLElement>('.pt-stay-n')!, own = end.querySelector<HTMLElement>('.pt-stay-own')!;
+    const { data: marks } = await supabase.from('piece_marks').select('member_id').eq('piece_id', piece);
+    let count = (marks ?? []).length, on = (marks ?? []).some((m: any) => m.member_id === me);
+    const showStay = () => { stay.setAttribute('aria-pressed', String(on)); stayN.textContent = count ? ` · ${count}` : ''; };
+    if (mine) { own.hidden = !count; own.textContent = `This stayed with ${count} ${count === 1 ? 'member' : 'members'} of the Guild`; }
+    else {
+      stay.hidden = false; showStay();
+      stay.addEventListener('click', async () => {
+        on = !on; count += on ? 1 : -1; showStay();
+        const { error } = on ? await supabase.from('piece_marks').insert({ member_id: me, piece_id: piece }) : await supabase.from('piece_marks').delete().eq('member_id', me).eq('piece_id', piece);
+        if (error) { on = !on; count += on ? 1 : -1; showStay(); }
+      });
+    }
+
+    // Reflections: everyone's, then your own (one each; you can change or remove it)
+    const list = end.querySelector<HTMLOListElement>('.pt-list')!, none = end.querySelector<HTMLElement>('.pt-none')!;
+    const form = end.querySelector<HTMLFormElement>('.pt-form')!, box = form.querySelector<HTMLTextAreaElement>('.pt-box')!;
+    const cnt = form.querySelector<HTMLElement>('.pt-count')!, msg = form.querySelector<HTMLElement>('.pt-msg')!, send = form.querySelector<HTMLButtonElement>('.pt-send')!;
+    let mineId: string | null = null;
+    const draw = async () => {
+      const { data } = await supabase.from('piece_reflections').select('id, author_id, body, created_at').eq('piece_id', piece).order('created_at');
+      const rows = (data ?? []) as { id: string; author_id: string; body: string; created_at: string }[];
+      const ids = [...new Set(rows.map((r) => r.author_id))];
+      const { data: ppl } = ids.length ? await supabase.from('profiles').select('id, display_name, portrait_path').in('id', ids) : { data: [] as any[] };
+      const who = new Map((ppl ?? []).map((p: any) => [p.id, p]));
+      list.innerHTML = '';
+      mineId = null;
+      for (const r of rows) {
+        const p: any = who.get(r.author_id) ?? { display_name: 'A member' };
+        if (r.author_id === me) { mineId = r.id; box.value = r.body; }
+        const li = document.createElement('li'); li.className = 'pt-item';
+        const av = document.createElement('a'); av.className = 'pt-av'; av.href = `/guild/members/?m=${r.author_id}`;
+        const src = portraitUrl(p.portrait_path);
+        if (src) { const i = new Image(); i.src = src; i.alt = ''; av.append(i); } else av.textContent = (p.display_name || '?').split(/\s+/).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
+        const t = document.createElement('div'); t.className = 'pt-item-t';
+        const h = document.createElement('div'); h.className = 'pt-item-h';
+        const n = document.createElement('a'); n.className = 'pt-item-n'; n.href = av.href; n.textContent = p.display_name;
+        const d = document.createElement('span'); d.className = 'lab pt-item-d'; d.textContent = ago(r.created_at) + (r.author_id === author ? ' · The writer' : '');
+        h.append(n, d);
+        const b = document.createElement('p'); b.className = 'pt-item-b'; b.textContent = r.body;
+        t.append(h, b);
+        if (r.author_id === me) {
+          const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'lab pt-rm'; rm.textContent = 'Remove';
+          rm.addEventListener('click', async () => { if (!confirm('Remove your reflection?')) return; await supabase.from('piece_reflections').delete().eq('id', r.id); box.value = ''; draw(); });
+          t.append(rm);
+        }
+        li.append(av, t); list.append(li);
+      }
+      none.hidden = rows.length > 0;
+      form.hidden = false;
+      send.textContent = mineId ? 'Update your reflection' : 'Leave a reflection';
+      cnt.textContent = `${box.value.length} / 600`;
+    };
+    box.addEventListener('input', () => { cnt.textContent = `${box.value.length} / 600`; });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); const body = box.value.trim(); if (body.length < 2) return;
+      send.disabled = true; msg.textContent = '';
+      const { error } = mineId ? await supabase.from('piece_reflections').update({ body }).eq('id', mineId)
+        : await supabase.from('piece_reflections').insert({ piece_id: piece, author_id: me, body });
+      send.disabled = false;
+      if (error) { msg.textContent = 'It didn’t save. Please try again.'; return; }
+      msg.textContent = 'Thank you. It is with the Guild.'; draw();
+    });
+    draw();
+  })();
+</script>
+
+<style is:global>
+  /* Members' parts stay out of sight for visitors */
+  html:not([data-member]) :is(.pt-save, .pt-end, .pt-follow) { display: none !important; }
+  /* top row: reading comfort on the left, Save on the right */
+  .pt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 34px; }
+  .pt-read { display: inline-flex; gap: 6px; }
+  .pt-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .28); color: var(--ink); font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; transition: box-shadow .3s, color .3s; }
+  .pt-size { font-family: var(--serif); font-size: 17px; letter-spacing: 0; text-transform: none; padding: 0 12px; min-width: 42px; justify-content: center; }
+  .pt-size sup { font-size: 11px; }
+  .pt-size-up { font-size: 20px; }
+  .pt-btn:disabled { opacity: .35; cursor: default; }
+  .pt-btn:hover:not(:disabled), .pt-btn[aria-pressed='true'] { color: var(--oxblood); box-shadow: inset 0 0 0 1px var(--oxblood); }
+  .pt-save[aria-pressed='true'] svg { fill: currentColor; }
+
+  /* end: the stayed-with-me mark and reflections */
+  .pt-end { margin-top: 56px; display: flex; flex-direction: column; gap: 30px; }
+  .pt-stay { align-self: center; display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 999px; cursor: pointer; background: none;
+    box-shadow: inset 0 0 0 1px rgba(98, 55, 45, .45); color: var(--oxblood); font-family: var(--serif); font-size: 20px; transition: background .3s, color .3s, box-shadow .3s; }
+  .pt-stay:hover { box-shadow: inset 0 0 0 1px var(--oxblood); }
+  .pt-stay[aria-pressed='true'] { background: var(--oxblood); color: var(--paper); }
+  .pt-stay-n { font-family: var(--sans); font-size: 11px; letter-spacing: .14em; }
+  .pt-stay[hidden], .pt-form[hidden], .pt-none[hidden], .pt-stay-own[hidden] { display: none; }
+  .pt-stay-own { align-self: center; color: var(--oxblood); }
+  .pt-refl { display: flex; flex-direction: column; gap: 18px; border-top: 1px solid rgba(42, 32, 23, .18); padding-top: 34px; }
+  .pt-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+  .pt-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; }
+  .pt-av { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: #14180F; color: var(--ember); font-family: var(--serif); font-size: 14px; box-shadow: 0 0 0 1px var(--brass); }
+  .pt-av img { width: 100%; height: 100%; object-fit: cover; }
+  .pt-item-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pt-item-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .pt-item-n { font-family: var(--serif); font-size: 19px; color: var(--ink); }
+  .pt-item-d { font-size: 9px; color: var(--muted-paper); }
+  .pt-item-b { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #3A2F25; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pt-rm { align-self: flex-start; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--muted-paper); font-size: 9px; }
+  .pt-none { margin: 0; font-size: 18px; color: var(--muted-paper); }
+  .pt-form { display: flex; flex-direction: column; gap: 10px; }
+  .pt-box { width: 100%; box-sizing: border-box; resize: vertical; min-height: 92px; padding: 14px 16px; border-radius: 12px; border: 0; background: rgba(255, 255, 255, .35);
+    box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .22); font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
+  .pt-box:focus { outline: none; box-shadow: inset 0 0 0 1px var(--oxblood); }
+  .pt-form-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .pt-count { font-size: 9px; color: var(--muted-paper); }
+  .pt-send { padding: 12px 22px; border: 0; border-radius: 999px; cursor: pointer; background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+  .pt-send:disabled { opacity: .5; }
+  .pt-msg { margin: 0; font-size: 16px; color: var(--oxblood); min-height: 1em; }
+
+  /* follow, in the author card */
+  .pt-follow { align-self: flex-start; margin-top: 16px; padding: 10px 18px; border: 0; border-radius: 999px; cursor: pointer; background: var(--ink); color: var(--paper);
+    font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; transition: background .3s, color .3s, box-shadow .3s; }
+  .pt-follow[aria-pressed='true'] { background: none; color: var(--ink); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .35); }
+  .pt-follow[hidden] { display: none; }
+
+  @media (max-width: 700px) {
+    .pt-top { margin-bottom: 26px; }
+    .pt-btn { min-height: 36px; padding: 0 12px; }
+    .pt-size { min-width: 38px; padding: 0 8px; }
+    .pt-night-w { display: none; }
+    .pt-night { padding: 0 11px; }
+    .pt-stay { font-size: 18px; padding: 12px 20px; }
+    .pt-item-b, .pt-item-n { font-size: 17px; }
+  }
+</style>

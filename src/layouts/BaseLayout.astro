@@ -61,6 +61,10 @@ const imageUrl = new URL(image, site).toString();
           var oaM = JSON.parse(localStorage.getItem('oa_member') || '{}');
           if (oaM.editor) document.documentElement.setAttribute('data-editor', '');
         }
+        // Reading comfort chosen on a piece (text size, night reading), before anything is drawn
+        var oaR = JSON.parse(localStorage.getItem('oa_read') || '{}');
+        if (oaR.size) document.documentElement.setAttribute('data-rs', String(oaR.size));
+        if (oaR.night) document.documentElement.setAttribute('data-night', '');
       } catch (e) {}
     </script>
     {Astro.url.pathname === '/' && (

@@ -3,6 +3,7 @@
 //   /guild/members/?m=<id>     a member's page: portrait, craft, bio, links, collected work
 //   /guild/members/?p=<id>     reading one of their published pieces
 // What anyone can see is enforced by the database's rules; this only presents it.
+import { FollowButton } from './Reading';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
@@ -279,6 +280,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
               Message {person.display_name.split(' ')[0]}
             </button>
+            <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />
           </nav>
         )}
         {person.id === me && (

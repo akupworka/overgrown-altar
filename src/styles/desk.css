@@ -1580,3 +1580,18 @@
 .d-decide-note .d-golive { max-width: 360px; }
 /* Writing: the bar already has "My pieces", so the separate back button stays hidden on every screen */
 .d-room.writing .d-back { display: none !important; }
+/* Reading shelf on the Desk: new from writers you follow, saved for later */
+.rd-shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.rd-list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; }
+.rd-row { display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(243, 236, 220, .08); }
+.rd-row:first-child { border-top: 0; }
+.rd-link { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 12px 0; color: var(--bone); }
+.rd-link:hover .rd-t { color: var(--ember); }
+.rd-t { font-family: var(--serif); font-size: 19px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .3s; }
+.rd-m { font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-x { flex: none; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: var(--muted-dark); font-size: 20px; cursor: pointer; }
+.rd-x:hover { color: var(--ember); }
+.m-act.rd-follow { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); color: var(--ember); }
+@media (max-width: 700px) { .rd-shelf { grid-template-columns: 1fr; gap: 12px; } .rd-t { font-size: 17px; } }
+button.m-act:not(.primary) { background: none; border: 0; cursor: pointer; }
+@media (max-width: 700px) { .m-actions button.m-act:not(.primary) { flex: 1; justify-content: center; } }
