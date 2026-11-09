@@ -851,6 +851,22 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
       if (error) { setMsg(error.message); return; }
       onDone(); return;
     }
+    // The Guild's pace: two pieces with the editor at a time, five photographs a month (the database holds the same rule).
+    const { data: ses } = await supabase.auth.getSession();
+    const uid = ses.session?.user.id;
+    if (uid) {
+      const { data: mine } = await supabase.from('pieces').select('id, status, medium, submitted_at').eq('author_id', uid);
+      const others = (Array.isArray(mine) ? mine : []).filter((x: any) => x.id !== id);
+      const month = new Date(); month.setUTCDate(1); month.setUTCHours(0, 0, 0, 0);
+      if (others.filter((x: any) => x.status === 'submitted').length >= 2) {
+        await save('draft');
+        setMsg('You already have two pieces with the editor. Once one has been read, you can send this one. It is saved as a draft until then.'); return;
+      }
+      if (isPhoto && others.filter((x: any) => x.medium === 'photograph' && x.submitted_at && new Date(x.submitted_at) >= month).length >= 5) {
+        await save('draft');
+        setMsg('You have sent five photographs this month, the most a month allows. You can send this one from the first of next month. It is saved as a draft until then.'); return;
+      }
+    }
     if (!confirm('Send this piece to the editor? You can withdraw it later to keep editing.')) return;
     const p = await save('submitted');
     if (p) onDone();
@@ -1086,9 +1102,9 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
           {!live && <button type="button" className="ghost d-btn" onClick={() => save('draft')} disabled={state === 'saving'}><span className="d-long">Save draft</span><span className="d-short">Save</span></button>}
           <button type="button" className="btn d-btn" onClick={submit} disabled={state === 'saving'}><span className="d-long">{sendLabel}</span><span className="d-short">{live ? (isEditor ? 'Update' : 'Send') : isEditor ? 'Publish' : 'Send →'}</span></button>
         </div>
+        {msg && <p className="it d-notice d-bar-notice" role="alert">{msg}</p>}
       </div>
       {note}
-      <p className="it d-notice" role="alert">{msg}</p>
 
       <div className="d-write-grid">
         {paper}

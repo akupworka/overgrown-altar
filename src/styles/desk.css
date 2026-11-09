@@ -1568,3 +1568,7 @@
 /* Guild page: pages of members */
 .g-pager { margin-top: 40px; }
 .g-people-head { scroll-margin-top: 90px; }
+/* The editor's message (e.g. why a piece can't be sent yet) sits in the writing bar, never hidden under it */
+.d-write-bar { flex-wrap: wrap; }
+.d-bar-notice { flex-basis: 100%; order: 9; margin: 4px 0 0 !important; font-size: 17px; text-align: right; }
+@media (max-width: 700px) { .d-bar-notice { text-align: center; font-size: 15px; } }
