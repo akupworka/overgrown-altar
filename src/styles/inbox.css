@@ -102,3 +102,11 @@
 .ib-unsend { margin-left: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #8C8679; }
 .ib-unsend:hover { color: #E8A091; }
 .ib .m-back { align-self: flex-start !important; }
+/* The ⋯ menu always sits above the conversation and the reply box */
+.ib-thead { position: relative; z-index: 60; }
+.ib-mod .fo-mod-menu { z-index: 61; }
+.ib-reply { z-index: 20; }
+@media (max-width: 700px) {
+  .ib-reply { position: fixed !important; left: 12px !important; right: 12px !important; width: auto !important; bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
+  .ib-thread:has(.ib-reply) { padding-bottom: 110px; }
+}
