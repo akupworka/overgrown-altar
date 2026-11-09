@@ -1,7 +1,6 @@
 ---
-// The Hearth: the Guild's creative room. Prose, poetry, fiction, photographs, architectural studies and design teardowns.
-//   - a featured piece (the newest), large
-//   - the six kinds of work, each a filter
+// The Hearth: the Guild's creative room. Prose, poetry, fiction and photographs.
+//   - the four kinds of work, each a filter
 //   - the written work as a gallery of cards, newest first (photographs have their own section)
 //   - the gallery: the newest photographs, and a link to all of them (/hearth/gallery/)
 //   - the makers, and an invitation to bring work to the table
@@ -16,8 +15,6 @@ const KINDS = [
   { value: 'poetry', label: 'Poetry', note: 'Lines, stanzas, psalms of our own.' },
   { value: 'fiction', label: 'Fiction', note: 'Stories that tell the truth slant.' },
   { value: 'photograph', label: 'Photographs', note: 'Stone in monochrome; color through glass.' },
-  { value: 'study', label: 'Architectural studies', note: 'Reading sacred space.' },
-  { value: 'teardown', label: 'Design teardowns', note: 'How a made thing works, and why.' },
 ];
 const FALLBACK = ['/images/glass-2-1200.jpg', '/images/window-light-on-wall-1200.jpg', '/images/bay-window-of-stained-glass-1200.jpg', '/images/faded-chapel-wall-with-a-1200.jpg'];
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -26,7 +23,6 @@ const all = (await guildPillar('hearth')).map((g, i) => ({
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), image: g.image || FALLBACK[i % FALLBACK.length], hasPhoto: !!g.image, pos: (g.image && g.imagePos) ? `object-position:${g.imagePos}` : undefined,
   author: g.author, authorHref: authorUrl(g.author), format: g.photoMeta?.format ?? '', more: g.gallery?.length ?? 0,
 }));
-const featured = all[0];
 // Photographs live in the gallery; the cards below are the written work.
 const works = all.filter((w) => w.kind !== 'photograph');
 const photos = all.filter((w) => w.kind === 'photograph' && w.hasPhoto);
@@ -34,34 +30,19 @@ const count = (k: string) => all.filter((w) => w.kind === k).length;
 const ROMAN = ['i', 'ii', 'iii', 'iv'];
 const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, GuildAuthor])).values()].slice(0, 8);
 ---
-<BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry, fiction, photographs, architectural studies and design teardowns.">
+<BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry, fiction and photographs.">
   <section class="hero pill-h">
     <img src="/images/ascension-window-wide.jpg" srcset="/images/ascension-window-wide-1200.jpg 1200w, /images/ascension-window-wide.jpg 2880w" sizes="100vw" alt="Stained-glass window of the Ascension in a warm stone vault" style="object-position:center 45%;" fetchpriority="high" />
     <div class="veil-l"></div><SiteNav />
     <div class="pill-in">
       <span class="eb">02 · Creative Guild</span>
       <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Hearth</h1>
-      <p class="body" style="color:#E6DFD0;max-width:720px">The Guild’s creative room, in the spirit of the Inklings: prose and poetry, fiction, photographs, architectural studies and design teardowns, made with reverence and brought to the fire to be read.</p>
+      <p class="body" style="color:#E6DFD0;max-width:720px">The Guild’s creative room, in the spirit of the Inklings: prose and poetry, fiction and photographs, made with reverence and brought to the fire to be read.</p>
     </div>
   </section>
 
-  {featured && (
-    <!-- The newest work, large -->
-    <section class="sec paper he-feat-sec">
-      <a class="he-feat" href={featured.href}>
-        <span class="he-feat-img"><img src={featured.image} alt="" style={featured.pos} /></span>
-        <span class="he-feat-text">
-          <span class="eb">Newest at the hearth · {featured.kindLabel}</span>
-          <span class="h2 he-feat-title">{featured.title}</span>
-          {featured.standfirst && <span class="it he-feat-sf">{featured.standfirst}</span>}
-          <span class="he-feat-by"><Avatar name={featured.author.display_name} src={featured.author.portrait || undefined} size={30} id={featured.author.id} /><span class="lab mut">{featured.author.display_name} · {fmt(featured.date)}</span></span>
-          <span class="lab he-feat-go">{featured.kind === 'photograph' ? 'See the photograph' : 'Read'} <span aria-hidden="true">→</span></span>
-        </span>
-      </a>
-    </section>
-  )}
 
-  <!-- The six kinds of work, each a filter -->
+  <!-- The four kinds of work, each a filter -->
   <section class="sec dark he-kinds-sec">
     <span class="eb">What the fellowship makes</span>
     <div class="he-kinds">
@@ -235,9 +216,9 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-feat-go { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .4); padding-bottom: 3px; }
 
   /* Kinds */
-  .he-kinds { margin-top: 34px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(243, 236, 220, .14); }
+  .he-kinds { margin-top: 34px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid rgba(243, 236, 220, .14); }
   .he-kind { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 26px 26px 24px; text-align: left; background: none; border: 0; border-bottom: 1px solid rgba(243, 236, 220, .14); color: inherit; cursor: pointer; }
-  .he-kind:not(:nth-child(3n + 1)) { border-left: 1px solid rgba(243, 236, 220, .14); }
+  .he-kind:not(:nth-child(4n + 1)) { border-left: 1px solid rgba(243, 236, 220, .14); }
   .he-k { font-family: var(--serif); font-size: 27px; line-height: 1.1; transition: color .3s; }
   .he-n { font-size: 17px; line-height: 1.45; color: var(--muted-dark); }
   .he-c { margin-top: 4px; color: var(--ember); font-size: 10px; }
@@ -284,7 +265,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   @media (max-width: 1000px) {
     .he-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .he-kinds { grid-template-columns: 1fr 1fr; }
-    .he-kind:not(:nth-child(3n + 1)) { border-left: 0; }
+    .he-kind:not(:nth-child(4n + 1)) { border-left: 0; }
     .he-kind:nth-child(2n) { border-left: 1px solid rgba(243, 236, 220, .14); }
   }
   @media (max-width: 700px) {

@@ -29,12 +29,6 @@ export const ROOMS: Room[] = [
       { value: 'photograph', name: 'Photographs', plural: 'Photographs', pillar: 'hearth',
         what: 'Dark, atmospheric photography: stone in monochrome, color through glass. One photograph, with the details behind the lens (digital or film, camera, lens) and, if you like, words of any length: the story, your process, why this light.',
         lookFor: 'A considered eye; light used as meaning; a photograph at least 1600 pixels wide, your own.', length: 'One photograph; words optional' },
-      { value: 'study', name: 'Architectural study', plural: 'Architectural studies', pillar: 'hearth',
-        what: 'A close reading of sacred or significant space: a window, a nave, a doorway, a ruin.',
-        lookFor: 'Looking long at one place; history worn lightly; what the building is saying about God and man.', length: '800–3,000 words, with photographs' },
-      { value: 'teardown', name: 'Design teardown', plural: 'Design teardowns', pillar: 'hearth',
-        what: 'An original design taken apart: how a made thing works, why it moves us, and what it believes.',
-        lookFor: 'Specific observation over opinion; images that show the point; craft respected even when critiqued.', length: '800–3,000 words, with images' },
     ],
   },
   {
