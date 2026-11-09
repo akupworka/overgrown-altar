@@ -1,14 +1,15 @@
 ---
 // A writer's small round picture. Shows their portrait when there is one,
-// otherwise their initials in a fine brass ring.
+// otherwise a detail of glass or stone (lib/seats.ts), in a fine brass ring.
 //   <Avatar name="Ainslie Willson" size={28} />
 //   <Avatar name="…" src="/images/portrait.jpg" />
 interface Props { name: string; src?: string; size?: number; id?: string }
+import { seatFor } from '../lib/seats';
 const { name, src, size = 28, id } = Astro.props;
 const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 ---
 <span class="avatar" style={`--s:${size}px`} aria-hidden="true" data-author-id={id}>
-  {src ? <img src={src} alt="" loading="lazy" /> : <span>{initials}</span>}
+  <img src={src || seatFor(name)} alt="" loading="lazy" data-initials={initials} />
 </span>
 <style>
   .avatar {

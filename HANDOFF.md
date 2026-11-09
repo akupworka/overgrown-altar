@@ -132,3 +132,17 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   `EMAIL_REPLY_TO` (a real inbox where writers' replies land). Without them, they quietly do nothing.
 - Forum extras: "new since your last visit" (kept on each device), Quote, *italic* / **bold** / links in posts,
   and each poster's prestige badge.
+
+## The editor's Forms room
+- Desk tab **Forms** (`/guild/desk/#forms`, editor only): Guild applications, Contact letters and Dispatch sign-ups,
+  read from Netlify Forms by `netlify/functions/forms.mts` after it checks the caller is the editor. Read only.
+- Needs `NETLIFY_FORMS_TOKEN` (a Netlify personal access token: User settings > Applications > New access token) in
+  Netlify > Site configuration > Environment variables. Until it's set, the room says it isn't switched on yet.
+
+## Forums
+- Boards are called "forums" on the site (tables keep their names: `forum_boards`, `forum_threads`, `forum_posts`).
+- Only the editor opens forums (Forum page → Open a new forum); `private.guard_board()` fills in the address and place.
+  Members start threads and reply. From the Editor's Desk is `editor_only` (only the editor starts threads there).
+- Names on the site: forums (rooms, `forum_boards`) · threads (`forum_threads`) · replies (`forum_posts`).
+- Every forum keeps its 40 most active threads (10 per page). A thread shows 20 replies per page and closes itself at
+  200 replies (`private.after_post`). Rules page: `?view=rules` (Forum.tsx).

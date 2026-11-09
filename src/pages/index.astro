@@ -18,7 +18,7 @@ const articles = [
 
 const pillars = [
   { href: '/watchtower', img: '/images/duomo-spires.jpg', pos: 'center 30%', mono: true, kicker: '01 · Prophetic Audits', name: 'The Watchtower', text: 'Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and Leviathan structures in art and philosophy.' },
-  { href: '/hearth', img: '/images/window-of-the-ascension-and.jpg', pos: 'center 45%', mono: false, kicker: '02 · Creative Guild', name: 'The Hearth', text: 'An Inklings-style fellowship space hosting dark atmospheric monochrome photography, original prose, architectural studies, design teardowns, and fiction.' },
+  { href: '/hearth', img: '/images/window-of-the-ascension-and.jpg', pos: 'center 45%', mono: false, kicker: '02 · Creative Guild', name: 'The Hearth', text: 'An Inklings-style fellowship space hosting dark atmospheric monochrome photography, original prose, poetry, and fiction.' },
   { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Testimony & the Unseen', name: 'The Perimeter', text: 'Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world, told honestly and anchored in Christ.' },
 ];
 
@@ -33,6 +33,7 @@ const watchtowerFeed = (await inPillar('watchtower')).slice(0, 4);
 const writers = (await getAuthors()).slice(0, 6).map(({ author }) => author);
 import { inPillar } from '../lib/catalog';
 import { getAuthors, guildPillar, guildUrl } from '../lib/guild';
+import { seatFor } from '../lib/seats';
 // The newest photographs from the Hearth's gallery, for a strip of plates.
 const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photograph' && g.image).slice(0, 5);
 ---
@@ -111,7 +112,7 @@ const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photogr
     <section class="sec dark home-plates">
       <div class="row" style="padding-bottom:30px">
         <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Hearth</span><h2 class="h2">The gallery</h2></div>
-        <a class="lab home-plates-go" href="/hearth/gallery/">Enter the gallery <span aria-hidden="true">→</span></a>
+        <a class="lab home-plates-go" href="/gallery/">Enter the gallery <span aria-hidden="true">→</span></a>
       </div>
       <div class="home-plates-row">
         {photos.map((g, i) => (
@@ -147,7 +148,7 @@ const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photogr
       <div class="writers">
         {writers.map((w) => (
           <a class="writer" href={`/guild/authors/${w.slug}/`}>
-            <span class="writer-arch" data-author-id={w.id}>{w.portrait ? <img src={w.portrait} alt="" loading="lazy" /> : <span>{w.display_name.split(/\s+/).slice(0, 2).map((x) => x[0]).join('')}</span>}</span>
+            <span class="writer-arch" data-author-id={w.id}><img src={w.portrait || seatFor(w.display_name)} alt="" loading="lazy" /></span>
             <span class="writer-name">{w.display_name}</span>
             {w.craft && <span class="lab mut writer-craft">{w.craft}</span>}
           </a>

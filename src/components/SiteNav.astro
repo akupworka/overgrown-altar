@@ -6,11 +6,13 @@
 // Desktop shows the sections; smaller screens show Menu. The glowing Sign in is always there.
 import Monogram from './Monogram.astro';
 import MenuPanel from './MenuPanel.astro';
+import '../styles/gbar.css';
 
 const links = [
   { href: '/watchtower', label: 'The Watchtower' },
   { href: '/hearth', label: 'The Hearth' },
   { href: '/perimeter', label: 'The Perimeter' },
+  { href: '/gallery', label: 'The Gallery' },
   { href: '/folios', label: 'Folios' },
   { href: '/about', label: 'About' },
 ];
@@ -28,8 +30,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     </a>
 
     <div class="nav-links">
-      {links.filter((l) => !(inside && l.href === '/folios')).map((l) => (
-        <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' ? '' : undefined}>{l.label}</a>
+      {links.map((l) => (
+        <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' || l.href === '/folios' ? '' : undefined}>{l.label}</a>
       ))}
     </div>
 
@@ -38,9 +40,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
       <a href="/guild" class="join" data-guest>Join the Guild</a>
-      <a href="/guild/members/" class="join" data-member hidden aria-current={current.startsWith('/guild/members') ? 'page' : undefined}>The Guild</a>
       <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
-      <a href="/guild/desk/" class="member" data-member hidden aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
+      <a href="/guild/desk/" class="member" data-member aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
         <span class="member-av" aria-hidden="true"></span><span class="member-label">My Desk</span>
       </a>
       <a href="/menu" class="menu-link" aria-label="Menu">
@@ -49,24 +50,45 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       </a>
     </div>
   </nav>
-  {inside && (
-    <!-- Inside the members' area: the Guild's own rooms, which the public header doesn't carry. -->
-    <nav class="inner lab" aria-label="The Guild" data-inner>
+  {(
+    <!-- The Guild's own rooms: for members, on every page of the site (the html data-member flag shows it). -->
+    <nav class="inner lab" aria-label="The Guild" data-inner data-member>
       <span class="inner-mark" aria-hidden="true">The Guild</span>
-      <a href="/guild/desk/" data-match="desk">My Desk</a>
-      <a href="/guild/desk/#write" data-match="write">Write</a>
-      <a href="/guild/desk/#review" data-match="review" data-editor hidden>Review</a>
-      <a href="/guild/members/?view=forum" data-match="forum" data-spa>The Forum</a>
-      <a href="/guild/members/" data-match="members" data-spa>Members</a>
-      <a href="/guild/members/?view=prestige" data-match="prestige" data-spa>Prestiges</a>
-      <a href="/guild/members/" data-match="me" data-spa data-my-page>My page</a>
-      <a href="/crafts/" class="inner-quiet">The crafts</a>
+      <div class="inner-rooms">
+        <a href="/guild/desk/" data-match="desk"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>My Desk<span class="inner-dot" data-gbar-dot hidden></span></a>
+        <a href="/guild/members/?view=forum" data-match="forum" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>The Forum</a>
+        <a href="/guild/members/" data-match="members" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>Members</a>
+        <a href="/guild/members/?view=prestige" data-match="prestige" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</a>
+        <a href="/guild/members/" data-match="me" data-spa data-my-page><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
+      </div>
+      <a href="/guild/desk/#photograph" data-match="photograph" class="inner-photo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+        Photograph</a>
+      <a href="/guild/desk/#write" data-match="write" class="inner-write">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
+        Write</a>
     </nav>
   )}
 </header>
+{(
+    <!-- Phones: one bar at the foot of every page for members, the same for every member. Write sits in the middle.
+         (The editor's Desk tab carries a gold dot when pieces or arrivals are waiting.) -->
+    <nav class="d-tabbar gbar" aria-label="The Guild" data-gbar data-member>
+      <a href="/guild/desk/" data-match="desk"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg><span class="gbar-dot" data-gbar-dot hidden></span></span><span>Desk</span></a>
+      <a href="/guild/members/?view=forum" data-match="forum" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg></span><span>Forum</span></a>
+      <a href="/guild/desk/#write" data-match="write" class="t-write" aria-haspopup="true" aria-expanded="false"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span><span>Write</span></a>
+      <a href="/guild/members/" data-match="members" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span>Guild</span></a>
+      <a href="/guild/members/" data-match="me" data-spa data-my-page><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg></span><span>Me</span></a>
+    </nav>
+    <div class="gbar-choose" data-gbar-choose hidden>
+      <a href="/guild/desk/#write" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg><span><b>Write a piece</b><i>Prose, poetry, essays, testimony</i></span></a>
+      <a href="/guild/desk/#photograph" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg><span><b>Submit a photograph</b><i>For the Gallery</i></span></a>
+    </div>
+)}
 <MenuPanel />
 
 <script>
+  import { seatFor } from '../lib/seats';
   // Signed in to the Guild? Show the member's portrait (or initials) and "My Desk" instead of
   // "Sign in". Reads only what this device already remembers, so nothing extra is loaded.
   try {
@@ -77,10 +99,16 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = true));
       document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = false));
       document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
-        if (me.portrait) { const img = new Image(); img.src = me.portrait; img.alt = ''; av.append(img); }
-        else av.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+        const img = new Image(); img.src = me.portrait || seatFor(name); img.alt = ''; av.append(img);
       });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
+      // Inside the Guild the Guild bar carries My Desk, so the picture pill becomes you: your first name, to your page.
+      const uid0 = JSON.parse(token)?.user?.id;
+      if (document.querySelector('[data-inner]') && name && uid0) {
+        const pill = document.querySelector<HTMLAnchorElement>('.member');
+        const label = pill?.querySelector('.member-label');
+        if (pill && label) { label.textContent = /^(the|a|an)$/i.test(name.split(/\s+/)[0]) ? name : name.split(/\s+/)[0]; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', `My page, signed in as ${name}`); pill.removeAttribute('aria-current'); }
+      }
       // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
       const home = document.querySelector<HTMLAnchorElement>('.nav-home');
       if (home) { home.href = '/guild/members/'; home.setAttribute('aria-label', 'The Guild, home for members'); }
@@ -94,22 +122,56 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     try {
       const me = JSON.parse(localStorage.getItem('oa_member') || '{}');
       const uid = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || '{}')?.user?.id;
-      if (me.editor) inner.querySelectorAll<HTMLElement>('[data-editor]').forEach((a) => (a.hidden = false));
-      if (uid) inner.querySelector<HTMLAnchorElement>('[data-my-page]')!.href = `/guild/members/?m=${uid}`;
+      if (uid) document.querySelectorAll<HTMLAnchorElement>('[data-my-page]').forEach((a) => (a.href = `/guild/members/?m=${uid}`));
+      // The editor's gold dot on Desk: pieces waiting for review, or new arrivals (the Desk keeps this count fresh).
+      if (me.editor && Number(localStorage.getItem('oa_desk_waiting') || 0) > 0) document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = false));
     } catch {}
     const here = () => {
       const q = new URLSearchParams(location.search), path = location.pathname, h = location.hash;
       const uid = inner.querySelector<HTMLAnchorElement>('[data-my-page]')!.href.split('m=')[1];
+      if (!path.startsWith('/guild/')) return '';   // a public page: no room is lit
       return path.startsWith('/guild/desk')
-        ? (h.startsWith('#write') ? 'write' : h === '#review' ? 'review' : h === '#my-page' ? 'me' : 'desk')
-        : q.get('view') === 'forum' || q.get('board') || q.get('t') ? 'forum'
-        : q.get('view') === 'prestige' ? 'prestige'
+        ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
+        : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('view') === 'mine' || q.get('board') || q.get('t') ? 'forum'
+        : q.get('view') === 'prestige' || q.get('view') === 'trophies' ? 'prestige'
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };
+    const gbar = document.querySelector<HTMLElement>('[data-gbar]');
+    // Pinned to the screen: move the bar (and its Write choice) to the page's outermost level, so no section it was
+    // written inside (a header photograph, a moving reveal) can carry it along as you scroll (iPhone Safari does).
+    if (gbar && gbar.parentElement !== document.body) document.body.append(gbar);
+    const chooser = document.querySelector<HTMLElement>('[data-gbar-choose]');
+    if (chooser && chooser.parentElement !== document.body) document.body.append(chooser);
+    // iPhone fault: after the keyboard has been up, the phone can keep measuring the screen as if it still were, and
+    // anything pinned to the bottom floats up by the keyboard's height. Measure the real visible screen and, when the
+    // phone has it wrong, pull the bar back down to the true bottom. (It only ever moves down, never above a keyboard.)
+    const vv = window.visualViewport;
+    const anchor = () => {
+      if (!vv || !gbar) return;
+      const gap = Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight));
+      document.documentElement.style.setProperty('--gbar-shift', gap + 'px');
+    };
+    anchor();
+    vv?.addEventListener('resize', anchor); vv?.addEventListener('scroll', anchor);
+    addEventListener('scroll', anchor, { passive: true }); addEventListener('resize', anchor); addEventListener('pageshow', anchor);
+    addEventListener('orientationchange', () => setTimeout(anchor, 300));
+    // ?barcheck: show what the phone measures, so a fault can be diagnosed from a screenshot.
+    if (/[?&]barcheck\b/.test(location.search) && gbar) {
+      const box = document.createElement('pre');
+      box.style.cssText = 'position:fixed;z-index:999;top:70px;left:8px;right:8px;margin:0;padding:10px;font:12px/1.5 monospace;color:#FFE3A3;background:rgba(0,0,0,.85);border:1px solid #FFE3A3;border-radius:8px;white-space:pre-wrap';
+      document.body.append(box);
+      const show = () => { const r = gbar.getBoundingClientRect(); box.textContent =
+        `innerHeight ${innerHeight}\nclientHeight ${document.documentElement.clientHeight}\nvisual ${vv ? Math.round(vv.height) + ' @' + Math.round(vv.offsetTop) + ' scale ' + vv.scale.toFixed(2) : 'none'}\nscreen ${screen.height}\nbar top ${Math.round(r.top)} bottom ${Math.round(r.bottom)}\nshift ${getComputedStyle(document.documentElement).getPropertyValue('--gbar-shift')}\nposition ${getComputedStyle(gbar).position}\nparent ${gbar.parentElement?.tagName}\nstandalone ${(navigator as any).standalone ?? matchMedia('(display-mode: standalone)').matches}`; };
+      show(); addEventListener('scroll', show, { passive: true }); vv?.addEventListener('resize', show); vv?.addEventListener('scroll', show);
+    }
+    // When the keyboard closes, ask the phone to measure again.
+    addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); anchor(); }, 120));
     const mark = () => {
       const now = here();
       inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));
-      inner.querySelector('[aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      // The phone bar has no Prestiges tab: the prestiges are one of the Guild's rooms.
+      const tab = now === 'prestige' ? 'members' : now;
+      gbar?.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => { a.classList.toggle('on', a.dataset.match === tab); a.toggleAttribute('aria-current', a.dataset.match === tab); });
     };
     mark();
     addEventListener('popstate', mark); addEventListener('hashchange', mark);
@@ -117,12 +179,37 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       const orig = history[k].bind(history);
       history[k] = (...args: Parameters<History['pushState']>) => { orig(...args); queueMicrotask(mark); };
     }
-    inner.addEventListener('click', (e) => {
-      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-spa]');
-      if (!a || e.metaKey || e.ctrlKey || !location.pathname.startsWith('/guild/members')) return;
-      e.preventDefault();
-      history.pushState(null, '', a.href); dispatchEvent(new PopStateEvent('popstate')); scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    const onNav = (e: MouseEvent) => {
+      if (e.metaKey || e.ctrlKey) return;
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
+      if (!a) return;
+      const to = new URL(a.href);
+      // Within the Guild's pages: change page without reloading.
+      if (a.matches('[data-spa]') && location.pathname.startsWith('/guild/members')) {
+        e.preventDefault();
+        history.pushState(null, '', a.href); dispatchEvent(new PopStateEvent('popstate')); scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      // Within the Desk: switch rooms in place (the Desk follows the address).
+      if (location.pathname.startsWith('/guild/desk') && to.pathname.startsWith('/guild/desk')) {
+        e.preventDefault();
+        if (to.hash === location.hash) return;
+        history.pushState(to.hash.startsWith('#write') ? { desk: 'write' } : null, '', to.pathname + to.hash);
+        dispatchEvent(new PopStateEvent('popstate'));
+      }
+    };
+    const choose = document.querySelector<HTMLElement>('[data-gbar-choose]');
+    const writeTab = gbar?.querySelector<HTMLAnchorElement>('.t-write');
+    const shut = () => { if (choose) choose.hidden = true; writeTab?.setAttribute('aria-expanded', 'false'); };
+    writeTab?.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const open = !!choose?.hidden; if (choose) choose.hidden = !open; writeTab.setAttribute('aria-expanded', String(open));
+    }, true);
+    choose?.addEventListener('click', (e) => { shut(); onNav(e as MouseEvent); });
+    document.addEventListener('click', (e) => { if (choose && !choose.hidden && !choose.contains(e.target as Node)) shut(); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') shut(); });
+    inner.addEventListener('click', onNav);
+    gbar?.addEventListener('click', onNav);
   }
 
   // Turns the header into a dark bar after you scroll, and tucks it away while you
@@ -200,6 +287,9 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   }
   .signin:hover::after { left: 0; right: 0; opacity: 1; }
   [data-member][hidden], [data-guest][hidden] { display: none !important; }
+  /* Who sees what is decided before the first paint (BaseLayout sets data-member on <html> for members). */
+  :global(html:not([data-member])) [data-member] { display: none !important; }
+  :global(html[data-member]) [data-guest] { display: none !important; }
 
   /* Signed in: the member's portrait and "My Desk". */
   .member { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px 0 5px; border-radius: 999px;
@@ -235,16 +325,38 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 </style>
 <style>
   /* The members' bar, under the main header, inside the Desk and the Guild's pages */
-  .inner { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 120px; height: 46px; border-top: 1px solid rgba(243, 236, 220, .08);
+  .inner { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 120px; height: 50px; border-top: 1px solid rgba(243, 236, 220, .08);
     overflow-x: auto; scrollbar-width: none; font-size: 10px; letter-spacing: .2em; }
   .inner::-webkit-scrollbar { display: none; }
-  .inner-mark { flex: none; color: var(--ember); margin-right: 14px; font-family: var(--serif); letter-spacing: .3em; }
-  .inner a { flex: none; padding: 8px 12px; border-radius: 999px; color: #CFC8B8; transition: color .25s, background-color .25s; white-space: nowrap; }
-  .inner a:hover { color: var(--ember); }
-  .inner a[aria-current] { color: #12160F; background: var(--bone); }
+  .inner-mark { flex: none; color: var(--ember); margin-right: 26px; font-family: var(--script); font-size: 24px; letter-spacing: 0; text-transform: none; line-height: 1; transform: translateY(2px); }
+  .inner-rooms { display: flex; align-items: stretch; gap: 4px; height: 100%; }
+  .inner-ic { flex: none; opacity: .75; transition: opacity .25s; }
+  .inner-rooms a { position: relative; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 0 14px; color: #CFC8B8; transition: color .25s; white-space: nowrap; }
+  .inner-rooms a:hover { color: var(--bone); }
+  .inner-rooms a:hover .inner-ic { opacity: 1; }
+  /* where you are: gold, with a thread of stained glass beneath (color only through glass) */
+  .inner-rooms a[aria-current] { color: var(--ember); }
+  .inner-rooms a[aria-current] .inner-ic { opacity: 1; }
+  .inner-rooms a::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; border-radius: 2px; opacity: 0; transform: scaleX(.4);
+    background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); transition: opacity .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .inner-rooms a[aria-current]::after { opacity: .9; transform: none; }
+  .inner-dot { position: absolute; top: 9px; left: 26px; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px #070906; }
+  .inner-dot[hidden] { display: none; }
   .inner a[hidden] { display: none; }
-  .inner .inner-quiet { margin-left: auto; color: var(--muted-dark); }
+  /* Write: a dark glass pill ringed in stained glass, the pen in candle gold (the phone's Write button, lying down) */
+  .inner .inner-photo { margin-left: auto; margin-right: 10px; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 18px; border-radius: 999px; color: #CFC8B8;
+    box-shadow: inset 0 0 0 1px rgba(243,236,220,.22); transition: color .25s, box-shadow .25s; }
+  .inner .inner-photo:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.5); }
+  .inner .inner-write { flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 20px; border-radius: 999px; color: var(--ember);
+    border: 1.5px solid transparent;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(255,236,190,.12), rgba(255,236,190,0) 60%) padding-box, linear-gradient(180deg, #1C2017, #0B0D0A) padding-box,
+      conic-gradient(from 200deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E) border-box;
+    box-shadow: 0 6px 18px rgba(0,0,0,.45); transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; }
+  .inner .inner-write:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.55); color: var(--ember); }
+  .inner .inner-write[aria-current] { color: #FFF1CC; }
   @media (max-width: 1320px) { .inner { padding: 0 48px; } }
+  /* Phones: the bar at the foot of the page does this job. */
+  @media (max-width: 700px) { .inner { display: none !important; } }
   @media (max-width: 760px) {
     .inner { padding: 0 16px; height: 42px; gap: 2px; font-size: 9px; letter-spacing: .16em;
       -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
@@ -256,4 +368,6 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 <style>
   /* Inside the members' area the header is a solid bar: nothing written beneath it shows through. */
   .site-header[data-always-solid] .bar { background: #070906; }
+  /* Members: the header is always a solid bar on every page, never see-through. */
+  :global(html[data-member]) .site-header .bar { opacity: 1; background: #070906; }
 </style>

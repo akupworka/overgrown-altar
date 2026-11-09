@@ -10,6 +10,7 @@ const pillars = [
   { href: '/watchtower', label: 'The Watchtower', note: 'Prophetic audits' },
   { href: '/hearth', label: 'The Hearth', note: 'Creative guild' },
   { href: '/perimeter', label: 'The Perimeter', note: 'Testimony & the unseen' },
+  { href: '/gallery', label: 'The Gallery', note: 'Photographs, newest first' },
 ];
 const groups = [
   { title: 'Begin', links: [['/start-here', 'Start Here'], ['/manifesto', 'The Manifesto'], ['/archive', 'The Archive'], ['/crafts/', 'The Crafts']] },
@@ -33,8 +34,8 @@ const groups = [
       </form>
 
       <div class="mp-guild">
-        <a href="/guild/desk/" class="mp-desk" data-member hidden><span class="member-av mp-av" aria-hidden="true"></span><span><span class="lab">The Guild</span><span class="mp-desk-t">My Desk</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
-        <a href="/guild/desk/#write" class="mp-chip mp-write lab" data-member hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>Write</a>
+        <a href="/guild/desk/" class="mp-desk" data-member><span class="member-av mp-av" aria-hidden="true"></span><span><span class="lab">The Guild</span><span class="mp-desk-t">My Desk</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
+        <a href="/guild/desk/#write" class="mp-chip mp-write lab" data-member><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>Write</a>
         <a href="/guild/desk" class="mp-desk" data-guest><span><span class="lab">Guild members</span><span class="mp-desk-t">Sign in</span></span><span class="mp-arrow" aria-hidden="true">→</span></a>
       </div>
 
@@ -49,7 +50,7 @@ const groups = [
           <section class="mp-group">
             <span class="eb">{g.title}</span>
             {g.links.map(([href, label]) => <a href={href} class="mp-link" aria-current={on(href)}>{label}</a>)}
-            {g.title === 'The Publication' && <a href="/guild/members/" class="mp-link" data-member hidden aria-current={on('/guild/members')}>Guild members</a>}
+            {g.title === 'The Publication' && <a href="/guild/members/" class="mp-link" data-member aria-current={on('/guild/members')}>Guild members</a>}
           </section>
         ))}
       </nav>

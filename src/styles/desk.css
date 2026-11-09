@@ -1126,3 +1126,404 @@
   .d-pz-next { font-size: 15px; }
   .d-pz-steps { max-width: none; }
 }
+
+/* Computers, writing: the writing bar sits flush under the Guild's bar (no strip of window between them),
+   and stays just beneath it as you scroll, instead of sliding under it. --gbar is the bottom of the two bars. */
+@media (min-width: 701px) {
+  :root { --gbar: 134px; }
+  .desk-in:has(.d-room.writing) { padding-top: var(--gbar); }
+  .d-room.writing .d-write-bar { top: var(--gbar) !important; }
+  .d-room.writing .d-write-bar::before { opacity: 1; }
+  .d-room.writing .d-write-grid { margin-top: 30px; }
+}
+@media (min-width: 701px) {
+  .d-room.writing .d-write-bar { z-index: 8; }
+  .d-room.writing .d-write-bar::before { background: #0A0C0A; }
+  .d-room.writing .d-paper-tools { top: calc(var(--gbar) + 64px); }
+  .d-room.writing .d-details { top: calc(var(--gbar) + 94px); }
+}
+/* The Desk home: the three pillars, one tap each (the Guild page's room tiles) */
+.d-pillars-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) {
+  .d-pillars-row { gap: 8px; }
+  .d-pillars-row .g-room-small { border-radius: 14px; padding: 14px 8px 12px; gap: 6px; align-items: center; text-align: center; justify-content: center; min-height: 92px; }
+  .d-pillars-row .g-room-small .eb { font-size: 9px; letter-spacing: .14em; }
+  .d-pillars-row .g-room-small .g-room-line { display: none; }
+  .d-pillars-row .g-room-small .g-room-go { align-self: center; font-size: 8.5px; }
+}
+.d-home .d-pillars-row .g-room { border-radius: 10px; background: var(--grain), var(--pane);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(243,236,220,.09), 0 34px 70px -38px rgba(0,0,0,.9); transition: box-shadow .3s; }
+.d-home .d-pillars-row .g-room:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,227,163,.45), 0 34px 70px -38px rgba(0,0,0,.9); }
+@media (max-width: 700px) {
+  /* Each name on two even lines: "The" small above it */
+  .d-pillars-row .d-pl-the { display: block; font-size: 7.5px; letter-spacing: .24em; color: #8C8679; margin-bottom: 3px; }
+  .d-pillars-row .g-room-small .eb { font-size: 9.5px; letter-spacing: .12em; white-space: nowrap; }
+  .d-home .d-pillars-row .g-room { border-radius: 14px; }
+}
+/* Phones: Sign out at the foot of the Desk (computers keep it in the side column) */
+.d-signout-foot { display: none; }
+@media (max-width: 700px) {
+  .d-signout-foot { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 18px; min-height: 46px; padding: 12px 16px;
+    border-radius: 999px; background: none; border: 0; cursor: pointer; color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243,236,220,.14);
+    font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; }
+  .d-signout-foot:active { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230,169,154,.5); }
+}
+/* My pieces, when there are many: find by title, keep to one pillar */
+.d-find { display: flex; gap: 10px; align-items: stretch; margin: -2px 0 10px; }
+.d-find-q { flex: 1 1 auto; max-width: none; }
+.d-find-q input::-webkit-search-cancel-button { display: none; }
+.d-find-clear { background: none; border: 0; color: var(--muted-dark); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 2px; }
+.d-find-pillar { flex: none; min-height: 48px; padding: 0 38px 0 18px; border-radius: 999px; border: 0; color: var(--bone); cursor: pointer;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; -webkit-appearance: none; appearance: none;
+  background: rgba(243,236,220,.04) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23CFC8B8' stroke-width='1.3'/%3E%3C/svg%3E") no-repeat right 16px center;
+  box-shadow: inset 0 0 0 1px rgba(243,236,220,.14); }
+.d-find-pillar:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.d-find-pillar option { background: #12160F; color: var(--bone); text-transform: none; }
+@media (max-width: 700px) {
+  .d-find { flex-direction: column; gap: 8px; }
+  .d-find-pillar { width: 100%; }
+}
+/* The three pillars as windows: each its own photograph, dimmed, the name set large over it */
+.d-pillars-row { gap: 14px !important; }
+.d-pl { position: relative; display: block; height: 168px; border-radius: 10px; overflow: hidden; isolation: isolate; color: var(--bone); text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgba(243,236,220,.12), 0 34px 70px -38px rgba(0,0,0,.9); }
+.d-pl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .55; transform: scale(1.02);
+  transition: transform 1.2s cubic-bezier(.16,1,.3,1), opacity .6s; }
+.d-pl::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(8,10,8,.15) 0%, rgba(8,10,8,.55) 45%, rgba(8,10,8,.94) 100%); }
+.d-pl::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+.d-pl-text { position: absolute; left: 22px; right: 48px; bottom: 18px; display: flex; flex-direction: column; gap: 2px; }
+.d-pl-the { font-size: 8.5px; letter-spacing: .3em; color: var(--ember); }
+.d-pl-name { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.05; }
+.d-pl-line { font-size: 15px; color: #CFC8B8; margin-top: 2px; }
+.d-pl-go { position: absolute; right: 18px; bottom: 20px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.4); transition: transform .5s cubic-bezier(.16,1,.3,1), background-color .3s; }
+.d-pl:hover img { transform: scale(1.07); opacity: .7; }
+.d-pl:hover .d-pl-go { transform: translateX(3px); background: rgba(255,227,163,.1); }
+.d-pl:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .d-pillars-row { gap: 8px !important; }
+  .d-pl { height: 128px; border-radius: 14px; }
+  .d-pl-text { left: 12px; right: 10px; bottom: 12px; }
+  .d-pl-the { font-size: 7.5px; }
+  .d-pl-name { font-size: 19px; }
+  .d-pl-line, .d-pl-go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .d-pl img, .d-pl-go { transition: none; } }
+
+/* ---- My pieces on phones: compact cards. The card opens the piece; "⋯" holds the rest. Computers unchanged. ---- */
+.d-item-open, .d-act-more { display: none; }
+@media (max-width: 700px) {
+  .d-home .d-list > .d-item { position: relative; padding: 14px 52px 14px 14px !important; gap: 8px !important; }
+  .d-home .d-item-actions { display: none !important; }
+  .d-item-open { display: block; position: absolute; inset: 0; z-index: 1; width: 100%; border: 0; padding: 0; background: none; border-radius: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .d-item-open:active { background: rgba(255, 227, 163, .04); }
+  .d-item-open:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
+  .d-home .d-item-main { gap: 6px !important; pointer-events: none; }
+  .d-home .d-item-head { gap: 10px !important; }
+  .d-home .d-item-title { font-size: 20px !important; }
+  /* status, pillar, words and date on one quiet line */
+  .d-home .d-item .d-meta { gap: 4px 10px; padding-left: 38px; }
+  .d-home .d-item .d-meta .d-status, .d-item .d-meta .lab { font-size: 8.5px !important; letter-spacing: .14em; }
+  .d-home .d-item .d-note { margin: 4px 0 0; pointer-events: auto; }
+  .d-act-more { display: block; position: absolute; top: 10px; right: 8px; z-index: 2; }
+  .d-act-more summary { list-style: none; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; color: var(--muted-dark); }
+  .d-act-more summary::-webkit-details-marker { display: none; }
+  .d-act-more[open] summary { color: var(--ember); background: rgba(255, 227, 163, .08); }
+  .d-act-list { position: absolute; right: 0; top: calc(100% + 4px); min-width: 190px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px;
+    background: #14170F; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14), 0 18px 40px rgba(0, 0, 0, .6); }
+  .d-act-item { display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; padding: 13px 14px; border-radius: 9px; text-decoration: none;
+    font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone); }
+  .d-act-item:active { background: rgba(243, 236, 220, .06); }
+  .d-act-item.d-danger { color: #E8A091; }
+  .d-home .d-list { gap: 8px !important; }
+}
+@media (max-width: 700px) { .d-act-more[open] { z-index: 30; } .d-home .d-list > .d-item:has(.d-act-more[open]) { z-index: 30; } }
+/* Phones: Write stands out in the tab bar: a dark glass disc, raised, ringed with a thin band of stained glass that turns slowly;
+   the pen in candle gold. (Color only through the glass ring.) */
+@media (max-width: 700px) {
+  .d-tabbar .t-write { color: var(--ember); }
+  .d-tabbar .t-write .d-tabbar-icon { position: relative; width: 54px; height: 54px; margin-top: -32px; border-radius: 50%; align-items: center; justify-content: center;
+    isolation: isolate; overflow: hidden; color: var(--ember);
+    box-shadow: 0 0 0 5px #0E110D, 0 12px 28px rgba(0, 0, 0, .6); transition: transform .35s cubic-bezier(.16,1,.3,1); }
+  /* the glass ring */
+  .d-tabbar .t-write .d-tabbar-icon::before { content: ''; position: absolute; z-index: -2; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; translate: -50% -50%;
+    background: conic-gradient(from 0deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E); opacity: .85;
+    animation: t-write-turn 14s linear infinite; }
+  /* the dark pane inside it */
+  .d-tabbar .t-write .d-tabbar-icon::after { content: ''; position: absolute; z-index: -1; inset: 2px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 18%, rgba(255, 236, 190, .16), rgba(255, 236, 190, 0) 55%), linear-gradient(180deg, #1C2017, #0B0D0A);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -8px 16px rgba(0, 0, 0, .45); }
+  .d-tabbar .t-write .d-tabbar-icon svg { width: 22px; height: 22px; }
+  .d-tabbar .t-write:active .d-tabbar-icon { transform: scale(.93); }
+}
+@keyframes t-write-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .d-tabbar .t-write .d-tabbar-icon::before { animation: none; } }
+/* Phones: where the bottom tab bar is showing (the Desk, your own page), the top Guild bar leaves out what the
+   tab bar already has (My Desk, Write, Review, My page) and keeps the rest of the Guild, spread evenly. */
+@media (max-width: 700px) {
+  body:has(.d-room:not(.writing) .d-tabbar, .m-page .d-tabbar) [data-inner] :is(a[data-match='desk'], a[data-match='write'], a[data-match='review'], a[data-match='forms'], a[data-match='me']) { display: none !important; }
+  body:has(.d-room:not(.writing) .d-tabbar, .m-page .d-tabbar) [data-inner] { justify-content: space-between; }
+}
+
+/* ---- The editor's Forms room ---- */
+.d-forms { gap: 22px; }
+.d-form-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.d-form-item { border-radius: 12px; background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.02);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); }
+.d-form-item[open] { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.35); }
+.d-form-item > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 18px 22px; }
+.d-form-item > summary::-webkit-details-marker { display: none; }
+.d-form-item > summary:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; border-radius: 12px; }
+.d-form-who { font-family: var(--serif); font-size: 22px; color: var(--bone); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-form-when { align-self: center; font-size: 9.5px; white-space: nowrap; }
+.d-form-peek { grid-column: 1 / -1; font-size: 16px; color: #A9A293; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.d-form-item[open] .d-form-peek { display: none; }
+.d-form-body { display: flex; flex-direction: column; gap: 14px; padding: 4px 22px 22px; border-top: 1px solid rgba(243,236,220,.08); padding-top: 18px; margin: 0 0 0; }
+.d-form-field { margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--bone); white-space: pre-wrap; overflow-wrap: anywhere; }
+.d-form-field .lab { font-size: 9px; color: var(--ember); white-space: normal; }
+.d-form-field a { color: var(--bone); border-bottom: 1px solid rgba(243,236,220,.3); align-self: flex-start; }
+.d-form-reply { align-self: flex-start; margin-top: 4px; }
+@media (max-width: 700px) {
+  .d-forms { padding-bottom: 96px; }
+  .d-form-item > summary { padding: 14px 16px; }
+  .d-form-who { font-size: 19px; }
+  .d-form-peek { font-size: 15px; }
+  .d-form-body { padding: 14px 16px 18px; }
+  .d-form-field { font-size: 16px; }
+  .d-form-reply { align-self: stretch; text-align: center; }
+}
+
+/* The Forms room's examples (shown until Netlify's key is set) */
+.d-form-sample { margin: 0; padding: 14px 18px; border-radius: 12px; font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.45; color: #CFC8B8;
+  background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25); }
+.d-form-sample b { color: var(--ember); font-weight: 500; font-style: normal; }
+.d-form-why { display: block; margin-top: 10px; font-style: normal; font-size: 9px; letter-spacing: .14em; color: #8C8679; line-height: 1.6; }
+.d-form-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+.d-form-acts .d-btn { text-decoration: none; }
+.d-form-del { margin-left: auto; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+@media (max-width: 700px) {
+  .d-form-acts { flex-direction: column; align-items: stretch; }
+  .d-form-acts .d-btn { text-align: center; justify-content: center; }
+  .d-form-del { margin: 4px auto 0; }
+}
+/* Forms: unread entries carry a small gold dot and a brighter name; read ones settle back */
+.d-form-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); margin-right: 12px; vertical-align: 4px; }
+.d-form-item:not(.unread) .d-form-who { color: #CFC8B8; }
+.d-form-item.unread .d-form-who { color: #FFF6E2; }
+.d-form-item.unread { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.22); }
+.d-form-unread-n { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 7px; margin-left: 8px; border-radius: 999px;
+  background: var(--ember); color: #12160F; font-size: 9px; letter-spacing: 0; }
+.d-form-mark { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; margin-left: auto; }
+.d-form-mark + .d-form-del { margin-left: 18px; }
+@media (max-width: 700px) {
+  .d-form-mark { margin: 4px auto 0; }
+  .d-form-mark + .d-form-del { margin: 0 auto; }
+  .d-form-dot { margin-right: 10px; vertical-align: 3px; }
+}
+
+/* ---- One Guild bar on phones (built by the site header, the same on every Guild page) ---- */
+.gbar[hidden] { display: none !important; }
+@media (max-width: 700px) {
+  /* The top Guild bar is gone on phones, so the header is shorter. */
+  :root { --hdr: 60px; }
+  .desk-in { padding-top: 104px; }
+  /* Room for the bar at the foot of every Guild page */
+  body:has(.gbar:not([hidden])) .desk-in { padding-bottom: 120px; }
+  body:has(.gbar:not([hidden])) .m-work { padding-bottom: 130px; }
+  /* Writing is full screen: the bar steps aside. */
+  body:has(.d-room.writing) .gbar { display: none !important; }
+  .gbar-dot { position: absolute; top: -2px; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px #0E110D; }
+  .gbar-dot[hidden] { display: none; }
+}
+/* The editor's Desk: Waiting for you and Arrivals, side by side at the top */
+.d-inbox { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.d-inbox-tile { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px; border: 0; border-radius: 12px; cursor: pointer; text-align: left; color: var(--bone);
+  background: var(--grain, none), var(--pane, rgba(243,236,220,.03)); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(243,236,220,.1); transition: box-shadow .3s; }
+.d-inbox-tile:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(255,227,163,.45); }
+.d-inbox-tile.lit { box-shadow: inset 0 1px 0 rgba(255,227,163,.18), inset 0 0 0 1px rgba(255,227,163,.4); }
+.d-inbox-icon { flex: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243,236,220,.16); }
+.d-inbox-tile.lit .d-inbox-icon { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.45); background: rgba(255,227,163,.06); }
+.d-inbox-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.d-inbox-text .eb { margin: 0; }
+.d-inbox-text .it { font-size: 17px; color: #CFC8B8; }
+.d-inbox-n { margin-left: auto; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ember); color: #12160F; font-family: var(--sans); font-size: 11px; }
+@media (max-width: 700px) {
+  .d-inbox { gap: 8px; }
+  .d-inbox-tile { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; border-radius: 14px; }
+  .d-inbox-icon { width: 36px; height: 36px; }
+  .d-inbox-text .eb { font-size: 9px; letter-spacing: .16em; }
+  .d-inbox-text .it { font-size: 15px; }
+  .d-inbox-n { position: absolute; top: 12px; right: 12px; margin: 0; }
+}
+/* The Guild page: Your Desk, the Prestiges (with your own crest) and the Crafts, as glass tiles with a mark each */
+.g-room-side .g-tile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 18px 20px;
+  border-radius: 12px; background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 40%), linear-gradient(180deg, rgba(22,25,20,.92), rgba(11,13,10,.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(243,236,220,.1), 0 24px 50px -30px rgba(0,0,0,.9); transition: box-shadow .3s; }
+.g-room-side .g-tile:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,227,163,.45), 0 24px 50px -30px rgba(0,0,0,.9); }
+.g-tile-mark { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ember);
+  box-shadow: inset 0 0 0 1px rgba(255,227,163,.35); background: radial-gradient(circle at 50% 30%, rgba(255,227,163,.1), transparent 70%); }
+.g-tile-crest-mark { box-shadow: none; background: none; width: 56px; height: 56px; }
+.g-tile-crest-mark svg { width: 56px; height: auto; overflow: visible; }
+.g-tile-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.g-tile-name { font-family: var(--serif); font-size: 22px; line-height: 1.15; color: var(--bone); }
+.g-tile .g-room-line { font-size: 15px; color: #A9A293; display: block !important; }
+.g-tile-go { color: var(--ember); font-size: 16px; transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.g-tile:hover .g-tile-go { transform: translateX(3px); }
+@media (max-width: 700px) {
+  .g-room-side .g-tile { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 10px; padding: 16px 8px 14px; border-radius: 14px; min-height: 0; }
+  .g-tile-mark { width: 44px; height: 44px; }
+  .g-tile-mark svg { width: 22px; height: 22px; }
+  .g-tile-crest-mark, .g-tile-crest-mark svg { width: 48px !important; height: auto; }
+  .g-tile-name { font-size: 16px; }
+  .g-tile .g-room-line, .g-tile-go { display: none !important; }
+}
+/* The Guild page's three tiles as small windows: each its own dimmed glass photograph, one mark, one name, all aligned */
+.g-room-side .g-tile { position: relative; overflow: hidden; isolation: isolate; }
+.g-tile-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .32; transform: scale(1.03);
+  transition: transform 1.2s cubic-bezier(.16,1,.3,1), opacity .5s; }
+.g-room-side .g-tile::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, rgba(10,12,9,.92) 0%, rgba(10,12,9,.7) 55%, rgba(10,12,9,.45) 100%); }
+.g-room-side .g-tile:hover .g-tile-photo { transform: scale(1.08); opacity: .45; }
+/* Every mark in the same box; no rings, the marks stand on their own in gold */
+.g-tile-mark, .g-tile-crest-mark { width: 56px !important; height: 56px !important; border-radius: 0; box-shadow: none !important; background: none !important; color: var(--ember); }
+.g-tile-mark svg { width: 30px; height: 30px; stroke-width: 1.2; }
+.g-tile-crest-mark > span { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; }
+.g-tile-crest-mark svg { width: 52px !important; height: 52px !important; }
+@media (max-width: 700px) {
+  .g-room-side .g-tile { padding: 18px 8px 16px; gap: 8px; min-height: 132px; align-content: center; }
+  .g-room-side .g-tile::before { background: linear-gradient(180deg, rgba(10,12,9,.55) 0%, rgba(10,12,9,.8) 60%, rgba(10,12,9,.94) 100%); }
+  .g-tile-mark, .g-tile-crest-mark { width: 48px !important; height: 48px !important; }
+  .g-tile-mark svg { width: 28px !important; height: 28px !important; }
+  .g-tile-crest-mark > span { width: 48px; height: 48px; }
+  .g-tile-crest-mark svg { width: 46px !important; height: 46px !important; }
+  .g-tile-name { font-size: 16px; line-height: 1.15; }
+}
+@media (prefers-reduced-motion: reduce) { .g-tile-photo { transition: none; } }
+/* Phones: the members four to a row: arch, name, role */
+@media (max-width: 700px) {
+  .g-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 22px 8px !important; }
+  .g-card { gap: 5px !important; padding: 0 !important; min-width: 0; }
+  .g-card .g-arch { width: 100% !important; max-width: 76px; height: auto !important; aspect-ratio: 76 / 100; margin-bottom: 4px !important;
+    box-shadow: 0 0 0 1px rgba(159, 148, 94, .7), 0 0 0 4px #0A0C0A, 0 0 0 5px rgba(159, 148, 94, .3) !important; }
+  .g-card .g-name { font-size: 14px !important; line-height: 1.15; width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .g-card .g-role { font-size: 7.5px !important; letter-spacing: .12em; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-card .g-count, .g-card .pr { display: none !important; }
+}
+@media (max-width: 700px) { .g-role-craft { display: none; } }
+/* Phones, inside a forum thread: the reply box owns the foot of the screen, so the Guild bar steps aside (back is at the top). */
+@media (max-width: 700px) { body:has(.fo-reply) .gbar { display: none !important; } body:has(.fo-reply) .desk-in { padding-bottom: 0 !important; } }
+
+/* A member's page: writing and photographs as two tabs; photographs as a square grid (like a profile) */
+.m-tabs { display: flex; justify-content: center; gap: 44px; margin: 4px 0 22px; border-top: 1px solid rgba(42, 32, 23, .16); }
+.m-tabs button { position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 16px 2px 12px; background: none; border: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #8C8070; transition: color .3s; }
+.m-tabs button::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 1px; background: var(--ink); opacity: 0; transition: opacity .3s; }
+.m-tabs button.on { color: var(--ink); }
+.m-tabs button.on::before { opacity: 1; }
+.m-tabs button:hover { color: var(--oxblood); }
+.m-tab-n { color: #9A9080; letter-spacing: .1em; }
+.m-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.m-grid-tile { position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; border: 0; cursor: pointer; overflow: hidden; background: #DDD5C6; }
+.m-grid-tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+.m-grid-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 10px; text-align: left; font-family: var(--serif); font-size: 17px; line-height: 1.2; color: var(--bone);
+  background: linear-gradient(180deg, rgba(8,10,8,0), rgba(8,10,8,.8)); opacity: 0; transition: opacity .35s; }
+.m-grid-tile:hover img { transform: scale(1.04); }
+.m-grid-tile:hover .m-grid-cap, .m-grid-tile:focus-visible .m-grid-cap { opacity: 1; }
+.m-grid-tile:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+.m-grid-more { display: flex; justify-content: center; padding-top: 22px; }
+.m-grid-more .d-link { color: var(--ink); border-bottom-color: rgba(42,32,23,.35); }
+@media (max-width: 700px) {
+  .m-tabs { gap: 30px; margin-bottom: 14px; }
+  .m-tabs button { font-size: 9px; letter-spacing: .16em; }
+  .m-grid { gap: 3px; }
+  .m-grid-cap { display: none; }
+}
+@media (min-width: 701px) { .m-grid { max-width: 935px; margin: 0 auto; } }
+/* The Guild page's six rooms: on a computer two across beside the forum; on a phone three across, two rows */
+@media (min-width: 861px) {
+  .g-room-side { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+  .g-room-side .g-tile { grid-template-columns: auto minmax(0, 1fr); padding: 14px 16px; gap: 12px; }
+  .g-room-side .g-tile .g-tile-go { display: none; }
+  .g-room-side .g-tile .g-room-line { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13.5px; }
+  .g-room-side .g-tile-name { font-size: 19px; }
+  .g-room-side .g-tile-mark, .g-room-side .g-tile-crest-mark { width: 44px !important; height: 44px !important; }
+  .g-room-side .g-tile-crest-mark > span { width: 44px; height: 44px; }
+  .g-room-side .g-tile-crest-mark svg { width: 42px !important; height: 42px !important; }
+}
+@media (max-width: 700px) { .g-room-side .g-tile { min-height: 116px; } }
+/* Phones: the Guild's six rooms as small windows, two across: the glass shows, the mark and name sit low on the left */
+@media (max-width: 700px) {
+  .g-room-side { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .g-room-side .g-tile { display: flex !important; flex-direction: column; justify-content: flex-end; align-items: flex-start !important; text-align: left !important;
+    gap: 6px !important; min-height: 112px !important; padding: 12px 14px !important; border-radius: 14px; }
+  .g-room-side .g-tile .g-tile-photo { opacity: .6; }
+  .g-room-side .g-tile::before { background: linear-gradient(180deg, rgba(10,12,9,.05) 0%, rgba(10,12,9,.45) 45%, rgba(10,12,9,.9) 100%) !important; }
+  .g-room-side .g-tile-mark, .g-room-side .g-tile-crest-mark { width: 26px !important; height: 26px !important; justify-content: flex-start; }
+  .g-room-side .g-tile-mark svg { width: 20px !important; height: 20px !important; }
+  .g-room-side .g-tile-crest-mark > span { width: 26px; height: 26px; justify-content: flex-start; }
+  .g-room-side .g-tile-crest-mark svg { width: 26px !important; height: 26px !important; }
+  .g-room-side .g-tile-text { align-items: flex-start; }
+  .g-room-side .g-tile-name { font-size: 18px !important; line-height: 1.1; }
+}
+/* The two feeds as one rounded switch; the chosen side filled in ink. The heading centers above it. */
+.m-work:has(.m-tabs) .m-work-head { justify-content: center; border: 0 !important; padding-bottom: 0; }
+.m-work:has(.m-tabs) .m-work-head > .lab { display: none; }
+.m-tabs { display: flex !important; width: fit-content; margin: 18px auto 30px !important; padding: 4px; gap: 4px !important; border: 0 !important; border-radius: 999px;
+  background: rgba(255, 255, 255, .28); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .18); }
+.m-tabs button { padding: 11px 22px !important; border-radius: 999px; color: #6E6457 !important; transition: background-color .3s, color .3s; }
+.m-tabs button::before { display: none; }
+.m-tabs button.on { background: var(--ink); color: var(--bone) !important; }
+.m-tabs button:not(.on):hover { color: var(--oxblood) !important; }
+.m-tabs .m-tab-n { min-width: 22px; height: 20px; padding: 0 7px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(42, 32, 23, .08); color: inherit !important; font-size: 9.5px; letter-spacing: .04em; }
+.m-tabs button.on .m-tab-n { background: rgba(243, 236, 220, .16); }
+@media (max-width: 700px) { .m-tabs button { padding: 10px 16px !important; } .m-tabs { margin: 14px auto 22px !important; } }
+
+.m-grid, .au-grid { border-radius: 4px; overflow: hidden; }
+/* The Desk's rooms: four (the three pillars and the Gallery) */
+.d-pillars-row { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.d-pl-name { font-size: 26px; }
+/* Phones: the Write disc covers Begin and Submit, so those step aside; the rooms come right under the greeting */
+@media (max-width: 700px) {
+  .d-home .d-begins { display: none !important; }
+  .d-home > .d-home-head { order: -2; }
+  .d-home > .d-pillars-row { order: -1; grid-template-columns: 1fr 1fr !important; }
+  .d-pl { height: 96px; }
+  .d-pl-name { font-size: 19px; }
+}
+/* Phones: Your prestige and Your vault side by side, each a compact half */
+@media (max-width: 700px) {
+  .d-standing { grid-template-columns: 1fr 1fr !important; }
+  .d-standing > div { padding: 16px 12px 16px !important; gap: 10px !important; align-items: center !important; text-align: center; }
+  .d-standing-vault { border-top: 0 !important; border-left: 1px solid rgba(243,236,220,.08) !important; }
+  .d-standing-k { font-size: 8px !important; letter-spacing: .16em; }
+  .d-pz { flex-direction: column; gap: 8px !important; align-items: center; }
+  .d-pz-ring, .d-pz-ring > svg { width: 84px !important; height: 84px !important; }
+  .d-pz-crest { width: 64px !important; }
+  .d-pz-text { align-items: center !important; gap: 3px !important; }
+  .d-pz-of { font-size: 7.5px !important; }
+  .d-pz-name { font-size: 22px !important; }
+  .d-pz-note { display: none; }
+  .d-pz-next { font-size: 12.5px !important; gap: 6px !important; margin-top: 2px !important; }
+  .d-pz-next-crest { width: 20px !important; height: 20px !important; }
+  .d-pz-steps { gap: 3px !important; }
+  .d-pz-steps li { height: 4px !important; }
+  .d-standing-medals { gap: 6px !important; justify-content: center; flex-wrap: wrap; }
+  .d-standing-medal svg, .d-standing-medal:first-child svg { width: 42px !important; height: 42px !important; }
+  .d-standing-tally { justify-content: center; gap: 6px 8px !important; font-size: 8.5px !important; }
+  .d-standing-tally em { flex-basis: 100%; }
+  .d-standing-none { font-size: 13.5px !important; }
+  .d-standing-link { font-size: 8px !important; letter-spacing: .14em; margin-top: auto !important; }
+}
+@media (max-width: 700px) {
+  .d-standing-vault { justify-content: flex-start; }
+  .d-standing-vault .d-standing-medals { margin-top: 10px; }
+  .d-standing-medal svg, .d-standing-medal:first-child svg { width: 50px !important; height: 50px !important; }
+  .d-standing-tally { margin-top: 6px; }
+}
+/* Computers too: the rooms right under the greeting; Begin and Submit step aside (the Guild bar has Write and Photograph) */
+.d-home .d-begins { display: none !important; }
+.d-home > .d-home-head { order: -2; }
+.d-home > .d-pillars-row { order: -1; }
+@media (min-width: 701px) { .d-pl { height: 150px; } }

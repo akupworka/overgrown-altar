@@ -119,7 +119,7 @@ export const TROPHIES: Trophy[] = [
   // Category trophies: they grow, bronze → silver → gold → rainbow
   { id: 'signal-fire', name: 'The Signal Fire', tier: 'bronze', glyph: G.beacon, unit: 'dispatches', note: 'For accepted cultural essays and secular audits in The Watchtower.', ...cat(isSignal, 1, 5, 15, 25) },
   { id: 'perimeter-stone', name: 'The Perimeter Stone', tier: 'bronze', glyph: G.standing, unit: 'testimonies', note: 'For raw, honest testimony and deliverance accounts shared in The Perimeter.', ...cat(isStone, 1, 3, 10, 20) },
-  { id: 'stained-glass', name: 'The Stained Glass Relic', tier: 'bronze', glyph: G.lancet, unit: 'visual works', note: 'For published visual work: dark atmospheric photography, architectural studies, original design teardowns.', ...cat(isRelic, 3, 10, 20, 30) },
+  { id: 'stained-glass', name: 'The Stained Glass Relic', tier: 'bronze', glyph: G.lancet, unit: 'visual works', note: 'For published photographs: dark, atmospheric work in the Gallery.', ...cat(isRelic, 3, 10, 20, 30) },
   { id: 'scribes-quill', name: 'The Scribe’s Quill', tier: 'bronze', glyph: G.quill, unit: 'long-form pieces', note: 'For long-form fiction and narrative prose (1,500 words or more) accepted into The Hearth.', ...cat(isQuill, 1, 5, 12, 25) },
   { id: 'lyre', name: 'The Lyre', tier: 'bronze', glyph: G.lyre, unit: 'poems', note: 'For poems published at the Guild.', ...cat(isLyre, 3, 10, 20, 30) },
   { id: 'darkroom', name: 'The Darkroom', tier: 'bronze', glyph: G.canister, unit: 'film photographs', note: 'For photographs made on film: loaded by hand, developed in the dark.', ...cat(isFilm, 1, 3, 8, 15) },

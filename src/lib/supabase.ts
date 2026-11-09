@@ -2,6 +2,7 @@
 // These two values are public by design: they only identify the project. What anyone may
 // read or change is enforced by the database's own rules (row-level security), not by secrecy.
 import { createClient } from '@supabase/supabase-js';
+import { seatFor } from './seats';
 
 export const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 export const SUPABASE_KEY = 'sb_publishable_84SLMdb_AiDAbaiz1eitbw_DRMx38lH';
@@ -40,6 +41,8 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
   if (typeof document === 'undefined') return;
+  document.documentElement.toggleAttribute('data-member', !!p);
+  document.documentElement.toggleAttribute('data-editor', p?.role === 'editor');
   document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
   document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));
@@ -49,8 +52,7 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
   const src = portraitUrl(p.portrait_path);
   document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
     av.textContent = '';
-    if (src) { const img = new Image(); img.src = src; img.alt = ''; av.append(img); }
-    else av.textContent = p.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+    const img = new Image(); img.src = src || seatFor(p.display_name); img.alt = ''; av.append(img);
   });
 }
 
@@ -65,7 +67,6 @@ export const PILLARS = [
 export const MEDIUMS = [
   { value: 'prose', label: 'Prose' }, { value: 'poetry', label: 'Poetry' }, { value: 'fiction', label: 'Fiction' },
   { value: 'essay', label: 'Essay / Dispatch' }, { value: 'photograph', label: 'Photographs' },
-  { value: 'study', label: 'Architectural study' }, { value: 'teardown', label: 'Design teardown' },
   { value: 'protocol', label: 'Protocol' },
   { value: 'recovery', label: 'Recovery story' }, { value: 'testimony', label: 'Testimony' },
   { value: 'deliverance', label: 'Deliverance story' }, { value: 'personal', label: 'Personal' },
@@ -75,7 +76,7 @@ export const MEDIUMS = [
 const BY_PILLAR: Record<string, string[]> = {
   watchtower: ['essay'],
   perimeter: ['recovery', 'testimony', 'deliverance', 'personal'],
-  hearth: ['prose', 'poetry', 'fiction', 'photograph', 'study', 'teardown'],
+  hearth: ['prose', 'poetry', 'fiction', 'photograph'],
 };
 export const mediumsFor = (pillar: string) => MEDIUMS.filter((m) => (BY_PILLAR[pillar] ?? []).includes(m.value));
 export const fitMedium = (pillar: string, medium: string) => { const ok = BY_PILLAR[pillar] ?? []; return ok.includes(medium) ? medium : ok[0]; };

@@ -13,10 +13,11 @@ import { PrestigeBadge } from './Prestige';
 import { KINDS } from '../../lib/kinds';
 import { prestigeFor, PRESTIGES, type Prestige } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
+import { seatFor } from '../../lib/seats';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
-import { ForumLatest, useForumTally } from './Forum';
+import { ForumMineLatest, useForumTally } from './Forum';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -50,6 +51,7 @@ const ICONS: Record<string, ReactNode> = {
   write: <><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></>,
   review: <><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></>,
   profile: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></>,
+  forms: <><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></>,
 };
 export const Icon = ({ name }: { name: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
@@ -69,7 +71,7 @@ export function Initials({ name, size = 40, src }: { name: string; size?: number
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
   return (
     <span className="d-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }} aria-hidden="true">
-      {src ? <img src={src} alt="" /> : initials}
+      <img src={src || seatFor(name)} alt="" data-initials={initials} />
     </span>
   );
 }
@@ -162,7 +164,7 @@ function SetPassword({ onDone, invited }: { onDone: () => void; invited: boolean
 
 // ---------------------------------------------------------------- signed in
 
-type Tab = 'pieces' | 'write' | 'review' | 'profile';
+type Tab = 'pieces' | 'write' | 'review' | 'profile' | 'forms';
 
 function Desk({ session }: { session: Session }) {
   const uid = session.user.id;
@@ -173,14 +175,35 @@ function Desk({ session }: { session: Session }) {
   const [loaded, setLoaded] = useState(false);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
-  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : 'pieces');
+  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') || startHash === '#photograph' ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : startHash === '#forms' ? 'forms' : 'pieces');
   // (#review and #my-page stay in the address, so the members' bar and a reload both know which room you're in.)
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
-  const [newMedium, setNewMedium] = useState<string | null>(null);   // a new piece can start as a photograph
+  const [newMedium, setNewMedium] = useState<string | null>(startHash === '#photograph' ? 'photograph' : null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = profile?.role === 'editor';
+  // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
+  const [arrivalsNew, setArrivalsNew] = useState(0);
+  useEffect(() => {
+    if (!isEditor) return;
+    (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
+      if (!res?.ok) return;
+      const out = await res.json().catch(() => ({}));
+      const { data: reads } = await supabase.from('form_reads').select('submission_id');
+      const seen = new Set((reads ?? []).map((r: any) => r.submission_id));
+      setArrivalsNew((out.rooms ?? []).reduce((n: number, r: any) => n + (r.items ?? []).filter((x: any) => !seen.has(x.id)).length, 0));
+    })();
+  }, [isEditor, tab]);
+  // The gold dot on the Desk tab of the Guild bar, here and (remembered) on the Guild's other pages.
+  useEffect(() => {
+    if (!isEditor) return;
+    const n = queue.length + arrivalsNew;
+    try { localStorage.setItem('oa_desk_waiting', String(n)); } catch {}
+    document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = n === 0));
+  }, [isEditor, queue.length, arrivalsNew]);
 
   const load = useCallback(async () => {
     const [{ data: p }, { data: mine }] = await Promise.all([
@@ -216,8 +239,8 @@ function Desk({ session }: { session: Session }) {
     if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     // Keep the address in step with the room, so the members' bar lights the right one.
-    else if (t === 'review') history.replaceState(history.state, '', location.pathname + location.search + '#review');
-    else if (t === 'pieces' && /^#(review|my-page)$/.test(location.hash)) history.replaceState(history.state, '', location.pathname + location.search);
+    else if (t === 'review' || t === 'forms') history.replaceState(history.state, '', location.pathname + location.search + '#' + t);
+    else if (t === 'pieces' && /^#(review|my-page|forms)$/.test(location.hash)) history.replaceState(history.state, '', location.pathname + location.search);
     setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const open = (p: Piece | null, medium?: string) => {
@@ -226,26 +249,27 @@ function Desk({ session }: { session: Session }) {
   };
   // Arrived straight at the sheet: put "my pieces" underneath it, so Back lands there.
   useEffect(() => {
-    if (startHash.startsWith('#write') && history.state?.desk !== 'write') {
+    if ((startHash.startsWith('#write') || startHash === '#photograph') && history.state?.desk !== 'write') {
       history.replaceState(null, '', location.pathname + location.search);
       history.pushState({ desk: 'write' }, '', '#write');
     }
   }, []);
   useEffect(() => {
     const onPop = () => {
+      // "Photograph" in the members' bars: a fresh photograph sheet (the address then reads #write like any sheet).
+      if (location.hash === '#photograph') { history.replaceState({ desk: 'write' }, '', location.pathname + location.search + '#write'); setEditing(null); setNewMedium('photograph'); setTab('write'); window.scrollTo({ top: 0 }); return; }
       if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
       // The members' bar can open these directly, too.
-      if (location.hash === '#review' || location.hash === '#my-page') { setTab(location.hash === '#review' ? 'review' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }
+      if (location.hash === '#review' || location.hash === '#my-page' || location.hash === '#forms') { setTab(location.hash === '#review' ? 'review' : location.hash === '#forms' ? 'forms' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }
       setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
   const items: [Tab, string, number?][] = [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
-    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number]] : []),
+    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'My page'],
   ];
-  const short: Record<Tab, string> = { pieces: 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page' };
 
   if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
@@ -282,23 +306,15 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} isEditor={isEditor} onReview={() => go('review')} onOpen={open} onChanged={load} />}
+        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
         {tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
+        {tab === 'forms' && isEditor && <FormsRoom />}
       </div>
 
-      {/* Phones: an app-style tab bar within thumb's reach. */}
-      <nav className="d-tabbar" aria-label="Desk">
-        {items.map(([t, , n]) => (
-          <button key={t} type="button" className={tab === t ? 'on' : ''} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
-            <span className="d-tabbar-icon"><Icon name={t} />{n ? <span className="d-tabbar-dot">{n}</span> : null}</span>
-            <span>{short[t]}</span>
-          </button>
-        ))}
-      </nav>
     </div>
   );
 }
@@ -471,13 +487,38 @@ function KindMark({ medium }: { medium: string }) {
   );
 }
 
-function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
+// The rarer things you can do with a piece, folded behind a small "⋯" (phones).
+function MoreActions({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: Event) => { const d = ref.current; if (d?.open && !d.contains(e.target as Node)) d.open = false; };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && ref.current) ref.current.open = false; };
+    document.addEventListener('pointerdown', close); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', esc); };
+  }, []);
+  return (
+    <details ref={ref} className="d-act-more">
+      <summary aria-label="More actions">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
+      </summary>
+      <div className="d-act-list" onClick={() => { if (ref.current) ref.current.open = false; }}>{children}</div>
+    </details>
+  );
+}
+
+function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = false, onReview, onArrivals, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; arrivals?: number; isEditor?: boolean; onReview?: () => void; onArrivals?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
   const tally = useForumTally(profile?.id);
   // Which pieces to show: all, or one state; six to a page, newest first.
   const [show, setShow] = useState<'all' | 'drafts' | 'with' | 'live'>('all');
   const [page, setPage] = useState(1);
+  // With many pieces: find one by its words, or keep to one pillar.
+  const [q, setQ] = useState('');
+  const [pillar, setPillar] = useState('');
+  const needle = q.trim().toLowerCase();
+  const inFind = (p: Piece) => (!pillar || p.pillar === pillar) && (!needle || `${p.title} ${p.standfirst}`.toLowerCase().includes(needle));
+  const finding = !!needle || !!pillar;
   const inShow = (p: Piece) => show === 'all' ? true : show === 'drafts' ? (p.status === 'draft' || p.status === 'returned') : show === 'with' ? p.status === 'submitted' : p.status === 'approved';
-  const listed = pieces.filter(inShow);
+  const listed = pieces.filter((p) => inShow(p) && inFind(p));
   const pages = Math.max(1, Math.ceil(listed.length / DESK_PER));
   const cur = Math.min(page, pages);
   const onPage = listed.slice((cur - 1) * DESK_PER, cur * DESK_PER);   // their part in the forum, for its trophies
@@ -510,24 +551,40 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
     { key: 'live', label: 'Published', has: (p) => p.status === 'approved', filter: 'live' },
     { key: 'declined', label: 'Declined', has: (p) => p.status === 'declined' },
   ];
-  // One piece, as a card.
-  const card = (p: Piece) => (
-            <li key={p.id} className="d-item">
+  // One piece, as a card. On a phone the whole card opens the piece, and the rarer actions wait behind "⋯".
+  const card = (p: Piece) => {
+    const editable = p.status === 'draft' || p.status === 'returned';
+    const openable = editable || p.status === 'approved';
+    const openLabel = editable ? 'Continue writing' : p.revision ? 'Edit your changes' : 'Edit';
+    return (
+            <li key={p.id} className={`d-item${openable ? ' d-openable' : ''}`}>
+              {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
                 <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
+                {editable && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
                 {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
                 {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
+                {editable && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
+              {/* Phones: the same actions, folded */}
+              {(openable || p.status === 'submitted' || isEditor) && (
+                <MoreActions>
+                  {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
+                  {p.status === 'approved' && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
+                  {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                  {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
+                  {editable && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
+                </MoreActions>
+              )}
             </li>
-  );
+    );
+  };
 
   return (
     <section className="d-section d-home">
@@ -546,26 +603,61 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
             Submit a photograph</button>
         </div>
       </header>
+      {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}
+      {isEditor && (
+        <div className="d-inbox">
+          <button type="button" className={`d-inbox-tile${waiting ? ' lit' : ''}`} onClick={onReview}>
+            <span className="d-inbox-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></svg></span>
+            <span className="d-inbox-text"><span className="eb">Waiting for you</span><span className="it">{waiting ? `${waiting} ${waiting === 1 ? 'piece' : 'pieces'} to review` : 'Nothing to review'}</span></span>
+            {waiting > 0 && <span className="d-inbox-n">{waiting}</span>}
+          </button>
+          <button type="button" className={`d-inbox-tile${arrivals ? ' lit' : ''}`} onClick={onArrivals}>
+            <span className="d-inbox-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg></span>
+            <span className="d-inbox-text"><span className="eb">Arrivals</span><span className="it">{arrivals ? `${arrivals} new` : 'All read'}</span></span>
+            {arrivals > 0 && <span className="d-inbox-n">{arrivals}</span>}
+          </button>
+        </div>
+      )}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
+      {/* Read the Guild's work: the three pillars, one tap each */}
+      <nav className="d-pillars-row" aria-label="Read">
+        {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry and fiction', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg'], ['/gallery/', 'Gallery', 'Photographs, newest first', '/images/bay-window-of-stained-glass-1200.jpg']] as const).map(([href, name, line, img]) => (
+          <a key={href} className="d-pl" href={href}>
+            <img src={img} alt="" loading="lazy" />
+            <span className="d-pl-text">
+              <span className="lab d-pl-the">The</span>
+              <span className="d-pl-name">{name}</span>
+              <span className="it d-pl-line">{line}</span>
+            </span>
+            <span className="d-pl-go" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </nav>
       {isEditor && <EditorTools />}
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
-        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
-        <ForumLatest count={3} plain />
+        <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
+        {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
-      {waiting > 0 && (
-        <button type="button" className="d-waiting" onClick={onReview}>
-          <span className="d-waiting-dot" aria-hidden="true" />
-          <span>{waiting === 1 ? 'One piece is' : `${waiting} pieces are`} waiting for your review</span>
-          <span className="lab">Review →</span>
-        </button>
-      )}
-      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' ? 'in all' : 'shown'} · newest first</span>}</div>
+      <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
       {pieces.length > 3 && (
         <div className="filters d-filters" role="group" aria-label="Show">
           {([['all', 'All', pieces.length], ['drafts', 'Drafts', counts.drafts], ['with', 'With the editor', counts.waiting], ['live', 'Published', counts.published]] as const).map(([k, label, n]) => (
             <button key={k} type="button" className="chip" aria-pressed={show === k} onClick={() => { setShow(k); setPage(1); }}>{label}<span className="chip-n">{n}</span></button>
           ))}
+        </div>
+      )}
+      {pieces.length > 6 && (
+        <div className="d-find">
+          <label className="g-search d-find-q">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+            <input type="search" placeholder="Find a piece by its title" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} aria-label="Find a piece" />
+            {q && <button type="button" className="d-find-clear" onClick={() => { setQ(''); setPage(1); }} aria-label="Clear">×</button>}
+          </label>
+          <select className="d-find-pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setPage(1); }} aria-label="Pillar">
+            <option value="">Every pillar</option>
+            {PILLARS.map((x) => <option key={x.value} value={x.value}>{x.label.split(' · ')[0]}</option>)}
+          </select>
         </div>
       )}
       {pieces.length === 0 ? (
@@ -574,7 +666,7 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           <span className="lab">Begin writing →</span>
         </button>
       ) : (
-        show === 'all' ? (
+        show === 'all' && !finding ? (
           // Everything, organized: what needs you first, then drafts, then what the editor has, then what's live.
           <div className="d-groups">
             {GROUPS.map((g) => {
@@ -596,12 +688,16 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           </div>
         ) : (
           <ul className="d-list">
-            {onPage.length === 0 && <li className="it mut d-empty">Nothing here yet.</li>}
+            {onPage.length === 0 && <li className="it mut d-empty">{finding ? 'No piece matches. Try other words, or every pillar.' : 'Nothing here yet.'}</li>}
             {onPage.map(card)}
           </ul>
         )
       )}
-      {show !== 'all' && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
+      {(show !== 'all' || finding) && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
+      {/* Phones: the side column is hidden, so Sign out lives at the foot of the Desk. */}
+      <button type="button" className="d-signout-foot" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
+        Sign out</button>
     </section>
   );
 }
@@ -828,7 +924,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   );
   const paper = isPhoto ? (
     <article className="d-paper d-paper-photo">
-      <span className="eb d-ph-kicker">A photograph for the Hearth</span>
+      <span className="eb d-ph-kicker">A photograph for the Gallery</span>
       <label className="visually-hidden" htmlFor="d-title">Title</label>
       <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
         onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
@@ -915,6 +1011,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
 
         {step === 1 && (
           <div className="d-step">
+            {isPhoto ? <p className="d-medium-only"><span className="d-medium on">The Gallery</span><span className="it">Photographs go to the Gallery, newest first.</span></p> : <>
             <h2 className="d-step-h">Where does it belong?</h2>
             <div className="d-pillars" role="radiogroup" aria-label="Pillar">
               {PILLARS.map((x) => {
@@ -936,6 +1033,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
                 </label>
               ))}
             </div>}
+            </>}
             <KindNote value={form.medium} />
             {!isPhoto && (<>
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
@@ -977,7 +1075,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   return (
     <section className="d-write">
       {showPreview && <PiecePreview form={form} photo={preview} author={author} onClose={() => setShowPreview(false)} />}
-      <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
+      <button type="button" className="d-back" onClick={onDone}>My pieces</button>
       <div className="d-write-bar">
         <button type="button" className="d-link d-close" onClick={onDone} aria-label="Back to my pieces"><span aria-hidden="true">←</span><span className="d-long"> My pieces</span></button>
         <span className="lab mut d-state" role="status" aria-live="polite">
@@ -997,6 +1095,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         <details className="d-details" open>
           <summary><h2 className="eb">Details</h2></summary>
           <div className="d-details-in">
+          {isPhoto ? <div className="d-lbl"><span className="lab">Goes to</span><span className="d-medium-fixed">The Gallery</span></div> : <>
           <label className="d-lbl"><span className="lab">Pillar</span>
             <select className="field" value={form.pillar} onChange={(e) => choosePillar(e.target.value)}>
               {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label.split(' · ')[0]}</option>)}
@@ -1009,6 +1108,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
                   {kinds.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
               </label>}
+          </>}
           <KindNote value={form.medium} />
           {!isPhoto && (<>
           <div className="d-lbl">
@@ -1083,6 +1183,140 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
   );
 }
 
+// ---------------------------------------------------------------- the editor's Forms room
+// What visitors send through the site's forms (Guild applications, letters, Dispatch sign-ups), fetched by
+// netlify/functions/forms.mts after it checks you are the editor. Read only.
+type FormItem = { id: string; at: string; name: string; email: string; fields: [string, string][] };
+type FormRoom = { key: string; label: string; count: number; items: FormItem[] };
+const FORMS_PER = 10;
+// Shown until the site has its Netlify key, so the room can be seen working. Clearly marked as examples.
+const ago = (d: number) => new Date(Date.now() - d * 864e5).toISOString();
+const SAMPLE_FORMS: FormRoom[] = [
+  { key: 'guild-application', label: 'Applications', count: 3, items: [
+    { id: 's1', at: ago(0.1), name: 'Mara Quill', email: 'mara@example.com', fields: [['craft', 'Poetry and short fiction'], ['why', 'I have been writing psalms of my own for ten years, mostly on the night bus home. I would like a table to bring them to, and readers who will be honest with me.'], ['sample link', 'https://example.com/psalms']] },
+    { id: 's2', at: ago(2), name: 'Tomas Reed', email: 'tomas@example.com', fields: [['craft', 'Photography'], ['why', 'I photograph cathedrals at first light, before the doors open. I would like to share them with people who look as slowly as I do.']] },
+    { id: 's3', at: ago(6), name: 'Hester Vale', email: 'hester@example.com', fields: [['craft', 'Essays'], ['why', 'Twenty years as a nurse on night shifts. I want to write about what the dark hours teach.']] } ] },
+  { key: 'contact', label: 'Letters', count: 2, items: [
+    { id: 's4', at: ago(1), name: 'Ruth Abara', email: 'ruth@example.com', fields: [['message', 'Thank you for the piece on the lamp road. I read it aloud to my mother, and she asked for it again the next evening.']] },
+    { id: 's5', at: ago(9), name: 'Daniel Okafor', email: 'daniel@example.com', fields: [['message', 'Is there a way to buy prints of the photographs in the Hearth? The window over the stair stayed with me all week.']] } ] },
+  { key: 'dispatches', label: 'Sign-ups', count: 2, items: [
+    { id: 's6', at: ago(0.5), name: '', email: 'reader@example.com', fields: [] },
+    { id: 's7', at: ago(3), name: '', email: 'pilgrim@example.com', fields: [] } ] },
+];
+const fieldName = (k: string) => k.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+function FormsRoom() {
+  const [rooms, setRooms] = useState<FormRoom[] | null>(null);
+  const [err, setErr] = useState('');
+  const [sample, setSample] = useState(false);
+  const [why, setWhy] = useState('');   // why the examples are showing, for the editor to pass on
+  const [pick, setPick] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
+      const out = res ? await res.json().catch(() => ({})) : {};
+      // Not switched on yet (no Netlify key): show the examples, so the room can be seen working.
+      if (res?.status === 503 || res?.status === 404) {
+        setWhy(res.status === 404 ? 'The site’s forms helper wasn’t found (404).' : `${out.error || 'Not switched on yet.'} (503)`);
+        setSample(true); setRooms(SAMPLE_FORMS); setPick(SAMPLE_FORMS[0].key); return;
+      }
+      if (!res?.ok) { setErr(out.error || 'Arrivals couldn’t be fetched. Check your connection.'); setRooms([]); return; }
+      setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
+    })();
+  }, []);
+  const [busy, setBusy] = useState('');
+  const [note, setNote] = useState('');
+  // Read or not: kept in the Guild's database (form_reads), so phone and computer agree. Examples are marked here only.
+  const [read, setRead] = useState<Set<string>>(new Set());
+  useEffect(() => { supabase.from('form_reads').select('submission_id').then(({ data }) => setRead(new Set((data ?? []).map((r: any) => r.submission_id)))); }, []);
+  const mark = async (id: string, on: boolean) => {
+    setRead((r) => { const n = new Set(r); on ? n.add(id) : n.delete(id); return n; });
+    if (sample) return;
+    if (on) await supabase.from('form_reads').upsert({ submission_id: id }, { onConflict: 'submission_id', ignoreDuplicates: true });
+    else await supabase.from('form_reads').delete().eq('submission_id', id);
+  };
+  const call = async (url: string, body: unknown) => {
+    const { data: s } = await supabase.auth.getSession();
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session?.access_token ?? ''}` }, body: JSON.stringify(body) }).catch(() => null);
+    const out = res ? await res.json().catch(() => ({})) : { error: 'Check your connection.' };
+    return res?.ok ? null : (out.error || 'Something went wrong.');
+  };
+  // Take an entry off the list (here, and in Netlify unless these are the examples).
+  const drop = (key: string, id: string) => setRooms((rs) => (rs ?? []).map((r) => r.key === key ? { ...r, count: Math.max(0, r.count - 1), items: r.items.filter((x) => x.id !== id) } : r));
+  async function remove(key: string, f: FormItem) {
+    if (!confirm(`Delete this entry from ${f.name || f.email || 'someone'}? It can’t be brought back.`)) return;
+    setBusy(f.id); setNote('');
+    const err = sample ? null : await call('/.netlify/functions/forms', { action: 'delete', id: f.id });
+    setBusy('');
+    if (err) { setNote(err); return; }
+    drop(key, f.id); setNote('Deleted.');
+  }
+  // Accept an application: the Guild's welcome email (the same invitation as "Invite a writer"), then off the list.
+  async function accept(key: string, f: FormItem) {
+    if (!f.email) { setNote('This application has no email address to invite.'); return; }
+    if (!confirm(`Accept ${f.name || f.email}? They’ll get the Guild’s welcome email with a link to choose a password, and arrive as a Writer.`)) return;
+    setBusy(f.id); setNote('');
+    if (sample) { setBusy(''); drop(key, f.id); setNote(`An example, so no email was sent. A real one would go to ${f.email}.`); return; }
+    const err = await call('/.netlify/functions/invite-writer', { email: f.email, name: f.name });
+    if (err) { setBusy(''); setNote(err); return; }
+    await call('/.netlify/functions/forms', { action: 'delete', id: f.id });
+    setBusy(''); drop(key, f.id); setNote(`Accepted. The welcome email is on its way to ${f.email}.`);
+  }
+  const room = rooms?.find((r) => r.key === pick);
+  const items = room?.items ?? [];
+  const pages = Math.max(1, Math.ceil(items.length / FORMS_PER));
+  const cur = Math.min(page, pages);
+  return (
+    <section className="d-section d-forms">
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Arrivals</h1>
+        <p className="it mut d-sub">What visitors have sent through the site: applications to the Guild, letters, and sign-ups for the Dispatches. Newest first.</p></header>
+      {!rooms ? <p className="lab mut">Opening Arrivals…</p>
+        : err ? <p className="d-photo-msg" role="alert">{err}</p>
+        : !rooms.length ? <p className="it mut d-empty">Nothing has arrived yet.</p>
+        : <>
+          {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
+          {/* The message always has its place, and the tab row its own box: the site's script wraps filter rows, so nothing is inserted beside them. */}
+          <p className="d-photo-msg" role="status" hidden={!note}>{note}</p>
+          <div>
+            <div className="filters d-filters" role="tablist" aria-label="Arrivals">
+              {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); setNote(''); }}>{r.label}<span className="chip-n">{r.count}</span>{r.items.some((x) => !read.has(x.id)) && <span className="d-form-unread-n" aria-label={`${r.items.filter((x) => !read.has(x.id)).length} unread`}>{r.items.filter((x) => !read.has(x.id)).length} new</span>}</button>)}
+            </div>
+          </div>
+          {items.length === 0 ? <p className="it mut d-empty">Nothing here yet.</p> : (
+            <ul className="d-form-list">
+              {items.slice((cur - 1) * FORMS_PER, cur * FORMS_PER).map((f) => {
+                const long = f.fields.filter(([k]) => !/^(name|email)$/i.test(k));
+                return (
+                  <li key={f.id}>
+                    <details className={`d-form-item${read.has(f.id) ? '' : ' unread'}`} onToggle={(e) => { if (e.currentTarget.open && !read.has(f.id)) mark(f.id, true); }}>
+                      <summary>
+                        <span className="d-form-who">{!read.has(f.id) && <i className="d-form-dot" aria-label="Unread" />}{f.name || f.email || 'Someone'}</span>
+                        <span className="lab mut d-form-when">{fmt(f.at)}</span>
+                        {long[0] && <span className="it d-form-peek">{long[0][1]}</span>}
+                      </summary>
+                      <div className="d-form-body">
+                        {f.email && <p className="d-form-field"><span className="lab">Email</span><a href={`mailto:${f.email}`}>{f.email}</a></p>}
+                        {long.map(([k, v]) => <p key={k} className="d-form-field"><span className="lab">{fieldName(k)}</span><span>{v}</span></p>)}
+                        <div className="d-form-acts">
+                          {room?.key === 'guild-application' && <button type="button" className="btn d-btn" disabled={busy === f.id} onClick={() => accept(room.key, f)}>{busy === f.id ? 'Sending…' : 'Accept & invite'}</button>}
+                          {f.email && <a className="ghost d-btn" href={`mailto:${f.email}`}>Reply by email</a>}
+                          <button type="button" className="d-textbtn d-form-mark" onClick={(e) => { const d = e.currentTarget.closest('details'); mark(f.id, !read.has(f.id)); if (d && read.has(f.id)) d.open = false; }}>{read.has(f.id) ? 'Mark as unread' : 'Mark as read'}</button>
+                          <button type="button" className="d-textbtn d-danger d-form-del" disabled={busy === f.id} onClick={() => room && remove(room.key, f)}>Delete</button>
+                        </div>
+                      </div>
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <DeskPages cur={cur} pages={pages} onGo={setPage} />
+        </>}
+    </section>
+  );
+}
+
 function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name: string } })[]; onRead: (p: Piece) => void }) {
   const [page, setPage] = useState(1);
   const pages = Math.max(1, Math.ceil(queue.length / DESK_PER));
@@ -1138,7 +1372,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   }
   return (
     <section className="d-section d-reader">
-      <button type="button" className="d-back-link" onClick={onBack}>← Waiting for you</button>
+      <button type="button" className="d-back-link" onClick={onBack}>Waiting for you</button>
       <article className="d-paper">
         <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === piece.medium)?.label}</span>
         {rev && <span className="lab d-rev-tag">Proposed changes to a published piece. The live version stays until you approve.</span>}

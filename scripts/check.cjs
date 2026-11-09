@@ -1,0 +1,138 @@
+// Check a page the way the owner sees it: on a phone (393x852) and a computer (1280x900), signed in with
+// pretend Guild data, so no real account or database is touched. Reports page errors and sideways overflow,
+// and saves screenshots for you to look at.
+//
+//   npm run build                      (the check uses the built site)
+//   node scripts/check.cjs <path> [options]
+//
+//   <path>            e.g. /guild/desk/  /guild/members/?view=prestige  /hearth
+//   --as editor|member|visitor   who is signed in (default editor; visitor = signed out)
+//   --pieces N        how many published pieces the signed-in member has (default 12; prestige ranks follow)
+//   --only phone|computer        check one size only
+//   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
+//   --click "<css>"   click this before the screenshot (e.g. a tab or a rank)
+//   --out <dir>       where screenshots go (default: a temporary folder; never inside the repo)
+//
+// It starts `astro preview` on port 4321 itself if nothing is running there, and stops it afterwards.
+// Chromium only: anything iPhone-Safari-specific still needs the owner to check on their phone.
+const { chromium } = require('playwright');
+const { spawn } = require('child_process');
+const os = require('os'), path = require('path'), fs = require('fs');
+
+const args = process.argv.slice(2);
+const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
+const flag = (name) => args.includes('--' + name);
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out'];
+const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
+if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
+const who = opt('as', 'editor');
+const out = opt('out', fs.mkdtempSync(path.join(os.tmpdir(), 'oa-check-')));
+const PORT = 4321, BASE = `http://localhost:${PORT}`;
+
+// ---- pretend Guild data -----------------------------------------------------------------------------------
+const ME = '22222222-2222-2222-2222-222222222222';
+const t = (d) => `2026-11-0${d}T09:00:00Z`;
+const profiles = [
+  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: 'm3', display_name: 'Thomas Ashgrove', craft: 'Poetry', bio: '', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(2) },
+];
+const piece = (id, author, title, status, medium = 'essay', pillar = 'hearth') => ({
+  id, author_id: author, title, standfirst: 'A line about what it holds.', body: 'The stones keep the psalms. '.repeat(60),
+  pillar, medium, image_path: null, image_alt: '', image_focus: '', photo_meta: {}, gallery: [], status, editor_note: status === 'returned' ? 'Lovely. Tighten the ending.' : '',
+  submitted_at: t(2), published_at: status === 'approved' ? t(3) : null, created_at: t(1), updated_at: t(4), slug: id, revision: null, revision_at: null, writer_notified: true });
+const n = Math.max(0, +opt('pieces', 12));
+const pieces = [
+  ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, `Published piece ${i + 1}`, 'approved', i % 3 === 2 ? 'photograph' : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
+  piece('d1', ME, 'A draft in progress', 'draft'), piece('r1', ME, 'Returned with a note', 'returned'),
+  piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
+];
+const boards = [
+  { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 40 },
+  { id: 'b2', slug: 'thesis-ideas', name: 'Thesis Ideas', description: 'Ideas in search of an argument.', image: '', position: 2, editor_only: false, keep_threads: 40 },
+];
+const threads = [
+  { id: 'th1', board_id: 'b1', author_id: ME, title: 'Welcome to the Nave', pinned: true, locked: false, reply_count: 2, created_at: t(1), last_post_at: t(4), last_author_id: 'm2' },
+  { id: 'th2', board_id: 'b1', author_id: 'm2', title: 'What are you reading this week?', pinned: false, locked: false, reply_count: 1, created_at: t(2), last_post_at: t(3), last_author_id: 'm3' },
+];
+const posts = [
+  { id: 'p1', thread_id: 'th1', author_id: ME, body: 'Pull up a chair. This is the place for anything.', created_at: t(1), edited_at: null },
+  { id: 'p2', thread_id: 'th1', author_id: 'm2', body: 'Glad to be here.', created_at: t(2), edited_at: null },
+  { id: 'p3', thread_id: 'th2', author_id: 'm2', body: 'Rereading Gilead, slowly.', created_at: t(2), edited_at: null },
+];
+const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
+  forum_tallies: [{ member_id: ME, posts: 14, threads: 3, best_thread: 6, prayer: 1, boards: 2 }] };
+
+// A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
+const test = (row, key, expr) => {
+  const v = row[key], s = v === null || v === undefined ? 'null' : String(v);
+  if (expr.startsWith('eq.')) return s === expr.slice(3);
+  if (expr.startsWith('neq.')) return s !== expr.slice(4);
+  if (expr.startsWith('in.(')) return expr.slice(4, -1).split(',').map((x) => x.replace(/"/g, '')).includes(s);
+  if (expr === 'is.null') return v === null || v === undefined;
+  if (expr === 'not.is.null') return !(v === null || v === undefined);
+  return true;
+};
+function query(table, url) {
+  let rows = [...(tables[table] ?? [])];
+  for (const [k, v] of url.searchParams) {
+    if (['select', 'order', 'limit', 'offset'].includes(k)) continue;
+    if (k === 'or') { const parts = v.slice(1, -1).split(','); rows = rows.filter((r) => parts.some((p) => { const [col, ...rest] = p.split('.'); return test(r, col, rest.join('.')); })); continue; }
+    rows = rows.filter((r) => test(r, k, v));
+  }
+  const ord = url.searchParams.get('order');
+  if (ord) { const [col, dir] = ord.split(','); const [c, d] = col.split('.'); rows.sort((a, b) => String(a[c] ?? '').localeCompare(String(b[c] ?? '')) * (d === 'desc' ? -1 : 1)); }
+  const lim = url.searchParams.get('limit'); if (lim) rows = rows.slice(0, +lim);
+  if (table === 'pieces' && (url.searchParams.get('select') || '').includes('profiles(')) rows = rows.map((r) => ({ ...r, profiles: { display_name: profiles.find((p) => p.id === r.author_id)?.display_name } }));
+  return rows;
+}
+
+// ---- run --------------------------------------------------------------------------------------------------
+const up = () => fetch(BASE).then(() => true, () => false);
+(async () => {
+  let server = null;
+  if (!(await up())) {
+    server = spawn('npx', ['astro', 'preview', '--port', String(PORT)], { cwd: path.join(__dirname, '..'), stdio: 'ignore', detached: true });
+    for (let i = 0; i < 40 && !(await up()); i++) await new Promise((r) => setTimeout(r, 500));
+  }
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: ME, role: 'authenticated', exp: 4102444800 })}.sig`;
+  const session = { access_token: jwt, refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: 4102444800,
+    user: { id: ME, aud: 'authenticated', role: 'authenticated', email: 'eden@example.com', app_metadata: {}, user_metadata: {}, created_at: t(1) } };
+  const sizes = [['phone', { viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true }], ['computer', { viewport: { width: 1280, height: 900 } }]]
+    .filter(([name]) => !opt('only') || opt('only') === name);
+  const browser = await chromium.launch();
+  let failed = false;
+  for (const [name, ctxOpts] of sizes) {
+    const ctx = await browser.newContext({ ...ctxOpts, deviceScaleFactor: 1 });
+    const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.route('**/zblgggifysohxqtgvgxs.supabase.co/**', (route) => {
+      const req = route.request(), url = new URL(req.url());
+      const one = (req.headers()['accept'] || '').includes('vnd.pgrst.object');
+      if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
+      if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
+      const table = url.pathname.split('/rest/v1/')[1];
+      if (req.method() !== 'GET') { const body = JSON.parse(req.postData() || '{}'); const row = Array.isArray(body) ? body[0] : body; return route.fulfill({ json: one ? { id: 'new', ...row } : [{ id: 'new', ...row }] }); }
+      const rows = table ? query(table, url) : [];
+      return route.fulfill({ json: one ? rows[0] ?? null : rows });
+    });
+    await page.goto(BASE + '/');
+    await page.evaluate(([s, signedIn, editor]) => {
+      localStorage.setItem('oa_arrived', '1');
+      if (signedIn) { localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor })); }
+    }, [session, who !== 'visitor', who === 'editor']);
+    await page.goto(BASE + target, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1200);
+    if (opt('click')) { await page.click(opt('click')); await page.waitForTimeout(600); }
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+    const file = path.join(out, `${name}.png`);
+    await page.screenshot({ path: file, fullPage: flag('full') });
+    console.log(`${name}: ${file}${overflow ? '  ⚠ page scrolls sideways' : ''}${errors.length ? '  ⚠ errors: ' + errors.join(' | ') : '  no page errors'}`);
+    if (overflow || errors.length) failed = true;
+    await ctx.close();
+  }
+  await browser.close();
+  if (server) try { process.kill(-server.pid); } catch {}
+  process.exit(failed ? 1 : 0);
+})();

@@ -293,3 +293,145 @@
 .fo-reply::before { display: none !important; }
 .fo:has(.fo-reply) { padding-bottom: 40px !important; }
 .fo-pill { bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important; }
+/* Computers too: one plain way back instead of the full trail (as on phones) */
+.fo-crumbs { display: none; }
+.fo-back { display: inline-flex; margin-bottom: 4px; letter-spacing: .2em; border-bottom: 0; transition: color .3s; }
+.fo-back span { transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.fo-back:hover span { transform: translateX(-3px); }
+/* Phones: New thread sits just above the Guild bar (it was hidden behind it), in the bar's dark glass, gold lettering */
+@media (max-width: 700px) {
+  .fo-fab { bottom: calc(104px + env(safe-area-inset-bottom, 0px)); z-index: 41; height: 46px; padding: 0 20px; color: var(--ember);
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 14px 34px rgba(0,0,0,.6); }
+}
+
+/* ---- A board on a computer, like the phone: a calmer banner, then each thread as its own glass card ---- */
+@media (min-width: 701px) {
+  .fo-board-head { padding: 34px 40px 32px; gap: 10px; border-radius: 14px; }
+  .fo-board-head .h1 { font-size: clamp(44px, 4.4vw, 60px) !important; line-height: 1.02; }
+  .fo-board-head .fo-sub { font-size: 18px; max-width: 620px; }
+  .fo-board-head .eb { display: none; }
+  .fo-board-head .fo-head-acts { margin-top: 8px; gap: 22px; }
+  .fo-board-head .fo-head-acts .btn { border-radius: 999px; padding: 13px 26px; color: var(--ember); border: 0;
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 10px 26px rgba(0,0,0,.45); }
+  .fo-board-head .fo-head-acts .btn:hover { color: var(--ember); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.75), 0 10px 26px rgba(0,0,0,.45); }
+  .fo-board-head .fo-head-acts .lab { font-size: 9.5px; color: var(--muted-dark); }
+
+  .fo-threads { border: 0 !important; display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .fo-threads > li { border: 0 !important; }
+  .fo-threads-head { display: none !important; }
+  .fo-thread { grid-template-columns: minmax(0, 1fr) 90px 170px; gap: 24px; align-items: center; padding: 20px 26px; border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.025);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); transition: box-shadow .3s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .fo-thread:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.45); transform: translateX(3px); }
+  .fo-thread.pinned { background: linear-gradient(160deg, rgba(255,227,163,.06), rgba(255,227,163,0) 50%), rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.25); }
+  .fo-thread-main { gap: 8px; }
+  .fo-thread-t { font-size: 24px; line-height: 1.2; }
+  .fo-thread-n { display: inline-flex; align-items: center; gap: 8px; color: var(--muted-dark); justify-self: center; }
+  .fo-thread-n b { font-size: 20px; font-family: var(--serif); font-weight: 400; color: var(--bone); }
+  .fo-bubble { display: block; }
+  .fo-thread-n-word { display: none; }
+  .fo-thread-last { text-align: right; line-height: 1.7; }
+}
+
+/* ---- Start a thread lives in the forum's top card on phones too (no floating button) ---- */
+.fo-fab { display: none !important; }
+@media (max-width: 700px) {
+  .fo-head-acts .btn { display: inline-flex !important; }
+  .fo-board-head .fo-head-acts { flex-direction: column; align-items: stretch; gap: 12px; margin-top: 6px; }
+  .fo-board-head .fo-head-acts .btn { justify-content: center; border-radius: 999px; padding: 13px 20px; color: var(--ember); border: 0;
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 10px 26px rgba(0,0,0,.45); }
+}
+
+/* ---- The Forum's own top: Open a new forum, and the rules ---- */
+.fo-index-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 10px; }
+.fo-glass-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer; color: var(--ember);
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 10px 26px rgba(0,0,0,.45); transition: box-shadow .3s; }
+.fo-glass-btn:hover { box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.75), 0 10px 26px rgba(0,0,0,.45); }
+.fo-glass-btn span { font-size: 16px; letter-spacing: 0; }
+.fo-rules-link { display: inline-flex; align-items: center; gap: 8px; color: var(--muted-dark); border-bottom: 1px solid rgba(243,236,220,.25); padding-bottom: 3px; transition: color .3s, border-color .3s; }
+.fo-rules-link:hover { color: var(--ember); border-color: var(--ember); }
+.fo-rules-link svg { color: var(--ember); }
+
+.fo-newforum { display: flex; flex-direction: column; gap: 16px; padding: 26px 28px; border-radius: 14px; margin: 6px 0 22px;
+  background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.3); }
+.fo-newforum .eb { margin: 0; }
+.fo-pics { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.fo-pics-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; }
+.fo-pic { position: relative; aspect-ratio: 4 / 5; border-radius: 8px; overflow: hidden; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(243,236,220,.14); }
+.fo-pic input { position: absolute; opacity: 0; pointer-events: none; }
+.fo-pic img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .7; transition: opacity .3s; }
+.fo-pic:hover img { opacity: .95; }
+.fo-pic.on { box-shadow: 0 0 0 2px var(--ember); }
+.fo-pic.on img { opacity: 1; }
+.fo-pic:has(input:focus-visible) { outline: 2px solid var(--ember); outline-offset: 2px; }
+.fo-newforum .fo-compose-acts { display: flex; align-items: center; gap: 18px; }
+
+@media (max-width: 700px) {
+  .fo-index-acts { flex-direction: column; align-items: stretch; }
+  .fo-glass-btn { justify-content: center; }
+  .fo-rules-link { align-self: center; }
+  .fo-newforum { padding: 18px 16px; }
+  .fo-pics-row { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+}
+.fo-plus { margin-right: 8px; font-size: 15px; letter-spacing: 0; }
+.fo-pics legend { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-dark); padding: 0; margin-bottom: 10px; }
+/* The rules, as a card above the forums */
+.fo-rules-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px 22px; margin: 4px 0 14px; border-radius: 14px; color: var(--bone);
+  background: linear-gradient(160deg, rgba(255,227,163,.06), rgba(255,227,163,0) 50%), rgba(243,236,220,.025);
+  box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.25); transition: box-shadow .3s; }
+.fo-rules-card:hover { box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.55); }
+.fo-rules-mark { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ember);
+  box-shadow: inset 0 0 0 1px rgba(255,227,163,.35); background: radial-gradient(circle at 50% 30%, rgba(255,227,163,.1), transparent 70%); }
+.fo-rules-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fo-rules-name { font-family: var(--serif); font-size: 21px; line-height: 1.2; }
+.fo-rules-line { font-size: 15px; color: #A9A293; }
+.fo-rules-go { color: var(--ember); transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.fo-rules-card:hover .fo-rules-go { transform: translateX(3px); }
+@media (max-width: 700px) {
+  .fo-rules-card { padding: 12px 14px; gap: 12px; margin: 2px 0 10px; }
+  .fo-rules-mark { width: 38px; height: 38px; }
+  .fo-rules-name { font-size: 18px; }
+  .fo-rules-line { font-size: 14px; }
+}
+
+/* ---- The forum rules, as a covenant: a quiet head, the One Body preamble, numbered articles ---- */
+.fo-rules { max-width: 860px; margin: 0 auto; }
+.fo-rules .fo-back { display: inline-flex; }
+.fr-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 8px; }
+.fr-cross { color: var(--ember); }
+.fr-head .eb { margin: 0; }
+.fr-title { font-size: clamp(46px, 6vw, 72px) !important; line-height: 1; }
+.fr-lead { margin: 0; max-width: 600px; font-size: 20px; line-height: 1.5; color: #CFC8B8; }
+.fr-pre { margin: 40px 0 26px; padding: 36px 44px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  background: radial-gradient(120% 140% at 50% 0%, rgba(255,227,163,.08), rgba(255,227,163,0) 60%), rgba(243,236,220,.025);
+  box-shadow: inset 0 1px 0 rgba(255,236,190,.12), inset 0 0 0 1px rgba(255,227,163,.28); }
+.fr-pre .eb { margin: 0; }
+.fr-pre-text { margin: 0; font-family: var(--serif); font-style: italic; font-size: 26px; line-height: 1.45; color: var(--bone); max-width: 680px; }
+.fr-pre-ref { color: var(--muted-dark); font-size: 9.5px; }
+.fr-list { list-style: none; margin: 0; padding: 0; }
+.fr-rule { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 26px; padding: 34px 0; position: relative; }
+.fr-rule + .fr-rule::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(243,236,220,0), rgba(243,236,220,.16) 15%, rgba(243,236,220,.16) 85%, rgba(243,236,220,0)); }
+.fr-n { font-family: var(--serif); font-weight: 300; font-size: 54px; line-height: .95; color: var(--ember); text-align: right; }
+.fr-h { margin: 4px 0 14px; font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.15; color: var(--bone); }
+.fr-body ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.fr-body li { position: relative; padding-left: 22px; font-family: var(--serif); font-size: 19px; line-height: 1.55; color: #CFC8B8; }
+.fr-body li::before { content: ''; position: absolute; left: 2px; top: .7em; width: 8px; height: 1px; background: var(--brass); }
+.fr-foot { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 34px 0 10px; color: var(--ember); }
+.fr-foot p { margin: 0; font-size: 18px; color: var(--muted-dark); max-width: 520px; }
+@media (max-width: 700px) {
+  .fr-head { padding-top: 8px; gap: 10px; }
+  .fr-lead { font-size: 17px; }
+  .fr-pre { margin: 28px 0 14px; padding: 24px 18px; gap: 12px; }
+  .fr-pre-text { font-size: 20px; }
+  .fr-rule { grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding: 24px 0; }
+  .fr-n { font-size: 32px; text-align: left; }
+  .fr-h { font-size: 23px; margin: 2px 0 10px; }
+  .fr-body li { font-size: 16.5px; padding-left: 18px; }
+}
+/* Your conversations: something new is marked, and the page's rows sit in a card */
+.fo-latest-title .fo-new { font-size: 7.5px; padding: 2px 6px; margin-right: 8px; position: relative; top: -2px; }
+.fo-latest-row.fresh .fo-latest-title { color: #FFF6E2; }
+.fo-mine { margin-top: 8px; padding: 4px 22px; border-radius: 14px; background: rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); }
+@media (max-width: 700px) { .fo-mine { padding: 2px 14px; } }

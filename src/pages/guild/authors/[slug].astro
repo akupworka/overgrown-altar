@@ -21,21 +21,25 @@ const { author: a, pieces } = Astro.props as { author: GuildAuthor; pieces: Guil
 const initials = a.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';
 const site = a.website ? a.website.replace(/^https?:\/\//, '').replace(/\/$/, '') : '';
-const items: DispatchItem[] = pieces.map((g) => ({
+// Writing and photographs are two feeds: photographs show as a square grid, writing as the list.
+const photos = pieces.filter((g) => g.medium === 'photograph' && g.image);
+const written = pieces.filter((g) => !(g.medium === 'photograph' && g.image));
+const items: DispatchItem[] = written.map((g) => ({
   href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), author: { name: a.display_name, portrait: a.portrait || undefined, id: a.id },
   image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
   imagePos: (g.image && g.imagePos) || undefined, tag: g.medium,
 }));
 // The kinds this writer has published, in the Guild's own order, for the filter.
-const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.value).length })).filter((k) => k.n > 0);
+const kinds = KINDS.map((k) => ({ ...k, n: written.filter((g) => g.medium === k.value).length })).filter((k) => k.n > 0);
+import { seatFor } from '../../../lib/seats';
 ---
 <BaseLayout title={a.display_name} description={a.bio || `${a.craft || 'Member'} of the Overgrown Altar Guild.`} image={a.portrait || undefined}>
   <section class="night au-hero">
     <img class="au-bg" src="/images/tall-windows-dark-vault-1200.jpg" alt="" aria-hidden="true" />
     <SiteNav />
     <div class="au-in">
-      <span class="au-arch" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt={`Portrait of ${a.display_name}`} /> : <span>{initials}</span>}</span>
+      <span class="au-arch" data-author-id={a.id}><img src={a.portrait || seatFor(a.display_name)} alt={a.portrait ? `Portrait of ${a.display_name}` : ''} /></span>
       <span class="eb">{a.role === 'editor' ? 'Editor in Chief' : 'Writer of the Guild'}</span>
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
@@ -46,7 +50,21 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
   </section>
   <section class="sec paper">
     <div class="au-shelf" data-per={PER_PAGE}>
-      <div class="au-head"><span class="eb">The work</span><span class="lab mut"><span class="au-count">{pieces.length} {pieces.length === 1 ? 'piece' : 'pieces'}</span> · newest first</span></div>
+      <div class="au-head"><span class="eb">The work</span><span class="lab mut"><span class="au-count">{(written.length ? written : photos).length} {written.length ? (written.length === 1 ? 'piece' : 'pieces') : (photos.length === 1 ? 'photograph' : 'photographs')}</span> · newest first</span></div>
+      {written.length > 0 && photos.length > 0 && (
+        <div class="au-tabs" role="tablist" aria-label="Work">
+          <button type="button" role="tab" class="on" aria-selected="true" data-tab="writing"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span class="au-tab-n">{written.length}</span></button>
+          <button type="button" role="tab" aria-selected="false" data-tab="photos"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span class="au-tab-n">{photos.length}</span></button>
+        </div>
+      )}
+      {photos.length > 0 && (
+        <ol class="au-grid" data-feed="photos" hidden={written.length > 0}>
+          {photos.map((g) => (
+            <li><a href={guildUrl(g)} aria-label={g.title}><img src={g.image} alt={g.image_alt || g.title} loading="lazy" style={g.imagePos ? `object-position:${g.imagePos}` : undefined} /><span class="au-grid-cap" aria-hidden="true">{g.title}</span></a></li>
+          ))}
+        </ol>
+      )}
+      <div data-feed="writing" hidden={!written.length}>
       {kinds.length > 1 && (
         <div class="filters shelf-filters" role="group" aria-label="Show">
           <button type="button" class="chip" aria-pressed="true" data-show="all">All<span class="chip-n">{pieces.length}</span></button>
@@ -55,6 +73,7 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
       )}
       <DispatchList items={items} />
       <nav class="pager" aria-label="Pages of work" hidden></nav>
+      </div>
     </div>
   </section>
   <TrophyCase name={a.display_name} ctx={{ pieces, member: { portrait: a.portrait, bio: a.bio, craft: a.craft, role: a.role, created_at: a.created_at } }} />
@@ -90,11 +109,52 @@ const kinds = KINDS.map((k) => ({ ...k, n: pieces.filter((g) => g.medium === k.v
     });
     chips.forEach((c) => c.addEventListener('click', () => { kind = c.dataset.show!; page = 1; draw(); }));
     draw();
+    // Writing or photographs
+    const tabs = [...shelf.querySelectorAll<HTMLButtonElement>('.au-tabs button')];
+    tabs.forEach((t) => t.addEventListener('click', () => {
+      tabs.forEach((x) => { const on = x === t; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); });
+      shelf.querySelectorAll<HTMLElement>('[data-feed]').forEach((f) => (f.hidden = f.dataset.feed !== t.dataset.tab));
+      const n = Number(t.querySelector('.au-tab-n')?.textContent || 0);
+      count.textContent = t.dataset.tab === 'photos' ? `${n} ${n === 1 ? 'photograph' : 'photographs'}` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+    }));
   }
 </script>
 
 <style>
   .au-shelf { scroll-margin-top: 110px; }
+  .au-tabs { display: flex; justify-content: center; gap: 44px; margin: 4px 0 22px; border-top: 1px solid rgba(42, 32, 23, .16); }
+  .au-tabs button { position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 16px 2px 12px; background: none; border: 0; cursor: pointer;
+    font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #8C8070; transition: color .3s; }
+  .au-tabs button::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 1px; background: var(--ink); opacity: 0; transition: opacity .3s; }
+  .au-tabs button.on { color: var(--ink); }
+  .au-tabs button.on::before { opacity: 1; }
+  .au-tab-n { color: #9A9080; letter-spacing: .1em; }
+  [data-feed][hidden] { display: none; }
+  /* the two feeds as one rounded switch */
+  .au-shelf:has(.au-tabs) .au-head { display: flex; justify-content: center; text-align: center; }
+  .au-shelf:has(.au-tabs) .au-head > .lab { display: none; }
+  .au-tabs { width: fit-content; margin: 18px auto 30px !important; padding: 4px; gap: 4px !important; border: 0 !important; border-radius: 999px;
+    background: rgba(255, 255, 255, .28); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .18); }
+  .au-tabs button { padding: 11px 22px !important; border-radius: 999px; color: #6E6457 !important; transition: background-color .3s, color .3s; }
+  .au-tabs button::before { display: none; }
+  .au-tabs button.on { background: var(--ink); color: var(--bone) !important; }
+  .au-tabs .au-tab-n { min-width: 22px; height: 20px; padding: 0 7px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(42, 32, 23, .08); color: inherit !important; font-size: 9.5px; letter-spacing: .04em; }
+  .au-tabs button.on .au-tab-n { background: rgba(243, 236, 220, .16); }
+  @media (max-width: 700px) { .au-tabs button { padding: 10px 16px !important; } }
+  .au-grid { list-style: none; margin: 0 auto; padding: 0; max-width: 935px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .au-grid a { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: #DDD5C6; }
+  .au-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+  .au-grid-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 10px; font-family: var(--serif); font-size: 17px; line-height: 1.2; color: var(--bone);
+    background: linear-gradient(180deg, rgba(8,10,8,0), rgba(8,10,8,.8)); opacity: 0; transition: opacity .35s; }
+  .au-grid a:hover img { transform: scale(1.04); }
+  .au-grid a:hover .au-grid-cap, .au-grid a:focus-visible .au-grid-cap { opacity: 1; }
+  @media (max-width: 700px) {
+    .au-tabs { gap: 30px; margin-bottom: 14px; }
+    .au-tabs button { font-size: 9px; letter-spacing: .16em; }
+    .au-grid { gap: 3px; }
+    .au-grid-cap { display: none; }
+  }
   .au-hero { position: relative; overflow: hidden; padding: 150px 24px 90px; text-align: center; }
   .au-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: brightness(.22) saturate(.8); }
   .au-in { position: relative; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }

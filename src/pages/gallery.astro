@@ -1,0 +1,136 @@
+---
+// The Gallery: every photograph the Guild has published, newest first, laid out like an explore page:
+// a tight wall of portrait tiles (3:4, as on Instagram), three across even on a phone, with a larger tile now and then to break the rhythm.
+// Hovering (or a first tap on a phone) shows the title and who made it; a second tap opens the photograph.
+// Thirty at a time, with "Show more" below.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import Subscribe from '../components/Subscribe.astro';
+import { guildPillar, guildUrl } from '../lib/guild';
+
+const photos = (await guildPillar('hearth'))
+  .filter((g) => g.medium === 'photograph' && g.image)
+  .sort((a, b) => b.published_at.localeCompare(a.published_at))
+  .map((g) => ({
+    href: guildUrl(g), title: g.title, image: g.image, alt: g.image_alt, pos: g.imagePos,
+    format: g.photoMeta?.format || '', more: g.gallery?.length ?? 0, who: g.author.display_name,
+  }));
+const film = photos.filter((p) => p.format === 'film').length, digital = photos.filter((p) => p.format === 'digital').length;
+// The explore rhythm: in every run of ten tiles, one is twice the size (first on the left, then on the right).
+const big = (i: number) => i % 10 === 2 || i % 10 === 7;
+---
+<BaseLayout title="The Gallery" description="Every photograph from the Guild: dark, atmospheric photography on film and digital, newest first.">
+  <section class="night gx-head">
+    <SiteNav />
+    <div class="gx-in">
+      <span class="eb">Photographs of the Guild</span>
+      <h1 class="h1">The Gallery</h1>
+      <p class="it gx-sub">Stone in monochrome. Color only through glass. Every photograph the fellowship has brought to the fire, newest first.</p>
+      {photos.length > 0 && (
+        <div class="filters gx-filters" role="group" aria-label="Format">
+          <button type="button" class="chip" aria-pressed="true" data-format="all">All<span class="chip-n">{photos.length}</span></button>
+          {film > 0 && <button type="button" class="chip" aria-pressed="false" data-format="film">Film<span class="chip-n">{film}</span></button>}
+          {digital > 0 && <button type="button" class="chip" aria-pressed="false" data-format="digital">Digital<span class="chip-n">{digital}</span></button>}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="dark gx-body">
+    {photos.length > 0 ? (
+      <>
+        <ol class="gx-wall">
+          {photos.map((p, i) => (
+            <li class:list={['gx-tile', { 'gx-big': big(i), 'gx-right': i % 10 === 7 }]} data-format={p.format || 'none'}>
+              <a href={p.href} aria-label={`${p.title}, by ${p.who}`}>
+                <img src={p.image} alt={p.alt || p.title} loading={i < 9 ? 'eager' : 'lazy'} style={p.pos ? `object-position:${p.pos}` : undefined} />
+                {p.more > 0 && <span class="gx-more" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="7" width="13" height="13" rx="1.5" /><path d="M4 16V5a1 1 0 0 1 1-1h11" /></svg></span>}
+                <span class="gx-cap" aria-hidden="true"><span class="gx-t">{p.title}</span><span class="lab">{p.who}{p.format ? ` · ${p.format === 'film' ? 'Film' : 'Digital'}` : ''}</span></span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <p class="it mut gx-none" hidden>No photographs here yet.</p>
+        <div class="gx-more-row"><button type="button" class="gx-show" hidden>Show more</button></div>
+      </>
+    ) : (
+      <p class="it mut gx-empty">The first photographs are being made. <a href="/guild/">Bring one to the fire →</a></p>
+    )}
+  </section>
+  <Subscribe />
+</BaseLayout>
+
+<script>
+  // Film or digital; thirty at a time. On touch screens, the first tap shows the caption, the second opens it.
+  const STEP = 30;
+  const wall = document.querySelector<HTMLElement>('.gx-wall');
+  if (wall) {
+    const tiles = [...wall.querySelectorAll<HTMLElement>(':scope > li')];
+    const chips = [...document.querySelectorAll<HTMLButtonElement>('.gx-filters .chip')];
+    const more = document.querySelector<HTMLButtonElement>('.gx-show')!;
+    const none = document.querySelector<HTMLElement>('.gx-none')!;
+    let format = 'all', shown = STEP;
+    const draw = () => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.format === format)));
+      const match = tiles.filter((t) => format === 'all' || t.dataset.format === format);
+      tiles.forEach((t) => (t.hidden = true));
+      match.slice(0, shown).forEach((t) => (t.hidden = false));
+      more.hidden = match.length <= shown;
+      none.hidden = match.length > 0;
+    };
+    chips.forEach((c) => c.addEventListener('click', () => { format = c.dataset.format!; shown = STEP; draw(); }));
+    more.addEventListener('click', () => { shown += STEP; draw(); });
+    draw();
+    if (matchMedia('(hover: none)').matches) {
+      wall.addEventListener('click', (e) => {
+        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('.gx-tile a');
+        if (!a || a.classList.contains('peek')) return;
+        e.preventDefault();
+        wall.querySelectorAll('.peek').forEach((x) => x.classList.remove('peek'));
+        a.classList.add('peek');
+      });
+    }
+  }
+</script>
+
+<style>
+  .gx-head { padding: 170px 24px 34px; }
+  .gx-in { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .gx-in .eb { margin: 0; }
+  .gx-sub { margin: 0; max-width: 620px; font-size: 21px; line-height: 1.5; color: #CFC8B8; }
+  .gx-filters { margin-top: 14px; }
+  .gx-body { padding: 0 24px 110px; }
+  .gx-wall { list-style: none; margin: 0 auto; padding: 0; max-width: 960px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; grid-auto-flow: dense; }
+  .gx-tile { position: relative; aspect-ratio: 3 / 4; }
+  .gx-tile[hidden] { display: none; }
+  .gx-big { grid-column: span 2; grid-row: span 2; }
+  .gx-right { grid-column: 2 / span 2; }
+  .gx-tile a { position: absolute; inset: 0; display: block; overflow: hidden; background: #14170F; }
+  .gx-tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .gx-more { position: absolute; top: 10px; right: 10px; color: var(--bone); opacity: .9; }
+  /* the caption, rising from a dark veil */
+  .gx-cap { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 4px; padding: 40px 16px 14px;
+    background: linear-gradient(180deg, rgba(8,10,8,0), rgba(8,10,8,.85)); opacity: 0; transform: translateY(8px); transition: opacity .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .gx-t { font-family: var(--serif); font-size: 21px; line-height: 1.2; color: var(--bone); }
+  .gx-cap .lab { font-size: 9px; color: var(--ember); }
+  .gx-tile a:hover img, .gx-tile a.peek img { transform: scale(1.04); }
+  .gx-tile a:hover .gx-cap, .gx-tile a:focus-visible .gx-cap, .gx-tile a.peek .gx-cap { opacity: 1; transform: none; }
+  .gx-tile a:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
+  .gx-more-row { display: flex; justify-content: center; padding-top: 34px; }
+  .gx-show { padding: 13px 28px; border-radius: 999px; border: 0; cursor: pointer; color: var(--ember); font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45); }
+  .gx-show[hidden] { display: none; }
+  .gx-none, .gx-empty { font-size: 20px; text-align: center; padding: 40px 0; }
+  .gx-empty a { color: var(--ember); }
+  @media (max-width: 700px) {
+    .gx-head { padding: 112px 16px 22px; }
+    .gx-sub { font-size: 17px; }
+    .gx-body { padding: 0 0 80px; }
+    .gx-wall { gap: 2px; }
+    .gx-t { font-size: 15px; }
+    .gx-cap { padding: 26px 8px 8px; }
+    .gx-cap .lab { font-size: 7.5px; }
+    .gx-more { top: 6px; right: 6px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .gx-tile img, .gx-cap { transition: none; } }
+</style>

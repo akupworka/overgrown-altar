@@ -97,7 +97,7 @@ export function PostBody({ body }: { body: string }) {
 function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
   // Phones get one plain way back (the full trail wraps onto several lines there).
   const back = thread && board ? { to: `/guild/members/?board=${board.slug}`, label: board.name }
-    : board ? { to: '/guild/members/?view=forum', label: 'All boards' } : { to: '/guild/members/', label: 'The Guild' };
+    : board ? { to: '/guild/members/?view=forum', label: 'All forums' } : { to: '/guild/members/', label: 'The Guild' };
   return (
     <>
       <nav className="fo-crumbs lab" aria-label="Where you are">
@@ -106,15 +106,16 @@ function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
         {board && <><span aria-hidden="true">›</span><Link to={`/guild/members/?board=${board.slug}`}>{board.name}</Link></>}
         {thread && <><span aria-hidden="true">›</span><span className="fo-crumb-here">{thread}</span></>}
       </nav>
-      <Link to={back.to} className="fo-back lab"><span aria-hidden="true">←</span> {back.label}</Link>
+      <Link to={back.to} className="fo-back lab">{back.label}</Link>
     </>
   );
 }
 
 // ---------------------------------------------------------------- the boards
 
-export function ForumIndex({ me }: { me?: string } = {}) {
+export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: boolean } = {}) {
   const [boards, setBoards] = useState<Board[] | null>(null);
+  const [opening, setOpening] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [people, setPeople] = useState<People>({});
   useEffect(() => {
@@ -135,8 +136,17 @@ export function ForumIndex({ me }: { me?: string } = {}) {
         <span className="eb">For members of the Guild</span>
         <h1 className="h1">The Forum</h1>
         <p className="it mut fo-sub">Where the Guild talks between pieces: ideas in progress, craft, photographs, books, and prayer. Only members can see it.</p>
-        {boards && <span className="lab mut">{boards.length} boards · {threads.length} {threads.length === 1 ? 'thread' : 'threads'} · {posts} {posts === 1 ? 'post' : 'posts'}</span>}
+        {boards && <span className="lab mut">{boards.length} {boards.length === 1 ? 'forum' : 'forums'} · {threads.length} {threads.length === 1 ? 'thread' : 'threads'} · {posts} {posts === 1 ? 'post' : 'posts'}</span>}
+        {isEditor && <div className="fo-index-acts">
+          { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
+        </div>}
       </header>
+      <Link to="/guild/members/?view=rules" className="fo-rules-card">
+        <span className="fo-rules-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg></span>
+        <span className="fo-rules-text"><span className="fo-rules-name">The forum rules</span><span className="it fo-rules-line">How we keep the table safe and kind. Read before you post.</span></span>
+        <span className="fo-rules-go" aria-hidden="true">→</span>
+      </Link>
+      {isEditor && opening && <NewForum onDone={(slug) => go(`/guild/members/?board=${slug}`)} onCancel={() => setOpening(false)} />}
       {!boards ? <p className="lab mut">Opening the forum…</p> : (
         <ol className="fo-boards">
           {boards.map((b) => {
@@ -163,12 +173,54 @@ export function ForumIndex({ me }: { me?: string } = {}) {
           })}
         </ol>
       )}
-      <p className="it mut fo-note">Each board keeps its most recently active threads. When a board grows full, its quietest threads are cleared away to make room; pinned threads always stay.</p>
+      <p className="it mut fo-note">Each forum keeps its 40 most recently active threads; when it grows full, its quietest threads are cleared away to make room (pinned threads always stay). A thread closes once it reaches 200 replies.</p>
     </div>
   );
 }
 
-// ---------------------------------------------------------------- one board
+// Ten threads to a page in a forum (each keeps its 40 most active); twenty replies to a page in a thread,
+// which closes itself at 200 replies.
+const FORUM_PER = 20;
+const THREADS_PER = 10;
+const MAX_REPLIES = 200;
+
+// The editor opens a forum: a name, a line about it, and a window of glass for its picture.
+const FORUM_PICTURES = Array.from({ length: 12 }, (_, i) => `/images/seats/seat-${i + 1}.jpg`);
+function NewForum({ onDone, onCancel }: { onDone: (slug: string) => void; onCancel: () => void }) {
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [pic, setPic] = useState(FORUM_PICTURES[Math.floor(Math.random() * FORUM_PICTURES.length)]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  async function make(e: FormEvent) {
+    e.preventDefault();
+    if (name.trim().length < 2) return setMsg('Give the forum a name.');
+    setBusy(true); setMsg('');
+    const { data, error } = await supabase.from('forum_boards').insert({ name: name.trim().slice(0, 60), description: desc.trim().slice(0, 300), image: pic }).select('slug').single();
+    setBusy(false);
+    if (error || !data) return setMsg('The forum couldn’t be opened. ' + (error?.message ?? ''));
+    onDone((data as any).slug);
+  }
+  return (
+    <form className="fo-compose fo-newforum" onSubmit={make}>
+      <span className="eb">Open a new forum</span>
+      <p className="it mut fo-sub">A room for a subject the Guild keeps returning to. Every member may start threads in it, and the forum rules apply.</p>
+      <label className="d-lbl"><span className="lab">Name</span>
+        <input className="field" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder="The Lantern Room" autoFocus /></label>
+      <label className="d-lbl"><span className="lab">What it’s for</span>
+        <input className="field" maxLength={300} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="One line: what belongs here" /></label>
+      <fieldset className="fo-pics"><legend className="lab">Its window</legend>
+        <div className="fo-pics-row">{FORUM_PICTURES.map((src) => (
+          <label key={src} className={`fo-pic${pic === src ? ' on' : ''}`}><input type="radio" name="fo-pic" checked={pic === src} onChange={() => setPic(src)} /><img src={src} alt="" loading="lazy" /></label>
+        ))}</div>
+      </fieldset>
+      {msg && <p className="d-photo-msg" role="alert">{msg}</p>}
+      <div className="fo-compose-acts"><button className="btn d-btn" type="submit" disabled={busy}>{busy ? 'Opening…' : 'Open the forum'}</button><button type="button" className="d-textbtn" onClick={onCancel}>Cancel</button></div>
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------- one forum
 
 export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; isEditor: boolean }) {
   const [board, setBoard] = useState<Board | null | undefined>(undefined);
@@ -186,13 +238,13 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
     setPeople(await loadPeople((Array.isArray(t) ? t : []).flatMap((x: any) => [x.author_id, x.last_author_id])));
   }, [slug]);
   useEffect(() => { load(); }, [load]);
-  if (board === undefined) return <p className="lab mut d-loading">Opening the board…</p>;
-  if (board === null) return <div className="fo"><Crumbs /><p className="it mut">This board isn’t here any more.</p></div>;
+  if (board === undefined) return <p className="lab mut d-loading">Opening the forum…</p>;
+  if (board === null) return <div className="fo"><Crumbs /><p className="it mut">This forum isn’t here any more.</p></div>;
   const canStart = isEditor || !board.editor_only;
   const closeSheet = () => setWriting(false);
-  const pages = Math.max(1, Math.ceil(threads.length / PER_PAGE));
+  const pages = Math.max(1, Math.ceil(threads.length / THREADS_PER));
   const cur = Math.min(page, pages);
-  const onPage = threads.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
+  const onPage = threads.slice((cur - 1) * THREADS_PER, cur * THREADS_PER);
   return (
     <div className="fo">
       <header className="fo-head fo-board-head">
@@ -203,14 +255,12 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
         <p className="it mut fo-sub">{board.description}</p>
         <div className="fo-head-acts">
           {canStart
-            ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{writing ? 'Never mind' : 'Start a thread'}</button>
+            ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{!writing && <span aria-hidden="true" className="fo-plus">+</span>}{writing ? 'Never mind' : 'Start a thread'}</button>
             : <span className="lab mut">Only the editor starts threads here. Everyone may reply.</span>}
-          <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'} · keeps the {board.keep_threads} most active</span>
+          <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'} · keeps the {board.keep_threads} most active{pages > 1 ? ` · page ${cur} of ${pages}` : ''}</span>
         </div>
       </header>
       {writing && <NewThread board={board} me={me} onCancel={closeSheet} onDone={(id) => { setWriting(false); go(`/guild/members/?t=${id}`); }} />}
-      {/* Phones: a floating button, always in reach however far down the board you are */}
-      {canStart && !writing && <button type="button" className="fo-fab" onClick={() => setWriting(true)}><span aria-hidden="true">+</span> New thread</button>}
       {threads.length === 0 ? <p className="it mut fo-empty">No threads yet. {canStart ? 'Start the first.' : ''}</p> : (
         <ol className="fo-threads">
           <li className="fo-threads-head lab mut" aria-hidden="true"><span>Thread</span><span>Replies</span><span>Latest</span></li>
@@ -315,7 +365,8 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [pieces, setPieces] = useState<Record<string, number>>({});   // each poster's published pieces, for their prestige
-  const [since] = useState(() => seenMap()[id] ?? firstVisit());     // when you last looked, so newer posts can be marked
+  const [since] = useState(() => seenMap()[id] ?? firstVisit());
+  const [pPage, setPPage] = useState<number | null>(null);   // which page of twenty replies     // when you last looked, so newer posts can be marked
   useEffect(() => () => markSeen(id), [id]);
   const load = useCallback(async () => {
     const { data: t } = await supabase.from('forum_threads').select('*').eq('id', id).maybeSingle();
@@ -351,6 +402,18 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   );
   const open = !thread.locked || isEditor;
   const fresh = posts.filter((p) => p.created_at > since && p.author_id !== me);
+  const pPages = Math.max(1, Math.ceil(posts.length / FORUM_PER));
+  const pCur = Math.min(pPage ?? 1, pPages);
+  const pageOf = (postId: string) => Math.floor(Math.max(0, posts.findIndex((x) => x.id === postId)) / FORUM_PER) + 1;
+  const showPost = (postId: string) => { setPPage(pageOf(postId)); setTimeout(() => document.getElementById(`post-${postId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
+  const postPager = pPages > 1 && (
+    <nav className="pager fo-pager" aria-label="Pages of replies">
+      <button type="button" className="pg-step" disabled={pCur === 1} onClick={() => { setPPage(pCur - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Earlier replies">‹<span className="pg-word">Earlier</span></button>
+      {pageList(pCur, pPages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+        : <button key={n} type="button" className="pg-n" aria-current={n === pCur ? 'page' : undefined} onClick={() => { setPPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{n}</button>)}
+      <button type="button" className="pg-step" disabled={pCur === pPages} onClick={() => { setPPage(pCur + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Later replies"><span className="pg-word">Later</span>›</button>
+    </nav>
+  );
   async function send(e: FormEvent) {
     e.preventDefault();
     const text = reply.trim();
@@ -358,6 +421,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     // It appears at once; the forum confirms it a moment later.
     const temp: Post = { id: 'sending-' + Date.now(), thread_id: id, author_id: me, body: text, created_at: new Date().toISOString(), edited_at: null };
     setPosts((ps) => [...ps, temp]); setReply(''); setBusy(true); setMsg('');
+    setPPage(Math.floor(posts.length / FORUM_PER) + 1);   // your reply lands on the last page: go there
     const box = document.querySelector<HTMLTextAreaElement>('.fo-reply textarea'); if (box) box.style.height = '';
     requestAnimationFrame(() => document.getElementById(`post-${temp.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     const { error } = await supabase.from('forum_posts').insert({ thread_id: id, author_id: me, body: text });
@@ -395,7 +459,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         <h1 className="h1 fo-thread-title">{thread.title}</h1>
         <span className="lab mut">
           {thread.pinned && <span className="fo-tag">Pinned</span>}{thread.locked && <span className="fo-tag fo-tag-dim">Closed</span>}
-          {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'} · started {ago(thread.created_at)}
+          {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'}{thread.reply_count >= MAX_REPLIES - 20 ? ` of ${MAX_REPLIES}` : ''} · started {ago(thread.created_at)}
         </span>
         {(isEditor || thread.author_id === me) && (
           <details className="fo-mod">
@@ -409,8 +473,10 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         )}
       </header>
       {msg && <p className="d-photo-msg" role="alert">{msg}</p>}
+      {postPager}
       <ol className="fo-posts">
-        {posts.map((p, i) => {
+        {posts.slice((pCur - 1) * FORUM_PER, pCur * FORUM_PER).map((p, k) => {
+          const i = (pCur - 1) * FORUM_PER + k;
           const who = people[p.author_id];
           const mine = p.author_id === me;
           return (
@@ -443,9 +509,10 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           );
         })}
       </ol>
+      {postPager}
       {/* New since you last looked: one tap takes you there */}
       {fresh.length > 0 && !pillGone && (
-        <button type="button" className="fo-pill" onClick={() => { document.getElementById(`post-${fresh[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setPillGone(true); }}>
+        <button type="button" className="fo-pill" onClick={() => { showPost(fresh[0].id); setPillGone(true); }}>
           <span aria-hidden="true">↓</span> {fresh.length} new {fresh.length === 1 ? 'post' : 'posts'}
         </button>
       )}
@@ -462,7 +529,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           </button>
           <span className="lab mut fo-reply-hint">{reply.trim() ? 'Draft kept on this device · ' : ''}*italic* · **bold** · links work</span>
         </form>
-      ) : <p className="it mut fo-empty">This thread is closed to new replies.</p>}
+      ) : <p className="it mut fo-empty">{thread.reply_count >= MAX_REPLIES ? `This thread has reached ${MAX_REPLIES} replies and is closed. Start a new thread to carry the conversation on.` : 'This thread is closed to new replies.'}</p>}
     </div>
   );
 }
@@ -515,4 +582,140 @@ export function useForumTally(uid?: string | null) {
       .then(({ data }) => setTally((data as any) ?? null));
   }, [uid]);
   return tally;
+}
+
+// ---------------------------------------------------------------- the forum rules
+// Plain, firm rules for keeping the forum safe. Linked from the top of the Forum (/guild/members/?view=rules).
+const RULES: { h: string; p: string[] }[] = [
+  { h: 'Speak as you would at the table', p: [
+    'Be honest, be generous, be kind. Disagree with ideas, never attack people.',
+    'No insults, mockery, name-calling, or contempt for anyone’s faith, background, body, or story.' ] },
+  { h: 'Honor the whole Body', p: [
+    'Members come from many traditions. Discuss doctrine honestly and charitably; never mock another denomination or question a member’s faith.',
+    'Hold fast to the essentials of the faith, and in everything else extend charity.' ] },
+  { h: 'Keep each other safe', p: [
+    'No harassment, threats, stalking, or repeated unwanted contact, here or elsewhere.',
+    'No sexual content, and nothing sexual involving anyone under 18, ever. This is reported to the authorities.',
+    'No hate: nothing that demeans people for their race, nation, sex, disability, or any part of who they are.' ] },
+  { h: 'Guard what is private', p: [
+    'Never share someone’s address, phone number, email, workplace, photos, or messages without their clear permission.',
+    'What a member shares in Prayer & Encouragement stays in the Guild. Do not repeat it outside.',
+    'Keep your own details safe too. You never need to post where you live.' ] },
+  { h: 'If someone is in danger', p: [
+    'If a member writes that they may harm themselves or someone else, tell the Editor in Chief at once, and urge them to call local emergency services or a crisis line.',
+    'The forum is for fellowship and prayer, not for medical, legal, or psychological advice. Point one another to qualified help.' ] },
+  { h: 'Honest work', p: [
+    'Post only writing and photographs that are your own, or quote others briefly and say whose they are.',
+    'No spam, advertising, fundraising, or selling without the editor’s permission.' ] },
+  { h: 'Using the forums', p: [
+    'Keep threads to the forum they belong in, and search before starting a new one.',
+    'Any member may start a thread in a forum and reply to others. The Editor in Chief opens new forums, and only the editor starts threads in From the Editor’s Desk. Have an idea for a forum? Ask in Questions for the Editor.',
+    'Each forum keeps its 40 most active threads; the quietest are cleared to make room. Pinned threads always stay. A thread closes once it reaches 200 replies: start a new one to carry the conversation on.' ] },
+  { h: 'When rules are broken', p: [
+    'Tell the Editor in Chief through Questions for the Editor or the Contact page. You will be taken seriously, and your name kept private.',
+    'The editor may edit or remove posts, close threads, and pause or end a membership. Serious harm is reported to the proper authorities.' ] },
+];
+export function ForumRules() {
+  const NUM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  return (
+    <div className="fo fo-rules">
+      <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
+      <header className="fr-head">
+        <svg className="fr-cross" width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M11 1v32M3 10h16" /></svg>
+        <span className="eb">For members of the Guild</span>
+        <h1 className="h1 fr-title">The forum rules</h1>
+        <p className="it fr-lead">The forum is a table we share. These rules keep it safe, honest and good for everyone who sits at it. By posting, you agree to keep them.</p>
+      </header>
+      {/* The ground under the rules: one Body, many members */}
+      <section className="fr-pre">
+        <span className="eb">One Body</span>
+        <p className="fr-pre-text">We are open to every denomination. The Church is one body in Christ, and each tradition is a member of it: a function given for the whole, and a roadway by which the gospel reaches people the others might not.</p>
+        <span className="lab fr-pre-ref">For as the body is one, and hath many members … so also is Christ. · 1 Corinthians 12:12</span>
+      </section>
+      <ol className="fr-list">
+        {RULES.map((r, i) => (
+          <li key={r.h} className="fr-rule">
+            <span className="fr-n" aria-hidden="true">{NUM[i]}</span>
+            <div className="fr-body">
+              <h2 className="fr-h">{r.h}</h2>
+              <ul>{r.p.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <footer className="fr-foot">
+        <svg width="16" height="24" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M11 1v32M3 10h16" /></svg>
+        <p className="it">Be generous, be honest, be kind. If you are in immediate danger, contact your local emergency services first.</p>
+      </footer>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------- your conversations
+// The threads you've started or replied in, most recently active first, with what's new since you last looked.
+async function loadMine(me: string) {
+  const { data: p } = await supabase.from('forum_posts').select('thread_id').eq('author_id', me);
+  const ids = [...new Set((Array.isArray(p) ? p : []).map((x: any) => x.thread_id))];
+  if (!ids.length) return { rows: [] as (Thread & { board: Board | undefined })[], people: {} as People };
+  const [{ data: t }, { data: b }] = await Promise.all([
+    supabase.from('forum_threads').select('*').in('id', ids).order('last_post_at', { ascending: false }),
+    supabase.from('forum_boards').select('*'),
+  ]);
+  const boards = new Map((Array.isArray(b) ? (b as Board[]) : []).map((x) => [x.id, x]));
+  const rows = (Array.isArray(t) ? (t as Thread[]) : []).map((x) => ({ ...x, board: boards.get(x.board_id) }));
+  return { rows, people: await loadPeople(rows.map((x) => x.last_author_id)) };
+}
+function MineRow({ t, me, people, A }: { t: Thread & { board: Board | undefined }; me: string; people: People; A: (p: { to: string; className?: string; children: ReactNode }) => ReactNode }) {
+  const fresh = isNew(t, me);
+  return (
+    <A to={`/guild/members/?t=${t.id}`} className={`fo-latest-row${fresh ? ' fresh' : ''}`}>
+      {t.board?.image && <span className="fo-latest-img"><img src={t.board.image} alt="" loading="lazy" /></span>}
+      <span className="fo-latest-text">
+        <span className="fo-latest-title">{fresh && <span className="lab fo-new">New</span>}{t.title}</span>
+        <span className="lab mut">{t.board?.name ?? 'The Forum'} · {t.reply_count} {t.reply_count === 1 ? 'reply' : 'replies'} · {t.last_author_id === me ? 'you' : nameOf(people, t.last_author_id)} · {ago(t.last_post_at)}</span>
+      </span>
+    </A>
+  );
+}
+/** On the Desk: your three most recently active conversations. */
+export function ForumMineLatest({ me, count = 3 }: { me: string; count?: number }) {
+  const [data, setData] = useState<Awaited<ReturnType<typeof loadMine>> | null>(null);
+  useEffect(() => { loadMine(me).then(setData); }, [me]);
+  const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) => <a href={to} className={className}>{children}</a>;
+  if (!data) return <p className="lab mut fo-latest-wait">Listening at the door…</p>;
+  if (!data.rows.length) return <p className="it mut fo-latest-none">You haven’t joined a conversation yet. <a href="/guild/members/?view=forum">Find one in the forum →</a></p>;
+  return <ol className="fo-latest">{data.rows.slice(0, count).map((t) => <li key={t.id}><MineRow t={t} me={me} people={data.people} A={A} /></li>)}</ol>;
+}
+/** The page: every conversation you're part of. */
+export function ForumMine({ me }: { me: string }) {
+  const [data, setData] = useState<Awaited<ReturnType<typeof loadMine>> | null>(null);
+  const [page, setPage] = useState(1);
+  useEffect(() => { loadMine(me).then(setData); }, [me]);
+  const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) => <Link to={to} className={className}>{children}</Link>;
+  const rows = data?.rows ?? [];
+  const fresh = rows.filter((t) => isNew(t, me)).length;
+  const pages = Math.max(1, Math.ceil(rows.length / THREADS_PER));
+  const cur = Math.min(page, pages);
+  return (
+    <div className="fo">
+      <header className="fo-head">
+        <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
+        <span className="eb">The Forum</span>
+        <h1 className="h1">Your conversations</h1>
+        <p className="it mut fo-sub">Every thread you’ve started or replied in, most recently active first.</p>
+        {data && <span className="lab mut">{rows.length} {rows.length === 1 ? 'conversation' : 'conversations'}{fresh ? ` · ${fresh} with something new` : ''}</span>}
+      </header>
+      {!data ? <p className="lab mut">Opening…</p> : !rows.length
+        ? <p className="it mut fo-empty">You haven’t joined a conversation yet. <Link to="/guild/members/?view=forum">Find one in the forum →</Link></p>
+        : <ol className="fo-latest fo-mine">{rows.slice((cur - 1) * THREADS_PER, cur * THREADS_PER).map((t) => <li key={t.id}><MineRow t={t} me={me} people={data.people} A={A} /></li>)}</ol>}
+      {pages > 1 && (
+        <nav className="pager fo-pager" aria-label="Pages">
+          <button type="button" className="pg-step" disabled={cur === 1} onClick={() => setPage(cur - 1)} aria-label="Newer">‹<span className="pg-word">Newer</span></button>
+          {pageList(cur, pages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+            : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} onClick={() => setPage(n)}>{n}</button>)}
+          <button type="button" className="pg-step" disabled={cur === pages} onClick={() => setPage(cur + 1)} aria-label="Older"><span className="pg-word">Older</span>›</button>
+        </nav>
+      )}
+    </div>
+  );
 }
