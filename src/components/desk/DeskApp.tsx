@@ -553,12 +553,6 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         </div>
       </header>
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
-      {isEditor && <EditorTools />}
-      {/* What the Guild is talking about */}
-      <section className="d-forum-panel">
-        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
-        <ForumLatest count={3} plain />
-      </section>
       {/* Read the Guild's work: the three pillars, one tap each */}
       <nav className="d-pillars-row" aria-label="Read">
         {([['/watchtower/', 'Watchtower', 'Prophetic audits of the age', '/images/duomo-pigeons-1200.jpg'], ['/hearth/', 'Hearth', 'Prose, poetry, photographs', '/images/glass-2-1200.jpg'], ['/perimeter/', 'Perimeter', 'Testimony and the unseen', '/images/the-perimeter-1200.jpg']] as const).map(([href, name, line, img]) => (
@@ -573,6 +567,12 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
           </a>
         ))}
       </nav>
+      {isEditor && <EditorTools />}
+      {/* What the Guild is talking about */}
+      <section className="d-forum-panel">
+        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
+        <ForumLatest count={3} plain />
+      </section>
       {waiting > 0 && (
         <button type="button" className="d-waiting" onClick={onReview}>
           <span className="d-waiting-dot" aria-hidden="true" />
