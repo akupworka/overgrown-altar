@@ -1481,3 +1481,14 @@
 @media (max-width: 700px) { .m-tabs button { padding: 10px 16px !important; } .m-tabs { margin: 14px auto 22px !important; } }
 
 .m-grid, .au-grid { border-radius: 4px; overflow: hidden; }
+/* The Desk's rooms: four (the three pillars and the Gallery) */
+.d-pillars-row { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.d-pl-name { font-size: 26px; }
+/* Phones: the Write disc covers Begin and Submit, so those step aside; the rooms come right under the greeting */
+@media (max-width: 700px) {
+  .d-home .d-begins { display: none !important; }
+  .d-home > .d-home-head { order: -2; }
+  .d-home > .d-pillars-row { order: -1; grid-template-columns: 1fr 1fr !important; }
+  .d-pl { height: 96px; }
+  .d-pl-name { font-size: 19px; }
+}
