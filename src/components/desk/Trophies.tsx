@@ -121,12 +121,19 @@ export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?
             <div className="tcat-text"><span className="tr-name">{t.name}</span><span className="tr-note">{t.note}</span>
               {mine(t) && <span className="lab tcat-you">{mine(t)!.earned ? `You: ${TIER_LABEL[mine(t)!.tier]} · ${mine(t)!.n} ${unitFor(mine(t)!.n, t.unit)}` : `You: ${mine(t)!.n} of ${(t.at ?? TIER_AT).bronze} for Bronze`}</span>}</div>
             <div className="tcat-metals">
-              {TIERS.map((tier) => (
-                <figure key={tier} className="tr tr-mini" data-tier={tier}>
+              {TIERS.map((tier) => {
+                const st = mine(t), at = t.at ?? TIER_AT;
+                const reached = !!st && st.n >= at[tier];
+                const nextUp = !!st && !reached && st.next?.tier === tier;
+                return (
+                <figure key={tier} className={`tr tr-mini${st ? (reached ? ' got' : nextUp ? ' next' : ' ahead') : ''}`} data-tier={tier}>
                   <span dangerouslySetInnerHTML={{ __html: trophySvg(t, 58, tier) }} />
-                  <span className="tr-tier"><span className="tr-mini-name">{TIER_LABEL[tier]} · </span>{(t.at ?? TIER_AT)[tier]}</span>
+                  <span className="tr-tier"><span className="tr-mini-name">{TIER_LABEL[tier]} </span>{(t.at ?? TIER_AT)[tier]}</span>
                 </figure>
-              ))}
+                );
+              })}
+              {mine(t) && (() => { const st = mine(t)!, goal = st.next ? st.next.at : (t.at ?? TIER_AT).rainbow;
+                return <span className="tcat-prog" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.round((st.n / goal) * 100))}%` }} /></span>; })()}
             </div>
           </div>
         ))}

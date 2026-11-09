@@ -188,3 +188,25 @@
   font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(255,227,163,.35); transition: box-shadow .3s, background-color .3s; }
 .vault-link:hover { background: rgba(255,227,163,.06); box-shadow: inset 0 0 0 1px rgba(255,227,163,.65); }
 @media (max-width: 700px) { .vault-links { margin-top: 30px; } .vault-link { padding: 11px 16px; font-size: 9.5px; letter-spacing: .16em; } }
+
+/* ---- Trophies that grow: what you hold is lit, the next is ringed, the rest wait dim; your progress sits under the medals ---- */
+.tcat-row { grid-template-columns: 1fr !important; gap: 16px !important; padding: 22px 24px !important; border: 0 !important; border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255,255,255,.035), rgba(255,255,255,0) 45%), rgba(243,236,220,.02); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(243,236,220,.09); }
+.tcat-rows { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; border: 0 !important; }
+.tcat-text .tr-note { max-width: none !important; }
+.tcat-metals { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; position: relative; padding-bottom: 14px; }
+.tr-mini { align-items: center; transition: opacity .3s; }
+.tr-mini .tr-tier { white-space: nowrap; font-size: 8.5px !important; letter-spacing: .12em !important; }
+.tr-mini.ahead { opacity: .32; }
+.tr-mini.next { opacity: .7; }
+.tr-mini.next > span:first-child { border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,227,163,.7); }
+.tr-mini.got .tr-tier { color: var(--ember); }
+.tcat-prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: rgba(243,236,220,.08); overflow: hidden; }
+.tcat-prog i { display: block; height: 100%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
+.tcat-you { margin-top: 2px !important; }
+@media (max-width: 900px) { .tcat-rows { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .tcat-row { padding: 18px 16px !important; }
+  .tr-mini-name { display: inline !important; }
+  .tr-mini .tr-tier { font-size: 7.5px !important; letter-spacing: .08em !important; }
+}
