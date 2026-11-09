@@ -132,7 +132,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       if (!path.startsWith('/guild/')) return '';   // a public page: no room is lit
       return path.startsWith('/guild/desk')
         ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
-        : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('board') || q.get('t') ? 'forum'
+        : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('view') === 'mine' || q.get('board') || q.get('t') ? 'forum'
         : q.get('view') === 'prestige' ? 'prestige'
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };

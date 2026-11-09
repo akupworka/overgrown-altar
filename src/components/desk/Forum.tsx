@@ -650,3 +650,72 @@ export function ForumRules() {
     </div>
   );
 }
+
+// ---------------------------------------------------------------- your conversations
+// The threads you've started or replied in, most recently active first, with what's new since you last looked.
+async function loadMine(me: string) {
+  const { data: p } = await supabase.from('forum_posts').select('thread_id').eq('author_id', me);
+  const ids = [...new Set((Array.isArray(p) ? p : []).map((x: any) => x.thread_id))];
+  if (!ids.length) return { rows: [] as (Thread & { board: Board | undefined })[], people: {} as People };
+  const [{ data: t }, { data: b }] = await Promise.all([
+    supabase.from('forum_threads').select('*').in('id', ids).order('last_post_at', { ascending: false }),
+    supabase.from('forum_boards').select('*'),
+  ]);
+  const boards = new Map((Array.isArray(b) ? (b as Board[]) : []).map((x) => [x.id, x]));
+  const rows = (Array.isArray(t) ? (t as Thread[]) : []).map((x) => ({ ...x, board: boards.get(x.board_id) }));
+  return { rows, people: await loadPeople(rows.map((x) => x.last_author_id)) };
+}
+function MineRow({ t, me, people, A }: { t: Thread & { board: Board | undefined }; me: string; people: People; A: (p: { to: string; className?: string; children: ReactNode }) => ReactNode }) {
+  const fresh = isNew(t, me);
+  return (
+    <A to={`/guild/members/?t=${t.id}`} className={`fo-latest-row${fresh ? ' fresh' : ''}`}>
+      {t.board?.image && <span className="fo-latest-img"><img src={t.board.image} alt="" loading="lazy" /></span>}
+      <span className="fo-latest-text">
+        <span className="fo-latest-title">{fresh && <span className="lab fo-new">New</span>}{t.title}</span>
+        <span className="lab mut">{t.board?.name ?? 'The Forum'} · {t.reply_count} {t.reply_count === 1 ? 'reply' : 'replies'} · {t.last_author_id === me ? 'you' : nameOf(people, t.last_author_id)} · {ago(t.last_post_at)}</span>
+      </span>
+    </A>
+  );
+}
+/** On the Desk: your three most recently active conversations. */
+export function ForumMineLatest({ me, count = 3 }: { me: string; count?: number }) {
+  const [data, setData] = useState<Awaited<ReturnType<typeof loadMine>> | null>(null);
+  useEffect(() => { loadMine(me).then(setData); }, [me]);
+  const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) => <a href={to} className={className}>{children}</a>;
+  if (!data) return <p className="lab mut fo-latest-wait">Listening at the door…</p>;
+  if (!data.rows.length) return <p className="it mut fo-latest-none">You haven’t joined a conversation yet. <a href="/guild/members/?view=forum">Find one in the forum →</a></p>;
+  return <ol className="fo-latest">{data.rows.slice(0, count).map((t) => <li key={t.id}><MineRow t={t} me={me} people={data.people} A={A} /></li>)}</ol>;
+}
+/** The page: every conversation you're part of. */
+export function ForumMine({ me }: { me: string }) {
+  const [data, setData] = useState<Awaited<ReturnType<typeof loadMine>> | null>(null);
+  const [page, setPage] = useState(1);
+  useEffect(() => { loadMine(me).then(setData); }, [me]);
+  const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) => <Link to={to} className={className}>{children}</Link>;
+  const rows = data?.rows ?? [];
+  const fresh = rows.filter((t) => isNew(t, me)).length;
+  const pages = Math.max(1, Math.ceil(rows.length / THREADS_PER));
+  const cur = Math.min(page, pages);
+  return (
+    <div className="fo">
+      <header className="fo-head">
+        <Link to="/guild/members/?view=forum" className="fo-back lab"><span aria-hidden="true">←</span> The Forum</Link>
+        <span className="eb">The Forum</span>
+        <h1 className="h1">Your conversations</h1>
+        <p className="it mut fo-sub">Every thread you’ve started or replied in, most recently active first.</p>
+        {data && <span className="lab mut">{rows.length} {rows.length === 1 ? 'conversation' : 'conversations'}{fresh ? ` · ${fresh} with something new` : ''}</span>}
+      </header>
+      {!data ? <p className="lab mut">Opening…</p> : !rows.length
+        ? <p className="it mut fo-empty">You haven’t joined a conversation yet. <Link to="/guild/members/?view=forum">Find one in the forum →</Link></p>
+        : <ol className="fo-latest fo-mine">{rows.slice((cur - 1) * THREADS_PER, cur * THREADS_PER).map((t) => <li key={t.id}><MineRow t={t} me={me} people={data.people} A={A} /></li>)}</ol>}
+      {pages > 1 && (
+        <nav className="pager fo-pager" aria-label="Pages">
+          <button type="button" className="pg-step" disabled={cur === 1} onClick={() => setPage(cur - 1)} aria-label="Newer">‹<span className="pg-word">Newer</span></button>
+          {pageList(cur, pages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+            : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} onClick={() => setPage(n)}>{n}</button>)}
+          <button type="button" className="pg-step" disabled={cur === pages} onClick={() => setPage(cur + 1)} aria-label="Older"><span className="pg-word">Older</span>›</button>
+        </nav>
+      )}
+    </div>
+  );
+}

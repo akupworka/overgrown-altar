@@ -17,7 +17,7 @@ import { seatFor } from '../../lib/seats';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
-import { ForumLatest, useForumTally } from './Forum';
+import { ForumMineLatest, useForumTally } from './Forum';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -636,8 +636,8 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
       {isEditor && <EditorTools />}
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
-        <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All forums →</a></div>
-        <ForumLatest count={3} plain />
+        <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
+        {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
       <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
       {pieces.length > 3 && (

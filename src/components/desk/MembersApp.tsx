@@ -16,7 +16,7 @@ import { crestSvg } from '../../lib/crests';
 import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
-import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, useForumTally } from './Forum';
+import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
@@ -364,7 +364,7 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'rules' ? 'The forum rules' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -391,6 +391,7 @@ export default function MembersApp() {
   if (route.board) return <ForumBoard slug={route.board} me={session.user.id} isEditor={isEditor} />;
   if (route.view === 'forum') return <ForumIndex me={session.user.id} isEditor={isEditor} />;
   if (route.view === 'rules') return <ForumRules />;
+  if (route.view === 'mine') return <ForumMine me={session.user.id} />;
   if (route.p) return <Reading id={route.p} />;
   if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
   return <Directory />;
