@@ -118,11 +118,16 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
   @media (max-width: 1000px) { .pe-grid { grid-template-columns: 1fr 1fr; } .pe-kind:nth-child(3) { border-left: 0; } .pe-kind:nth-child(n+3) { border-top: 1px solid rgba(243, 236, 220, .14); } }
   @media (max-width: 700px) {
     .pe-kinds { padding-top: 56px; padding-bottom: 48px; }
-    .pe-grid { grid-template-columns: 1fr; }
-    .pe-kind { padding: 20px 0; }
-    .pe-kind + .pe-kind { border-left: 0; border-top: 1px solid rgba(243, 236, 220, .14); }
-    .pe-k { font-size: 23px; }
-    .pe-n { font-size: 16px; }
+    /* Two by two, so the four kinds fit in one glance */
+    .pe-grid { grid-template-columns: 1fr 1fr; margin-top: 22px; }
+    .pe-kind { padding: 18px 14px 16px; gap: 8px; }
+    .pe-kind:nth-child(odd) { padding-left: 0; }
+    .pe-kind + .pe-kind { border-left: 0; border-top: 0; }
+    .pe-kind:nth-child(even) { border-left: 1px solid rgba(243, 236, 220, .14) !important; }
+    .pe-kind:nth-child(n+3) { border-top: 1px solid rgba(243, 236, 220, .14) !important; }
+    .pe-k { font-size: 20px; }
+    .pe-n { font-size: 14.5px; line-height: 1.4; }
+    .pe-c { font-size: 9px; margin-top: auto; padding-top: 4px; }
     .pe-big { font-size: 36px !important; }
     .pe-share { min-height: 0; }
     .pe-cta { flex-direction: column; align-items: stretch; }
