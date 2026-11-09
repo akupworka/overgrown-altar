@@ -376,3 +376,5 @@
 @media (max-width: 700px) {
   .pzv-stand { background: radial-gradient(70% 34% at 50% 22%, color-mix(in srgb, var(--ink) 28%, transparent), transparent 78%), linear-gradient(180deg, #14170F, #0A0C09) !important; }
 }
+/* Crests of ranks not yet reached: a touch softer (still in full color) */
+.pzv-pane:not(.lit) .pzv-pane-crest { opacity: .78 !important; }
