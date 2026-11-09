@@ -67,7 +67,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
   return (
     <div className="pzx">
       <header className="pzx-head">
-        {me && link('/guild/members/', 'm-back lab', '← The Guild')}
+        {me && link('/guild/members/', 'm-back lab', 'The Guild')}
         <span className="eb">The Guild</span>
         <h1 className="h1">{section === 'trophies' ? 'The trophies' : 'The ten prestiges'}</h1>
         <p className="it pzx-lead">{section === 'trophies'

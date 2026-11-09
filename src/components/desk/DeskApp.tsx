@@ -1075,7 +1075,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   return (
     <section className="d-write">
       {showPreview && <PiecePreview form={form} photo={preview} author={author} onClose={() => setShowPreview(false)} />}
-      <button type="button" className="d-back" onClick={onDone}>← My pieces</button>
+      <button type="button" className="d-back" onClick={onDone}>My pieces</button>
       <div className="d-write-bar">
         <button type="button" className="d-link d-close" onClick={onDone} aria-label="Back to my pieces"><span aria-hidden="true">←</span><span className="d-long"> My pieces</span></button>
         <span className="lab mut d-state" role="status" aria-live="polite">
@@ -1372,7 +1372,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   }
   return (
     <section className="d-section d-reader">
-      <button type="button" className="d-back-link" onClick={onBack}>← Waiting for you</button>
+      <button type="button" className="d-back-link" onClick={onBack}>Waiting for you</button>
       <article className="d-paper">
         <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === piece.medium)?.label}</span>
         {rev && <span className="lab d-rev-tag">Proposed changes to a published piece. The live version stays until you approve.</span>}

@@ -46,7 +46,7 @@ export default function LivePiece() {
         <img src={photo || '/images/tall-windows-dark-vault-1200.jpg'} alt={photo ? piece.image_alt : ''} style={{ objectPosition: (photo && piece.image_focus) || 'center 45%', filter: `brightness(${photo ? 0.5 : 0.35})` }} />
         <div className="veil" />
         <div className="hero-c gp-hero-c">
-          <a className="lab gp-back" href={`/${piece.pillar}`}><span aria-hidden="true">←</span> {PILLAR[piece.pillar]}</a>
+          <a className="lab gp-back" href={`/${piece.pillar}`}>{PILLAR[piece.pillar]}</a>
           <span className="eb"><a className="gp-eb-room" href={`/${piece.pillar}`}>{PILLAR[piece.pillar]}</a><span className="gp-eb-dot"> · </span>{MEDIUM[piece.medium] ?? ''}</span>
           <h1 className="h1 gp-title">{piece.title}</h1>
           <span className="gp-by">

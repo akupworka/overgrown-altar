@@ -106,7 +106,7 @@ function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
         {board && <><span aria-hidden="true">›</span><Link to={`/guild/members/?board=${board.slug}`}>{board.name}</Link></>}
         {thread && <><span aria-hidden="true">›</span><span className="fo-crumb-here">{thread}</span></>}
       </nav>
-      <Link to={back.to} className="fo-back lab"><span aria-hidden="true">←</span> {back.label}</Link>
+      <Link to={back.to} className="fo-back lab">{back.label}</Link>
     </>
   );
 }
@@ -619,7 +619,7 @@ export function ForumRules() {
   const NUM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   return (
     <div className="fo fo-rules">
-      <Link to="/guild/members/?view=forum" className="fo-back lab"><span aria-hidden="true">←</span> The Forum</Link>
+      <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
       <header className="fr-head">
         <svg className="fr-cross" width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M11 1v32M3 10h16" /></svg>
         <span className="eb">For members of the Guild</span>
@@ -699,7 +699,7 @@ export function ForumMine({ me }: { me: string }) {
   return (
     <div className="fo">
       <header className="fo-head">
-        <Link to="/guild/members/?view=forum" className="fo-back lab"><span aria-hidden="true">←</span> The Forum</Link>
+        <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
         <span className="eb">The Forum</span>
         <h1 className="h1">Your conversations</h1>
         <p className="it mut fo-sub">Every thread you’ve started or replied in, most recently active first.</p>

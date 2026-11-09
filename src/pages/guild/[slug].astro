@@ -38,7 +38,7 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
     <div class="veil"></div>
     <SiteNav />
     <div class="hero-c gp-hero-c">
-      <a class="lab gp-back" href={`/${p.pillar}`}><span aria-hidden="true">←</span> {PILLAR_LABEL[p.pillar]}</a>
+      <a class="lab gp-back" href={`/${p.pillar}`}>{PILLAR_LABEL[p.pillar]}</a>
       <span class="eb"><a class="gp-eb-room" href={`/${p.pillar}`}>{PILLAR_LABEL[p.pillar]}</a><span class="gp-eb-dot"> · </span>{MEDIUM_LABEL[p.medium] ?? ''}</span>
       <h1 class="h1 gp-title">{p.title}</h1>
       <span class="gp-by">

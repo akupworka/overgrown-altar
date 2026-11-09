@@ -194,7 +194,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   return (
     <div className="m-page">
       <header className="m-hero">
-        <Link className="m-back lab" to="/guild/members/">← The Guild</Link>
+        <Link className="m-back lab" to="/guild/members/">The Guild</Link>
         <Arch p={person} big />
         <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : 'Writer of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
@@ -327,7 +327,7 @@ function Reading({ id }: { id: string }) {
   if (piece === null) return <div className="m-gate"><p className="it mut d-empty">This piece is not available.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   return (
     <div className="m-reading">
-      <Link className="d-link" to={`/guild/members/?m=${piece.author_id}`}>← {author?.display_name ?? 'Back'}</Link>
+      <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>
       <article className="d-paper">
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
         <span className="eb">{pillarName(piece.pillar)} · {mediumName(piece.medium)}</span>
