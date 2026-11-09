@@ -169,13 +169,16 @@ export function ForumIndex({ me }: { me?: string } = {}) {
           })}
         </ol>
       )}
-      <p className="it mut fo-note">Each forum keeps its 400 most recently active threads (twenty pages). When a forum grows full, its quietest threads are cleared away to make room; pinned threads always stay.</p>
+      <p className="it mut fo-note">Each forum keeps its 40 most recently active threads; when it grows full, its quietest threads are cleared away to make room (pinned threads always stay). A thread closes once it reaches 200 replies.</p>
     </div>
   );
 }
 
-// Twenty threads to a page in a forum, twenty posts to a page in a thread.
+// Ten threads to a page in a forum (each keeps its 40 most active); twenty replies to a page in a thread,
+// which closes itself at 200 replies.
 const FORUM_PER = 20;
+const THREADS_PER = 10;
+const MAX_REPLIES = 200;
 
 // Any member may open a forum: a name, a line about it, and a window of glass for its picture.
 const FORUM_PICTURES = Array.from({ length: 12 }, (_, i) => `/images/seats/seat-${i + 1}.jpg`);
@@ -235,9 +238,9 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
   if (board === null) return <div className="fo"><Crumbs /><p className="it mut">This forum isn’t here any more.</p></div>;
   const canStart = isEditor || !board.editor_only;
   const closeSheet = () => setWriting(false);
-  const pages = Math.max(1, Math.ceil(threads.length / FORUM_PER));
+  const pages = Math.max(1, Math.ceil(threads.length / THREADS_PER));
   const cur = Math.min(page, pages);
-  const onPage = threads.slice((cur - 1) * FORUM_PER, cur * FORUM_PER);
+  const onPage = threads.slice((cur - 1) * THREADS_PER, cur * THREADS_PER);
   return (
     <div className="fo">
       <header className="fo-head fo-board-head">
@@ -250,7 +253,7 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
           {canStart
             ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{!writing && <span aria-hidden="true" className="fo-plus">+</span>}{writing ? 'Never mind' : 'Start a thread'}</button>
             : <span className="lab mut">Only the editor starts threads here. Everyone may reply.</span>}
-          <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'}{pages > 1 ? ` · page ${cur} of ${pages}` : ''}</span>
+          <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'} · keeps the {board.keep_threads} most active{pages > 1 ? ` · page ${cur} of ${pages}` : ''}</span>
         </div>
       </header>
       {writing && <NewThread board={board} me={me} onCancel={closeSheet} onDone={(id) => { setWriting(false); go(`/guild/members/?t=${id}`); }} />}
@@ -452,7 +455,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
         <h1 className="h1 fo-thread-title">{thread.title}</h1>
         <span className="lab mut">
           {thread.pinned && <span className="fo-tag">Pinned</span>}{thread.locked && <span className="fo-tag fo-tag-dim">Closed</span>}
-          {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'} · started {ago(thread.created_at)}
+          {thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'}{thread.reply_count >= MAX_REPLIES - 20 ? ` of ${MAX_REPLIES}` : ''} · started {ago(thread.created_at)}
         </span>
         {(isEditor || thread.author_id === me) && (
           <details className="fo-mod">
@@ -522,7 +525,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           </button>
           <span className="lab mut fo-reply-hint">{reply.trim() ? 'Draft kept on this device · ' : ''}*italic* · **bold** · links work</span>
         </form>
-      ) : <p className="it mut fo-empty">This thread is closed to new replies.</p>}
+      ) : <p className="it mut fo-empty">{thread.reply_count >= MAX_REPLIES ? `This thread has reached ${MAX_REPLIES} replies and is closed. Start a new thread to carry the conversation on.` : 'This thread is closed to new replies.'}</p>}
     </div>
   );
 }
@@ -600,7 +603,7 @@ const RULES: { h: string; p: string[] }[] = [
   { h: 'Using the forums', p: [
     'Keep threads to the forum they belong in, and search before starting a new one.',
     'Any member may open a new forum for a subject the Guild keeps returning to. Only the Editor in Chief starts threads in From the Editor’s Desk.',
-    'Each forum keeps its 400 most active threads; the quietest are cleared to make room. Pinned threads always stay.' ] },
+    'Each forum keeps its 40 most active threads; the quietest are cleared to make room. Pinned threads always stay. A thread closes once it reaches 200 replies: start a new one to carry the conversation on.' ] },
   { h: 'When rules are broken', p: [
     'Tell the Editor in Chief through Questions for the Editor or the Contact page. You will be taken seriously, and your name kept private.',
     'The editor may edit or remove posts, close threads, and pause or end a membership. Serious harm is reported to the proper authorities.' ] },

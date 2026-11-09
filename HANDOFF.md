@@ -144,4 +144,6 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - Any member may open a forum (Forum page → Open a new forum); `private.guard_board()` sets its address, place and
   creator, and keeps the editor's settings (`editor_only`, `keep_threads`) the editor's. Members may rename their own;
   only the editor deletes forums (deleting removes every thread in it). From the Editor's Desk is `editor_only`.
-- Every forum keeps 400 threads (20 pages of 20); threads show 20 posts per page. Rules page: `?view=rules` (Forum.tsx).
+- Names on the site: forums (rooms, `forum_boards`) · threads (`forum_threads`) · replies (`forum_posts`).
+- Every forum keeps its 40 most active threads (10 per page). A thread shows 20 replies per page and closes itself at
+  200 replies (`private.after_post`). Rules page: `?view=rules` (Forum.tsx).
