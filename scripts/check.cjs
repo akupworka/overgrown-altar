@@ -68,6 +68,7 @@ const dm_threads = [
   { id: 'dm2', a: d2a, b: d2b, last_at: t(2), last_body: 'Thank you, that helped.', last_from: ME, a_read_at: t(2), b_read_at: t(2), a_cleared_at: '1970-01-01', b_cleared_at: '1970-01-01' },
 ];
 const dm_messages = [
+  ...Array.from({ length: 14 }, (_, i) => ({ id: 'dmx' + i, thread_id: 'dm1', author_id: i % 4 === 3 ? 'm2' : ME, body: ['Test', 'What’s up?', 'This is a little test', 'Got it, thanks!'][i % 4], created_at: `2026-11-02T09:${String(10 + i).padStart(2, '0')}:00Z` })),
   { id: 'dm-1', thread_id: 'dm1', author_id: ME, body: 'Your piece on the lamp road stayed with me all week.', created_at: t(3) },
   { id: 'dm-2', thread_id: 'dm1', author_id: 'm2', body: 'That means a great deal. I nearly didn’t send it.', created_at: t(4) },
   { id: 'dm-3', thread_id: 'dm1', author_id: 'm2', body: 'Would you read my draft before I send it in?', created_at: t(5) },

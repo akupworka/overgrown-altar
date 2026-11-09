@@ -109,7 +109,7 @@ const imageUrl = new URL(image, site).toString();
         const SIDEWAYS = '.inner, .filters, .filters-wrap, .d-paper-tools, .d-tools-wrap, .ga-filters, .shelf-filters, .pager, .home-plates-row, .d-tabbar';
         const busy = () => {
           const el = document.activeElement as HTMLElement | null;
-          return document.documentElement.classList.contains('menu-open') || !!document.querySelector('.d-room.writing, .pv')
+          return document.documentElement.classList.contains('menu-open') || !!document.querySelector('.d-room.writing, .pv, .ib-thread')
             || !!(el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)));
         };
         const draw = () => {

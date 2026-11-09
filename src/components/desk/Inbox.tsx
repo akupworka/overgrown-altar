@@ -155,6 +155,8 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [msg, setMsg] = useState('');
   const [blocked, setBlocked] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const [peek, setPeek] = useState<string | null>(null);   // a bubble tapped to show its time and Delete
   const usage = useUsage(msgs.length);
   const load = useCallback(async () => {
     const { data: t } = await supabase.from('dm_threads').select('*').eq('id', id).maybeSingle();
@@ -179,7 +181,7 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
     }).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [id, me]);
-  useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
+  useEffect(() => { const l = listRef.current; if (l) l.scrollTop = l.scrollHeight; }, [msgs.length]);
   useEffect(() => { document.documentElement.classList.add('ib-open'); return () => document.documentElement.classList.remove('ib-open'); }, []);
 
   if (thread === undefined) return <p className="lab mut d-loading">Opening the conversation…</p>;
@@ -233,23 +235,26 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
           </> : <span className="ib-who-name">{people[thread.a]?.display_name} &amp; {p2?.display_name} <span className="lab mut">· reported conversation</span></span>}
         </div>
       </header>
-      <ol className="ib-msgs">
+      <ol className="ib-msgs" ref={listRef}>
         {msgs.length === 0 && <li className="it mut ib-hello">Say hello to {o?.display_name?.split(' ')[0] ?? 'them'}.</li>}
-        {msgs.map((m) => {
+        {msgs.map((m, k) => {
+          // A run of messages from one person within five minutes sits together; the time shows under the last.
+          const nx = msgs[k + 1];
+          const lastOfRun = !nx || nx.author_id !== m.author_id || +new Date(nx.created_at) - +new Date(m.created_at) > 5 * 60e3;
           const day = new Date(m.created_at).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
           const showDay = day !== lastDay; lastDay = day;
           const fromMe = m.author_id === me;
           return (
-            <li key={m.id} className={`ib-m${fromMe ? ' me' : ''}${m.id.startsWith('sending-') ? ' sending' : ''}`}>
+            <li key={m.id} className={`ib-m${fromMe ? ' me' : ''}${m.id.startsWith('sending-') ? ' sending' : ''}${lastOfRun ? ' run-end' : ''}`}>
               {showDay && <span className="lab ib-day">{day}</span>}
               {!mine && <span className="lab mut ib-m-who">{people[m.author_id]?.display_name}</span>}
-              <span className="ib-bubble">{m.body}</span>
-              <span className="lab ib-m-when">{m.id.startsWith('sending-') ? 'Sending…' : new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              <span className="ib-bubble" onClick={() => setPeek((p) => (p === m.id ? null : m.id))}>{m.body}</span>
+              {(lastOfRun || peek === m.id) && <span className="lab ib-m-when">{m.id.startsWith('sending-') ? 'Sending…' : new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 {fromMe && mine && !m.id.startsWith('sending-') && <button type="button" className="ib-unsend" onClick={async () => {
                   if (!confirm('Delete this message for both of you?')) return;
                   const { error } = await supabase.rpc('dm_unsend', { m: m.id });
                   if (error) alert(error.message); else setMsgs((ms) => ms.filter((x) => x.id !== m.id));
-                }}>Delete</button>}</span>
+                }}>Delete</button>}</span>}
             </li>
           );
         })}

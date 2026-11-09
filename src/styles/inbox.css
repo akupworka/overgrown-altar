@@ -110,3 +110,26 @@
   .ib-reply { position: fixed !important; left: 12px !important; right: 12px !important; width: auto !important; bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
   .ib-thread:has(.ib-reply) { padding-bottom: 110px; }
 }
+
+/* ---- A conversation is an app view: the name stays at the top, the box at the bottom, only messages scroll ---- */
+:root { --ibtop: 134px; }
+@media (max-width: 700px) { :root { --ibtop: 60px; } }
+html.ib-open, html.ib-open body { overflow: hidden; }
+html.ib-open .desk-in { padding: 0 !important; }
+.ib-thread { position: fixed; z-index: 30; top: var(--ibtop); bottom: 0; left: 0; right: 0; width: auto; max-width: 760px; margin: 0 auto;
+  padding: 18px 20px calc(12px + env(safe-area-inset-bottom, 0px)) !important; display: flex; flex-direction: column; gap: 8px; }
+.ib-thead { flex: none; padding-bottom: 12px; }
+.ib-msgs { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 6px 2px 10px; gap: 2px; }
+.ib-reply, .ib-thread .ib-blocked, .ib-thread .ib-full, .ib-thread .d-photo-msg { flex: none; }
+.ib-reply { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; width: 100% !important; transform: none !important; }
+.ib-reply::before { display: none; }
+/* runs sit together; a little space after each run */
+.ib-m { gap: 2px; }
+.ib-m.run-end { margin-bottom: 10px; }
+.ib-m:not(.run-end) .ib-bubble { border-radius: 18px; }
+.ib-bubble { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+@media (max-width: 700px) {
+  .ib-thread { padding: 12px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
+  .ib-thread .ib-thead { gap: 8px; padding-bottom: 10px; }
+  .ib-thread .m-back { min-height: 36px; }
+}
