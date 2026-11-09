@@ -1086,3 +1086,43 @@
   .d-home .d-list { background: none; }
 }
 @media (prefers-reduced-motion: reduce) { .d-home .d-waiting-dot { animation: none; } .d-home .d-item, .d-home .d-kind-mark { transition: none; } }
+/* Invite a writer: name and email share the row; the button drops beneath whenever there isn't room (it never spills). */
+.d-invite-row { display: flex !important; flex-wrap: wrap; }
+.d-invite-row .field { flex: 1 1 170px; min-width: 0; }
+.d-invite-row .d-btn { flex: none; }
+
+/* ---- Your prestige on the Desk, as on the Prestiges page: the crest in a filling ring, the rank in its own glass ---- */
+.d-pz { display: flex; align-items: center; gap: 26px; width: 100%; }
+.d-pz-ring { position: relative; width: 150px; height: 150px; flex: none; }
+.d-pz-ring > svg { transform: rotate(-90deg); display: block; }
+.d-pz-track { fill: none; stroke: rgba(243, 236, 220, .08); stroke-width: 6; }
+.d-pz-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dasharray 1.2s cubic-bezier(.16, 1, .3, 1); }
+.d-pz-crest { position: absolute; left: 50%; top: 50%; width: 118px; transform: translate(-50%, -52%); line-height: 0; }
+.d-pz-crest svg { width: 100%; height: auto; overflow: visible; }
+.d-pz-dot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 48px; color: #8C8679; }
+.d-pz-text { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.d-pz-of { font-size: 9px; color: #8C8679; }
+.d-pz-name { font-family: var(--serif); font-weight: 500; font-size: 40px; line-height: 1; color: var(--ink); }
+.d-pz-note { font-size: 16px; color: #CFC8B8; line-height: 1.35; }
+.d-pz-next { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; font-family: var(--serif); font-size: 16px; color: #CFC8B8; }
+.d-pz-next b { font-weight: 500; color: var(--bone); }
+.d-pz-next .d-pz-next-name { font-style: italic; }
+.d-pz-next-crest { width: 32px; height: 32px; flex: none; line-height: 0; margin: -4px 0; }
+.d-pz-next-crest svg { width: 100%; height: 100%; }
+/* The ten ranks as a row of glass, lit to where you are */
+.d-pz-steps { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; width: 100%; max-width: 380px; }
+.d-pz-steps li { height: 6px; border-radius: 3px; background: rgba(243, 236, 220, .08); overflow: hidden; }
+.d-pz-steps li i { display: block; height: 100%; background: var(--ink); opacity: 0; }
+.d-pz-steps li.lit i { opacity: .85; }
+.d-pz-steps li.here { box-shadow: 0 0 0 1px var(--ink); }
+.d-pz-steps li.here i { opacity: 1; }
+@media (max-width: 700px) {
+  .d-pz { gap: 18px; }
+  .d-pz-ring { width: 116px; height: 116px; }
+  .d-pz-ring > svg { width: 116px; height: 116px; }
+  .d-pz-crest { width: 92px; }
+  .d-pz-name { font-size: 32px; }
+  .d-pz-note { font-size: 15px; }
+  .d-pz-next { font-size: 15px; }
+  .d-pz-steps { max-width: none; }
+}
