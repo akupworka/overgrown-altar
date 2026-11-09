@@ -435,3 +435,13 @@
 .fo-latest-row.fresh .fo-latest-title { color: #FFF6E2; }
 .fo-mine { margin-top: 8px; padding: 4px 22px; border-radius: 14px; background: rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); }
 @media (max-width: 700px) { .fo-mine { padding: 2px 14px; } }
+/* A forum's header: the picture sits further back so the words lead; the manage menu for the editor */
+.fo-banner { filter: brightness(.16) saturate(.7) !important; }
+.fo-board-head::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(10,12,9,.2), rgba(10,12,9,.75)); }
+.fo-forum-mod { align-self: flex-start; position: relative; }
+.fo-forum-mod .fo-mod-menu { z-index: 5; }
+/* No threads yet: a quiet card instead of loose text */
+.fo-empty-card { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; margin-top: 18px; padding: 40px 24px; border-radius: 14px; color: var(--ember);
+  background: rgba(243,236,220,.02); box-shadow: inset 0 0 0 1px rgba(243,236,220,.08); }
+.fo-empty-card p { margin: 6px 0 0; font-size: 22px; color: var(--bone); }
+.fo-empty-card .lab { font-size: 9px; }

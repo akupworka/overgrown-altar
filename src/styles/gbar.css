@@ -58,3 +58,12 @@
 @media (max-width: 700px) {
   .gbar.d-tabbar, .gbar-choose:not([hidden]) { transform: translateY(var(--gbar-shift, 0px)); }
 }
+/* Phones, signed in: enough room at the foot of every page to clear the bar and the raised Write disc */
+@media (max-width: 700px) {
+  html[data-member] body { padding-bottom: 140px !important; }
+  html[data-member] body:has(.desk-in) { padding-bottom: 0 !important; }
+  html[data-member] .desk-in { padding-bottom: 160px !important; }
+  html[data-member] .desk-in:has(.m-work) { padding-bottom: 0 !important; }
+  html[data-member] .m-work { padding-bottom: 170px !important; }
+  html[data-member] body:has(.d-room.writing) .desk-in, html[data-member] body:has(.fo-reply) .desk-in { padding-bottom: 0 !important; }
+}
