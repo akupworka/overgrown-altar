@@ -36,3 +36,8 @@
 }
 @keyframes gbar-turn { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .gbar .t-write .d-tabbar-icon::before { animation: none; } }
+/* Computers, signed in: the header is solid and carries the Guild bar (50px) under it, so every page's opening
+   section starts below both bars and keeps its full height (the Guild's own pages already allow for it). */
+@media (min-width: 701px) {
+  html[data-member] main > section:first-child:not(.desk) { margin-top: 50px; }
+}
