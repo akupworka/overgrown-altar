@@ -106,7 +106,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
           {me && next && (
             <div className="pzv-toward">
               <span className="pzv-bar" aria-hidden="true"><i style={{ width: `${Math.round(pct * 100)}%` }} /></span>
-              <span className="pzv-next"><Crest lv={next.level} size={44} className="pzv-next-crest" locked /><span>{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b style={{ color: inkOf(next) }}>{next.name}</b></span></span>
+              <span className="pzv-next"><Crest lv={next.level} size={44} className="pzv-next-crest" /><span>{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b style={{ color: inkOf(next) }}>{next.name}</b></span></span>
             </div>
           )}
           {me ? <a className="pzv-cta" href="/guild/desk/#write">Write a piece <span aria-hidden="true">→</span></a> : <a className="pzv-cta" href="/guild">Join the Guild <span aria-hidden="true">→</span></a>}
@@ -124,11 +124,12 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
             return (
               <li key={p.level} className={`pzv-pane${reached ? ' lit' : ''}${here ? ' here' : ''}`} style={{ '--lv': p.level, '--ink': inkOf(p), '--glass': glassOf(p) } as CSSProperties}>
                 <button type="button" className="pzv-pane-btn" onClick={() => setChosen(p.level)} aria-label={`${p.name}, rank ${p.level}: ${p.at} published ${p.at === 1 ? 'piece' : 'pieces'}${here ? ', you are here' : reached ? ', reached' : ''}`}>
-                  <span className="pzv-pane-glass" aria-hidden="true"><span className="pzv-pane-lead" /><Crest lv={p.level} size={120} className="pzv-pane-crest" locked={!reached} glow={here} /></span>
+                  <span className="pzv-pane-glass" aria-hidden="true"><span className="pzv-pane-lead" /><Crest lv={p.level} size={120} className="pzv-pane-crest" glow={here} /></span>
                   <span className="pzv-pane-text">
                     <span className="pzv-pane-num">{p.numeral}</span>
                     <span className="pzv-pane-name">{p.name}</span>
                     <span className="lab pzv-pane-at">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
+                    {me && reached && !here ? <span className="lab pzv-pane-st pzv-pane-got">Reached</span> : me && !reached ? <span className="lab pzv-pane-st pzv-pane-togo">{p.at - mine} to go</span> : null}
                     {who.length > 0 && <span className="pzv-pane-who" aria-hidden="true">{who.slice(0, 3).map((h) => <Initials key={h.id} name={h.display_name} size={20} src={portraitUrl(h.portrait_path)} />)}{who.length > 3 && <span className="lab">+{who.length - 3}</span>}</span>}
                   </span>
                   {here && <span className="lab pzv-you">You</span>}

@@ -333,3 +333,29 @@
   .pzv-pane.here .pzv-pane-glass { box-shadow: none !important; }
   .pzv-pane-crest { width: 56px !important; }
 }
+
+/* The climb in color from the first rank: each rank's own glow behind its crest; every crest shown in full */
+.pzv-pane-glass, .pzv-pane.lit .pzv-pane-glass {
+  background: radial-gradient(60% 70% at 50% 45%, color-mix(in srgb, var(--ink) 30%, transparent), transparent 75%), linear-gradient(180deg, rgba(243,236,220,.04), rgba(243,236,220,.015)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px color-mix(in srgb, var(--ink) 30%, transparent) !important; }
+.pzv-pane.here .pzv-pane-glass { box-shadow: inset 0 0 0 1.5px var(--ink), 0 14px 34px -14px color-mix(in srgb, var(--ink) 70%, transparent) !important;
+  background: radial-gradient(65% 75% at 50% 45%, color-mix(in srgb, var(--ink) 45%, transparent), transparent 78%), rgba(243,236,220,.05) !important; }
+.pzv-pane:not(.lit) .pzv-pane-crest { opacity: .82; }
+.pzv-pane:not(.lit) .pzv-pane-num { color: var(--ink) !important; opacity: .75; }
+.pzv-pane:not(.lit) .pzv-pane-name { color: #CFC8B8 !important; }
+.pzv-pane-got { color: var(--ember); }
+.pzv-pane-togo { color: #A9A293; }
+@media (max-width: 700px) {
+  .pzv-pane-btn { background: radial-gradient(40% 120% at 12% 50%, color-mix(in srgb, var(--ink) 26%, transparent), transparent 80%), rgba(243,236,220,.025) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 28%, transparent) !important; }
+  .pzv-pane.here .pzv-pane-btn { background: radial-gradient(45% 130% at 12% 50%, color-mix(in srgb, var(--ink) 42%, transparent), transparent 80%), rgba(243,236,220,.04) !important;
+    box-shadow: inset 0 0 0 1.5px var(--ink) !important; }
+  .pzv-pane-glass, .pzv-pane.lit .pzv-pane-glass, .pzv-pane.here .pzv-pane-glass { background: none !important; box-shadow: none !important; }
+}
+.pzv-pane-st { font-size: 8px; letter-spacing: .16em; margin-top: 2px; }
+@media (max-width: 700px) {
+  .pzv-pane-text { display: grid !important; grid-template-columns: auto auto; justify-content: start; column-gap: 6px; }
+  .pzv-pane-name, .pzv-pane-who { grid-column: 1 / -1; }
+  .pzv-pane-st { margin-top: 0; font-size: 8.5px; }
+  .pzv-pane-st::before { content: '· '; color: #8C8679; }
+}
