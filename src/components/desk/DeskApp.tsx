@@ -924,7 +924,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   );
   const paper = isPhoto ? (
     <article className="d-paper d-paper-photo">
-      <span className="eb d-ph-kicker">A photograph for the Hearth</span>
+      <span className="eb d-ph-kicker">A photograph for the Gallery</span>
       <label className="visually-hidden" htmlFor="d-title">Title</label>
       <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
         onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
@@ -1011,6 +1011,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
 
         {step === 1 && (
           <div className="d-step">
+            {isPhoto ? <p className="d-medium-only"><span className="d-medium on">The Gallery</span><span className="it">Photographs go to the Gallery, newest first.</span></p> : <>
             <h2 className="d-step-h">Where does it belong?</h2>
             <div className="d-pillars" role="radiogroup" aria-label="Pillar">
               {PILLARS.map((x) => {
@@ -1032,6 +1033,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
                 </label>
               ))}
             </div>}
+            </>}
             <KindNote value={form.medium} />
             {!isPhoto && (<>
             <h2 className="d-step-h">A photograph <span className="d-opt">optional</span></h2>
@@ -1093,6 +1095,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         <details className="d-details" open>
           <summary><h2 className="eb">Details</h2></summary>
           <div className="d-details-in">
+          {isPhoto ? <div className="d-lbl"><span className="lab">Goes to</span><span className="d-medium-fixed">The Gallery</span></div> : <>
           <label className="d-lbl"><span className="lab">Pillar</span>
             <select className="field" value={form.pillar} onChange={(e) => choosePillar(e.target.value)}>
               {PILLARS.map((p) => <option key={p.value} value={p.value}>{p.label.split(' · ')[0]}</option>)}
@@ -1105,6 +1108,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
                   {kinds.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
               </label>}
+          </>}
           <KindNote value={form.medium} />
           {!isPhoto && (<>
           <div className="d-lbl">

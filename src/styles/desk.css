@@ -1436,7 +1436,7 @@
 @media (max-width: 700px) {
   .m-tabs { gap: 30px; margin-bottom: 14px; }
   .m-tabs button { font-size: 9px; letter-spacing: .16em; }
-  .m-grid { gap: 2px; margin: 0 -24px; }
+  .m-grid { gap: 3px; }
   .m-grid-cap { display: none; }
 }
 @media (min-width: 701px) { .m-grid { max-width: 935px; margin: 0 auto; } }
@@ -1479,3 +1479,5 @@
   background: rgba(42, 32, 23, .08); color: inherit !important; font-size: 9.5px; letter-spacing: .04em; }
 .m-tabs button.on .m-tab-n { background: rgba(243, 236, 220, .16); }
 @media (max-width: 700px) { .m-tabs button { padding: 10px 16px !important; } .m-tabs { margin: 14px auto 22px !important; } }
+
+.m-grid, .au-grid { border-radius: 4px; overflow: hidden; }
