@@ -1440,3 +1440,15 @@
   .m-grid-cap { display: none; }
 }
 @media (min-width: 701px) { .m-grid { max-width: 935px; margin: 0 auto; } }
+/* The Guild page's six rooms: on a computer two across beside the forum; on a phone three across, two rows */
+@media (min-width: 861px) {
+  .g-room-side { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+  .g-room-side .g-tile { grid-template-columns: auto minmax(0, 1fr); padding: 14px 16px; gap: 12px; }
+  .g-room-side .g-tile .g-tile-go { display: none; }
+  .g-room-side .g-tile .g-room-line { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13.5px; }
+  .g-room-side .g-tile-name { font-size: 19px; }
+  .g-room-side .g-tile-mark, .g-room-side .g-tile-crest-mark { width: 44px !important; height: 44px !important; }
+  .g-room-side .g-tile-crest-mark > span { width: 44px; height: 44px; }
+  .g-room-side .g-tile-crest-mark svg { width: 42px !important; height: 42px !important; }
+}
+@media (max-width: 700px) { .g-room-side .g-tile { min-height: 116px; } }
