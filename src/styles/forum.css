@@ -303,3 +303,32 @@
   .fo-fab { bottom: calc(104px + env(safe-area-inset-bottom, 0px)); z-index: 41; height: 46px; padding: 0 20px; color: var(--ember);
     background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 14px 34px rgba(0,0,0,.6); }
 }
+
+/* ---- A board on a computer, like the phone: a calmer banner, then each thread as its own glass card ---- */
+@media (min-width: 701px) {
+  .fo-board-head { padding: 34px 40px 32px; gap: 10px; border-radius: 14px; }
+  .fo-board-head .h1 { font-size: clamp(44px, 4.4vw, 60px) !important; line-height: 1.02; }
+  .fo-board-head .fo-sub { font-size: 18px; max-width: 620px; }
+  .fo-board-head .eb { display: none; }
+  .fo-board-head .fo-head-acts { margin-top: 8px; gap: 22px; }
+  .fo-board-head .fo-head-acts .btn { border-radius: 999px; padding: 13px 26px; color: var(--ember); border: 0;
+    background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45), 0 10px 26px rgba(0,0,0,.45); }
+  .fo-board-head .fo-head-acts .btn:hover { color: var(--ember); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.75), 0 10px 26px rgba(0,0,0,.45); }
+  .fo-board-head .fo-head-acts .lab { font-size: 9.5px; color: var(--muted-dark); }
+
+  .fo-threads { border: 0 !important; display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .fo-threads > li { border: 0 !important; }
+  .fo-threads-head { display: none !important; }
+  .fo-thread { grid-template-columns: minmax(0, 1fr) 90px 170px; gap: 24px; align-items: center; padding: 20px 26px; border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.025);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); transition: box-shadow .3s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .fo-thread:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.45); transform: translateX(3px); }
+  .fo-thread.pinned { background: linear-gradient(160deg, rgba(255,227,163,.06), rgba(255,227,163,0) 50%), rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.25); }
+  .fo-thread-main { gap: 8px; }
+  .fo-thread-t { font-size: 24px; line-height: 1.2; }
+  .fo-thread-n { display: inline-flex; align-items: center; gap: 8px; color: var(--muted-dark); justify-self: center; }
+  .fo-thread-n b { font-size: 20px; font-family: var(--serif); font-weight: 400; color: var(--bone); }
+  .fo-bubble { display: block; }
+  .fo-thread-n-word { display: none; }
+  .fo-thread-last { text-align: right; line-height: 1.7; }
+}

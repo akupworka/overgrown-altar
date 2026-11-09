@@ -1411,3 +1411,5 @@
   .g-card .g-count, .g-card .pr { display: none !important; }
 }
 @media (max-width: 700px) { .g-role-craft { display: none; } }
+/* Phones, inside a forum thread: the reply box owns the foot of the screen, so the Guild bar steps aside (back is at the top). */
+@media (max-width: 700px) { body:has(.fo-reply) .gbar { display: none !important; } body:has(.fo-reply) .desk-in { padding-bottom: 0 !important; } }
