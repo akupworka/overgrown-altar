@@ -4,3 +4,6 @@
 # The Forms became The Crafts (so it is never mistaken for the Forum).
 /forms      /crafts/   301
 /forms/     /crafts/   301
+# The Hearth's gallery became The Gallery, its own room.
+/hearth/gallery   /gallery/   301
+/hearth/gallery/  /gallery/   301

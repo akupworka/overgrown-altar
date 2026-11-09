@@ -2,7 +2,7 @@
 // The Hearth: the Guild's creative room. Prose, poetry, fiction and photographs.
 //   - the four kinds of work, each a filter
 //   - the written work as a gallery of cards, newest first (photographs have their own section)
-//   - the gallery: the newest photographs, and a link to all of them (/hearth/gallery/)
+//   - the gallery: the newest photographs, and a link to all of them (/gallery/)
 //   - the makers, and an invitation to bring work to the table
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -48,7 +48,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     <div class="he-kinds">
       {KINDS.map((k) => (
         k.value === 'photograph' ? (
-          <a class="he-kind" href="#gallery">
+          <a class="he-kind" href="/gallery/">
             <span class="he-k">{k.label}</span>
             <span class="it he-n">{k.note}</span>
             <span class="lab he-c">{count(k.value) ? `${count(k.value)} in the gallery` : 'Be the first'}</span>
@@ -115,7 +115,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     )}
     <div class="he-gallery-go">
       {photos.length > 0
-        ? <a class="btn" href="/hearth/gallery/">View the full gallery <span aria-hidden="true">→</span></a>
+        ? <a class="btn" href="/gallery/">View the full gallery <span aria-hidden="true">→</span></a>
         : <a class="btn" href="/guild/">Bring the first photograph</a>}
       {photos.length > 0 && <span class="lab mut">{photos.length} {photos.length === 1 ? 'photograph' : 'photographs'} from the fellowship</span>}
     </div>
