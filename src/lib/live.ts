@@ -22,7 +22,7 @@ export function freshSince(built: string, pillar?: string): Promise<FreshPiece[]
     // A little overlap with the build, in case a piece was approved while the site was being built.
     const since = new Date(Date.parse(built) - 15 * 60 * 1000).toISOString();
     let q = supabase.from('pieces')
-      .select('slug, title, standfirst, body, pillar, medium, image_path, image_focus, published_at, author:profiles(id, display_name, portrait_path)')
+      .select('slug, title, standfirst, body, pillar, medium, image_path, image_focus, published_at, author:profiles!pieces_author_id_fkey(id, display_name, portrait_path)')
       .eq('status', 'approved').not('slug', 'is', null).gt('published_at', since).lte('published_at', new Date().toISOString()).order('published_at', { ascending: false }).limit(12);
     if (pillar) q = q.eq('pillar', pillar);
     const { data } = await q;

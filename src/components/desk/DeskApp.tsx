@@ -217,7 +217,7 @@ function Desk({ session }: { session: Session }) {
     rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
     if ((p as Profile)?.role === 'editor') {
-      const { data: q } = await supabase.from('pieces').select('*, profiles(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
+      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
     setLoaded(true);

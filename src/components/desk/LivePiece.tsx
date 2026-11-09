@@ -18,7 +18,7 @@ export default function LivePiece() {
     if (!m || ['desk', 'members'].includes(m[1])) return;
     (async () => {
       const { data } = await supabase.from('pieces')
-        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles(display_name, craft, bio, portrait_path, website, instagram)')
+        .select('title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles!pieces_author_id_fkey(display_name, craft, bio, portrait_path, website, instagram)')
         .eq('slug', m[1]).eq('status', 'approved').maybeSingle();
       if (!data) return;
       if (data.image_path) {

@@ -116,7 +116,7 @@ function query(table, url) {
   const ord = url.searchParams.get('order');
   if (ord) { const [col, dir] = ord.split(','); const [c, d] = col.split('.'); rows.sort((a, b) => String(a[c] ?? '').localeCompare(String(b[c] ?? '')) * (d === 'desc' ? -1 : 1)); }
   const lim = url.searchParams.get('limit'); if (lim) rows = rows.slice(0, +lim);
-  if (table === 'pieces' && (url.searchParams.get('select') || '').includes('profiles(')) rows = rows.map((r) => ({ ...r, profiles: { display_name: profiles.find((p) => p.id === r.author_id)?.display_name } }));
+  if (table === 'pieces' && (url.searchParams.get('select') || '').includes('profiles')) rows = rows.map((r) => ({ ...r, profiles: { display_name: profiles.find((p) => p.id === r.author_id)?.display_name } }));
   return rows;
 }
 

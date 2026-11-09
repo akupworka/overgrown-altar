@@ -21,7 +21,7 @@ async function load(): Promise<GuildPiece[]> {
   try {
     const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     const { data, error } = await db.from('pieces')
-      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
+      .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles!pieces_author_id_fkey(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
       .eq('status', 'approved').not('slug', 'is', null).lte('published_at', new Date().toISOString()).order('published_at', { ascending: false });   // scheduled pieces wait for their time
     if (error) throw error;
     const paths = (data ?? []).map((p: any) => p.image_path).filter(Boolean);
