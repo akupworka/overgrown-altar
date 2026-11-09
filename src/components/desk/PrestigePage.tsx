@@ -129,7 +129,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
                     <span className="pzv-pane-num">{p.numeral}</span>
                     <span className="pzv-pane-name">{p.name}</span>
                     <span className="lab pzv-pane-at">{p.at} {p.at === 1 ? 'piece' : 'pieces'}</span>
-                    {me && reached && !here ? <span className="lab pzv-pane-st pzv-pane-got">Reached</span> : me && !reached ? <span className="lab pzv-pane-st pzv-pane-togo">{p.at - mine} to go</span> : null}
+                    {me && !reached ? <span className="lab pzv-pane-st pzv-pane-togo">{p.at - mine} to go</span> : null}
                     {who.length > 0 && <span className="pzv-pane-who" aria-hidden="true">{who.slice(0, 3).map((h) => <Initials key={h.id} name={h.display_name} size={20} src={portraitUrl(h.portrait_path)} />)}{who.length > 3 && <span className="lab">+{who.length - 3}</span>}</span>}
                   </span>
                   {here && <span className="lab pzv-you">You</span>}
