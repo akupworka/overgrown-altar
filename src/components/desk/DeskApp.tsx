@@ -1485,6 +1485,14 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     portrait_path: profile.portrait_path,
   });
   const [msg, setMsg] = useState('');
+  // The daily letter (messages, replies, mentions, responses, new from writers you follow): on unless turned off.
+  const [letters, setLetters] = useState(true);
+  useEffect(() => { supabase.from('member_prefs').select('email_digest').eq('member_id', profile.id).maybeSingle().then(({ data }) => { if (data) setLetters(data.email_digest !== false); }); }, [profile.id]);
+  async function toggleLetters(on: boolean) {
+    setLetters(on);
+    const { error } = await supabase.from('member_prefs').upsert({ member_id: profile.id, email_digest: on }, { onConflict: 'member_id' });
+    if (error) setLetters(!on);
+  }
   // Showing an email is a choice: off unless they turn it on. It can be any address, not only the one they sign in with.
   const [showEmail, setShowEmail] = useState(!!profile.public_email);
   const [email, setEmail] = useState(profile.public_email ?? '');
@@ -1549,6 +1557,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
         {emailMsg && <p className="d-photo-msg" role="alert">{emailMsg}</p>}
       </div>
       <label className="d-check"><input type="checkbox" checked={f.listed} onChange={(e) => setF({ ...f, listed: e.target.checked })} /><span>Show me in the Guild directory</span></label>
+      <label className="d-check"><input type="checkbox" checked={letters} onChange={(e) => toggleLetters(e.target.checked)} /><span>Email me a daily letter when something is waiting: messages, replies, mentions, and new work from writers I follow (saved straight away)</span></label>
       <p className="it d-notice" role="status">{msg}</p>
       <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
       <div className="d-account">
