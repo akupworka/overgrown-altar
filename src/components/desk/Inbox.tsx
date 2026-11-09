@@ -176,7 +176,7 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
   useEffect(() => {
     const ch = supabase.channel('dm-' + id).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dm_messages', filter: `thread_id=eq.${id}` }, (p) => {
       const m = p.new as Message;
-      setMsgs((ms) => (ms.some((x) => x.id === m.id) ? ms : [...ms.filter((x) => !x.id.startsWith('sending-')), m]));
+      setMsgs((ms) => (ms.some((x) => x.id === m.id) ? ms : m.author_id === me && ms.some((x) => x.id.startsWith('sending-')) ? [...ms.filter((x) => !x.id.startsWith('sending-')), m] : [...ms, m]));
       if (m.author_id !== me) { supabase.rpc('dm_read', { t: id }).then(() => refreshInboxDot()); }
     }).subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -196,9 +196,11 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
     const temp: Message = { id: 'sending-' + Date.now(), thread_id: id, author_id: me, body, created_at: new Date().toISOString() };
     setMsgs((ms) => [...ms, temp]); setText(''); setBusy(true); setMsg('');
     const box = document.getElementById('ib-box') as HTMLTextAreaElement | null; if (box) box.style.height = '';   // back to one line
-    const { error } = await supabase.rpc('dm_send', { t: id, msg: body });
+    const { data: newId, error } = await supabase.rpc('dm_send', { t: id, msg: body });
     setBusy(false);
-    if (error) { setMsgs((ms) => ms.filter((x) => x.id !== temp.id)); setText(body); setMsg(error.message); }
+    if (error) { setMsgs((ms) => ms.filter((x) => x.id !== temp.id)); setText(body); setMsg(error.message); return; }
+    // Sent: settle it now rather than waiting for the live feed (which may not arrive on every phone)
+    setMsgs((ms) => (ms.some((x) => x.id === newId) ? ms.filter((x) => x.id !== temp.id) : ms.map((x) => (x.id === temp.id ? { ...x, id: String(newId) } : x))));
   }
   async function block() {
     if (blocked) { await supabase.from('dm_blocks').delete().eq('blocker', me).eq('blocked', oid); setBlocked(false); return; }
