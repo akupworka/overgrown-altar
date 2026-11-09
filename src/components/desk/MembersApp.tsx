@@ -5,7 +5,7 @@
 // What anyone can see is enforced by the database's rules; this only presents it.
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
-import { WayPage, WayCard } from './Way';
+import { WayPage, WayBadge } from './Way';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
@@ -277,7 +277,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Writer of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
-        {!fellow && <PrestigeBadge published={work.length} size="lg" />}
+        {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
         {(site || handle || person.public_email) && (
           <span className="m-pills">
@@ -333,7 +333,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
               Edit my page
             </a>
-            {work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
+            {fellow ? <a className="m-act" href={`/collection/?of=${person.id}`}>Public page</a>
+              : work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
             <button type="button" className="m-signout lab" onClick={async () => { rememberMember(null); await supabase.auth.signOut(); location.href = '/guild/desk/'; }}>Sign out</button>
           </nav>
         )}
@@ -508,7 +509,6 @@ function FellowCollection({ id, first, mine }: { id: string; first: string; mine
   const items = useCollection(id);
   return (
     <section className="m-work m-coll">
-      <div className="m-way"><WayCard member={id} mine={mine} /></div>
       <div className="m-work-head"><span className="eb">{mine ? 'Your collection' : `${first}’s collection`}</span>
         <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
       <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />

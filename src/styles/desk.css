@@ -1734,3 +1734,12 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .fl-coll-link .it { font-size: 17px; color: var(--muted-dark); }
 .fl-coll-go { color: var(--ember); white-space: nowrap; font-size: 9.5px; }
 .fl-coll-link:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .4); }
+/* The Fellowship's station, worn under the name: a pewter pill (the counterpart of the Guild's prestige badge) */
+.wy-pill { display: inline-flex; align-items: center; gap: 7px; vertical-align: middle; white-space: nowrap; padding: 3px 12px 3px 4px; border-radius: 999px;
+  font-family: var(--sans); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; line-height: 1.4; color: #E9E7E0;
+  background: rgba(233, 231, 224, .07); box-shadow: inset 0 0 0 1px rgba(201, 199, 192, .45); }
+.wy-pill span[aria-hidden] { display: inline-flex; }
+.wy-pill-n { font-family: var(--serif); font-size: 12px; letter-spacing: .06em; opacity: .85; }
+.wy-pill-lg { font-size: 11px; padding: 4px 15px 4px 5px; gap: 9px; }
+.wy-pill-lg .wy-pill-n { font-size: 14px; }
+.wy-pill:hover { box-shadow: inset 0 0 0 1px rgba(233, 231, 224, .75); }

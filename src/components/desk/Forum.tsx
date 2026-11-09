@@ -4,6 +4,7 @@
 //   /guild/members/?t=<thread id>    a thread: the opening post and every reply, and a reply box
 // Each board keeps its most recently active threads (40 by default); quieter ones are cleared away
 // by the database when new ones arrive. Pinned threads always stay.
+import { WayBadge } from './Way';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
@@ -533,8 +534,8 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
                   <span className="fo-who-name">{who?.display_name || 'A member'}</span>
                 </Link>
-                <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : 'Writer'}</span>
-                <PrestigeBadge published={pieces[p.author_id] ?? 0} />
+                <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : who?.role === 'fellow' ? 'Fellowship' : 'Writer'}</span>
+                {who?.role === 'fellow' ? <WayBadge member={p.author_id} /> : <PrestigeBadge published={pieces[p.author_id] ?? 0} />}
               </div>
               <div className="fo-post-main">
                 <span className="lab mut fo-post-when">{p.id.startsWith('sending-') ? 'Posting…' : ago(p.created_at)}{p.edited_at ? ' · edited' : ''}{i === 0 ? ' · opening post' : ''}</span>

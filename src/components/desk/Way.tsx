@@ -102,3 +102,17 @@ export function WayCard({ member, mine }: { member: string; mine: boolean }) {
     </a>
   );
 }
+
+/** A small pewter pill with a Fellowship member's station, worn under their name (their page, the Forum):
+ *  the Fellowship's counterpart to the Guild's prestige badge. */
+export function WayBadge({ member, size = 'sm', tone = 'dark' }: { member: string; size?: 'sm' | 'lg'; tone?: 'dark' | 'paper' }) {
+  const w = useWay(member);
+  if (!w) return null;
+  const s = size === 'lg' ? 26 : 20;
+  return (
+    <a href="/guild/members/?view=way" className={`wy-pill${size === 'lg' ? ' wy-pill-lg' : ''}${tone === 'paper' ? ' wy-pill-paper' : ''}`} title={`${w.current.name}: ${w.current.line}`}>
+      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: pewterBadge('shell', s, true) }} />
+      <span className="wy-pill-n">{['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][w.current.n - 1]}</span>{w.current.name}
+    </a>
+  );
+}
