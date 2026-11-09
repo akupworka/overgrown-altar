@@ -137,11 +137,15 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
         <h1 className="h1">The Forum</h1>
         <p className="it mut fo-sub">Where the Guild talks between pieces: ideas in progress, craft, photographs, books, and prayer. Only members can see it.</p>
         {boards && <span className="lab mut">{boards.length} {boards.length === 1 ? 'forum' : 'forums'} · {threads.length} {threads.length === 1 ? 'thread' : 'threads'} · {posts} {posts === 1 ? 'post' : 'posts'}</span>}
-        <div className="fo-index-acts">
-          {isEditor && <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
-          <Link to="/guild/members/?view=rules" className="fo-rules-link lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg>The forum rules</Link>
-        </div>
+        {isEditor && <div className="fo-index-acts">
+          { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
+        </div>}
       </header>
+      <Link to="/guild/members/?view=rules" className="fo-rules-card">
+        <span className="fo-rules-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg></span>
+        <span className="fo-rules-text"><span className="fo-rules-name">The forum rules</span><span className="it fo-rules-line">How we keep the table safe and kind. Read before you post.</span></span>
+        <span className="fo-rules-go" aria-hidden="true">→</span>
+      </Link>
       {isEditor && opening && <NewForum onDone={(slug) => go(`/guild/members/?board=${slug}`)} onCancel={() => setOpening(false)} />}
       {!boards ? <p className="lab mut">Opening the forum…</p> : (
         <ol className="fo-boards">
