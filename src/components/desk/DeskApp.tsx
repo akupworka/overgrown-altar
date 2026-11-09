@@ -612,6 +612,10 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         )
       )}
       {show !== 'all' && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
+      {/* Phones: the side column is hidden, so Sign out lives at the foot of the Desk. */}
+      <button type="button" className="d-signout-foot" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
+        Sign out</button>
     </section>
   );
 }

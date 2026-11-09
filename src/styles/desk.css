@@ -1160,3 +1160,11 @@
   .d-pillars-row .g-room-small .eb { font-size: 9.5px; letter-spacing: .12em; white-space: nowrap; }
   .d-home .d-pillars-row .g-room { border-radius: 14px; }
 }
+/* Phones: Sign out at the foot of the Desk (computers keep it in the side column) */
+.d-signout-foot { display: none; }
+@media (max-width: 700px) {
+  .d-signout-foot { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 18px; min-height: 46px; padding: 12px 16px;
+    border-radius: 999px; background: none; border: 0; cursor: pointer; color: var(--muted-dark); box-shadow: inset 0 0 0 1px rgba(243,236,220,.14);
+    font-family: var(--sans); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; }
+  .d-signout-foot:active { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230,169,154,.5); }
+}
