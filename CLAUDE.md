@@ -5,7 +5,12 @@ Astro site + React islands, Netlify (pushing `main` deploys to overgrownaltar.co
 section a task needs, not the whole file.
 
 ## The owner
-Editor in Chief, a beginner. Explain in plain words, briefly. Phone screenshots are their main way of reporting.
+Editor in Chief, a beginner. Phone screenshots are their main way of reporting. What they expect:
+- Fix what the screenshot shows, then look at the result yourself before saying it's done. If it still looks
+  off (misaligned, cramped, clipped, busy), fix that too: they judge by eye, so "close enough" isn't done.
+- When they ask for something "elite" or "better", aim high and keep it clean: bold, simple shapes over fine detail.
+- Finish with one short plain-words report: what changed, where to see it, anything they must check on their
+  iPhone. No code, no jargon. Lead with any decision they need to make.
 
 ## Visual identity (keep it)
 - Tokens and type in `src/styles/global.css`: `--night --dark --paper --bone --ink --ember --oxblood --brass`;
@@ -25,8 +30,11 @@ Editor in Chief, a beginner. Explain in plain words, briefly. Phone screenshots 
 - Secrets only in Netlify env vars; never in chat or the repo.
 
 ## Before pushing (a push is a deploy)
-- `npm run build` must pass, and the changed page must be checked (Playwright with mocked Supabase; Chromium only,
-  so say when iPhone Safari should be checked by the owner).
+- `npm run build` must pass, then check the changed page on phone and computer with
+  `node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--click "<css>"] [--only phone]`
+  (pretend Guild data, no real account; starts the preview server itself; prints errors and sideways scrolling,
+  saves screenshots outside the repo; look at them). Skip the screenshots only if the owner says not to check.
+  Chromium only, so say when iPhone Safari should be checked by the owner.
 - Ask first before anything destructive or hard to undo: database migrations that drop/alter data, deleting files
   or rows, auth or email settings, new scheduled jobs.
 - Commit to `main` with a clear message; keep the tree clean (no stray screenshots in the repo).
