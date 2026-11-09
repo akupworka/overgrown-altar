@@ -50,6 +50,7 @@ const ICONS: Record<string, ReactNode> = {
   write: <><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></>,
   review: <><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></>,
   profile: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></>,
+  forms: <><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></>,
 };
 export const Icon = ({ name }: { name: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
@@ -162,7 +163,7 @@ function SetPassword({ onDone, invited }: { onDone: () => void; invited: boolean
 
 // ---------------------------------------------------------------- signed in
 
-type Tab = 'pieces' | 'write' | 'review' | 'profile';
+type Tab = 'pieces' | 'write' | 'review' | 'profile' | 'forms';
 
 function Desk({ session }: { session: Session }) {
   const uid = session.user.id;
@@ -173,7 +174,7 @@ function Desk({ session }: { session: Session }) {
   const [loaded, setLoaded] = useState(false);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
-  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : 'pieces');
+  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : startHash === '#forms' ? 'forms' : 'pieces');
   // (#review and #my-page stay in the address, so the members' bar and a reload both know which room you're in.)
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
@@ -216,8 +217,8 @@ function Desk({ session }: { session: Session }) {
     if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     // Keep the address in step with the room, so the members' bar lights the right one.
-    else if (t === 'review') history.replaceState(history.state, '', location.pathname + location.search + '#review');
-    else if (t === 'pieces' && /^#(review|my-page)$/.test(location.hash)) history.replaceState(history.state, '', location.pathname + location.search);
+    else if (t === 'review' || t === 'forms') history.replaceState(history.state, '', location.pathname + location.search + '#' + t);
+    else if (t === 'pieces' && /^#(review|my-page|forms)$/.test(location.hash)) history.replaceState(history.state, '', location.pathname + location.search);
     setTab(t); setReading(null); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const open = (p: Piece | null, medium?: string) => {
@@ -235,17 +236,17 @@ function Desk({ session }: { session: Session }) {
     const onPop = () => {
       if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
       // The members' bar can open these directly, too.
-      if (location.hash === '#review' || location.hash === '#my-page') { setTab(location.hash === '#review' ? 'review' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }
+      if (location.hash === '#review' || location.hash === '#my-page' || location.hash === '#forms') { setTab(location.hash === '#review' ? 'review' : location.hash === '#forms' ? 'forms' : 'profile'); setReading(null); window.scrollTo({ top: 0 }); return; }
       setTab(after.current ?? 'pieces'); after.current = null; setReading(null); window.scrollTo({ top: 0 }); load();
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
   const items: [Tab, string, number?][] = [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
-    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number]] : []),
+    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Forms'] as [Tab, string]] : []),
     ['profile', 'My page'],
   ];
-  const short: Record<Tab, string> = { pieces: 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page' };
+  const short: Record<Tab, string> = { pieces: isEditor ? 'Desk' : 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page', forms: 'Forms' };
 
   if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
@@ -288,11 +289,13 @@ function Desk({ session }: { session: Session }) {
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
+        {tab === 'forms' && isEditor && <FormsRoom />}
       </div>
 
       {/* Phones: an app-style tab bar within thumb's reach. */}
       <nav className="d-tabbar" aria-label="Desk">
-        {items.map(([t, , n]) => (
+        {/* Write sits in the middle: Desk, Waiting, Write, Forms, My page for the editor. */}
+        {(isEditor ? (['pieces', 'review', 'write', 'forms', 'profile'] as Tab[]).map((t) => items.find((x) => x[0] === t)!).filter(Boolean) : items).map(([t, , n]) => (
           <button key={t} type="button" className={`${tab === t ? 'on' : ''}${t === 'write' ? ' t-write' : ''}`} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
             <span className="d-tabbar-icon"><Icon name={t} />{n ? <span className="d-tabbar-dot">{n}</span> : null}</span>
             <span>{short[t]}</span>
@@ -1152,6 +1155,71 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
       </div>
     </div>,
     document.body,
+  );
+}
+
+// ---------------------------------------------------------------- the editor's Forms room
+// What visitors send through the site's forms (Guild applications, letters, Dispatch sign-ups), fetched by
+// netlify/functions/forms.mts after it checks you are the editor. Read only.
+type FormItem = { id: string; at: string; name: string; email: string; fields: [string, string][] };
+type FormRoom = { key: string; label: string; count: number; items: FormItem[] };
+const FORMS_PER = 10;
+const fieldName = (k: string) => k.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+function FormsRoom() {
+  const [rooms, setRooms] = useState<FormRoom[] | null>(null);
+  const [err, setErr] = useState('');
+  const [pick, setPick] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
+      const out = res ? await res.json().catch(() => ({})) : {};
+      if (!res?.ok) { setErr(out.error || 'The forms couldn’t be fetched. Check your connection.'); setRooms([]); return; }
+      setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
+    })();
+  }, []);
+  const room = rooms?.find((r) => r.key === pick);
+  const items = room?.items ?? [];
+  const pages = Math.max(1, Math.ceil(items.length / FORMS_PER));
+  const cur = Math.min(page, pages);
+  return (
+    <section className="d-section d-forms">
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Forms</h1>
+        <p className="it mut d-sub">What visitors have sent through the site: applications to the Guild, letters, and sign-ups for the Dispatches. Newest first.</p></header>
+      {!rooms ? <p className="lab mut">Opening the forms…</p>
+        : err ? <p className="d-photo-msg" role="alert">{err}</p>
+        : !rooms.length ? <p className="it mut d-empty">No forms have been sent yet.</p>
+        : <>
+          <div className="filters d-filters" role="tablist" aria-label="Forms">
+            {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
+          </div>
+          {items.length === 0 ? <p className="it mut d-empty">Nothing here yet.</p> : (
+            <ul className="d-form-list">
+              {items.slice((cur - 1) * FORMS_PER, cur * FORMS_PER).map((f) => {
+                const long = f.fields.filter(([k]) => !/^(name|email)$/i.test(k));
+                return (
+                  <li key={f.id}>
+                    <details className="d-form-item">
+                      <summary>
+                        <span className="d-form-who">{f.name || f.email || 'Someone'}</span>
+                        <span className="lab mut d-form-when">{fmt(f.at)}</span>
+                        {long[0] && <span className="it d-form-peek">{long[0][1]}</span>}
+                      </summary>
+                      <div className="d-form-body">
+                        {f.email && <p className="d-form-field"><span className="lab">Email</span><a href={`mailto:${f.email}`}>{f.email}</a></p>}
+                        {long.map(([k, v]) => <p key={k} className="d-form-field"><span className="lab">{fieldName(k)}</span><span>{v}</span></p>)}
+                        {f.email && <a className="ghost d-btn d-form-reply" href={`mailto:${f.email}`}>Reply by email</a>}
+                      </div>
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <DeskPages cur={cur} pages={pages} onGo={setPage} />
+        </>}
+    </section>
   );
 }
 

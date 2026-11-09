@@ -132,3 +132,9 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   `EMAIL_REPLY_TO` (a real inbox where writers' replies land). Without them, they quietly do nothing.
 - Forum extras: "new since your last visit" (kept on each device), Quote, *italic* / **bold** / links in posts,
   and each poster's prestige badge.
+
+## The editor's Forms room
+- Desk tab **Forms** (`/guild/desk/#forms`, editor only): Guild applications, Contact letters and Dispatch sign-ups,
+  read from Netlify Forms by `netlify/functions/forms.mts` after it checks the caller is the editor. Read only.
+- Needs `NETLIFY_FORMS_TOKEN` (a Netlify personal access token: User settings > Applications > New access token) in
+  Netlify > Site configuration > Environment variables. Until it's set, the room says it isn't switched on yet.

@@ -1261,6 +1261,34 @@
 /* Phones: where the bottom tab bar is showing (the Desk, your own page), the top Guild bar leaves out what the
    tab bar already has (My Desk, Write, Review, My page) and keeps the rest of the Guild, spread evenly. */
 @media (max-width: 700px) {
-  body:has(.d-room:not(.writing) .d-tabbar, .m-page .d-tabbar) [data-inner] :is(a[data-match='desk'], a[data-match='write'], a[data-match='review'], a[data-match='me']) { display: none !important; }
+  body:has(.d-room:not(.writing) .d-tabbar, .m-page .d-tabbar) [data-inner] :is(a[data-match='desk'], a[data-match='write'], a[data-match='review'], a[data-match='forms'], a[data-match='me']) { display: none !important; }
   body:has(.d-room:not(.writing) .d-tabbar, .m-page .d-tabbar) [data-inner] { justify-content: space-between; }
+}
+
+/* ---- The editor's Forms room ---- */
+.d-forms { gap: 22px; }
+.d-form-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.d-form-item { border-radius: 12px; background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.02);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); }
+.d-form-item[open] { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,227,163,.35); }
+.d-form-item > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 18px 22px; }
+.d-form-item > summary::-webkit-details-marker { display: none; }
+.d-form-item > summary:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; border-radius: 12px; }
+.d-form-who { font-family: var(--serif); font-size: 22px; color: var(--bone); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-form-when { align-self: center; font-size: 9.5px; white-space: nowrap; }
+.d-form-peek { grid-column: 1 / -1; font-size: 16px; color: #A9A293; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.d-form-item[open] .d-form-peek { display: none; }
+.d-form-body { display: flex; flex-direction: column; gap: 14px; padding: 4px 22px 22px; border-top: 1px solid rgba(243,236,220,.08); padding-top: 18px; margin: 0 0 0; }
+.d-form-field { margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--bone); white-space: pre-wrap; overflow-wrap: anywhere; }
+.d-form-field .lab { font-size: 9px; color: var(--ember); white-space: normal; }
+.d-form-field a { color: var(--bone); border-bottom: 1px solid rgba(243,236,220,.3); align-self: flex-start; }
+.d-form-reply { align-self: flex-start; margin-top: 4px; }
+@media (max-width: 700px) {
+  .d-forms { padding-bottom: 96px; }
+  .d-form-item > summary { padding: 14px 16px; }
+  .d-form-who { font-size: 19px; }
+  .d-form-peek { font-size: 15px; }
+  .d-form-body { padding: 14px 16px 18px; }
+  .d-form-field { font-size: 16px; }
+  .d-form-reply { align-self: stretch; text-align: center; }
 }
