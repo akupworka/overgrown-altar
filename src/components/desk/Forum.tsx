@@ -113,7 +113,7 @@ function Crumbs({ board, thread }: { board?: Board | null; thread?: string }) {
 
 // ---------------------------------------------------------------- the boards
 
-export function ForumIndex({ me }: { me?: string } = {}) {
+export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: boolean } = {}) {
   const [boards, setBoards] = useState<Board[] | null>(null);
   const [opening, setOpening] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -138,11 +138,11 @@ export function ForumIndex({ me }: { me?: string } = {}) {
         <p className="it mut fo-sub">Where the Guild talks between pieces: ideas in progress, craft, photographs, books, and prayer. Only members can see it.</p>
         {boards && <span className="lab mut">{boards.length} {boards.length === 1 ? 'forum' : 'forums'} · {threads.length} {threads.length === 1 ? 'thread' : 'threads'} · {posts} {posts === 1 ? 'post' : 'posts'}</span>}
         <div className="fo-index-acts">
-          <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>
+          {isEditor && <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
           <Link to="/guild/members/?view=rules" className="fo-rules-link lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg>The forum rules</Link>
         </div>
       </header>
-      {opening && <NewForum onDone={(slug) => go(`/guild/members/?board=${slug}`)} onCancel={() => setOpening(false)} />}
+      {isEditor && opening && <NewForum onDone={(slug) => go(`/guild/members/?board=${slug}`)} onCancel={() => setOpening(false)} />}
       {!boards ? <p className="lab mut">Opening the forum…</p> : (
         <ol className="fo-boards">
           {boards.map((b) => {
@@ -180,7 +180,7 @@ const FORUM_PER = 20;
 const THREADS_PER = 10;
 const MAX_REPLIES = 200;
 
-// Any member may open a forum: a name, a line about it, and a window of glass for its picture.
+// The editor opens a forum: a name, a line about it, and a window of glass for its picture.
 const FORUM_PICTURES = Array.from({ length: 12 }, (_, i) => `/images/seats/seat-${i + 1}.jpg`);
 function NewForum({ onDone, onCancel }: { onDone: (slug: string) => void; onCancel: () => void }) {
   const [name, setName] = useState('');
@@ -200,7 +200,7 @@ function NewForum({ onDone, onCancel }: { onDone: (slug: string) => void; onCanc
   return (
     <form className="fo-compose fo-newforum" onSubmit={make}>
       <span className="eb">Open a new forum</span>
-      <p className="it mut fo-sub">A room for a subject the Guild keeps returning to. Everyone may start threads in it, and the forum rules apply.</p>
+      <p className="it mut fo-sub">A room for a subject the Guild keeps returning to. Every member may start threads in it, and the forum rules apply.</p>
       <label className="d-lbl"><span className="lab">Name</span>
         <input className="field" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder="The Lantern Room" autoFocus /></label>
       <label className="d-lbl"><span className="lab">What it’s for</span>
@@ -602,7 +602,7 @@ const RULES: { h: string; p: string[] }[] = [
     'No spam, advertising, fundraising, or selling without the editor’s permission.' ] },
   { h: 'Using the forums', p: [
     'Keep threads to the forum they belong in, and search before starting a new one.',
-    'Any member may open a new forum for a subject the Guild keeps returning to. Only the Editor in Chief starts threads in From the Editor’s Desk.',
+    'Any member may start a thread in a forum and reply to others. The Editor in Chief opens new forums, and only the editor starts threads in From the Editor’s Desk. Have an idea for a forum? Ask in Questions for the Editor.',
     'Each forum keeps its 40 most active threads; the quietest are cleared to make room. Pinned threads always stay. A thread closes once it reaches 200 replies: start a new one to carry the conversation on.' ] },
   { h: 'When rules are broken', p: [
     'Tell the Editor in Chief through Questions for the Editor or the Contact page. You will be taken seriously, and your name kept private.',
