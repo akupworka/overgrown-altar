@@ -44,6 +44,12 @@ const imageUrl = new URL(image, site).toString();
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#060806" />
+    <!-- Added to a phone's home screen, the site opens full-screen like an app -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="The Guild" />
 
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
     <!-- Signed in to the Guild? Known before anything is drawn, so members never see the visitors' header flash by. -->
