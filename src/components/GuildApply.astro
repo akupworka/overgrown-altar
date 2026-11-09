@@ -1,0 +1,130 @@
+---
+// The Guild application: three steps (about you, your work, faith & commitment), sent to Netlify Forms ("guild-application").
+// Used on /guild/ and on /join/. Its look lives in src/styles/guild.css.
+---
+<!-- Applications arrive in Netlify > Forms ("guild-application"). You then invite the people you choose. -->
+<section class="apply" id="apply">
+  <img class="apply-bg" src="/images/tall-windows-dark-vault-1200.jpg" alt="" aria-hidden="true" loading="lazy" />
+  <div class="apply-in">
+    <div class="apply-side">
+      <span class="eb">Apply</span>
+      <h2 class="h2 apply-title">Pull up a chair.</h2>
+      <p class="it apply-lead">Every application is read by the Editor in Chief. Answer as you would at the table; it takes about ten minutes.</p>
+      <ol class="apply-steps">
+        <li class="on"><span class="num">I</span><span><b>About you</b><em>Who you are and where to find you.</em></span></li>
+        <li><span class="num">II</span><span><b>Your work</b><em>What you make, and a sample of it.</em></span></li>
+        <li><span class="num">III</span><span><b>Faith &amp; commitment</b><em>Your walk, a reference, and a few agreements.</em></span></li>
+      </ol>
+      <span class="apply-bar" aria-hidden="true"><i></i></span>
+      <p class="apply-promise">You’ll hear back from us <b>within three days</b>. If there is a seat for you, your invitation will arrive by email.</p>
+    </div>
+    <div class="apply-card">
+<form name="guild-application" method="POST" action="/thanks/?for=guild" data-netlify="true" netlify-honeypot="company" class="ap" novalidate>
+<input type="hidden" name="form-name" value="guild-application" />
+<p class="visually-hidden"><label>Leave this empty <input name="company" tabindex="-1" /></label></p>
+
+<fieldset class="ap-step" data-step="0">
+  <legend class="ap-h"><span class="num">I</span><span class="ap-of">Step 1 of 3</span>About you</legend>
+  <div class="ap-row"><label class="dw-field"><span class="dw-label">Your name</span><span class="dw-line-row"><input name="name" autocomplete="name" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Email</span><span class="dw-line-row"><input type="email" name="email" autocomplete="email" required /></span></label></div>
+  <div class="ap-row"><label class="dw-field"><span class="dw-label">Where you are based</span><span class="dw-line-row"><input name="location" placeholder="City, country" required /></span></label>
+  <label class="dw-field"><span class="dw-label">Website or portfolio (optional)</span><span class="dw-line-row"><input name="website" type="url" inputmode="url" placeholder="https://" /></span></label></div>
+  <label class="dw-field"><span class="dw-label">How you heard of the Guild</span><span class="dw-line-row"><input name="heard" placeholder="A friend, Instagram, a piece you read…" /></span></label>
+</fieldset>
+
+<fieldset class="ap-step" data-step="1" hidden>
+  <legend class="ap-h"><span class="num">II</span><span class="ap-of">Step 2 of 3</span>Your work</legend>
+  <label class="dw-field"><span class="dw-label">What you make</span><span class="dw-line-row"><input name="craft" placeholder="Essays, poems, fiction, photographs…" required /></span></label>
+  <div class="dw-field"><span class="dw-label ap-label-row">Which rooms you would write for <a class="ap-forms" href="/crafts/" target="_blank" rel="noopener">Not sure? See what each room publishes →</a></span>
+    <div class="dw-topics ap-pillars" data-need-one>
+      <label class="dw-topic"><input type="checkbox" name="pillar-watchtower" value="yes" />The Watchtower</label>
+      <label class="dw-topic"><input type="checkbox" name="pillar-hearth" value="yes" />The Hearth</label>
+      <label class="dw-topic"><input type="checkbox" name="pillar-perimeter" value="yes" />The Perimeter</label>
+      <label class="dw-topic ap-all"><input type="checkbox" name="pillar-all" value="yes" />All three</label>
+    </div>
+  </div>
+  <label class="dw-field"><span class="dw-label">Where your work has appeared</span><span class="dw-line-row"><textarea name="experience" rows="3" placeholder="Publications, blogs, exhibitions, or “nowhere yet”: that is fine."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">A sample of your work</span><span class="dw-line-row"><textarea name="sample" rows="6" required placeholder="Paste 150 to 500 words, or a link to a piece or a gallery."></textarea></span><span class="ap-hint">Your best short piece, or an excerpt. Photographers and designers: a link to your images.</span></label>
+</fieldset>
+
+<fieldset class="ap-step" data-step="2" hidden>
+  <legend class="ap-h"><span class="num">III</span><span class="ap-of">Step 3 of 3</span>Faith &amp; commitment</legend>
+  <label class="dw-field"><span class="dw-label">Your walk with Christ</span><span class="dw-line-row"><textarea name="faith" rows="4" required placeholder="A few honest lines, and where you worship."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">Why this table?</span><span class="dw-line-row"><textarea name="why" rows="3" required placeholder="What you hope to bring, and to be sharpened in."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">A reference</span><span class="dw-line-row"><input name="reference" required placeholder="Someone who knows you or your work: name and how to reach them" /></span><span class="ap-hint">A pastor, an editor, a teacher, a friend in the faith.</span></label>
+  <div class="dw-field"><span class="dw-label">How often you could bring work</span>
+    <div class="dw-topics">
+      <label class="dw-topic"><input type="radio" name="commitment" value="Monthly" required />Monthly</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="Each season" />Each season</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="When something is ready" />When it is ready</label>
+    </div>
+  </div>
+  <div class="ap-agree">
+    <label class="ap-check"><input type="checkbox" name="read-beliefs" value="yes" required /><span>I have read <a href="/beliefs" target="_blank" rel="noopener">What We Believe</a> and <a href="/manifesto" target="_blank" rel="noopener">the Manifesto</a>, and can write within them.</span></label>
+    <label class="ap-check"><input type="checkbox" name="accept-editing" value="yes" required /><span>I understand every piece is read, and may be edited or returned, before it is published.</span></label>
+    <label class="ap-check"><input type="checkbox" name="over-18" value="yes" required /><span>I am 18 or older.</span></label>
+  </div>
+</fieldset>
+
+<p class="ap-msg" role="alert" hidden></p>
+<div class="ap-nav">
+  <button type="button" class="dw-text ap-back" hidden>← Back</button>
+  <button type="button" class="dw-send ap-next">Next <span aria-hidden="true">→</span></button>
+  <button type="submit" class="dw-send ap-submit" hidden>Send my application <span aria-hidden="true">→</span></button>
+</div>
+</form>
+    </div>
+  </div>
+</section>
+
+<script>
+  // The application in three steps. Each step checks its own answers before moving on; everything is sent together.
+  const form = document.querySelector<HTMLFormElement>('form.ap');
+  if (form) {
+    const steps = [...form.querySelectorAll<HTMLFieldSetElement>('.ap-step')];
+    const marks = [...document.querySelectorAll<HTMLElement>('.apply-steps li')];
+    const bar = document.querySelector<HTMLElement>('.apply-bar i');
+    const back = form.querySelector<HTMLButtonElement>('.ap-back')!, next = form.querySelector<HTMLButtonElement>('.ap-next')!, send = form.querySelector<HTMLButtonElement>('.ap-submit')!;
+    const msg = form.querySelector<HTMLElement>('.ap-msg')!;
+    let at = 0;
+    if (bar) bar.style.width = `${Math.round(100 / steps.length)}%`;
+    const show = (i: number) => {
+      at = i;
+      steps.forEach((s, j) => (s.hidden = j !== i));
+      marks.forEach((m, j) => { m.classList.toggle('on', j === i); m.classList.toggle('done', j < i); });
+      if (bar) bar.style.width = `${Math.round(((i + 1) / steps.length) * 100)}%`;
+      back.hidden = i === 0; next.hidden = i === steps.length - 1; send.hidden = i !== steps.length - 1;
+      msg.hidden = true;
+      if (matchMedia('(max-width: 900px)').matches) form.closest('.apply-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const ok = (i: number) => {
+      const step = steps[i];
+      for (const el of step.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')) {
+        if (!el.checkValidity()) { el.reportValidity(); return false; }
+      }
+      const group = step.querySelector('[data-need-one]');
+      if (group && !group.querySelector('input:checked')) { msg.textContent = 'Choose at least one room you would write for.'; msg.hidden = false; return false; }
+      const sample = step.querySelector<HTMLTextAreaElement>('textarea[name="sample"]');
+      if (sample && sample.value.trim().split(/\s+/).length < 40 && !/https?:\/\//.test(sample.value)) { msg.textContent = 'Please share a little more of your work: at least a paragraph, or a link.'; msg.hidden = false; sample.focus(); return false; }
+      return true;
+    };
+    // "All three" ticks every room; unticking any room unticks "All three".
+    const rooms = [...form.querySelectorAll<HTMLInputElement>('.ap-pillars input:not([name="pillar-all"])')];
+    const all = form.querySelector<HTMLInputElement>('input[name="pillar-all"]');
+    all?.addEventListener('change', () => rooms.forEach((r) => (r.checked = all.checked)));
+    rooms.forEach((r) => r.addEventListener('change', () => { if (all) all.checked = rooms.every((x) => x.checked); }));
+    next.addEventListener('click', () => { if (ok(at)) show(at + 1); });
+    back.addEventListener('click', () => show(at - 1));
+    // Enter in a field moves to the next step; only the last step can send, and only when every step is complete.
+    form.addEventListener('submit', (e) => {
+      if (at < steps.length - 1) { e.preventDefault(); if (ok(at)) show(at + 1); return; }
+      for (let i = 0; i < steps.length; i++) {
+        if (i !== at) steps[i].hidden = false;
+        const good = ok(i);
+        if (i !== at) steps[i].hidden = true;
+        if (!good) { e.preventDefault(); show(i); ok(i); return; }
+      }
+    });
+  }
+</script>
+

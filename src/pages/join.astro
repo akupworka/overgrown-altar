@@ -1,0 +1,178 @@
+---
+// Join: two doors, side by side (stacked on phones). The Fellowship, for readers: free and open to all.
+// The Guild, for writers and photographers: by application, read by the editor. Choosing a door opens its form below.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import FellowshipJoin from '../components/FellowshipJoin.astro';
+import GuildApply from '../components/GuildApply.astro';
+import '../styles/doorway.css';
+import '../styles/guild.css';
+---
+<BaseLayout title="Join" description="Two ways to the table: the Fellowship, for readers, free and open to all; or the Guild, for writers and photographers, by application.">
+  <SiteNav />
+  <section class="jn" aria-label="Choose your way in">
+    <a class="jn-door jn-f" href="#fellowship" data-door="fellowship">
+      <img src="/images/window-of-the-ascension-and.jpg" alt="" fetchpriority="high" />
+      <span class="jn-veil"></span>
+      <span class="jn-in">
+        <span class="eb">For readers</span>
+        <span class="jn-t">The Fellowship</span>
+        <span class="it jn-line">Free, and open to all.</span>
+        <span class="jn-pts">
+          <span><b>Collect</b> the pieces and photographs you love</span>
+          <span><b>Converse</b> with the Guild, by message and in the Forum</span>
+          <span><b>Follow</b> the writers whose work stays with you</span>
+        </span>
+        <span class="jn-go">Join the Fellowship <i aria-hidden="true">→</i></span>
+      </span>
+    </a>
+    <a class="jn-door jn-g" href="#guild" data-door="guild">
+      <img src="/images/format-guild.jpg" alt="" fetchpriority="high" />
+      <span class="jn-veil"></span>
+      <span class="jn-in">
+        <span class="eb">For writers &amp; photographers</span>
+        <span class="jn-t">The Guild</span>
+        <span class="it jn-line">By application. Every one is read.</span>
+        <span class="jn-pts">
+          <span><b>Apply</b> with a sample of your work</span>
+          <span><b>Be read</b> by the Editor in Chief, within three days</span>
+          <span><b>Take your seat</b>: write, publish, and climb the prestiges</span>
+        </span>
+        <span class="jn-go">Apply to the Guild <i aria-hidden="true">→</i></span>
+      </span>
+    </a>
+    <span class="jn-or lab" aria-hidden="true">or</span>
+  </section>
+
+  <!-- The Fellowship: what it is, then the form -->
+  <section class="sec dark jn-path" id="fellowship" hidden>
+    <div class="jn-path-in">
+      <div class="jn-path-text">
+        <span class="eb">The Fellowship</span>
+        <h2 class="h2">Keep company with the Guild.</h2>
+        <p class="it mut">The Fellowship is for those who come to read and to look. You won’t publish here; you’ll gather.</p>
+        <ol class="jn-list">
+          <li><span class="num">I</span><span><b>A collection of your own.</b> Save any piece or photograph; your collection is open for others to see.</span></li>
+          <li><span class="num">II</span><span><b>Conversation.</b> Write to any member, and pull up a chair in the Forum.</span></li>
+          <li><span class="num">III</span><span><b>A daily letter</b>, only when something is waiting: replies, messages, new work from writers you follow.</span></li>
+          <li><span class="num">IV</span><span><b>In time, the Guild.</b> If you begin to make work of your own, you can apply for a seat at the table.</span></li>
+        </ol>
+        <a class="lab jn-switch" href="#guild" data-door="guild">Here to write? Apply to the Guild instead →</a>
+      </div>
+      <FellowshipJoin />
+    </div>
+  </section>
+
+  <!-- The Guild: the vetting, then the application -->
+  <section class="jn-path jn-path-g" id="guild" hidden>
+    <div class="sec paper jn-vet">
+      <div class="jn-path-in jn-vet-in">
+        <div class="jn-path-text">
+          <span class="eb">The Guild</span>
+          <h2 class="h2">How a seat is given.</h2>
+          <p class="it mut">The Guild is a working table of writers and photographers. Seats are given by application, so that what goes on the altar is worth the reading.</p>
+          <a class="lab jn-switch" href="#fellowship" data-door="fellowship">Here to read? Join the Fellowship instead →</a>
+        </div>
+        <ol class="jn-steps">
+          <li><span class="num">1</span><b>Apply</b><span>About ten minutes: who you are, a sample of your work, your faith, a reference.</span></li>
+          <li><span class="num">2</span><b>We read it</b><span>The Editor in Chief reads every application, and answers within three days.</span></li>
+          <li><span class="num">3</span><b>An invitation</b><span>If there is a seat for you, it arrives by email.</span></li>
+          <li><span class="num">4</span><b>Take your seat</b><span>Fill in your page, then write your first piece at the Desk.</span></li>
+        </ol>
+        <div class="jn-ask">
+          <span class="lab">What we ask of members</span>
+          <p>Craft over content · Truth with charity · Your own hand · A teachable spirit · Faithful presence · Discretion. <a href="/guild/#expectations">Read them in full →</a></p>
+        </div>
+      </div>
+    </div>
+    <GuildApply />
+  </section>
+</BaseLayout>
+
+<script>
+  // Choosing a door opens its path below (and the address remembers it: /join/#fellowship or /join/#guild).
+  const doors = [...document.querySelectorAll<HTMLAnchorElement>('.jn-door')];
+  const paths = { fellowship: document.getElementById('fellowship')!, guild: document.getElementById('guild')! };
+  const open = (which: 'fellowship' | 'guild', scroll = true) => {
+    (Object.keys(paths) as ('fellowship' | 'guild')[]).forEach((k) => (paths[k].hidden = k !== which));
+    doors.forEach((d) => { d.classList.toggle('chosen', d.dataset.door === which); d.classList.toggle('other', d.dataset.door !== which); });
+    history.replaceState(null, '', '#' + which);
+    if (scroll) requestAnimationFrame(() => paths[which].scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
+  document.querySelectorAll<HTMLAnchorElement>('[data-door]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); open(a.dataset.door as 'fellowship' | 'guild'); }));
+  const start = location.hash.replace('#', '');
+  if (start === 'fellowship' || start === 'guild' || start === 'apply') open(start === 'apply' ? 'guild' : start, false);
+</script>
+
+<style>
+  /* Two doors: side by side on a computer, one above the other on a phone */
+  .jn { position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; min-height: 100svh; background: #060806; }
+  .jn-door { position: relative; overflow: hidden; display: flex; align-items: flex-end; color: var(--bone); isolation: isolate; }
+  .jn-door img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transform: scale(1.02); transition: transform 1.6s var(--ease, ease), opacity .6s; }
+  .jn-f img { object-position: center 30%; }
+  .jn-g img { object-position: center 40%; }
+  .jn-veil { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .35) 35%, rgba(6, 8, 6, .92) 100%); transition: opacity .6s; }
+  .jn-g .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .6) 0%, rgba(6, 8, 6, .4) 35%, rgba(6, 8, 6, .94) 100%); }
+  .jn-door + .jn-door { box-shadow: inset 1px 0 0 rgba(255, 227, 163, .25); }
+  .jn-in { display: flex; flex-direction: column; gap: 14px; padding: 0 56px 72px; max-width: 560px; transition: transform .7s var(--ease, ease); }
+  .jn-t { font-family: var(--serif); font-weight: 400; font-size: 64px; line-height: 1; }
+  .jn-line { font-size: 22px; color: #E6DFD0; }
+  .jn-pts { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; font-family: var(--serif); font-size: 18px; line-height: 1.4; color: #CFC8B8; }
+  .jn-pts b { font-weight: 500; color: var(--bone); }
+  .jn-go { align-self: flex-start; margin-top: 16px; display: inline-flex; gap: 12px; align-items: center; padding: 15px 26px; border-radius: 999px;
+    font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; transition: background .35s, color .35s, box-shadow .35s; }
+  .jn-f .jn-go { background: var(--bone); color: #12160F; }
+  .jn-g .jn-go { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); background: rgba(6, 8, 6, .35); }
+  .jn-go i { font-style: normal; transition: transform .4s var(--ease, ease); }
+  .jn-door:hover img { transform: scale(1.07); }
+  .jn-door:hover .jn-in { transform: translateY(-6px); }
+  .jn-door:hover .jn-go i { transform: translateX(4px); }
+  .jn-f:hover .jn-go { background: var(--ember); }
+  .jn-g:hover .jn-go { background: rgba(255, 227, 163, .1); }
+  .jn-door.other img { opacity: .45; }
+  .jn-door.chosen .jn-go { box-shadow: 0 0 0 1px var(--ember), 0 10px 30px -12px rgba(255, 214, 140, .5); }
+  .jn-or { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: #0B0D0A; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); font-size: 10px; pointer-events: none; }
+
+  /* The chosen path */
+  .jn-path[hidden] { display: none; }
+  .jn-path { scroll-margin-top: 70px; }
+  .jn-path-in { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 480px); gap: 64px; align-items: start; }
+  .jn-path-text { display: flex; flex-direction: column; gap: 16px; }
+  .jn-path-text .h2 { margin: 0; }
+  .jn-path-text > .it { margin: 0; font-size: 20px; line-height: 1.5; }
+  .jn-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  .jn-list li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; font-family: var(--serif); font-size: 19px; line-height: 1.45; color: #CFC8B8; }
+  .jn-list .num { color: var(--ember); font-size: 22px; }
+  .jn-list b { font-weight: 500; color: var(--bone); }
+  .jn-switch { align-self: flex-start; margin-top: 10px; color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; }
+  .paper .jn-switch { color: var(--oxblood); border-bottom-color: rgba(98, 55, 45, .35); }
+  .jn-vet-in { grid-template-columns: 1fr; gap: 34px; }
+  .jn-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .jn-steps li { display: flex; flex-direction: column; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(42, 32, 23, .25); }
+  .jn-steps .num { font-size: 40px; color: var(--oxblood); line-height: 1; }
+  .jn-steps b { font-family: var(--serif); font-weight: 500; font-size: 24px; }
+  .jn-steps span:last-child { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.45; color: var(--muted-paper); }
+  .jn-ask { padding: 20px 24px; border-radius: 14px; background: rgba(42, 32, 23, .05); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .14); }
+  .jn-ask p { margin: 8px 0 0; font-family: var(--serif); font-size: 19px; line-height: 1.5; }
+  .jn-ask a { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); }
+
+  @media (max-width: 900px) {
+    .jn { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; min-height: calc(100svh - 0px); }
+    .jn-door + .jn-door { box-shadow: inset 0 1px 0 rgba(255, 227, 163, .25); }
+    .jn-door { min-height: 50svh; }
+    .jn-f .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .62) 40%, rgba(6, 8, 6, .9) 100%); }
+    .jn-in { padding: 90px 22px 30px; gap: 8px; }
+    .jn-g .jn-in { padding-top: 46px; }
+    .jn-t { font-size: 40px; }
+    .jn-line { font-size: 18px; }
+    .jn-pts { font-size: 15.5px; gap: 4px; }
+    .jn-go { margin-top: 10px; padding: 13px 20px; font-size: 9.5px; }
+    .jn-or { width: 44px; height: 44px; font-size: 9px; }
+    .jn-path-in { grid-template-columns: 1fr; gap: 34px; }
+    .jn-steps { grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+    .jn-steps b { font-size: 20px; }
+    .jn-steps span:last-child { font-size: 15.5px; }
+    .jn-list li { font-size: 17px; }
+  }
+</style>

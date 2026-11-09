@@ -1,0 +1,64 @@
+---
+// The Fellowship sign-up card (name, email): used on /fellowship/ and /join/. Sends to netlify/functions/join-fellowship.mts.
+---
+<div class="fs-card">
+  <span class="eb">Join</span>
+  <h2 class="h2 fs-h">Take your place.</h2>
+  <p class="it mut fs-sub">It’s free. We’ll email you a link to choose your password.</p>
+  <form class="fs-form" novalidate>
+    <label class="fs-lbl"><span class="lab">Your name</span><input class="field" name="name" autocomplete="name" required maxlength="80" /></label>
+    <label class="fs-lbl"><span class="lab">Email</span><input class="field" name="email" type="email" autocomplete="email" inputmode="email" required /></label>
+    <label class="fs-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+    <button type="submit" class="btn fs-go">Join the Fellowship</button>
+    <p class="it fs-msg" role="status"></p>
+  </form>
+  <div class="fs-done" hidden>
+    <p class="fs-done-h">Check your email.</p>
+    <p class="it mut">A welcome letter is on its way to <b class="fs-to"></b>. Open it and choose your password to take your place.</p>
+  </div>
+  <p class="lab mut fs-alt">Already one of us? <a href="/guild/desk/">Sign in</a> · Writers: <a href="/guild/">apply to the Guild</a></p>
+</div>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.fs-form')!;
+  const msg = form.querySelector<HTMLElement>('.fs-msg')!, go = form.querySelector<HTMLButtonElement>('.fs-go')!;
+  const since = Date.now();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(form), name = String(f.get('name') ?? '').trim(), email = String(f.get('email') ?? '').trim();
+    if (!name) { msg.textContent = 'Please tell us your name.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'That email address doesn’t look right.'; return; }
+    go.disabled = true; go.textContent = 'One moment…'; msg.textContent = '';
+    const res = await fetch('/.netlify/functions/join-fellowship', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, website: f.get('website'), since }) }).catch(() => null);
+    const out = res ? await res.json().catch(() => ({})) : {};
+    go.disabled = false; go.textContent = 'Join the Fellowship';
+    if (!res || !res.ok || !out.ok) { msg.textContent = out.error || 'Something went wrong. Please try again.'; return; }
+    form.hidden = true;
+    const done = document.querySelector<HTMLElement>('.fs-done')!; done.hidden = false;
+    done.querySelector('.fs-to')!.textContent = out.email;
+  });
+</script>
+
+<style>
+  .fs-hero { height: 680px; }
+  .fs-hero-c { top: 230px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .fs-card { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 14px; padding: 40px 36px; border-radius: 20px;
+  .fs-h { margin: 0; }
+  .fs-sub { margin: 0 0 8px; font-size: 18px; }
+  .fs-form { display: flex; flex-direction: column; gap: 18px; }
+  .fs-lbl { display: flex; flex-direction: column; gap: 8px; }
+  .fs-lbl .field { color-scheme: dark; }
+  .fs-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .fs-go { margin-top: 6px; }
+  .fs-go:disabled { opacity: .6; }
+  .fs-msg { margin: 0; min-height: 1.2em; font-size: 17px; color: var(--ember); }
+  .fs-done[hidden], .fs-form[hidden] { display: none; }
+  .fs-done-h { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; color: var(--ember); }
+  .fs-done p { margin: 0; font-size: 18px; line-height: 1.5; }
+  .fs-alt { margin-top: 10px; font-size: 9.5px; line-height: 2; }
+  .fs-alt a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .35); }
+    .fs-hero { height: 560px; }
+    .fs-hero-c { top: 170px; padding: 0 20px; }
+  @media (max-width: 700px) { .fs-card { padding: 28px 20px; } }
+</style>
