@@ -471,6 +471,25 @@ function KindMark({ medium }: { medium: string }) {
   );
 }
 
+// The rarer things you can do with a piece, folded behind a small "⋯" (phones).
+function MoreActions({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: Event) => { const d = ref.current; if (d?.open && !d.contains(e.target as Node)) d.open = false; };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && ref.current) ref.current.open = false; };
+    document.addEventListener('pointerdown', close); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', esc); };
+  }, []);
+  return (
+    <details ref={ref} className="d-act-more">
+      <summary aria-label="More actions">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
+      </summary>
+      <div className="d-act-list" onClick={() => { if (ref.current) ref.current.open = false; }}>{children}</div>
+    </details>
+  );
+}
+
 function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
   const tally = useForumTally(profile?.id);
   // Which pieces to show: all, or one state; six to a page, newest first.
@@ -516,24 +535,40 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
     { key: 'live', label: 'Published', has: (p) => p.status === 'approved', filter: 'live' },
     { key: 'declined', label: 'Declined', has: (p) => p.status === 'declined' },
   ];
-  // One piece, as a card.
-  const card = (p: Piece) => (
-            <li key={p.id} className="d-item">
+  // One piece, as a card. On a phone the whole card opens the piece, and the rarer actions wait behind "⋯".
+  const card = (p: Piece) => {
+    const editable = p.status === 'draft' || p.status === 'returned';
+    const openable = editable || p.status === 'approved';
+    const openLabel = editable ? 'Continue writing' : p.revision ? 'Edit your changes' : 'Edit';
+    return (
+            <li key={p.id} className={`d-item${openable ? ' d-openable' : ''}`}>
+              {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
                 <span className="d-meta"><StatusChip status={p.status} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <div className="d-item-actions">
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
+                {editable && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
                 {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
                 {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
-                {(p.status === 'draft' || p.status === 'returned') && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
+                {editable && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
+              {/* Phones: the same actions, folded */}
+              {(openable || p.status === 'submitted' || isEditor) && (
+                <MoreActions>
+                  {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
+                  {p.status === 'approved' && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
+                  {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                  {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
+                  {editable && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
+                </MoreActions>
+              )}
             </li>
-  );
+    );
+  };
 
   return (
     <section className="d-section d-home">

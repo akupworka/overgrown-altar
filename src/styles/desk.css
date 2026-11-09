@@ -1209,3 +1209,32 @@
   .d-pl-line, .d-pl-go { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .d-pl img, .d-pl-go { transition: none; } }
+
+/* ---- My pieces on phones: compact cards. The card opens the piece; "⋯" holds the rest. Computers unchanged. ---- */
+.d-item-open, .d-act-more { display: none; }
+@media (max-width: 700px) {
+  .d-home .d-list > .d-item { position: relative; padding: 14px 52px 14px 14px !important; gap: 8px !important; }
+  .d-home .d-item-actions { display: none !important; }
+  .d-item-open { display: block; position: absolute; inset: 0; z-index: 1; width: 100%; border: 0; padding: 0; background: none; border-radius: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .d-item-open:active { background: rgba(255, 227, 163, .04); }
+  .d-item-open:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
+  .d-home .d-item-main { gap: 6px !important; pointer-events: none; }
+  .d-home .d-item-head { gap: 10px !important; }
+  .d-home .d-item-title { font-size: 20px !important; }
+  /* status, pillar, words and date on one quiet line */
+  .d-home .d-item .d-meta { gap: 4px 10px; padding-left: 38px; }
+  .d-home .d-item .d-meta .d-status, .d-item .d-meta .lab { font-size: 8.5px !important; letter-spacing: .14em; }
+  .d-home .d-item .d-note { margin: 4px 0 0; pointer-events: auto; }
+  .d-act-more { display: block; position: absolute; top: 10px; right: 8px; z-index: 2; }
+  .d-act-more summary { list-style: none; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; color: var(--muted-dark); }
+  .d-act-more summary::-webkit-details-marker { display: none; }
+  .d-act-more[open] summary { color: var(--ember); background: rgba(255, 227, 163, .08); }
+  .d-act-list { position: absolute; right: 0; top: calc(100% + 4px); min-width: 190px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px;
+    background: #14170F; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14), 0 18px 40px rgba(0, 0, 0, .6); }
+  .d-act-item { display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; padding: 13px 14px; border-radius: 9px; text-decoration: none;
+    font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone); }
+  .d-act-item:active { background: rgba(243, 236, 220, .06); }
+  .d-act-item.d-danger { color: #E8A091; }
+  .d-home .d-list { gap: 8px !important; }
+}
+@media (max-width: 700px) { .d-act-more[open] { z-index: 30; } .d-home .d-list > .d-item:has(.d-act-more[open]) { z-index: 30; } }
