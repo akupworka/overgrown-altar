@@ -795,8 +795,7 @@
 /* Phones: a fade to black behind the bottom tab bar, so writing melts away before it instead of showing beneath it. */
 @media (max-width: 700px) {
   .d-tabbar::before { content: ''; position: absolute; z-index: -1; pointer-events: none;
-    left: -12px; right: -12px; top: 32px; bottom: calc(-12px - env(safe-area-inset-bottom));
-    background: #0A0C0A; }   /* only beneath the bar: no fade above it */
+    display: none; }   /* nothing behind the bar: it floats on the page by itself */
 }
 
 /* Phones: an arrow at the end of the formatting bar, with a fade, until the bar is scrolled to its end */
