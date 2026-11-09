@@ -52,9 +52,9 @@ function Arch({ p, big = false }: { p: Pick<Profile, 'display_name' | 'portrait_
 function Directory() {
   const [members, setMembers] = useState<(Profile & { count: number })[] | null>(null);
   const [q, setQ] = useState('');   // find a member by name or craft
-  // Members shown before "Show more": 25 on a computer (five full rows of five), 24 on a phone (six rows of four)
+  // Members a page: 25 on a computer (five full rows of five), 24 on a phone (six rows of four)
   const STEP = typeof window !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 24 : 25;
-  const [seen, setSeen] = useState(STEP);
+  const [mPage, setMPage] = useState(1);
   const [mine, setMine] = useState<number | null>(null);   // your own published count, for your crest on the Prestiges tile
   // For the rooms: your own work (Desk counts, trophies), and the newest photographs (the Gallery's mosaic).
   const [myPieces, setMyPieces] = useState<Piece[]>([]);
@@ -86,6 +86,9 @@ function Directory() {
       }
     })();
   }, []);
+  const found = (members ?? []).filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const mPages = Math.max(1, Math.ceil(found.length / STEP)), mCur = Math.min(mPage, mPages);
+  const turnM = (n: number) => { setMPage(n); document.querySelector('.g-people-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   return (
     <div className="g-wrap">
       <header className="g-head">
@@ -160,14 +163,14 @@ function Directory() {
         <label className="g-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <span className="visually-hidden">Find a member</span>
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a member by name or craft" />
+          <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setMPage(1); }} placeholder="Find a member by name or craft" />
         </label>
       )}
       {!members ? <p className="lab mut">Gathering the Guild…</p>
         : members.length === 0 ? <p className="it mut d-empty">No one is listed yet.</p>
         : (
           <div className="g-grid">
-            {members.filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).slice(0, q.trim() ? undefined : seen).map((m) => (
+            {found.slice((mCur - 1) * STEP, mCur * STEP).map((m) => (
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
@@ -178,8 +181,13 @@ function Directory() {
             ))}
           </div>
         )}
-      {members && !q.trim() && members.length > seen && (
-        <div className="m-grid-more g-more"><button type="button" className="d-link" onClick={() => setSeen((n) => n + STEP)}>Show more · {members.length - seen} more</button></div>
+      {mPages > 1 && (
+        <nav className="pager fo-pager g-pager" aria-label="Pages of members">
+          <button type="button" className="pg-step" disabled={mCur === 1} onClick={() => turnM(mCur - 1)} aria-label="Previous page">‹<span className="pg-word">Previous</span></button>
+          {pageList(mCur, mPages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
+            : <button key={n} type="button" className="pg-n" aria-current={n === mCur ? 'page' : undefined} aria-label={`Page ${n} of ${mPages}`} onClick={() => turnM(n)}>{n}</button>)}
+          <button type="button" className="pg-step" disabled={mCur === mPages} onClick={() => turnM(mCur + 1)} aria-label="Next page"><span className="pg-word">Next</span>›</button>
+        </nav>
       )}
     </div>
   );
