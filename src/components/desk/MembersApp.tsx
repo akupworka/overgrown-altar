@@ -19,11 +19,12 @@ import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
+import { InboxList, InboxThread } from './Inbox';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
   const q = new URLSearchParams(location.search);
-  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined };
+  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined, dm: q.get('dm') ?? undefined };
 };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '');
 const pillarName = (v: string) => PILLARS.find((p) => p.value === v)?.label.split(' · ')[0] ?? '';
@@ -252,6 +253,18 @@ function MemberPage({ id, me }: { id: string; me: string }) {
             )}
           </span>
         )}
+        {person.id !== me && (
+          <nav className="m-actions" aria-label="Contact">
+            <button type="button" className="m-act primary" onClick={async () => {
+              const { data, error } = await supabase.rpc('dm_open', { other: person.id });
+              if (error) { alert(error.message); return; }
+              go(`/guild/members/?dm=${data}`);
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
+              Message {person.display_name.split(' ')[0]}
+            </button>
+          </nav>
+        )}
         {person.id === me && (
           <nav className="m-actions" aria-label="My Desk">
             <a className="m-act primary" href="/guild/desk/#write">
@@ -393,7 +406,7 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -421,6 +434,8 @@ export default function MembersApp() {
   if (route.view === 'forum') return <ForumIndex me={session.user.id} isEditor={isEditor} />;
   if (route.view === 'rules') return <ForumRules />;
   if (route.view === 'mine') return <ForumMine me={session.user.id} />;
+  if (route.view === 'inbox') return <InboxList me={session.user.id} />;
+  if (route.dm) return <InboxThread key={route.dm} id={route.dm} me={session.user.id} isEditor={isEditor} />;
   if (route.p) return <Reading id={route.p} />;
   if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
   return <Directory />;

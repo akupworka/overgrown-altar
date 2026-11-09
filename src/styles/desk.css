@@ -1558,3 +1558,10 @@
 }
 @media (min-width: 861px) { .g-tile:has(.g-tile-stats) .g-room-line { display: none !important; } }
 @media (min-width: 861px) { .g-tile-stats { font-size: 8px; letter-spacing: .12em; gap: 4px; white-space: nowrap; } .g-tile-stats b { font-size: 15px; } }
+/* Arrivals: reported conversations */
+.d-reports { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-radius: 14px; background: rgba(232,160,145,.05); box-shadow: inset 0 0 0 1px rgba(232,160,145,.35); }
+.d-reports .eb { margin: 0; color: #F0A99A; }
+.d-reports ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.d-reports li { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.d-rep-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
+.d-rep-text .it { font-size: 17px; color: var(--bone); }

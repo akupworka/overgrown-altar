@@ -60,7 +60,20 @@ const posts = [
   { id: 'p2', thread_id: 'th1', author_id: 'm2', body: 'Glad to be here.', created_at: t(2), edited_at: null },
   { id: 'p3', thread_id: 'th2', author_id: 'm2', body: 'Rereading Gilead, slowly.', created_at: t(2), edited_at: null },
 ];
+// Direct messages: two conversations, one unread.
+const lo = (x, y) => (x < y ? [x, y] : [y, x]);
+const [d1a, d1b] = lo(ME, 'm2'), [d2a, d2b] = lo(ME, 'm3');
+const dm_threads = [
+  { id: 'dm1', a: d1a, b: d1b, last_at: t(5), last_body: 'Would you read my draft before I send it in?', last_from: 'm2', a_read_at: t(3), b_read_at: t(3), a_cleared_at: '1970-01-01', b_cleared_at: '1970-01-01' },
+  { id: 'dm2', a: d2a, b: d2b, last_at: t(2), last_body: 'Thank you, that helped.', last_from: ME, a_read_at: t(2), b_read_at: t(2), a_cleared_at: '1970-01-01', b_cleared_at: '1970-01-01' },
+];
+const dm_messages = [
+  { id: 'dm-1', thread_id: 'dm1', author_id: ME, body: 'Your piece on the lamp road stayed with me all week.', created_at: t(3) },
+  { id: 'dm-2', thread_id: 'dm1', author_id: 'm2', body: 'That means a great deal. I nearly didn’t send it.', created_at: t(4) },
+  { id: 'dm-3', thread_id: 'dm1', author_id: 'm2', body: 'Would you read my draft before I send it in?', created_at: t(5) },
+];
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
+  dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
   forum_tallies: [{ member_id: ME, posts: 14, threads: 3, best_thread: 6, prayer: 1, boards: 2 }] };
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
@@ -111,6 +124,8 @@ const up = () => fetch(BASE).then(() => true, () => false);
       const req = route.request(), url = new URL(req.url());
       const one = (req.headers()['accept'] || '').includes('vnd.pgrst.object');
       if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
+      if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: 240, cap: 300 } });
+      if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
       if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
       const table = url.pathname.split('/rest/v1/')[1];
       if (req.method() !== 'GET') { const body = JSON.parse(req.postData() || '{}'); const row = Array.isArray(body) ? body[0] : body; return route.fulfill({ json: one ? { id: 'new', ...row } : [{ id: 'new', ...row }] }); }

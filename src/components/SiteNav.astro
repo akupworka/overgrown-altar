@@ -60,6 +60,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <a href="/guild/members/?view=forum" data-match="forum" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>The Forum</a>
         <a href="/guild/members/" data-match="members" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>Members</a>
         <a href="/guild/members/?view=prestige" data-match="prestige" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</a>
+        <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>Inbox<span class="inner-n" data-inbox-dot hidden></span></a>
         <a href="/guild/members/" data-match="me" data-spa data-my-page><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
       </div>
       <a href="/guild/desk/#photograph" data-match="photograph" class="inner-photo">
@@ -78,8 +79,9 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <a href="/guild/desk/" data-match="desk"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg><span class="gbar-dot" data-gbar-dot hidden></span></span><span>Desk</span></a>
       <a href="/guild/members/?view=forum" data-match="forum" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg></span><span>Forum</span></a>
       <a href="/guild/desk/#write" data-match="write" class="t-write" aria-haspopup="true" aria-expanded="false"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span><span>Write</span></a>
+      <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg><span class="gbar-n" data-inbox-dot hidden></span></span><span>Inbox</span></a>
       <a href="/guild/members/" data-match="members" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span>Guild</span></a>
-      <a href="/guild/members/" data-match="me" data-spa data-my-page><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg></span><span>Me</span></a>
+      
     </nav>
     <div class="gbar-choose" data-gbar-choose hidden>
       <a href="/guild/desk/#write" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg><span><b>Write a piece</b><i>Prose, poetry, essays, testimony</i></span></a>
@@ -99,6 +101,13 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         const pill = document.querySelector<HTMLElement>('[data-online]');
         const n = document.querySelector<HTMLElement>('[data-online-n]');
         const room = supabase.channel('guild-online', { config: { presence: { key: uid } } });
+        // Unread messages: the count on Inbox, now and as messages arrive.
+        const dot = () => supabase.rpc('dm_unread').then(({ data }) => {
+          const n = typeof data === 'number' ? data : 0;
+          document.querySelectorAll<HTMLElement>('[data-inbox-dot]').forEach((d) => { d.hidden = n === 0; d.textContent = n > 9 ? '9+' : String(n); });
+        });
+        dot();
+        supabase.channel('inbox-dot').on('postgres_changes', { event: '*', schema: 'public', table: 'dm_threads' }, () => dot()).subscribe();
         room.on('presence', { event: 'sync' }, () => {
           const count = Object.keys(room.presenceState()).length;
           if (n) n.textContent = String(Math.max(1, count));
@@ -150,6 +159,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       if (!path.startsWith('/guild/')) return '';   // a public page: no room is lit
       return path.startsWith('/guild/desk')
         ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
+        : q.get('view') === 'inbox' || q.get('dm') ? 'inbox'
         : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('view') === 'mine' || q.get('board') || q.get('t') ? 'forum'
         : q.get('view') === 'prestige' || q.get('view') === 'trophies' ? 'prestige'
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
@@ -370,6 +380,9 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .inner-rooms a[aria-current]::after { opacity: .9; transform: none; }
   .inner-dot { position: absolute; top: 9px; left: 26px; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px #070906; }
   .inner-dot[hidden] { display: none; }
+  .inner-n { min-width: 16px; height: 16px; padding: 0 5px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; margin-left: 2px;
+    background: var(--ember); color: #12160F; font-size: 9px; letter-spacing: 0; }
+  .inner-n[hidden] { display: none; }
   .inner a[hidden] { display: none; }
   /* Write: a dark glass pill ringed in stained glass, the pen in candle gold (the phone's Write button, lying down) */
   .inner .inner-photo { margin-left: auto; margin-right: 10px; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 18px; border-radius: 999px; color: #CFC8B8;

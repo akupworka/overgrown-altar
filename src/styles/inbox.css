@@ -1,0 +1,104 @@
+/* The members' inbox and conversations (components/desk/Inbox.tsx). Dark, like the forum. */
+.ib { width: 100%; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; text-align: left; }
+.ib-head { display: flex; flex-direction: column; gap: 10px; }
+.ib-head .eb { margin: 0; }
+.ib-head .h1 { margin: 0; font-size: clamp(44px, 6vw, 64px); }
+.ib-sub { margin: 0; font-size: 18px; }
+.ib-head-acts { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+.ib-new { display: inline-flex; align-items: center; gap: 9px; padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer; color: var(--ember);
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  background: linear-gradient(180deg, #1C2017, #0B0D0A); box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.45); }
+.ib-new:hover { box-shadow: inset 0 1px 0 rgba(255,236,190,.14), inset 0 0 0 1px rgba(255,227,163,.8); }
+
+/* Choosing who to message */
+.ib-pick { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: rgba(243,236,220,.025); box-shadow: inset 0 0 0 1px rgba(255,227,163,.25); }
+.ib-find { max-width: none; }
+.ib-people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; }
+.ib-person { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 8px; border: 0; border-radius: 10px; background: none; cursor: pointer; text-align: left; color: var(--bone);
+  font-family: var(--serif); font-size: 19px; }
+.ib-person:hover { background: rgba(255,227,163,.05); color: var(--ember); }
+.ib-person .lab { margin-left: auto; font-size: 8.5px; }
+
+/* The list */
+.ib-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ib-row { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; color: var(--bone);
+  background: rgba(243,236,220,.025); box-shadow: inset 0 0 0 1px rgba(243,236,220,.08); transition: box-shadow .3s, background-color .3s; }
+.ib-row:hover { box-shadow: inset 0 0 0 1px rgba(255,227,163,.4); }
+.ib-row.new { background: rgba(255,227,163,.045); box-shadow: inset 0 0 0 1px rgba(255,227,163,.3); }
+.ib-row-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.ib-row-top { display: flex; align-items: baseline; gap: 10px; }
+.ib-row-name { font-family: var(--serif); font-size: 20px; line-height: 1.2; }
+.ib-row.new .ib-row-name { color: #FFF6E2; }
+.ib-row-when { margin-left: auto; font-size: 8.5px; white-space: nowrap; }
+.ib-row-last { font-family: var(--serif); font-size: 16px; color: #A9A293; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ib-row.new .ib-row-last { color: #E6DFD0; }
+.ib-row-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--ember); }
+.ib-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 48px 24px; border-radius: 16px; color: var(--ember);
+  background: rgba(243,236,220,.02); box-shadow: inset 0 0 0 1px rgba(243,236,220,.08); }
+.ib-empty p { margin: 6px 0 0; font-size: 22px; color: var(--bone); }
+.ib-empty .lab { font-size: 9px; }
+
+/* A conversation */
+.ib-thread { gap: 14px; }
+.ib-thead { display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid rgba(243,236,220,.08); }
+.ib-who { display: flex; align-items: center; gap: 12px; }
+.ib-who-link { display: inline-flex; align-items: center; gap: 12px; color: var(--bone); }
+.ib-who-name { font-family: var(--serif); font-size: 24px; color: var(--bone); }
+.ib-who-link:hover .ib-who-name { color: var(--ember); }
+.ib-mod { margin-left: auto; position: relative; }
+.ib-mod .fo-mod-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; }
+.ib-mod-a { display: block; padding: 13px 16px; font-family: var(--serif); font-size: 17px; color: var(--bone); }
+.ib-mod-a:hover { background: rgba(255,227,163,.06); }
+.ib-msgs { list-style: none; margin: 0; padding: 0 0 8px; display: flex; flex-direction: column; gap: 6px; }
+.ib-hello { text-align: center; padding: 30px 0; font-size: 19px; }
+.ib-m { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; max-width: 78%; }
+.ib-m.me { align-self: flex-end; align-items: flex-end; }
+.ib-day { align-self: center; margin: 14px 0 6px; font-size: 8.5px; color: #8C8679; }
+.ib-m.me .ib-day { align-self: center; }
+.ib-m:has(.ib-day) { max-width: 100%; align-self: stretch; }
+.ib-m.me:has(.ib-day) { align-items: flex-end; }
+.ib-bubble { padding: 11px 15px; border-radius: 18px 18px 18px 6px; font-family: var(--serif); font-size: 18px; line-height: 1.45; color: var(--bone); white-space: pre-wrap; overflow-wrap: anywhere;
+  background: rgba(243,236,220,.06); box-shadow: inset 0 0 0 1px rgba(243,236,220,.08); }
+.ib-m.me .ib-bubble { border-radius: 18px 18px 6px 18px; color: #12160F; background: linear-gradient(180deg, #F3ECDC, #E6DCC6); box-shadow: none; }
+.ib-m.sending .ib-bubble { opacity: .6; }
+.ib-m-when { font-size: 8px; color: #8C8679; padding: 0 4px; }
+.ib-m-who { font-size: 8.5px; padding: 0 4px; }
+.ib-blocked { text-align: center; font-size: 16px; }
+.ib-blocked .d-link { margin-left: 6px; }
+.ib-reply { position: sticky !important; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: none !important; left: auto !important; width: 100% !important; }
+.ib-thread:has(.ib-reply) { padding-bottom: 20px; }
+@media (max-width: 700px) {
+  .ib { gap: 16px; }
+  .ib-sub { font-size: 16px; }
+  .ib-row { padding: 12px 14px; gap: 12px; }
+  .ib-row-name { font-size: 18px; }
+  .ib-row-last { font-size: 15px; }
+  .ib-m { max-width: 86%; }
+  .ib-bubble { font-size: 16.5px; padding: 10px 13px; }
+  .ib-who-name { font-size: 21px; }
+  /* In a conversation the reply box owns the foot of the screen: the members' bar steps aside */
+  html.ib-open .gbar { display: none !important; }
+  html.ib-open .desk-in { padding-bottom: 0 !important; }
+  .ib-reply { left: auto !important; right: auto !important; }
+}
+/* How full the inbox is */
+.ib-gauge { display: flex; align-items: center; gap: 12px; margin-top: 4px; max-width: 360px; }
+.ib-gauge-bar { flex: 1; height: 4px; border-radius: 4px; background: rgba(243,236,220,.1); overflow: hidden; }
+.ib-gauge-bar i { display: block; height: 100%; background: var(--ember); }
+.ib-gauge .lab { font-size: 8.5px; color: #A9A293; white-space: nowrap; }
+.ib-gauge.near .ib-gauge-bar i { background: #E6A99A; }
+.ib-gauge.full .ib-gauge-bar i { background: #E8A091; }
+.ib-gauge.full .lab { color: #F0A99A; }
+.ib-full { margin: 0; padding: 14px 16px; border-radius: 12px; font-family: var(--serif); font-size: 16px; line-height: 1.45; color: #F3D7D0;
+  background: rgba(232,160,145,.07); box-shadow: inset 0 0 0 1px rgba(232,160,145,.4); }
+/* Delete: a conversation from the list, a message you sent */
+.ib-list li { position: relative; }
+.ib-row { padding-right: 60px; }
+.ib-row-dot { margin-right: 4px; }
+.ib-row-del { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; cursor: pointer;
+  color: #8C8679; display: flex; align-items: center; justify-content: center; transition: color .25s, background-color .25s; }
+.ib-row-del:hover { color: #E8A091; background: rgba(232,160,145,.08); }
+.ib-row:has(.ib-row-dot) { padding-right: 60px; }
+.ib-unsend { margin-left: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #8C8679; }
+.ib-unsend:hover { color: #E8A091; }
+.ib .m-back { align-self: flex-start !important; }

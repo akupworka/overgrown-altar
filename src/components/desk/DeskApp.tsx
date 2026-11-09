@@ -1263,6 +1263,10 @@ function FormsRoom() {
     await call('/.netlify/functions/forms', { action: 'delete', id: f.id });
     setBusy(''); drop(key, f.id); setNote(`Accepted. The welcome email is on its way to ${f.email}.`);
   }
+  // Reported conversations (members' direct messages), for the editor to read and resolve.
+  const [reports, setReports] = useState<{ id: string; thread_id: string; reason: string; created_at: string; resolved: boolean; reporter: string }[]>([]);
+  const loadReports = () => supabase.from('dm_reports').select('*').eq('resolved', false).order('created_at', { ascending: false }).then(({ data }) => setReports(Array.isArray(data) ? (data as any) : []));
+  useEffect(() => { loadReports(); }, []);
   const room = rooms?.find((r) => r.key === pick);
   const items = room?.items ?? [];
   const pages = Math.max(1, Math.ceil(items.length / FORMS_PER));
@@ -1277,6 +1281,18 @@ function FormsRoom() {
         : <>
           {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
           {/* The message always has its place, and the tab row its own box: the site's script wraps filter rows, so nothing is inserted beside them. */}
+          {reports.length > 0 && (
+            <section className="d-reports">
+              <span className="eb">Reported conversations · {reports.length}</span>
+              <ul>{reports.map((r) => (
+                <li key={r.id}>
+                  <span className="d-rep-text"><span className="it">{r.reason || 'No reason given.'}</span><span className="lab mut">{fmt(r.created_at)}</span></span>
+                  <a className="ghost d-btn" href={`/guild/members/?dm=${r.thread_id}`}>Read it</a>
+                  <button type="button" className="d-textbtn" onClick={async () => { await supabase.from('dm_reports').update({ resolved: true }).eq('id', r.id); loadReports(); }}>Resolve</button>
+                </li>
+              ))}</ul>
+            </section>
+          )}
           <p className="d-photo-msg" role="status" hidden={!note}>{note}</p>
           <div>
             <div className="filters d-filters" role="tablist" aria-label="Arrivals">

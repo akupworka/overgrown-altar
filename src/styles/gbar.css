@@ -67,3 +67,7 @@
   html[data-member] .m-work { padding-bottom: 170px !important; }
   html[data-member] body:has(.d-room.writing) .desk-in, html[data-member] body:has(.fo-reply) .desk-in { padding-bottom: 0 !important; }
 }
+/* Unread messages on the Inbox tab */
+.gbar-n { position: absolute; top: -6px; right: -10px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ember); color: #12160F; font-family: var(--sans); font-size: 9px; letter-spacing: 0; box-shadow: 0 0 0 2px #0E110D; }
+.gbar-n[hidden] { display: none; }
