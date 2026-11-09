@@ -19,6 +19,7 @@ import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from
 import { PhotoFocus } from './PhotoFocus';
 import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
+import { Welcome } from './Welcome';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -619,6 +620,10 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
             Submit a photograph</button>
         </div>
       </header>
+      {profile && !isEditor && (
+        <Welcome portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
+          sent={pieces.some((p) => p.status !== 'draft')} onWrite={() => onOpen(null)} />
+      )}
       {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}
       {isEditor && (
         <div className="d-inbox">

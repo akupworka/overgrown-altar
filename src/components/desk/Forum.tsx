@@ -674,6 +674,7 @@ const RULES: { h: string; p: string[] }[] = [
 ];
 export function ForumRules() {
   const NUM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  useEffect(() => { try { localStorage.setItem('oa_rules_read', '1'); } catch {} }, []);   // ticks "Read the forum rules" on the Desk's welcome
   return (
     <div className="fo fo-rules">
       <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
