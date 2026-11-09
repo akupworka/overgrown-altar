@@ -122,6 +122,9 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   `netlify/functions/notify-writer.mts`, which sends through Resend, once per decision (`pieces.writer_notified`).
 - The editor's **Invite a writer** box calls `netlify/functions/invite-writer.mts` (checks the caller is the editor,
   then Supabase sends the branded invite and sets their name).
+- **Nothing deleted is kept.** Pieces, forum posts and profile changes are real deletes/overwrites (no history
+  tables). Uploaded files are swept daily by `netlify/functions/sweep-files.mts` (a scheduled function): any file in
+  the guild, media or portraits buckets older than two days that no piece, portrait or forum post mentions is removed.
 - Both functions need Netlify environment variables (Site configuration > Environment variables):
   `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API keys > secret key) for both,
   `RESEND_API_KEY` (resend.com, with overgrownaltar.com verified) for the writer emails, and optionally
