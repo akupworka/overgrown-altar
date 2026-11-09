@@ -1,7 +1,7 @@
 // The Guild Desk: where members (and the editor) sign in, write, and submit pieces.
 // Everything a member can see or change is enforced by the database's rules in Supabase;
 // this screen only makes it pleasant to use.
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { createPortal } from 'react-dom';
 import { Body, wantsDropCap } from '../../lib/marks';
@@ -11,7 +11,8 @@ import { shrinkImage, TooSmall } from '../../lib/shrink';
 const MIN_PHOTO_WIDTH = 1600;
 import { PrestigeBadge } from './Prestige';
 import { KINDS } from '../../lib/kinds';
-import { prestigeFor } from '../../lib/prestige';
+import { prestigeFor, PRESTIGES, type Prestige } from '../../lib/prestige';
+import { crestSvg } from '../../lib/crests';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
@@ -302,25 +303,65 @@ function Desk({ session }: { session: Session }) {
   );
 }
 
-// Your standing: the prestige you hold and how close the next is, beside your finest trophies.
+// A rank's ink: its glass color, lightened for type on dark (the same as the Prestiges page).
+const inkOf = (p: Prestige) => (p.color === 'rainbow' ? '#C9A7FF' : p.color === 'gold' ? '#F2D27A' : `color-mix(in srgb, ${p.color} 70%, white)`);
+const glassStops = (p: Prestige | null) => !p ? ['#8C8679', '#5E5A50']
+  : p.color === 'rainbow' ? ['#3E7BFF', '#B05BFF', '#FF3B4E', '#FFC44D', '#3DE0A0']
+  : p.color === 'gold' ? ['#FFF0B8', '#D2A23A'] : [p.color, p.color];
+const deskCrests = new Map<string, string>();
+const deskCrest = (lv: number, size: number, locked = false) => {
+  const k = `${lv}-${size}-${locked}`;
+  if (!deskCrests.has(k)) deskCrests.set(k, crestSvg(lv, size, locked ? { locked: true, mini: true } : { glow: true }));
+  return deskCrests.get(k)!;
+};
+
+// Your standing: where you are among the ten prestiges (as on the Prestiges page), beside your finest trophies.
 function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; uid?: string }) {
   const { current, next, toNext } = prestigeFor(published);
   const from = current?.at ?? 0;
-  const pct = next ? Math.max(4, Math.round(((published - from) / (next.at - from)) * 100)) : 100;
+  const frac = next ? Math.max(0.04, (published - from) / (next.at - from)) : 1;
   const earned = finestFirst(trophiesFor(ctx).filter((t) => t.earned));
   const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ t, n: earned.filter((x) => x.tier === t).length })).filter((x) => x.n);
+  const R = 62, C = 2 * Math.PI * R;
+  const stops = glassStops(current);
   return (
     <div className="d-standing">
-      <div className="d-standing-rank">
+      <div className="d-standing-rank" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
         <span className="lab d-standing-k">Your prestige</span>
-        {current ? <PrestigeBadge published={published} size="lg" /> : <span className="it d-standing-none">Your first published piece makes you an Inkling.</span>}
-        {next && (
-          <div className="d-standing-prog">
-            <span className="d-standing-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></span>
-            <span className="it">{toNext} more published {toNext === 1 ? 'piece' : 'pieces'} to <b>{next.name}</b></span>
+        <div className="d-pz">
+          {/* The crest of your rank, in a ring that fills toward the next */}
+          <div className="d-pz-ring" aria-hidden="true">
+            <svg viewBox="0 0 150 150" width="150" height="150">
+              <defs><linearGradient id="d-pz-g" x1="0" y1="0" x2="1" y2="1">{stops.map((c, i) => <stop key={i} offset={stops.length > 1 ? i / (stops.length - 1) : 0} stopColor={c} />)}</linearGradient></defs>
+              <circle cx="75" cy="75" r={R} className="d-pz-track" />
+              <circle cx="75" cy="75" r={R} className="d-pz-fill" stroke="url(#d-pz-g)" strokeDasharray={`${C * frac} ${C}`} />
+            </svg>
+            {current ? <span className="d-pz-crest" dangerouslySetInnerHTML={{ __html: deskCrest(current.level, 120) }} /> : <span className="d-pz-dot">·</span>}
           </div>
-        )}
-        <a className="lab d-standing-link" href="/guild/members/?view=prestige">The ladder →</a>
+          <div className="d-pz-text">
+            {current ? <>
+              <span className="lab d-pz-of">Rank {current.numeral} of X</span>
+              <span className="d-pz-name">{current.name}</span>
+              <span className="it d-pz-note">{current.note}</span>
+            </> : <>
+              <span className="d-pz-name">Not yet ranked</span>
+              <span className="it d-pz-note">Your first published piece makes you an Inkling.</span>
+            </>}
+            {next && (
+              <span className="d-pz-next">
+                <span className="d-pz-next-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: deskCrest(next.level, 40) }} />
+                <span><b>{toNext}</b> more to <b className="d-pz-next-name" style={{ color: inkOf(next) }}>{next.name}</b></span>
+              </span>
+            )}
+          </div>
+        </div>
+        {/* The ten ranks, as a row of glass: lit to where you are */}
+        <ol className="d-pz-steps" aria-label={`Rank ${current?.level ?? 0} of 10`}>
+          {PRESTIGES.map((p) => (
+            <li key={p.level} className={`${current && p.level <= current.level ? 'lit' : ''}${current?.level === p.level ? ' here' : ''}`} style={{ '--ink': inkOf(p) } as CSSProperties} title={`${p.numeral} · ${p.name} · ${p.at} ${p.at === 1 ? 'piece' : 'pieces'}`}><i /></li>
+          ))}
+        </ol>
+        <a className="lab d-standing-link" href="/guild/members/?view=prestige">The ten prestiges →</a>
       </div>
       <div className="d-standing-vault">
         <span className="lab d-standing-k">Your vault</span>
