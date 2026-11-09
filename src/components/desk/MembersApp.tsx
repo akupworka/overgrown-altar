@@ -364,7 +364,7 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -377,7 +377,7 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;
-  if (route.view === 'prestige') return <PrestigePage me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
+  if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
       <span className="eb">Members of the Guild</span>

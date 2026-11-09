@@ -9,6 +9,8 @@ import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
 import { TrophyCatalogue } from './Trophies';
+import { useForumTally } from './Forum';
+import type { Piece } from '../../lib/supabase';
 import { PrestigeBadge } from './Prestige';
 import { crestSvg, type CrestOpts } from '../../lib/crests';
 
@@ -29,7 +31,11 @@ export const glassOf = (p: Prestige) => p.color === 'rainbow'
   : `linear-gradient(180deg, color-mix(in srgb, ${p.color} 55%, white), ${p.color} 45%, color-mix(in srgb, ${p.color} 55%, black))`;
 const inkOf = (p: Prestige) => (p.color === 'rainbow' ? '#C9A7FF' : p.color === 'gold' ? '#F2D27A' : `color-mix(in srgb, ${p.color} 70%, white)`);
 
-export function PrestigePage({ me, link }: { me: string; link: (to: string, cls: string, children: ReactNode) => ReactNode }) {
+export function PrestigePage({ me, link, section = 'prestige' }: { me: string; link: (to: string, cls: string, children: ReactNode) => ReactNode; section?: 'prestige' | 'trophies' }) {
+  // Your own published pieces and forum part, so each trophy can show how far along you are.
+  const [myWork, setMyWork] = useState<Piece[]>([]);
+  const tally = useForumTally(me || null);
+  useEffect(() => { if (me) supabase.from('pieces').select('*').eq('author_id', me).eq('status', 'approved').then(({ data }) => setMyWork(Array.isArray(data) ? (data as Piece[]) : [])); }, [me]);
   const [people, setPeople] = useState<(Profile & { count: number })[] | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [trophies, setTrophies] = useState<'growing' | 'once'>('growing');
@@ -63,9 +69,17 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
       <header className="pzx-head">
         {me && link('/guild/members/', 'm-back lab', '← The Guild')}
         <span className="eb">The Guild</span>
-        <h1 className="h1">The ten prestiges</h1>
-        <p className="it pzx-lead">Every published piece raises a member through the ranks of the Guild, from a first inkling to the burning ones. Each rank is a color of glass; badges change the moment the editor publishes.</p>
+        <h1 className="h1">{section === 'trophies' ? 'The trophies' : 'The ten prestiges'}</h1>
+        <p className="it pzx-lead">{section === 'trophies'
+          ? 'Prestiges count everything you publish. Trophies mark the work in each category, raised from bronze to silver, gold and rainbow glass as it grows, and a few things done once and done well. Tap any trophy to see how to earn it.'
+          : 'Every published piece raises a member through the ranks of the Guild, from a first inkling to the burning ones. Each rank is a color of glass; badges change the moment the editor publishes.'}</p>
+        {/* Two rooms of one page: the ranks, and the trophies */}
+        <nav className="pzx-sw" aria-label="Prestiges or trophies">
+          {link('/guild/members/?view=prestige', `pzx-sw-b${section === 'prestige' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</>)}
+          {link('/guild/members/?view=trophies', `pzx-sw-b${section === 'trophies' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Trophies</>)}
+        </nav>
       </header>
+      {section === 'prestige' && <>
 
       {/* Where you stand */}
       <section className="pzx-stand" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
@@ -145,17 +159,15 @@ export function PrestigePage({ me, link }: { me: string; link: (to: string, cls:
         </div>
       </section>
 
-      {/* The trophies, one set at a time */}
+      </>}
+      {section === 'trophies' && (
       <section className="pzx-trophies" id="trophies">
-        <span className="eb">Beside the prestiges</span>
-        <h2 className="h2">The trophies</h2>
-        <p className="it pzx-lead">Prestiges count everything you publish. Trophies mark the work in each category, raised from bronze to silver, gold and rainbow glass as it grows, and a few things done once and done well.</p>
         <div className="pzx-switch" role="tablist" aria-label="Trophies">
           <button type="button" role="tab" aria-selected={trophies === 'growing'} onClick={() => setTrophies('growing')}>Trophies that grow</button>
           <button type="button" role="tab" aria-selected={trophies === 'once'} onClick={() => setTrophies('once')}>Won once</button>
         </div>
-        <div className="pz-cat"><TrophyCatalogue only={trophies} /></div>
-      </section>
+        <div className="pz-cat"><TrophyCatalogue only={trophies} ctx={me ? { pieces: myWork, member: people.find((p) => p.id === me) ?? {}, forum: tally } : undefined} /></div>
+      </section>)}
     </div>
   );
 }

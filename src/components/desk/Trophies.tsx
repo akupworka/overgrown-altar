@@ -24,7 +24,7 @@ function Medal({ s, locked, size = 72, big = false, onOpen }: { s: Standing; loc
 }
 
 // One trophy, opened: what it's for, how far along you are, and what each metal takes. Tap outside (or Escape) to close.
-function TrophyCard({ s, onClose }: { s: Standing; onClose: () => void }) {
+export function TrophyCard({ s, onClose }: { s: Standing; onClose: () => void }) {
   const { trophy: t, tier, n, earned, next } = s;
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k); }, [onClose]);
   const at = t.count ? (t.at ?? TIER_AT) : null;
@@ -87,7 +87,7 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
         )}
         <div className="vault-links">
           <a className="vault-link" href="/guild/members/?view=prestige"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>The ten prestiges</a>
-          <a className="vault-link" href="/guild/members/?view=prestige#trophies"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Every trophy</a>
+          <a className="vault-link" href="/guild/members/?view=trophies"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Every trophy</a>
         </div>
         {open && <TrophyCard s={open} onClose={() => setOpen(null)} />}
       </div>
@@ -98,7 +98,16 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
 const TIERS: Tier[] = ['bronze', 'silver', 'gold', 'rainbow'];
 
 /** Every trophy, for the catalog on the prestiges page: the growing ones in all four metals, then the rest. */
-export function TrophyCatalogue({ only }: { only?: 'growing' | 'once' } = {}) {
+export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?: TrophyCtx } = {}) {
+  // With a member's standing (ctx), every trophy opens its card with their progress.
+  const standings = ctx ? trophiesFor(ctx) : null;
+  const [open, setOpen] = useState<Standing | null>(null);
+  const tap = (t: Trophy) => {
+    const st = standings?.find((x) => x.trophy.id === t.id);
+    return st ? { role: 'button', tabIndex: 0, 'aria-label': `${t.name}: how to earn it`, onClick: () => setOpen(st),
+      onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(st); } } } : {};
+  };
+  const mine = (t: Trophy) => standings?.find((x) => x.trophy.id === t.id);
   const growing = TROPHIES.filter((t) => t.count);
   const once = TROPHIES.filter((t) => !t.count);
   return (
@@ -108,8 +117,9 @@ export function TrophyCatalogue({ only }: { only?: 'growing' | 'once' } = {}) {
       <p className="it tcat-p">The same trophy, raised from bronze to silver, gold and rainbow glass as the articles in its category grow, or as the years and the unbroken months add up. The easier a thing is, the more it takes; rainbow is rare.</p>
       <div className="tcat-rows">
         {growing.map((t: Trophy) => (
-          <div key={t.id} className="tcat-row">
-            <div className="tcat-text"><span className="tr-name">{t.name}</span><span className="tr-note">{t.note}</span></div>
+          <div key={t.id} className={`tcat-row${standings ? ' tr-tap' : ''}`} {...tap(t)}>
+            <div className="tcat-text"><span className="tr-name">{t.name}</span><span className="tr-note">{t.note}</span>
+              {mine(t) && <span className="lab tcat-you">{mine(t)!.earned ? `You: ${TIER_LABEL[mine(t)!.tier]} · ${mine(t)!.n} ${unitFor(mine(t)!.n, t.unit)}` : `You: ${mine(t)!.n} of ${(t.at ?? TIER_AT).bronze} for Bronze`}</span>}</div>
             <div className="tcat-metals">
               {TIERS.map((tier) => (
                 <figure key={tier} className="tr tr-mini" data-tier={tier}>
@@ -126,7 +136,7 @@ export function TrophyCatalogue({ only }: { only?: 'growing' | 'once' } = {}) {
       <span className="eb tcat-h">Won once</span>
       <div className="tc-grid">
         {once.map((t) => (
-          <figure key={t.id} className="tr" data-tier={t.tier} title={t.note}>
+          <figure key={t.id} className={`tr${standings ? ' tr-tap' : ''}${mine(t) && !mine(t)!.earned ? ' locked' : ''}`} data-tier={t.tier} {...(standings ? tap(t) : { title: t.note })}>
             <span dangerouslySetInnerHTML={{ __html: trophySvg(t) }} />
             <span className="tr-name">{t.name}</span>
             <span className="tr-tier">{TIER_LABEL[t.tier]}</span>
@@ -135,6 +145,7 @@ export function TrophyCatalogue({ only }: { only?: 'growing' | 'once' } = {}) {
         ))}
       </div>
       </>}
+      {open && <TrophyCard s={open} onClose={() => setOpen(null)} />}
     </div>
   );
 }

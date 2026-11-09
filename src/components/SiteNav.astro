@@ -133,7 +133,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       return path.startsWith('/guild/desk')
         ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
         : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('view') === 'mine' || q.get('board') || q.get('t') ? 'forum'
-        : q.get('view') === 'prestige' ? 'prestige'
+        : q.get('view') === 'prestige' || q.get('view') === 'trophies' ? 'prestige'
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };
     const gbar = document.querySelector<HTMLElement>('[data-gbar]');

@@ -162,3 +162,14 @@
   .pzx-l-badge { display: block; margin-top: 6px; line-height: 0; }
   .pzx-l:not(.reached):not(.chosen) .pzx-l-badge { opacity: .45; }
 }
+/* Prestiges or Trophies: one rounded switch under the title */
+.pzx-sw { display: inline-flex; gap: 4px; margin-top: 18px; padding: 4px; border-radius: 999px; background: rgba(243,236,220,.04); box-shadow: inset 0 0 0 1px rgba(243,236,220,.14); }
+.pzx-sw-b { display: inline-flex; align-items: center; gap: 9px; padding: 11px 22px; border-radius: 999px; color: var(--muted-dark); text-decoration: none;
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; transition: background-color .3s, color .3s; }
+.pzx-sw-b:hover { color: var(--ember); }
+.pzx-sw-b.on { background: var(--bone); color: #12160F; }
+.pzx-trophies { margin-top: 10px !important; padding-top: 0 !important; border-top: 0 !important; }
+.tcat-row.tr-tap { cursor: pointer; border-radius: 12px; transition: background-color .3s; }
+.tcat-row.tr-tap:hover { background: rgba(255,227,163,.035); }
+.tcat-you { margin-top: 6px; color: var(--ember); font-size: 9px; }
+@media (max-width: 700px) { .pzx-sw-b { padding: 10px 18px; font-size: 9.5px; letter-spacing: .16em; } }
