@@ -130,6 +130,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
       <div class="wt-list"><DispatchList items={rest} live={{ pillar: 'watchtower' }} paged={10} /></div>
       <p class="it mut wt-none" hidden>No dispatch matches that. Try another word, or <a href="/archive">search everything</a>.</p>
       </>)}
+      {rest.length === 0 && <p class="it mut wt-first">The next dispatches are being written at the watch. <a href="#subscribe">Receive them as they go up →</a></p>}
 
       <!-- The writers, and an open invitation -->
       <div class="wt-write">
@@ -277,6 +278,8 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .wt-search input::placeholder { color: #8C8070; }
   .wt-list li[hidden] { display: none; }
   .wt-none { margin: 28px 0 0; font-size: 19px; }
+  .wt-first { margin: 0 0 40px; font-size: 21px; }
+  .wt-first a { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); }
   .wt-none a { border-bottom: 1px solid currentColor; }
   .latest-who { display: inline-flex; align-items: center; gap: 12px; }
   .latest-by { flex-wrap: wrap; row-gap: 6px; }

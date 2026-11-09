@@ -5,7 +5,7 @@ import DoorwayFrame from './DoorwayFrame.astro';
 ---
 <DoorwayFrame kicker="The letter" title="Receive the Dispatches" image="/images/four-lancet-window-1200.jpg"
   lead="New essays from The Watchtower, work from The Hearth, and testimonies from The Perimeter, delivered as a letter.">
-  <form name="dispatches" method="POST" action="/thanks/" data-netlify="true" class="dw-form">
+  <form id="subscribe" name="dispatches" method="POST" action="/thanks/" data-netlify="true" class="dw-form">
     <input type="hidden" name="form-name" value="dispatches" />
     <label class="dw-field" for="sub-email"><span class="dw-label">Your email</span>
       <span class="dw-line-row"><input id="sub-email" type="email" name="email" autocomplete="email" required />
