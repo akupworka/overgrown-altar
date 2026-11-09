@@ -1126,3 +1126,19 @@
   .d-pz-next { font-size: 15px; }
   .d-pz-steps { max-width: none; }
 }
+
+/* Computers, writing: the writing bar sits flush under the Guild's bar (no strip of window between them),
+   and stays just beneath it as you scroll, instead of sliding under it. --gbar is the bottom of the two bars. */
+@media (min-width: 701px) {
+  :root { --gbar: 130px; }
+  .desk-in:has(.d-room.writing) { padding-top: var(--gbar); }
+  .d-room.writing .d-write-bar { top: var(--gbar) !important; }
+  .d-room.writing .d-write-bar::before { opacity: 1; }
+  .d-room.writing .d-write-grid { margin-top: 30px; }
+}
+@media (min-width: 701px) {
+  .d-room.writing .d-write-bar { z-index: 8; }
+  .d-room.writing .d-write-bar::before { background: #0A0C0A; }
+  .d-room.writing .d-paper-tools { top: calc(var(--gbar) + 64px); }
+  .d-room.writing .d-details { top: calc(var(--gbar) + 94px); }
+}
