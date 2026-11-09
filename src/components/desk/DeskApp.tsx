@@ -293,7 +293,7 @@ function Desk({ session }: { session: Session }) {
       {/* Phones: an app-style tab bar within thumb's reach. */}
       <nav className="d-tabbar" aria-label="Desk">
         {items.map(([t, , n]) => (
-          <button key={t} type="button" className={tab === t ? 'on' : ''} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
+          <button key={t} type="button" className={`${tab === t ? 'on' : ''}${t === 'write' ? ' t-write' : ''}`} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
             <span className="d-tabbar-icon"><Icon name={t} />{n ? <span className="d-tabbar-dot">{n}</span> : null}</span>
             <span>{short[t]}</span>
           </button>

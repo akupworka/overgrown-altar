@@ -214,7 +214,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               ...(person.role === 'editor' ? [['review', 'Waiting', '/guild/desk/#review']] : []),
               ['profile', 'My page', '']] as [string, string, string][]).map(([t, label, href]) => t === 'profile'
               ? <span key={t} className="on" aria-current="page"><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></span>
-              : <a key={t} href={href}><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></a>)}
+              : <a key={t} href={href} className={t === 'write' ? 't-write' : undefined}><span className="d-tabbar-icon"><Icon name={t} /></span><span>{label}</span></a>)}
           </nav>
         )}
       </header>
