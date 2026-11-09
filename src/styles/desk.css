@@ -1130,7 +1130,7 @@
 /* Computers, writing: the writing bar sits flush under the Guild's bar (no strip of window between them),
    and stays just beneath it as you scroll, instead of sliding under it. --gbar is the bottom of the two bars. */
 @media (min-width: 701px) {
-  :root { --gbar: 130px; }
+  :root { --gbar: 134px; }
   .desk-in:has(.d-room.writing) { padding-top: var(--gbar); }
   .d-room.writing .d-write-bar { top: var(--gbar) !important; }
   .d-room.writing .d-write-bar::before { opacity: 1; }

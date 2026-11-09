@@ -38,7 +38,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
       <a href="/guild" class="join" data-guest>Join the Guild</a>
-      <a href="/guild/members/" class="join" data-member hidden aria-current={current.startsWith('/guild/members') ? 'page' : undefined}>The Guild</a>
+      {!inside && <a href="/guild/members/" class="join" data-member hidden>The Guild</a>}
       <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
       <a href="/guild/desk/" class="member" data-member hidden aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
         <span class="member-av" aria-hidden="true"></span><span class="member-label">My Desk</span>
@@ -53,11 +53,13 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     <!-- Inside the members' area: the Guild's own rooms, which the public header doesn't carry. -->
     <nav class="inner lab" aria-label="The Guild" data-inner>
       <span class="inner-mark" aria-hidden="true">The Guild</span>
-      <a href="/guild/desk/" data-match="desk">My Desk</a>
-      <a href="/guild/members/?view=forum" data-match="forum" data-spa>The Forum</a>
-      <a href="/guild/members/" data-match="members" data-spa>Members</a>
-      <a href="/guild/members/?view=prestige" data-match="prestige" data-spa>Prestiges</a>
-      <a href="/guild/members/" data-match="me" data-spa data-my-page>My page</a>
+      <div class="inner-rooms">
+        <a href="/guild/desk/" data-match="desk"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>My Desk<span class="inner-dot" data-gbar-dot hidden></span></a>
+        <a href="/guild/members/?view=forum" data-match="forum" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>The Forum</a>
+        <a href="/guild/members/" data-match="members" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>Members</a>
+        <a href="/guild/members/?view=prestige" data-match="prestige" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</a>
+        <a href="/guild/members/" data-match="me" data-spa data-my-page><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
+      </div>
       <a href="/guild/desk/#write" data-match="write" class="inner-write">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
         Write</a>
@@ -92,6 +94,13 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         const img = new Image(); img.src = me.portrait || seatFor(name); img.alt = ''; av.append(img);
       });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
+      // Inside the Guild the Guild bar carries My Desk, so the picture pill becomes you: your first name, to your page.
+      const uid0 = JSON.parse(token)?.user?.id;
+      if (document.querySelector('[data-inner]') && name && uid0) {
+        const pill = document.querySelector<HTMLAnchorElement>('.member');
+        const label = pill?.querySelector('.member-label');
+        if (pill && label) { label.textContent = /^(the|a|an)$/i.test(name.split(/\s+/)[0]) ? name : name.split(/\s+/)[0]; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', `My page, signed in as ${name}`); pill.removeAttribute('aria-current'); }
+      }
       // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
       const home = document.querySelector<HTMLAnchorElement>('.nav-home');
       if (home) { home.href = '/guild/members/'; home.setAttribute('aria-label', 'The Guild, home for members'); }
@@ -265,18 +274,32 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 </style>
 <style>
   /* The members' bar, under the main header, inside the Desk and the Guild's pages */
-  .inner { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 120px; height: 46px; border-top: 1px solid rgba(243, 236, 220, .08);
+  .inner { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 120px; height: 50px; border-top: 1px solid rgba(243, 236, 220, .08);
     overflow-x: auto; scrollbar-width: none; font-size: 10px; letter-spacing: .2em; }
   .inner::-webkit-scrollbar { display: none; }
-  .inner-mark { flex: none; color: var(--ember); margin-right: 14px; font-family: var(--serif); letter-spacing: .3em; }
-  .inner a { flex: none; padding: 8px 12px; border-radius: 999px; color: #CFC8B8; transition: color .25s, background-color .25s; white-space: nowrap; }
-  .inner a:hover { color: var(--ember); }
-  .inner a[aria-current] { color: #12160F; background: var(--bone); }
+  .inner-mark { flex: none; color: var(--ember); margin-right: 26px; font-family: var(--script); font-size: 24px; letter-spacing: 0; text-transform: none; line-height: 1; transform: translateY(2px); }
+  .inner-rooms { display: flex; align-items: stretch; gap: 4px; height: 100%; }
+  .inner-ic { flex: none; opacity: .75; transition: opacity .25s; }
+  .inner-rooms a { position: relative; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 0 14px; color: #CFC8B8; transition: color .25s; white-space: nowrap; }
+  .inner-rooms a:hover { color: var(--bone); }
+  .inner-rooms a:hover .inner-ic { opacity: 1; }
+  /* where you are: gold, with a thread of stained glass beneath (color only through glass) */
+  .inner-rooms a[aria-current] { color: var(--ember); }
+  .inner-rooms a[aria-current] .inner-ic { opacity: 1; }
+  .inner-rooms a::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; border-radius: 2px; opacity: 0; transform: scaleX(.4);
+    background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); transition: opacity .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .inner-rooms a[aria-current]::after { opacity: .9; transform: none; }
+  .inner-dot { position: absolute; top: 9px; left: 26px; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px #070906; }
+  .inner-dot[hidden] { display: none; }
   .inner a[hidden] { display: none; }
-  .inner .inner-write { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; color: var(--ember);
-    box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); }
-  .inner .inner-write:hover { background: rgba(255, 227, 163, .08); color: var(--ember); }
-  .inner .inner-write[aria-current] { color: #12160F; background: var(--ember); box-shadow: none; }
+  /* Write: a dark glass pill ringed in stained glass, the pen in candle gold (the phone's Write button, lying down) */
+  .inner .inner-write { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 8px 20px; border-radius: 999px; color: var(--ember);
+    border: 1.5px solid transparent;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(255,236,190,.12), rgba(255,236,190,0) 60%) padding-box, linear-gradient(180deg, #1C2017, #0B0D0A) padding-box,
+      conic-gradient(from 200deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E) border-box;
+    box-shadow: 0 6px 18px rgba(0,0,0,.45); transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; }
+  .inner .inner-write:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.55); color: var(--ember); }
+  .inner .inner-write[aria-current] { color: #FFF1CC; }
   @media (max-width: 1320px) { .inner { padding: 0 48px; } }
   /* Phones: the bar at the foot of the page does this job. */
   @media (max-width: 700px) { .inner { display: none !important; } }
