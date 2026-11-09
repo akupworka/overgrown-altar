@@ -182,6 +182,27 @@ function Desk({ session }: { session: Session }) {
   const [newMedium, setNewMedium] = useState<string | null>(null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = profile?.role === 'editor';
+  // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
+  const [arrivalsNew, setArrivalsNew] = useState(0);
+  useEffect(() => {
+    if (!isEditor) return;
+    (async () => {
+      const { data: s } = await supabase.auth.getSession();
+      const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
+      if (!res?.ok) return;
+      const out = await res.json().catch(() => ({}));
+      const { data: reads } = await supabase.from('form_reads').select('submission_id');
+      const seen = new Set((reads ?? []).map((r: any) => r.submission_id));
+      setArrivalsNew((out.rooms ?? []).reduce((n: number, r: any) => n + (r.items ?? []).filter((x: any) => !seen.has(x.id)).length, 0));
+    })();
+  }, [isEditor, tab]);
+  // The gold dot on the Desk tab of the Guild bar, here and (remembered) on the Guild's other pages.
+  useEffect(() => {
+    if (!isEditor) return;
+    const n = queue.length + arrivalsNew;
+    try { localStorage.setItem('oa_desk_waiting', String(n)); } catch {}
+    document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = n === 0));
+  }, [isEditor, queue.length, arrivalsNew]);
 
   const load = useCallback(async () => {
     const [{ data: p }, { data: mine }] = await Promise.all([
@@ -246,7 +267,6 @@ function Desk({ session }: { session: Session }) {
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'My page'],
   ];
-  const short: Record<Tab, string> = { pieces: isEditor ? 'Desk' : 'Pieces', write: 'Write', review: 'Waiting', profile: 'My page', forms: 'Arrivals' };
 
   if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
@@ -283,7 +303,7 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} isEditor={isEditor} onReview={() => go('review')} onOpen={open} onChanged={load} />}
+        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
         {tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
@@ -292,16 +312,6 @@ function Desk({ session }: { session: Session }) {
         {tab === 'forms' && isEditor && <FormsRoom />}
       </div>
 
-      {/* Phones: an app-style tab bar within thumb's reach. */}
-      <nav className="d-tabbar" aria-label="Desk">
-        {/* Write sits in the middle: Desk, Waiting, Write, Forms, My page for the editor. */}
-        {(isEditor ? (['pieces', 'review', 'write', 'forms', 'profile'] as Tab[]).map((t) => items.find((x) => x[0] === t)!).filter(Boolean) : items).map(([t, , n]) => (
-          <button key={t} type="button" className={`${tab === t ? 'on' : ''}${t === 'write' ? ' t-write' : ''}`} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
-            <span className="d-tabbar-icon"><Icon name={t} />{n ? <span className="d-tabbar-dot">{n}</span> : null}</span>
-            <span>{short[t]}</span>
-          </button>
-        ))}
-      </nav>
     </div>
   );
 }
@@ -493,7 +503,7 @@ function MoreActions({ children }: { children: ReactNode }) {
   );
 }
 
-function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; isEditor?: boolean; onReview?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
+function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = false, onReview, onArrivals, onOpen, onChanged }: { name: string; profile: Profile | null; pieces: Piece[]; waiting?: number; arrivals?: number; isEditor?: boolean; onReview?: () => void; onArrivals?: () => void; onOpen: (p: Piece | null, medium?: string) => void; onChanged: () => void }) {
   const tally = useForumTally(profile?.id);
   // Which pieces to show: all, or one state; six to a page, newest first.
   const [show, setShow] = useState<'all' | 'drafts' | 'with' | 'live'>('all');
@@ -590,6 +600,21 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
             Submit a photograph</button>
         </div>
       </header>
+      {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}
+      {isEditor && (
+        <div className="d-inbox">
+          <button type="button" className={`d-inbox-tile${waiting ? ' lit' : ''}`} onClick={onReview}>
+            <span className="d-inbox-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 13l2.5-7h11L20 13v5H4v-5z" /><path d="M4 13h5l1 2h4l1-2h5" /></svg></span>
+            <span className="d-inbox-text"><span className="eb">Waiting for you</span><span className="it">{waiting ? `${waiting} ${waiting === 1 ? 'piece' : 'pieces'} to review` : 'Nothing to review'}</span></span>
+            {waiting > 0 && <span className="d-inbox-n">{waiting}</span>}
+          </button>
+          <button type="button" className={`d-inbox-tile${arrivals ? ' lit' : ''}`} onClick={onArrivals}>
+            <span className="d-inbox-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg></span>
+            <span className="d-inbox-text"><span className="eb">Arrivals</span><span className="it">{arrivals ? `${arrivals} new` : 'All read'}</span></span>
+            {arrivals > 0 && <span className="d-inbox-n">{arrivals}</span>}
+          </button>
+        </div>
+      )}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {/* Read the Guild's work: the three pillars, one tap each */}
       <nav className="d-pillars-row" aria-label="Read">
@@ -611,13 +636,6 @@ function Pieces({ name, profile, pieces, waiting = 0, isEditor = false, onReview
         <div className="d-forum-head"><span className="eb">From the forum</span><a className="lab d-forum-link" href="/guild/members/?view=forum">All boards →</a></div>
         <ForumLatest count={3} plain />
       </section>
-      {waiting > 0 && (
-        <button type="button" className="d-waiting" onClick={onReview}>
-          <span className="d-waiting-dot" aria-hidden="true" />
-          <span>{waiting === 1 ? 'One piece is' : `${waiting} pieces are`} waiting for your review</span>
-          <span className="lab">Review →</span>
-        </button>
-      )}
       <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
       {pieces.length > 3 && (
         <div className="filters d-filters" role="group" aria-label="Show">
