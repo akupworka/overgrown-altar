@@ -41,6 +41,8 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
   if (typeof document === 'undefined') return;
+  document.documentElement.toggleAttribute('data-member', !!p);
+  document.documentElement.toggleAttribute('data-editor', p?.role === 'editor');
   document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
   document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));

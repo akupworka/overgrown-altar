@@ -46,6 +46,17 @@ const imageUrl = new URL(image, site).toString();
     <meta name="theme-color" content="#060806" />
 
     <link rel="preload" href="/fonts/cormorant-500.ttf" as="font" type="font/ttf" crossorigin />
+    <!-- Signed in to the Guild? Known before anything is drawn, so members never see the visitors' header flash by. -->
+    <script is:inline>
+      try {
+        var oaT = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || 'null');
+        if (oaT && oaT.refresh_token) {
+          document.documentElement.setAttribute('data-member', '');
+          var oaM = JSON.parse(localStorage.getItem('oa_member') || '{}');
+          if (oaM.editor) document.documentElement.setAttribute('data-editor', '');
+        }
+      } catch (e) {}
+    </script>
     {Astro.url.pathname === '/' && (
       <!-- Members arriving at the front door (typed, bookmarked, or from another site) go straight to their Desk,
            before anything is drawn. Coming from inside the site, or with ?home, the homepage shows as usual. -->

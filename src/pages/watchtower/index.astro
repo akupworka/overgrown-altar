@@ -286,21 +286,19 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   @media (max-width: 900px) and (min-width: 701px) { .newest-grid, .also-grid { gap: 26px 20px; } .nw-t { font-size: 24px; } }
   /* Phones: the newest full width, the next two side by side; Also new two to a row */
   @media (max-width: 700px) {
-    .newest { padding-bottom: 44px; }
-    .newest-h { margin-bottom: 20px; }
-    .newest-grid { grid-template-columns: 1fr 1fr; gap: 30px 14px; }
-    .nw-first { grid-column: 1 / -1; }
-    .nw-first .nw-img { aspect-ratio: 5 / 6; }
-    .nw-first .nw-t { font-size: 30px; }
-    .nw-first .nw-sf { font-size: 17px; }
-    .nw { gap: 8px; }
-    .nw-t { font-size: 20px; line-height: 1.15; }
+    /* the three newest, all the same: a small arch beside each title */
+    .newest { padding-bottom: 40px; }
+    .newest-h { margin-bottom: 18px; }
+    .newest-grid { grid-template-columns: 1fr; gap: 0; }
+    .nw { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; row-gap: 5px; align-items: start; padding: 18px 0; border-top: 1px solid rgba(42, 32, 23, .14); }
+    .nw:first-child { border-top: 0; padding-top: 0; }
+    .nw-img { grid-row: 1 / span 4; width: 96px; aspect-ratio: 4 / 5; margin: 0; }
+    .nw-k { font-size: 8.5px; letter-spacing: .14em; }
+    .nw-t { font-size: 21px; line-height: 1.15; }
     .nw-sf { font-size: 14.5px; -webkit-line-clamp: 2; }
-    .nw:not(.nw-first) .nw-by .latest-who .avatar { display: none; }
-    .nw:not(.nw-first) .nw-by { flex-direction: column; align-items: flex-start; gap: 2px; }
-    .nw:not(.nw-first) .nw-by .lab { font-size: 8.5px; }
-    .nw:not(.nw-first) .nw-dot { display: none; }
-    .nw:not(.nw-first) .nw-k { font-size: 8.5px; letter-spacing: .14em; }
+    .nw-by :global(.avatar), .nw-dot { display: none; }
+    .nw-by { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .nw-by .lab { font-size: 8.5px; }
     .also-grid { grid-template-columns: 1fr 1fr !important; gap: 26px 14px !important; }
     .also-card { gap: 6px; }
     .also-t { font-size: 19px !important; }
