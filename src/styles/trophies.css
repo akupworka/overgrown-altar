@@ -118,3 +118,6 @@
   .vault-rest .tr-name, .vault-locked .tc-grid .tr-name { font-size: 11.5px !important; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .vault-rest :is(.tr-tier, .tr-next, .tr-bar, .tr-note), .vault-locked .tc-grid :is(.tr-tier, .tr-next, .tr-bar, .tr-note) { display: none !important; }
 }
+/* Still to earn: quieter than what's been won */
+.vault-locked .tc-grid .tr, .tr.locked { opacity: .75; transition: opacity .3s; }
+.vault-locked .tc-grid .tr:hover, .tr.locked:hover { opacity: 1; }
