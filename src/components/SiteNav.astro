@@ -41,6 +41,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       </a>
       <a href="/guild" class="join" data-guest>Join the Guild</a>
       <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
+      <a href="/guild/members/" class="online" data-member data-online hidden aria-label="Members online now"><i aria-hidden="true"></i><b data-online-n>1</b><span class="online-w">online</span></a>
       <a href="/guild/desk/" class="member" data-member aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
         <span class="member-av" aria-hidden="true"></span><span class="member-label">My Desk</span>
       </a>
@@ -89,6 +90,23 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 
 <script>
   import { seatFor } from '../lib/seats';
+  // Members online now: everyone signed in with a page of the site open joins one presence room; the pill counts them.
+  try {
+    const tok = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || 'null');
+    const uid: string | undefined = tok?.user?.id;
+    if (tok?.refresh_token && uid) {
+      import('../lib/supabase').then(({ supabase }) => {
+        const pill = document.querySelector<HTMLElement>('[data-online]');
+        const n = document.querySelector<HTMLElement>('[data-online-n]');
+        const room = supabase.channel('guild-online', { config: { presence: { key: uid } } });
+        room.on('presence', { event: 'sync' }, () => {
+          const count = Object.keys(room.presenceState()).length;
+          if (n) n.textContent = String(Math.max(1, count));
+          if (pill) pill.hidden = false;
+        }).subscribe((st) => { if (st === 'SUBSCRIBED') room.track({ at: Date.now() }); });
+      }).catch(() => {});
+    }
+  } catch {}
   // Signed in to the Guild? Show the member's portrait (or initials) and "My Desk" instead of
   // "Sign in". Reads only what this device already remembers, so nothing extra is loaded.
   try {
@@ -298,6 +316,16 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .member-av { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center;
     background: #14180F; box-shadow: 0 0 0 1px rgba(159, 148, 94, .8); color: var(--ember); font-family: var(--serif); font-size: 12px; letter-spacing: .04em; text-transform: none; }
   .member-av img { width: 100%; height: 100%; object-fit: cover; }
+  /* Members online now */
+  .online { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; margin-right: 10px; border-radius: 999px; color: var(--muted-dark, #CFC8B8);
+    font-size: 10px; letter-spacing: .16em; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(243,236,220,.16); transition: box-shadow .3s, color .3s; }
+  .online:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255,227,163,.45); }
+  .online[hidden] { display: none !important; }
+  .online i { width: 7px; height: 7px; border-radius: 50%; background: #7FD9A8; animation: online-breathe 2.6s ease-in-out infinite; }
+  .online b { font-weight: 500; color: var(--bone); letter-spacing: .04em; }
+  @keyframes online-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+  @media (prefers-reduced-motion: reduce) { .online i { animation: none; } }
+  @media (max-width: 760px) { .online { height: 30px; padding: 0 10px; margin-right: 8px; gap: 6px; font-size: 9px; } .online-w { display: none; } }
 
   /* Medium screens: sections move into the Menu. */
   @media (max-width: 1320px) {
