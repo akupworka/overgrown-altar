@@ -1041,3 +1041,48 @@
   .m-list .m-thumb { width: 76px; aspect-ratio: 1; justify-self: end; }
   .m-list .m-piece { grid-template-columns: minmax(0, 1fr) 76px; gap: 14px; }
 }
+
+/* ---- The Desk home, finished: same layout, finer materials ------------------------------------------------
+   Panels become dark glass panes (a lit top edge, a fine grain, depth beneath); the greeting gets a thread of
+   stained glass under it; hairlines fade at their ends; each piece answers the pointer quietly. */
+.d-home { --pane: linear-gradient(160deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 38%), linear-gradient(180deg, rgba(22,25,20,.92), rgba(11,13,10,.96));
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.06'/%3E%3C/svg%3E"); }
+.d-home :is(.d-standing, .d-forum-panel, .d-invite, .d-rebuild) {
+  position: relative; border-radius: 10px; background: var(--grain), var(--pane);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(243,236,220,.09), 0 34px 70px -38px rgba(0,0,0,.9); }
+.d-home :is(.d-invite, .d-rebuild) { box-shadow: inset 0 1px 0 rgba(255,227,163,.14), inset 0 0 0 1px rgba(255,227,163,.2), 0 34px 70px -38px rgba(0,0,0,.9); }
+.d-home .d-standing-vault { border-left-color: rgba(243,236,220,.07); }
+
+/* The greeting: lighter, larger, with a thread of stained glass beneath (color only through glass). */
+.d-home .d-hello { font-weight: 300; letter-spacing: -.012em; line-height: 1.02; }
+.d-home-head { position: relative; border-bottom-color: transparent !important; }
+.d-home-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(243,236,220,0), rgba(62,123,255,.5) 16%, rgba(176,91,255,.45) 34%, rgba(255,59,78,.4) 52%, rgba(255,196,77,.45) 70%, rgba(61,224,160,.4) 86%, rgba(243,236,220,0)); }
+
+/* The review notice: a lit pane, its dot breathing slowly. */
+.d-home .d-waiting { border-radius: 10px; background: linear-gradient(160deg, rgba(255,227,163,.09), rgba(255,227,163,.03)); box-shadow: inset 0 1px 0 rgba(255,227,163,.18), inset 0 0 0 1px rgba(255,227,163,.24); }
+.d-home .d-waiting-dot { animation: d-breathe 3.2s ease-in-out infinite; }
+@keyframes d-breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
+
+/* Hairlines that fade at their ends, and a quiet answer to the pointer on each piece. */
+.d-home .d-list { border-top: 0; background: linear-gradient(90deg, rgba(243,236,220,0), rgba(243,236,220,.14) 12%, rgba(243,236,220,.14) 88%, rgba(243,236,220,0)) top / 100% 1px no-repeat; }
+.d-home .d-group-head + .d-list, .d-home .d-group .d-list { background-size: 100% 1px; }
+@media (min-width: 701px) {
+  .d-home .d-item { position: relative; border-bottom: 0; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .d-home .d-item::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, rgba(243,236,220,0), rgba(243,236,220,.09) 12%, rgba(243,236,220,.09) 88%, rgba(243,236,220,0)); }
+  .d-home .d-item::before { content: ''; position: absolute; inset: 0 -18px; border-radius: 10px; pointer-events: none; opacity: 0; transition: opacity .4s;
+    background: radial-gradient(ellipse 60% 120% at 20% 50%, rgba(255,227,163,.045), transparent 70%); }
+  .d-home .d-item:hover::before { opacity: 1; }
+  .d-home .d-item:hover { transform: translateX(4px); }
+  .d-home .d-item .d-item-title { transition: color .35s; }
+  .d-home .d-item:hover .d-item-title { color: #FFF6E2; }
+  .d-home .d-kind-mark { transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .d-home .d-item:hover .d-kind-mark { transform: rotate(-8deg); }
+}
+/* Phones: the piece cards as the same dark glass. */
+@media (max-width: 700px) {
+  .d-home .d-list > .d-item { border-radius: 14px; background: var(--grain), var(--pane) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(243,236,220,.09), 0 24px 50px -30px rgba(0,0,0,.9) !important; }
+  .d-home .d-list { background: none; }
+}
+@media (prefers-reduced-motion: reduce) { .d-home .d-waiting-dot { animation: none; } .d-home .d-item, .d-home .d-kind-mark { transition: none; } }
