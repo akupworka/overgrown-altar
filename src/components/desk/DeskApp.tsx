@@ -1183,6 +1183,7 @@ function FormsRoom() {
   const [rooms, setRooms] = useState<FormRoom[] | null>(null);
   const [err, setErr] = useState('');
   const [sample, setSample] = useState(false);
+  const [why, setWhy] = useState('');   // why the examples are showing, for the editor to pass on
   const [pick, setPick] = useState('');
   const [page, setPage] = useState(1);
   useEffect(() => {
@@ -1191,7 +1192,10 @@ function FormsRoom() {
       const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
       const out = res ? await res.json().catch(() => ({})) : {};
       // Not switched on yet (no Netlify key): show the examples, so the room can be seen working.
-      if (res?.status === 503 || res?.status === 404) { setSample(true); setRooms(SAMPLE_FORMS); setPick(SAMPLE_FORMS[0].key); return; }
+      if (res?.status === 503 || res?.status === 404) {
+        setWhy(res.status === 404 ? 'The site’s forms helper wasn’t found (404).' : `${out.error || 'Not switched on yet.'} (503)`);
+        setSample(true); setRooms(SAMPLE_FORMS); setPick(SAMPLE_FORMS[0].key); return;
+      }
       if (!res?.ok) { setErr(out.error || 'The forms couldn’t be fetched. Check your connection.'); setRooms([]); return; }
       setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
     })();
@@ -1208,7 +1212,7 @@ function FormsRoom() {
         : err ? <p className="d-photo-msg" role="alert">{err}</p>
         : !rooms.length ? <p className="it mut d-empty">No forms have been sent yet.</p>
         : <>
-          {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.</p>}
+          {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
           <div className="filters d-filters" role="tablist" aria-label="Forms">
             {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
           </div>

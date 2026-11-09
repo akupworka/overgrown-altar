@@ -1297,3 +1297,4 @@
 .d-form-sample { margin: 0; padding: 14px 18px; border-radius: 12px; font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.45; color: #CFC8B8;
   background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25); }
 .d-form-sample b { color: var(--ember); font-weight: 500; font-style: normal; }
+.d-form-why { display: block; margin-top: 10px; font-style: normal; font-size: 9px; letter-spacing: .14em; color: #8C8679; line-height: 1.6; }
