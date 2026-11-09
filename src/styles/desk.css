@@ -1242,7 +1242,7 @@
    the pen in candle gold. (Color only through the glass ring.) */
 @media (max-width: 700px) {
   .d-tabbar .t-write { color: var(--ember); }
-  .d-tabbar .t-write .d-tabbar-icon { position: relative; width: 54px; height: 54px; margin-top: -26px; border-radius: 50%; align-items: center; justify-content: center;
+  .d-tabbar .t-write .d-tabbar-icon { position: relative; width: 54px; height: 54px; margin-top: -32px; border-radius: 50%; align-items: center; justify-content: center;
     isolation: isolate; overflow: hidden; color: var(--ember);
     box-shadow: 0 0 0 5px #0E110D, 0 12px 28px rgba(0, 0, 0, .6); transition: transform .35s cubic-bezier(.16,1,.3,1); }
   /* the glass ring */
@@ -1292,3 +1292,8 @@
   .d-form-field { font-size: 16px; }
   .d-form-reply { align-self: stretch; text-align: center; }
 }
+
+/* The Forms room's examples (shown until Netlify's key is set) */
+.d-form-sample { margin: 0; padding: 14px 18px; border-radius: 12px; font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.45; color: #CFC8B8;
+  background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25); }
+.d-form-sample b { color: var(--ember); font-weight: 500; font-style: normal; }

@@ -1164,10 +1164,25 @@ function PiecePreview({ form, photo, author, onClose }: { form: { title: string;
 type FormItem = { id: string; at: string; name: string; email: string; fields: [string, string][] };
 type FormRoom = { key: string; label: string; count: number; items: FormItem[] };
 const FORMS_PER = 10;
+// Shown until the site has its Netlify key, so the room can be seen working. Clearly marked as examples.
+const ago = (d: number) => new Date(Date.now() - d * 864e5).toISOString();
+const SAMPLE_FORMS: FormRoom[] = [
+  { key: 'guild-application', label: 'Applications', count: 3, items: [
+    { id: 's1', at: ago(0.1), name: 'Mara Quill', email: 'mara@example.com', fields: [['craft', 'Poetry and short fiction'], ['why', 'I have been writing psalms of my own for ten years, mostly on the night bus home. I would like a table to bring them to, and readers who will be honest with me.'], ['sample link', 'https://example.com/psalms']] },
+    { id: 's2', at: ago(2), name: 'Tomas Reed', email: 'tomas@example.com', fields: [['craft', 'Photography'], ['why', 'I photograph cathedrals at first light, before the doors open. I would like to share them with people who look as slowly as I do.']] },
+    { id: 's3', at: ago(6), name: 'Hester Vale', email: 'hester@example.com', fields: [['craft', 'Essays'], ['why', 'Twenty years as a nurse on night shifts. I want to write about what the dark hours teach.']] } ] },
+  { key: 'contact', label: 'Letters', count: 2, items: [
+    { id: 's4', at: ago(1), name: 'Ruth Abara', email: 'ruth@example.com', fields: [['message', 'Thank you for the piece on the lamp road. I read it aloud to my mother, and she asked for it again the next evening.']] },
+    { id: 's5', at: ago(9), name: 'Daniel Okafor', email: 'daniel@example.com', fields: [['message', 'Is there a way to buy prints of the photographs in the Hearth? The window over the stair stayed with me all week.']] } ] },
+  { key: 'dispatches', label: 'Sign-ups', count: 2, items: [
+    { id: 's6', at: ago(0.5), name: '', email: 'reader@example.com', fields: [] },
+    { id: 's7', at: ago(3), name: '', email: 'pilgrim@example.com', fields: [] } ] },
+];
 const fieldName = (k: string) => k.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 function FormsRoom() {
   const [rooms, setRooms] = useState<FormRoom[] | null>(null);
   const [err, setErr] = useState('');
+  const [sample, setSample] = useState(false);
   const [pick, setPick] = useState('');
   const [page, setPage] = useState(1);
   useEffect(() => {
@@ -1175,6 +1190,8 @@ function FormsRoom() {
       const { data: s } = await supabase.auth.getSession();
       const res = await fetch('/.netlify/functions/forms', { method: 'POST', headers: { Authorization: `Bearer ${s.session?.access_token ?? ''}` } }).catch(() => null);
       const out = res ? await res.json().catch(() => ({})) : {};
+      // Not switched on yet (no Netlify key): show the examples, so the room can be seen working.
+      if (res?.status === 503 || res?.status === 404) { setSample(true); setRooms(SAMPLE_FORMS); setPick(SAMPLE_FORMS[0].key); return; }
       if (!res?.ok) { setErr(out.error || 'The forms couldn’t be fetched. Check your connection.'); setRooms([]); return; }
       setRooms(out.rooms ?? []); setPick((out.rooms ?? [])[0]?.key ?? '');
     })();
@@ -1191,6 +1208,7 @@ function FormsRoom() {
         : err ? <p className="d-photo-msg" role="alert">{err}</p>
         : !rooms.length ? <p className="it mut d-empty">No forms have been sent yet.</p>
         : <>
+          {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.</p>}
           <div className="filters d-filters" role="tablist" aria-label="Forms">
             {rooms.map((r) => <button key={r.key} type="button" role="tab" className="chip" aria-pressed={pick === r.key} aria-selected={pick === r.key} onClick={() => { setPick(r.key); setPage(1); }}>{r.label}<span className="chip-n">{r.count}</span></button>)}
           </div>
