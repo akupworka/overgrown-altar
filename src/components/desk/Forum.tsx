@@ -253,6 +253,24 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
         <span className="eb">The Forum</span>
         <h1 className="h1">{board.name}</h1>
         <p className="it mut fo-sub">{board.description}</p>
+        {isEditor && (
+          <details className="fo-mod fo-forum-mod">
+            <summary className="lab"><span aria-hidden="true">⋯</span> Manage this forum</summary>
+            <div className="fo-mod-menu">
+              <button type="button" onClick={async () => {
+                const name = prompt('The forum’s name', board.name); if (name === null) return;
+                const description = prompt('One line about it', board.description); if (description === null) return;
+                const { error } = await supabase.from('forum_boards').update({ name: name.trim().slice(0, 60) || board.name, description: description.trim().slice(0, 300) }).eq('id', board.id);
+                if (error) alert(error.message); else load();
+              }}>Rename or describe</button>
+              <button type="button" className="fo-danger" onClick={async () => {
+                if (!confirm(`Delete the forum “${board.name}”${threads.length ? `, with its ${threads.length} ${threads.length === 1 ? 'thread' : 'threads'} and every reply` : ''}? It can’t be brought back.`)) return;
+                const { error } = await supabase.from('forum_boards').delete().eq('id', board.id);
+                if (error) alert('The forum couldn’t be deleted. ' + error.message); else go('/guild/members/?view=forum');
+              }}>Delete this forum</button>
+            </div>
+          </details>
+        )}
         <div className="fo-head-acts">
           {canStart
             ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{!writing && <span aria-hidden="true" className="fo-plus">+</span>}{writing ? 'Never mind' : 'Start a thread'}</button>
@@ -261,7 +279,13 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
         </div>
       </header>
       {writing && <NewThread board={board} me={me} onCancel={closeSheet} onDone={(id) => { setWriting(false); go(`/guild/members/?t=${id}`); }} />}
-      {threads.length === 0 ? <p className="it mut fo-empty">No threads yet. {canStart ? 'Start the first.' : ''}</p> : (
+      {threads.length === 0 ? (
+        <div className="fo-empty-card">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>
+          <p className="it">No threads yet.</p>
+          <span className="lab mut">{canStart ? 'Start the first conversation above.' : 'The editor will open the first one.'}</span>
+        </div>
+      ) : (
         <ol className="fo-threads">
           <li className="fo-threads-head lab mut" aria-hidden="true"><span>Thread</span><span>Replies</span><span>Latest</span></li>
           {onPage.map((t) => (
