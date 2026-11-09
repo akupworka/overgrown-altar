@@ -16,7 +16,7 @@ async function withNames(rows: Row[]) {
 }
 
 /** On the Desk: what you saved, and what's new from the writers you follow. Shows nothing until there is something. */
-export function ReadingShelf({ me }: { me: string }) {
+export function ReadingShelf({ me, freshOnly = false }: { me: string; freshOnly?: boolean }) {
   const [saved, setSaved] = useState<Row[] | null>(null);
   const [fresh, setFresh] = useState<Row[] | null>(null);
   const [savedAll, setSavedAll] = useState(0);
@@ -45,6 +45,7 @@ export function ReadingShelf({ me }: { me: string }) {
     setSaved((s) => (s ?? []).filter((r) => r.id !== id)); setSavedAll((n) => n - 1);
     await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', id);
   }
+  if (freshOnly && !fresh?.length) return null;
   if (!saved?.length && !fresh?.length) return null;
   const list = (rows: Row[], removable = false) => (
     <ol className="rd-list">
@@ -67,7 +68,7 @@ export function ReadingShelf({ me }: { me: string }) {
           {list(fresh)}
         </section>
       )}
-      {!!saved?.length && (
+      {!freshOnly && !!saved?.length && (
         <section className="d-forum-panel rd-panel">
           <div className="d-forum-head"><span className="eb">Saved for later</span>{savedAll > 4 && <span className="lab mut">{savedAll} saved</span>}</div>
           {list(saved, true)}

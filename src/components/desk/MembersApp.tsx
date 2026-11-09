@@ -4,6 +4,7 @@
 //   /guild/members/?p=<id>     reading one of their published pieces
 // What anyone can see is enforced by the database's rules; this only presents it.
 import { FollowButton } from './Reading';
+import { useCollection, CollectionWall } from './Collection';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
@@ -56,6 +57,7 @@ function Directory() {
   // Members a page: 25 on a computer (five full rows of five), 24 on a phone (six rows of four)
   const STEP = typeof window !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 24 : 25;
   const [mPage, setMPage] = useState(1);
+  const amFellow = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').fellow; } catch { return false; } })();
   const [mine, setMine] = useState<number | null>(null);   // your own published count, for your crest on the Prestiges tile
   // For the rooms: your own work (Desk counts, trophies), and the newest photographs (the Gallery's mosaic).
   const [myPieces, setMyPieces] = useState<Piece[]>([]);
@@ -87,7 +89,13 @@ function Directory() {
       }
     })();
   }, []);
-  const found = (members ?? []).filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const matched = (members ?? []).filter((m) => !q.trim() || `${m.display_name} ${m.craft ?? ''}`.toLowerCase().includes(q.trim().toLowerCase()));
+  // The Guild's writers first, by rank; the Fellowship in a section of its own beneath, newest first.
+  const found = matched.filter((m) => m.role !== 'fellow');
+  const fellows = matched.filter((m) => m.role === 'fellow').sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
+  const [fPage, setFPage] = useState(1);
+  const fPages = Math.max(1, Math.ceil(fellows.length / STEP)), fCur = Math.min(fPage, fPages);
+  const turnF = (n: number) => { setFPage(n); document.querySelector('.g-fellow-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const mPages = Math.max(1, Math.ceil(found.length / STEP)), mCur = Math.min(mPage, mPages);
   const turnM = (n: number) => { setMPage(n); document.querySelector('.g-people-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   return (
@@ -111,8 +119,8 @@ function Directory() {
           <a className="g-room g-room-small g-tile" href="/guild/desk/">
             <img className="g-tile-photo" src="/images/window-light-on-wall-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span>
-            <span className="g-tile-text"><span className="g-tile-name">Your Desk</span><span className="g-room-line">Write, send, and see where your pieces stand.</span>
-              {meId && <span className="g-tile-stats"><b>{myPieces.filter((p) => p.status === 'approved').length}</b> published<i>·</i><b>{myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length}</b> {myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length === 1 ? 'draft' : 'drafts'}</span>}</span>
+            <span className="g-tile-text"><span className="g-tile-name">{amFellow ? 'Your collection' : 'Your Desk'}</span><span className="g-room-line">{amFellow ? 'What you’ve saved, and what’s new from writers you follow.' : 'Write, send, and see where your pieces stand.'}</span>
+              {meId && !amFellow && <span className="g-tile-stats"><b>{myPieces.filter((p) => p.status === 'approved').length}</b> published<i>·</i><b>{myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length}</b> {myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length === 1 ? 'draft' : 'drafts'}</span>}</span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>
           {(() => {
@@ -159,12 +167,12 @@ function Directory() {
           </a>
         </div>
       </div>
-      <div className="g-people-head"><span className="eb">Members</span>{members && <span className="lab mut">{members.length} at the table</span>}</div>
+      <div className="g-people-head"><span className="eb">Members</span>{members && <span className="lab mut">{members.filter((m) => m.role !== 'fellow').length} at the table</span>}</div>
       {members && members.length > 3 && (
         <label className="g-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <span className="visually-hidden">Find a member</span>
-          <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setMPage(1); }} placeholder="Find a member by name or craft" />
+          <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setMPage(1); setFPage(1); }} placeholder="Find a member by name or craft" />
         </label>
       )}
       {!members ? <p className="lab mut">Gathering the Guild…</p>
@@ -190,6 +198,26 @@ function Directory() {
           <button type="button" className="pg-step" disabled={mCur === mPages} onClick={() => turnM(mCur + 1)} aria-label="Next page"><span className="pg-word">Next</span>›</button>
         </nav>
       )}
+      {fellows.length > 0 && (<>
+        <div className="g-people-head g-fellow-head"><span className="eb">The Fellowship</span><span className="lab mut">{fellows.length} {fellows.length === 1 ? 'reader' : 'readers'}</span></div>
+        <div className="g-grid g-fellows">
+          {fellows.slice((fCur - 1) * STEP, fCur * STEP).map((m) => (
+            <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
+              <Arch p={m} />
+              <span className="g-name">{m.display_name || 'A reader'}</span>
+              <span className="lab mut g-craft g-role">Fellowship<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
+            </Link>
+          ))}
+        </div>
+        {fPages > 1 && (
+          <nav className="pager fo-pager g-pager" aria-label="Pages of the Fellowship">
+            <button type="button" className="pg-step" disabled={fCur === 1} onClick={() => turnF(fCur - 1)} aria-label="Previous page">‹<span className="pg-word">Previous</span></button>
+            {pageList(fCur, fPages).map((n, i) => n === '…' ? <span key={'f' + i} className="pg-gap" aria-hidden="true">…</span>
+              : <button key={n} type="button" className="pg-n" aria-current={n === fCur ? 'page' : undefined} onClick={() => turnF(n)}>{n}</button>)}
+            <button type="button" className="pg-step" disabled={fCur === fPages} onClick={() => turnF(fCur + 1)} aria-label="Next page"><span className="pg-word">Next</span>›</button>
+          </nav>
+        )}
+      </>)}
     </div>
   );
 }
@@ -226,6 +254,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   if (person === null) return <div className="m-gate"><p className="it mut d-empty">This member’s page could not be found.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
   const handle = (person.instagram ?? '').replace(/^@/, '');
+  const fellow = person.role === 'fellow';   // the Fellowship: a collection instead of work and prestige
+  const iAmEditor = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').editor; } catch { return false; } })();
   // Six pieces to a page, with pages below; the kind filter narrows the list first.
   const photos = work.filter((w) => w.medium === 'photograph' && w.image_path);
   const writing = work.filter((w) => !(w.medium === 'photograph' && w.image_path));
@@ -243,10 +273,10 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <header className="m-hero">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : 'Writer of the Guild'}</span>
+        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Writer of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
-        <PrestigeBadge published={work.length} size="lg" />
+        {!fellow && <PrestigeBadge published={work.length} size="lg" />}
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
         {(site || handle || person.public_email) && (
           <span className="m-pills">
@@ -280,16 +310,24 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
               Message {person.display_name.split(' ')[0]}
             </button>
-            <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />
+            {!fellow && <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />}
+            {fellow && iAmEditor && (
+              <button type="button" className="m-act" onClick={async () => {
+                if (!confirm(`Welcome ${person.display_name} into the Guild? They will be able to write and send work to you.`)) return;
+                const { error } = await supabase.rpc('welcome_to_guild', { person: person.id });
+                if (error) alert(error.message); else location.reload();
+              }}>Welcome into the Guild</button>
+            )}
           </nav>
         )}
         {person.id === me && (
           <nav className="m-actions" aria-label="My Desk">
+            {fellow ? <a className="m-act primary" href="/guild/desk/">My collection</a> : <>
             <a className="m-act primary" href="/guild/desk/#write">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
               Write a piece
             </a>
-            <a className="m-act" href="/guild/desk/">My pieces</a>
+            <a className="m-act" href="/guild/desk/">My pieces</a></>}
             <a className="m-act" href="/guild/desk/#my-page">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
               Edit my page
@@ -299,6 +337,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
           </nav>
         )}
       </header>
+      {fellow ? <FellowCollection id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} /> : (<>
       <section className="m-work">
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
         {/* Writing and photographs, each in its own place */}
@@ -360,6 +399,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         </>)}
       </section>
       <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person, forum: tally }} mine={person.id === me} name={person.display_name} /></div>
+      </>)}
     </div>
   );
 }
@@ -457,4 +497,16 @@ export default function MembersApp() {
   if (route.p) return <Reading id={route.p} />;
   if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
   return <Directory />;
+}
+
+// A Fellowship member's page shows their collection (open to everyone; see /collection/).
+function FellowCollection({ id, first, mine }: { id: string; first: string; mine: boolean }) {
+  const items = useCollection(id);
+  return (
+    <section className="m-work m-coll">
+      <div className="m-work-head"><span className="eb">{mine ? 'Your collection' : `${first}’s collection`}</span>
+        <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
+      <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />
+    </section>
+  );
 }

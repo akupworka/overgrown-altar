@@ -23,7 +23,7 @@ export interface Piece {
   revision_at?: string | null;
 }
 export interface Profile {
-  id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor';
+  id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor' | 'fellow';
   website: string; instagram: string; listed: boolean; created_at?: string;
   public_email?: string | null;   // shown on their work and pages only when they choose to
 }
@@ -36,13 +36,14 @@ export const portraitUrl = (path?: string | null) =>
 export const MEMBER_KEY = 'oa_member';
 export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path'> & { role?: string | null }) | null) {
   try {
-    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor' }));
+    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor', fellow: p.role === 'fellow' }));
     else localStorage.removeItem(MEMBER_KEY);
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
   if (typeof document === 'undefined') return;
   document.documentElement.toggleAttribute('data-member', !!p);
   document.documentElement.toggleAttribute('data-editor', p?.role === 'editor');
+  document.documentElement.toggleAttribute('data-fellow', p?.role === 'fellow');   // the Fellowship: no writing tools
   document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
   document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));

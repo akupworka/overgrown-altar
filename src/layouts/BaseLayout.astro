@@ -60,6 +60,7 @@ const imageUrl = new URL(image, site).toString();
           document.documentElement.setAttribute('data-member', '');
           var oaM = JSON.parse(localStorage.getItem('oa_member') || '{}');
           if (oaM.editor) document.documentElement.setAttribute('data-editor', '');
+          if (oaM.fellow) document.documentElement.setAttribute('data-fellow', '');
         }
         // Reading comfort chosen on a piece (text size, night reading), before anything is drawn
         var oaR = JSON.parse(localStorage.getItem('oa_read') || '{}');

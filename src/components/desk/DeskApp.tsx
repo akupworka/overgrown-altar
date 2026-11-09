@@ -20,6 +20,7 @@ import { PhotoFocus } from './PhotoFocus';
 import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
+import { FellowHome } from './Fellow';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -267,7 +268,8 @@ function Desk({ session }: { session: Session }) {
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
-  const items: [Tab, string, number?][] = [
+  const isFellow = profile?.role === 'fellow';   // the Fellowship: a collection, not pieces; no writing
+  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'My page']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'My page'],
@@ -275,13 +277,13 @@ function Desk({ session }: { session: Session }) {
 
   if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
   return (
-    <div className={`d-room ${tab === 'write' ? 'writing' : ''}`}>
+    <div className={`d-room ${tab === 'write' && !isFellow ? 'writing' : ''}`}>
       <aside className="d-side">
         <div className="d-me">
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? 'Editor in Chief' : 'Writer'}</span>
+            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'The Fellowship' : 'Writer'}</span>
           </div>
         </div>
         <nav className="d-nav" aria-label="Desk">
@@ -308,8 +310,9 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
-        {tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
+        {isFellow && profile && (tab === 'pieces' || tab === 'write') && <FellowHome profile={profile} />}
+        {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
+        {!isFellow && tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
           : <Queue queue={queue} onRead={setReading} />)}
@@ -1540,7 +1543,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       </div>
       {portraitMsg && <p className="d-photo-msg" role="status">{portraitMsg}</p>}
       <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
-      <label className="d-lbl"><span className="lab">Your craft · e.g. Essayist, Photographer</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">{profile.role === 'fellow' ? 'What you love · e.g. Poetry, old churches' : 'Your craft · e.g. Essayist, Photographer'}</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
       <div className="d-two">
         <label className="d-lbl"><span className="lab">Website</span><input className="field" inputMode="url" placeholder="yoursite.com" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></label>

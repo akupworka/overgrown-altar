@@ -2,10 +2,10 @@
 // the forum rules, a hello in the forum, the Guild on your home screen, and your first piece.
 import { useEffect, useState } from 'react';
 
-interface Props { portrait: boolean; bio: boolean; posted: boolean; sent: boolean; onWrite: () => void }
+interface Props { portrait: boolean; bio: boolean; posted: boolean; sent: boolean; onWrite: () => void; fellow?: boolean }
 const store = (k: string, v?: string) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch {} return null; };
 
-export function Welcome({ portrait, bio, posted, sent, onWrite }: Props) {
+export function Welcome({ portrait, bio, posted, sent, onWrite, fellow = false }: Props) {
   const [hidden, setHidden] = useState(() => store('oa_welcome_hidden') === '1');
   const [rules] = useState(() => store('oa_rules_read') === '1');
   const [home, setHome] = useState(() => store('oa_home_added') === '1');
@@ -16,11 +16,13 @@ export function Welcome({ portrait, bio, posted, sent, onWrite }: Props) {
   }, []);
   const steps = [
     { done: portrait, label: 'Add your picture', note: 'So the Guild can put a face to your words.', href: '/guild/desk/#my-page' },
-    { done: bio, label: 'Write a few lines about yourself', note: 'Your craft, and what you love to make.', href: '/guild/desk/#my-page' },
+    { done: bio, label: 'Write a few lines about yourself', note: fellow ? 'Who you are, and what brings you to the altar.' : 'Your craft, and what you love to make.', href: '/guild/desk/#my-page' },
     { done: rules, label: 'Read the forum rules', note: 'How we keep the table safe and kind.', href: '/guild/members/?view=rules' },
     { done: posted, label: 'Say hello in the forum', note: 'A line in the Nave is enough.', href: '/guild/members/?view=forum' },
     { done: home, label: 'Add the Guild to your home screen', note: 'It opens full-screen, like an app.', how: true },
-    { done: sent, label: 'Send your first piece', note: 'The editor reads every one.', write: true },
+    fellow
+      ? { done: sent, label: 'Save your first piece or photograph', note: 'Tap Save on anything you love; it gathers in your collection.', href: '/gallery/' }
+      : { done: sent, label: 'Send your first piece', note: 'The editor reads every one.', write: true },
   ];
   const done = steps.filter((s) => s.done).length;
   if (hidden || done === steps.length) return null;

@@ -1,0 +1,105 @@
+---
+// The Fellowship: readers with an account. Joining is open to anyone: name and email, then a welcome letter
+// with a link to choose a password (netlify/functions/join-fellowship.mts). Writers apply to the Guild instead.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+---
+<BaseLayout title="The Fellowship" description="Join the Fellowship of the Overgrown Altar: keep a collection of the work and photographs you love, write to the Guild, and join the conversation.">
+  <section class="hero fs-hero">
+    <img src="/images/window-of-the-ascension-and.jpg" alt="" style="object-position:center 35%;filter:brightness(.5)" fetchpriority="high" />
+    <div class="veil"></div>
+    <SiteNav />
+    <div class="hero-c fs-hero-c">
+      <span class="eb">Readers of the altar</span>
+      <h1 class="h1">The Fellowship</h1>
+      <p class="it fs-lead">For those who come to read, to look, and to keep company with the Guild.</p>
+      <a class="btn" href="#join">Join the Fellowship</a>
+    </div>
+  </section>
+
+  <section class="sec paper fs-what">
+    <ol class="fs-three">
+      <li><span class="num">I</span><span class="fs-k">Collect</span><span class="it mut fs-d">Keep the pieces and photographs you love in a collection of your own, open for others to see.</span></li>
+      <li><span class="num">II</span><span class="fs-k">Converse</span><span class="it mut fs-d">Write to the members of the Guild, and pull up a chair in the Forum.</span></li>
+      <li><span class="num">III</span><span class="fs-k">Belong</span><span class="it mut fs-d">Follow the writers whose work stays with you. In time, you may take a seat at the Guild’s table yourself.</span></li>
+    </ol>
+  </section>
+
+  <section class="sec dark fs-join" id="join">
+    <div class="fs-card">
+      <span class="eb">Join</span>
+      <h2 class="h2 fs-h">Take your place.</h2>
+      <p class="it mut fs-sub">It’s free. We’ll email you a link to choose your password.</p>
+      <form class="fs-form" novalidate>
+        <label class="fs-lbl"><span class="lab">Your name</span><input class="field" name="name" autocomplete="name" required maxlength="80" /></label>
+        <label class="fs-lbl"><span class="lab">Email</span><input class="field" name="email" type="email" autocomplete="email" inputmode="email" required /></label>
+        <label class="fs-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <button type="submit" class="btn fs-go">Join the Fellowship</button>
+        <p class="it fs-msg" role="status"></p>
+      </form>
+      <div class="fs-done" hidden>
+        <p class="fs-done-h">Check your email.</p>
+        <p class="it mut">A welcome letter is on its way to <b class="fs-to"></b>. Open it and choose your password to take your place.</p>
+      </div>
+      <p class="lab mut fs-alt">Already one of us? <a href="/guild/desk/">Sign in</a> · Writers: <a href="/guild/">apply to the Guild</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.fs-form')!;
+  const msg = form.querySelector<HTMLElement>('.fs-msg')!, go = form.querySelector<HTMLButtonElement>('.fs-go')!;
+  const since = Date.now();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(form), name = String(f.get('name') ?? '').trim(), email = String(f.get('email') ?? '').trim();
+    if (!name) { msg.textContent = 'Please tell us your name.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'That email address doesn’t look right.'; return; }
+    go.disabled = true; go.textContent = 'One moment…'; msg.textContent = '';
+    const res = await fetch('/.netlify/functions/join-fellowship', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, website: f.get('website'), since }) }).catch(() => null);
+    const out = res ? await res.json().catch(() => ({})) : {};
+    go.disabled = false; go.textContent = 'Join the Fellowship';
+    if (!res || !res.ok || !out.ok) { msg.textContent = out.error || 'Something went wrong. Please try again.'; return; }
+    form.hidden = true;
+    const done = document.querySelector<HTMLElement>('.fs-done')!; done.hidden = false;
+    done.querySelector('.fs-to')!.textContent = out.email;
+  });
+</script>
+
+<style>
+  .fs-hero { height: 680px; }
+  .fs-hero-c { top: 230px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .fs-lead { margin: 0; max-width: 620px; font-size: 26px; line-height: 1.4; color: #E6DFD0; }
+  .fs-three { list-style: none; margin: 0 auto; padding: 0; max-width: 1100px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .fs-three li { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+  .fs-three .num { font-size: 60px; color: var(--oxblood); }
+  .fs-k { font-family: var(--serif); font-size: 34px; letter-spacing: .08em; text-transform: uppercase; }
+  .fs-d { font-size: 20px; max-width: 300px; line-height: 1.45; }
+  .fs-join { display: flex; justify-content: center; }
+  .fs-card { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 14px; padding: 40px 36px; border-radius: 20px;
+    background: linear-gradient(180deg, #171B13, #0E110C); box-shadow: inset 0 1px 0 rgba(255, 236, 190, .1), inset 0 0 0 1px rgba(255, 227, 163, .3); }
+  .fs-h { margin: 0; }
+  .fs-sub { margin: 0 0 8px; font-size: 18px; }
+  .fs-form { display: flex; flex-direction: column; gap: 18px; }
+  .fs-lbl { display: flex; flex-direction: column; gap: 8px; }
+  .fs-lbl .field { color-scheme: dark; }
+  .fs-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .fs-go { margin-top: 6px; }
+  .fs-go:disabled { opacity: .6; }
+  .fs-msg { margin: 0; min-height: 1.2em; font-size: 17px; color: var(--ember); }
+  .fs-done[hidden], .fs-form[hidden] { display: none; }
+  .fs-done-h { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; color: var(--ember); }
+  .fs-done p { margin: 0; font-size: 18px; line-height: 1.5; }
+  .fs-alt { margin-top: 10px; font-size: 9.5px; line-height: 2; }
+  .fs-alt a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .35); }
+  @media (max-width: 700px) {
+    .fs-hero { height: 560px; }
+    .fs-hero-c { top: 170px; padding: 0 20px; }
+    .fs-lead { font-size: 20px; }
+    .fs-three { grid-template-columns: 1fr; gap: 34px; }
+    .fs-k { font-size: 26px; }
+    .fs-d { font-size: 18px; }
+    .fs-card { padding: 28px 20px; }
+  }
+</style>

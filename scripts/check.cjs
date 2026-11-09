@@ -6,7 +6,7 @@
 //   node scripts/check.cjs <path> [options]
 //
 //   <path>            e.g. /guild/desk/  /guild/members/?view=prestige  /hearth
-//   --as editor|member|visitor   who is signed in (default editor; visitor = signed out)
+//   --as editor|member|fellow|visitor   who is signed in (default editor; visitor = signed out)
 //   --pieces N        how many published pieces the signed-in member has (default 12; prestige ranks follow)
 //   --only phone|computer        check one size only
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
@@ -34,7 +34,7 @@ const PORT = 4321, BASE = `http://localhost:${PORT}`;
 const ME = '22222222-2222-2222-2222-222222222222';
 const t = (d) => `2026-11-0${d}T09:00:00Z`;
 const profiles = [
-  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm3', display_name: 'Thomas Ashgrove', craft: 'Poetry', bio: '', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(2) },
 ];
@@ -153,10 +153,10 @@ const up = () => fetch(BASE).then(() => true, () => false);
       return route.fulfill({ json: one ? rows[0] ?? null : rows });
     });
     await page.goto(BASE + '/');
-    await page.evaluate(([s, signedIn, editor]) => {
+    await page.evaluate(([s, signedIn, editor, fellowAcct]) => {
       localStorage.setItem('oa_arrived', '1');
-      if (signedIn) { localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor })); }
-    }, [session, who !== 'visitor', who === 'editor']);
+      if (signedIn) { localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor, fellow: fellowAcct })); }
+    }, [session, who !== 'visitor', who === 'editor', who === 'fellow']);
     await page.goto(BASE + target, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     if (opt('click')) { await page.click(opt('click')); await page.waitForTimeout(600); }

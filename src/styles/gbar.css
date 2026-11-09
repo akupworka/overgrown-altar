@@ -71,3 +71,7 @@
 .gbar-n { position: absolute; top: -6px; right: -10px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
   background: var(--ember); color: #12160F; font-family: var(--sans); font-size: 9px; letter-spacing: 0; box-shadow: 0 0 0 2px #0E110D; }
 .gbar-n[hidden] { display: none; }
+
+/* The Fellowship: no writing tools anywhere; the phone bar's centre button explores instead */
+html[data-fellow] :is(.gbar .t-write:not(.t-explore), .inner-write, .inner-photo, [data-writer]) { display: none !important; }
+html:not([data-fellow]) .gbar .t-explore { display: none !important; }
