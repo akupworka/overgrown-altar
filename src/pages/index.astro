@@ -33,6 +33,7 @@ const watchtowerFeed = (await inPillar('watchtower')).slice(0, 4);
 const writers = (await getAuthors()).slice(0, 6).map(({ author }) => author);
 import { inPillar } from '../lib/catalog';
 import { getAuthors, guildPillar, guildUrl } from '../lib/guild';
+import { seatFor } from '../lib/seats';
 // The newest photographs from the Hearth's gallery, for a strip of plates.
 const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photograph' && g.image).slice(0, 5);
 ---
@@ -147,7 +148,7 @@ const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photogr
       <div class="writers">
         {writers.map((w) => (
           <a class="writer" href={`/guild/authors/${w.slug}/`}>
-            <span class="writer-arch" data-author-id={w.id}>{w.portrait ? <img src={w.portrait} alt="" loading="lazy" /> : <span>{w.display_name.split(/\s+/).slice(0, 2).map((x) => x[0]).join('')}</span>}</span>
+            <span class="writer-arch" data-author-id={w.id}><img src={w.portrait || seatFor(w.display_name)} alt="" loading="lazy" /></span>
             <span class="writer-name">{w.display_name}</span>
             {w.craft && <span class="lab mut writer-craft">{w.craft}</span>}
           </a>

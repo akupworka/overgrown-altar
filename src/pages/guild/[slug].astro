@@ -10,6 +10,7 @@ import PrestigeBadge from '../../components/PrestigeBadge.astro';
 import { Body, wantsDropCap } from '../../lib/marks';
 import { PhotoPlate } from '../../components/PhotoPlate';
 import { authorUrl, getGuildPieces, guildPillar, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildPiece } from '../../lib/guild';
+import { seatFor } from '../../lib/seats';
 import '../../styles/desk.css';
 import '../../styles/guild-piece.css';
 
@@ -62,7 +63,7 @@ const published = (await getGuildPieces()).filter((x) => x.author.id === a.id).l
       </div>
 
       <aside class="gp-author" aria-label="About the author">
-        <a class="gp-arch" href={aUrl} aria-hidden="true" tabindex="-1" data-author-id={a.id}>{a.portrait ? <img src={a.portrait} alt="" loading="lazy" /> : a.display_name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')}</a>
+        <a class="gp-arch" href={aUrl} aria-hidden="true" tabindex="-1" data-author-id={a.id}><img src={a.portrait || seatFor(a.display_name)} alt="" loading="lazy" /></a>
         <div class="gp-author-text">
           <span class="eb">About the author</span>
           <a class="gp-author-name" href={aUrl}>{a.display_name}</a>

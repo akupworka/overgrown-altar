@@ -2,6 +2,7 @@
 // These two values are public by design: they only identify the project. What anyone may
 // read or change is enforced by the database's own rules (row-level security), not by secrecy.
 import { createClient } from '@supabase/supabase-js';
+import { seatFor } from './seats';
 
 export const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 export const SUPABASE_KEY = 'sb_publishable_84SLMdb_AiDAbaiz1eitbw_DRMx38lH';
@@ -49,8 +50,7 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
   const src = portraitUrl(p.portrait_path);
   document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
     av.textContent = '';
-    if (src) { const img = new Image(); img.src = src; img.alt = ''; av.append(img); }
-    else av.textContent = p.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+    const img = new Image(); img.src = src || seatFor(p.display_name); img.alt = ''; av.append(img);
   });
 }
 

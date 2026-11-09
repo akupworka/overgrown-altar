@@ -13,6 +13,7 @@ import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
+import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, useForumTally } from './Forum';
@@ -41,7 +42,7 @@ function Link({ to, className, children }: { to: string; className?: string; chi
 function Arch({ p, big = false }: { p: Pick<Profile, 'display_name' | 'portrait_path'>; big?: boolean }) {
   const src = portraitUrl(p.portrait_path);
   const initials = p.display_name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-  return <span className="g-arch" aria-hidden="true">{src ? <img src={src} alt="" loading={big ? 'eager' : 'lazy'} /> : initials}</span>;
+  return <span className="g-arch" aria-hidden="true"><img src={src || seatFor(p.display_name)} alt="" loading={big ? 'eager' : 'lazy'} data-initials={initials} /></span>;
 }
 
 // ---------------------------------------------------------------- the directory

@@ -13,6 +13,7 @@ import { PrestigeBadge } from './Prestige';
 import { KINDS } from '../../lib/kinds';
 import { prestigeFor, PRESTIGES, type Prestige } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
+import { seatFor } from '../../lib/seats';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
@@ -70,7 +71,7 @@ export function Initials({ name, size = 40, src }: { name: string; size?: number
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
   return (
     <span className="d-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }} aria-hidden="true">
-      {src ? <img src={src} alt="" /> : initials}
+      <img src={src || seatFor(name)} alt="" data-initials={initials} />
     </span>
   );
 }

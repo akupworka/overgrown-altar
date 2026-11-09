@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { supabase, portraitUrl } from '../../lib/supabase';
 import { Body, wantsDropCap } from '../../lib/marks';
 import { PhotoPlate } from '../PhotoPlate';
+import { seatFor } from '../../lib/seats';
 
 const PILLAR = { watchtower: 'The Watchtower', hearth: 'The Hearth', perimeter: 'The Perimeter' } as Record<string, string>;
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photographs', study: 'Architectural study', teardown: 'Design teardown', protocol: 'Protocol', recovery: 'Recovery story', testimony: 'Testimony', deliverance: 'Deliverance story', personal: 'Personal' };
@@ -61,7 +62,7 @@ export default function LivePiece() {
           {piece.body.trim() && <Body body={piece.body} />}
           <div className="gp-sign"><span>{(a.display_name || '').split(' ')[0]}</span></div>
           <aside className="gp-author" aria-label="About the author">
-            <a className="gp-arch" href={aUrl} aria-hidden="true" tabIndex={-1}>{portrait ? <img src={portrait} alt="" /> : initials}</a>
+            <a className="gp-arch" href={aUrl} aria-hidden="true" tabIndex={-1}><img src={portrait || seatFor(a.display_name)} alt="" data-initials={initials} /></a>
             <div className="gp-author-text">
               <span className="eb">About the author</span>
               <a className="gp-author-name" href={aUrl}>{a.display_name}</a>

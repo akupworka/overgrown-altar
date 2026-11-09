@@ -78,6 +78,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 <MenuPanel />
 
 <script>
+  import { seatFor } from '../lib/seats';
   // Signed in to the Guild? Show the member's portrait (or initials) and "My Desk" instead of
   // "Sign in". Reads only what this device already remembers, so nothing extra is loaded.
   try {
@@ -88,8 +89,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = true));
       document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = false));
       document.querySelectorAll<HTMLElement>('.member-av').forEach((av) => {
-        if (me.portrait) { const img = new Image(); img.src = me.portrait; img.alt = ''; av.append(img); }
-        else av.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '·';
+        const img = new Image(); img.src = me.portrait || seatFor(name); img.alt = ''; av.append(img);
       });
       document.querySelector('.member')?.setAttribute('aria-label', name ? `My Desk, signed in as ${name}` : 'My Desk');
       // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
