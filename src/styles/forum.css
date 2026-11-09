@@ -367,26 +367,12 @@
 .fo-pic:has(input:focus-visible) { outline: 2px solid var(--ember); outline-offset: 2px; }
 .fo-newforum .fo-compose-acts { display: flex; align-items: center; gap: 18px; }
 
-/* ---- The forum rules ---- */
-.fo-rule-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; max-width: 820px; }
-.fo-rule { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; padding: 24px 26px; border-radius: 14px;
-  background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,0) 40%), rgba(243,236,220,.025); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(243,236,220,.1); }
-.fo-rule-n { font-family: var(--serif); font-size: 26px; color: var(--ember); line-height: 1.2; text-align: center; }
-.fo-rule-h { margin: 0 0 10px; font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.2; color: var(--bone); }
-.fo-rule ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
-.fo-rule li { font-family: var(--serif); font-size: 18px; line-height: 1.5; color: #CFC8B8; }
-.fo-rule li::marker { color: var(--brass); }
-.fo-rules .fo-back { display: inline-flex; }
 @media (max-width: 700px) {
   .fo-index-acts { flex-direction: column; align-items: stretch; }
   .fo-glass-btn { justify-content: center; }
   .fo-rules-link { align-self: center; }
   .fo-newforum { padding: 18px 16px; }
   .fo-pics-row { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-  .fo-rule { grid-template-columns: 1fr; gap: 6px; padding: 18px 16px; }
-  .fo-rule-n { text-align: left; font-size: 20px; }
-  .fo-rule-h { font-size: 21px; }
-  .fo-rule li { font-size: 16px; }
 }
 .fo-plus { margin-right: 8px; font-size: 15px; letter-spacing: 0; }
 .fo-pics legend { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-dark); padding: 0; margin-bottom: 10px; }
@@ -407,4 +393,40 @@
   .fo-rules-mark { width: 38px; height: 38px; }
   .fo-rules-name { font-size: 18px; }
   .fo-rules-line { font-size: 14px; }
+}
+
+/* ---- The forum rules, as a covenant: a quiet head, the One Body preamble, numbered articles ---- */
+.fo-rules { max-width: 860px; margin: 0 auto; }
+.fo-rules .fo-back { display: inline-flex; }
+.fr-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 8px; }
+.fr-cross { color: var(--ember); }
+.fr-head .eb { margin: 0; }
+.fr-title { font-size: clamp(46px, 6vw, 72px) !important; line-height: 1; }
+.fr-lead { margin: 0; max-width: 600px; font-size: 20px; line-height: 1.5; color: #CFC8B8; }
+.fr-pre { margin: 40px 0 26px; padding: 36px 44px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  background: radial-gradient(120% 140% at 50% 0%, rgba(255,227,163,.08), rgba(255,227,163,0) 60%), rgba(243,236,220,.025);
+  box-shadow: inset 0 1px 0 rgba(255,236,190,.12), inset 0 0 0 1px rgba(255,227,163,.28); }
+.fr-pre .eb { margin: 0; }
+.fr-pre-text { margin: 0; font-family: var(--serif); font-style: italic; font-size: 26px; line-height: 1.45; color: var(--bone); max-width: 680px; }
+.fr-pre-ref { color: var(--muted-dark); font-size: 9.5px; }
+.fr-list { list-style: none; margin: 0; padding: 0; }
+.fr-rule { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 26px; padding: 34px 0; position: relative; }
+.fr-rule + .fr-rule::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(243,236,220,0), rgba(243,236,220,.16) 15%, rgba(243,236,220,.16) 85%, rgba(243,236,220,0)); }
+.fr-n { font-family: var(--serif); font-weight: 300; font-size: 54px; line-height: .95; color: var(--ember); text-align: right; }
+.fr-h { margin: 4px 0 14px; font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.15; color: var(--bone); }
+.fr-body ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.fr-body li { position: relative; padding-left: 22px; font-family: var(--serif); font-size: 19px; line-height: 1.55; color: #CFC8B8; }
+.fr-body li::before { content: ''; position: absolute; left: 2px; top: .7em; width: 8px; height: 1px; background: var(--brass); }
+.fr-foot { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 34px 0 10px; color: var(--ember); }
+.fr-foot p { margin: 0; font-size: 18px; color: var(--muted-dark); max-width: 520px; }
+@media (max-width: 700px) {
+  .fr-head { padding-top: 8px; gap: 10px; }
+  .fr-lead { font-size: 17px; }
+  .fr-pre { margin: 28px 0 14px; padding: 24px 18px; gap: 12px; }
+  .fr-pre-text { font-size: 20px; }
+  .fr-rule { grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding: 24px 0; }
+  .fr-n { font-size: 32px; text-align: left; }
+  .fr-h { font-size: 23px; margin: 2px 0 10px; }
+  .fr-body li { font-size: 16.5px; padding-left: 18px; }
 }

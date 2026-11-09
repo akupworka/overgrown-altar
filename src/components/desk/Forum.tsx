@@ -590,6 +590,9 @@ const RULES: { h: string; p: string[] }[] = [
   { h: 'Speak as you would at the table', p: [
     'Be honest, be generous, be kind. Disagree with ideas, never attack people.',
     'No insults, mockery, name-calling, or contempt for anyone’s faith, background, body, or story.' ] },
+  { h: 'Honor the whole Body', p: [
+    'Members come from many traditions. Discuss doctrine honestly and charitably; never mock another denomination or question a member’s faith.',
+    'Hold fast to the essentials of the faith, and in everything else extend charity.' ] },
   { h: 'Keep each other safe', p: [
     'No harassment, threats, stalking, or repeated unwanted contact, here or elsewhere.',
     'No sexual content, and nothing sexual involving anyone under 18, ever. This is reported to the authorities.',
@@ -613,26 +616,37 @@ const RULES: { h: string; p: string[] }[] = [
     'The editor may edit or remove posts, close threads, and pause or end a membership. Serious harm is reported to the proper authorities.' ] },
 ];
 export function ForumRules() {
+  const NUM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   return (
     <div className="fo fo-rules">
-      <header className="fo-head">
-        <Link to="/guild/members/?view=forum" className="fo-back lab"><span aria-hidden="true">←</span> The Forum</Link>
+      <Link to="/guild/members/?view=forum" className="fo-back lab"><span aria-hidden="true">←</span> The Forum</Link>
+      <header className="fr-head">
+        <svg className="fr-cross" width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M11 1v32M3 10h16" /></svg>
         <span className="eb">For members of the Guild</span>
-        <h1 className="h1">The forum rules</h1>
-        <p className="it mut fo-sub">The forum is a table we share. These rules keep it safe and good for everyone at it. By posting, you agree to keep them.</p>
+        <h1 className="h1 fr-title">The forum rules</h1>
+        <p className="it fr-lead">The forum is a table we share. These rules keep it safe, honest and good for everyone who sits at it. By posting, you agree to keep them.</p>
       </header>
-      <ol className="fo-rule-list">
+      {/* The ground under the rules: one Body, many members */}
+      <section className="fr-pre">
+        <span className="eb">One Body</span>
+        <p className="fr-pre-text">We are open to every denomination. The Church is one body in Christ, and each tradition is a member of it: a function given for the whole, and a roadway by which the gospel reaches people the others might not.</p>
+        <span className="lab fr-pre-ref">For as the body is one, and hath many members … so also is Christ. · 1 Corinthians 12:12</span>
+      </section>
+      <ol className="fr-list">
         {RULES.map((r, i) => (
-          <li key={r.h} className="fo-rule">
-            <span className="fo-rule-n" aria-hidden="true">{['I','II','III','IV','V','VI','VII'][i]}</span>
-            <div className="fo-rule-text">
-              <h2 className="fo-rule-h">{r.h}</h2>
+          <li key={r.h} className="fr-rule">
+            <span className="fr-n" aria-hidden="true">{NUM[i]}</span>
+            <div className="fr-body">
+              <h2 className="fr-h">{r.h}</h2>
               <ul>{r.p.map((t) => <li key={t}>{t}</li>)}</ul>
             </div>
           </li>
         ))}
       </ol>
-      <p className="it mut fo-note">If you are in immediate danger, contact your local emergency services first.</p>
+      <footer className="fr-foot">
+        <svg width="16" height="24" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M11 1v32M3 10h16" /></svg>
+        <p className="it">Be generous, be honest, be kind. If you are in immediate danger, contact your local emergency services first.</p>
+      </footer>
     </div>
   );
 }
