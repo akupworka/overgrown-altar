@@ -2,7 +2,6 @@
 // The Hearth: the Guild's creative room. Prose, poetry, fiction and photographs.
 //   - the four kinds of work, each a filter
 //   - the written work as a gallery of cards, newest first (photographs have their own section)
-//   - the gallery: the newest photographs, and a link to all of them (/gallery/)
 //   - the makers, and an invitation to bring work to the table
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -25,9 +24,7 @@ const all = (await guildPillar('hearth')).map((g, i) => ({
 }));
 // Photographs live in the gallery; the cards below are the written work.
 const works = all.filter((w) => w.kind !== 'photograph');
-const photos = all.filter((w) => w.kind === 'photograph' && w.hasPhoto);
 const count = (k: string) => all.filter((w) => w.kind === k).length;
-const ROMAN = ['i', 'ii', 'iii', 'iv'];
 const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, GuildAuthor])).values()].slice(0, 8);
 ---
 <BaseLayout title="The Hearth" description="The Guild's creative room: prose, poetry, fiction and photographs.">
@@ -91,34 +88,6 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     ) : <p class="it mut" style="font-size:22px;margin:0">The first pieces from the fellowship are being written.</p>}
     <p class="it mut he-none" hidden>Nothing of this kind yet. The first one may be yours.</p>
     <nav class="pager he-pager" aria-label="Pages of work" hidden></nav>
-  </section>
-
-  <!-- The gallery: the newest photographs from the fellowship, and the way to all of them -->
-  <section class="sec dark" id="gallery">
-    <div class="row" style="padding-bottom:30px"><div style="display:flex;flex-direction:column;gap:16px"><span class="eb">Photographs</span><h2 class="h2">The gallery</h2></div><span class="it mut" style="font-size:20px">Stone in monochrome. Color only through glass.</span></div>
-    {photos.length > 0 ? (
-      <div class="g4 he-plates">
-        {photos.slice(0, 4).map((w, i) => (
-          <a class="he-plate" href={w.href}>
-            <figure><div class="tile" style={`height:${i % 2 ? 280 : 360}px`}><img src={w.image} alt="" loading="lazy" style={w.pos} /></div>
-              <figcaption class="lab mut">Plate {ROMAN[i]} · {w.title}<span class="he-plate-by">{w.author.display_name}{w.format ? ` · ${w.format === 'film' ? 'Film' : 'Digital'}` : ''}</span></figcaption></figure>
-          </a>
-        ))}
-      </div>
-    ) : (
-      <div class="g4 he-plates">
-        <figure><div class="tile" style="height:360px"><img src="/images/glass.jpg" alt="Glass" loading="lazy" /></div><figcaption class="lab mut">Plate i · Glass</figcaption></figure>
-        <figure><div class="tile" style="height:280px"><img src="/images/ivy.jpg" alt="Ivy" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate ii · Ivy</figcaption></figure>
-        <figure><div class="tile" style="height:360px"><img src="/images/glass-2.jpg" srcset="/images/glass-2-1200.jpg 1200w, /images/glass-2.jpg 1617w" sizes="(max-width: 700px) 100vw, 50vw" alt="Glass" style="object-position:center 30%;" loading="lazy" /></div><figcaption class="lab mut">Plate iii · Glass</figcaption></figure>
-        <figure><div class="tile" style="height:280px"><img src="/images/stone.jpg" alt="Stone" class="mono" loading="lazy" /></div><figcaption class="lab mut">Plate iv · Stone</figcaption></figure>
-      </div>
-    )}
-    <div class="he-gallery-go">
-      {photos.length > 0
-        ? <a class="btn" href="/gallery/">View the full gallery <span aria-hidden="true">→</span></a>
-        : <a class="btn" href="/guild/">Bring the first photograph</a>}
-      {photos.length > 0 && <span class="lab mut">{photos.length} {photos.length === 1 ? 'photograph' : 'photographs'} from the fellowship</span>}
-    </div>
   </section>
 
   <!-- The makers, and an open chair -->
@@ -244,13 +213,6 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-none { margin: 28px 0 0; font-size: 19px; }
 
   /* Plates */
-  .he-plates figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  .he-plates figcaption { font-size: 10px; display: flex; flex-direction: column; gap: 4px; }
-  .he-plate-by { opacity: .7; }
-  .he-plate { display: block; }
-  .he-plate .tile img { transition: transform 1.1s var(--ease, ease); }
-  .he-plate:hover .tile img { transform: scale(1.04); }
-  .he-plate:hover figcaption { color: var(--ember); }
   .he-gallery-go { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
   /* The table */
@@ -278,9 +240,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     .he-kind:nth-child(2n) { padding-left: 14px; }
     .he-k { font-size: 20px; }
     .he-n { display: none; }
-    .he-plates { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
-    .he-plates .tile { height: 200px !important; max-height: none; }
-    .he-grid { grid-template-columns: 1fr 1fr; gap: 30px 16px; }
+        .he-grid { grid-template-columns: 1fr 1fr; gap: 30px 16px; }
     .he-card-t { font-size: 19px; }
     .he-card-sf { display: none; }
     .he-total { display: none; }
