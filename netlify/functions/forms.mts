@@ -17,7 +17,8 @@ export default async (req: Request) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const netlify = process.env.NETLIFY_FORMS_TOKEN;
-  if (!service || !netlify) return json({ error: 'The Forms room isn’t switched on yet: the site needs its Netlify access key (NETLIFY_FORMS_TOKEN). See HANDOFF.md.' }, 503);
+  if (!netlify) return json({ error: 'The site can’t see NETLIFY_FORMS_TOKEN yet.' }, 503);
+  if (!service) return json({ error: 'The site can’t see SUPABASE_SERVICE_ROLE_KEY.' }, 503);
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
   if (!token) return json({ error: 'Please sign in again.' }, 401);
 
