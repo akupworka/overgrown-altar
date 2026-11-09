@@ -136,6 +136,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const [work, setWork] = useState<Piece[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [kind, setKind] = useState('all');
+  const [tab, setTab] = useState<'writing' | 'photos' | null>(null);   // like a profile's posts and reels: writing, or photographs
+  const [photoShown, setPhotoShown] = useState(12);
   const tally = useForumTally(id);   // their part in the forum, for its trophies
   const [page, setPage] = useState(1);
   useEffect(() => {
@@ -160,8 +162,11 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
   const handle = (person.instagram ?? '').replace(/^@/, '');
   // Six pieces to a page, with pages below; the kind filter narrows the list first.
-  const kinds = KINDS.map((k) => ({ ...k, n: work.filter((w) => w.medium === k.value).length })).filter((k) => k.n > 0);
-  const shown = kind === 'all' ? work : work.filter((w) => w.medium === kind);
+  const photos = work.filter((w) => w.medium === 'photograph' && w.image_path);
+  const writing = work.filter((w) => !(w.medium === 'photograph' && w.image_path));
+  const view = tab ?? (writing.length || !photos.length ? 'writing' : 'photos');
+  const kinds = KINDS.map((k) => ({ ...k, n: writing.filter((w) => w.medium === k.value).length })).filter((k) => k.n > 0);
+  const shown = kind === 'all' ? writing : writing.filter((w) => w.medium === kind);
   const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
@@ -217,14 +222,36 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
       </header>
       <section className="m-work">
-        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{shown.length} {shown.length === 1 ? 'piece' : 'pieces'} · newest first</span></div>
+        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
+        {/* Writing and photographs, each in its own place */}
+        {writing.length > 0 && photos.length > 0 && (
+          <div className="m-tabs" role="tablist" aria-label="Work">
+            <button type="button" role="tab" aria-selected={view === 'writing'} className={view === 'writing' ? 'on' : ''} onClick={() => setTab('writing')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span className="m-tab-n">{writing.length}</span></button>
+            <button type="button" role="tab" aria-selected={view === 'photos'} className={view === 'photos' ? 'on' : ''} onClick={() => setTab('photos')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span className="m-tab-n">{photos.length}</span></button>
+          </div>
+        )}
+        {view === 'photos' ? (<>
+          <ol className="m-grid">
+            {photos.slice(0, photoShown).map((w) => (
+              <li key={w.id}>
+                <button type="button" className="m-grid-tile" onClick={() => go(`/guild/members/?p=${w.id}`)} aria-label={w.title}>
+                  {thumbs[w.image_path!] && <img src={thumbs[w.image_path!]} alt="" loading="lazy" style={w.image_focus ? { objectPosition: w.image_focus } : undefined} />}
+                  <span className="m-grid-cap" aria-hidden="true">{w.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          {photos.length > photoShown && <div className="m-grid-more"><button type="button" className="d-link" onClick={() => setPhotoShown((n) => n + 12)}>Show more</button></div>}
+        </>) : (<>
         {kinds.length > 1 && (
           <div className="filters-wrap"><div className="filters shelf-filters" role="group" aria-label="Show">
             <button type="button" className="chip" aria-pressed={kind === 'all'} onClick={() => { setKind('all'); setPage(1); }}>All<span className="chip-n">{work.length}</span></button>
             {kinds.map((k) => <button key={k.value} type="button" className="chip" aria-pressed={kind === k.value} onClick={() => { setKind(k.value); setPage(1); }}>{k.plural}<span className="chip-n">{k.n}</span></button>)}
           </div></div>
         )}
-        {work.length === 0 ? (
+        {writing.length === 0 ? (
           <p className="it m-none">{person.id === me ? 'Your published pieces will gather here once the editor approves them.' : 'Their first published piece is still to come.'}</p>
         ) : (
           <ol className="m-list">
@@ -252,6 +279,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
             <button type="button" className="pg-step" disabled={cur === pages} aria-label="Older pieces" onClick={() => turn(cur + 1)}><span className="pg-word">Older</span>{arrow('r')}</button>
           </nav>
         )}
+        </>)}
       </section>
       <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person, forum: tally }} mine={person.id === me} name={person.display_name} /></div>
     </div>

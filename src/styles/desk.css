@@ -1413,3 +1413,30 @@
 @media (max-width: 700px) { .g-role-craft { display: none; } }
 /* Phones, inside a forum thread: the reply box owns the foot of the screen, so the Guild bar steps aside (back is at the top). */
 @media (max-width: 700px) { body:has(.fo-reply) .gbar { display: none !important; } body:has(.fo-reply) .desk-in { padding-bottom: 0 !important; } }
+
+/* A member's page: writing and photographs as two tabs; photographs as a square grid (like a profile) */
+.m-tabs { display: flex; justify-content: center; gap: 44px; margin: 4px 0 22px; border-top: 1px solid rgba(42, 32, 23, .16); }
+.m-tabs button { position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 16px 2px 12px; background: none; border: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #8C8070; transition: color .3s; }
+.m-tabs button::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 1px; background: var(--ink); opacity: 0; transition: opacity .3s; }
+.m-tabs button.on { color: var(--ink); }
+.m-tabs button.on::before { opacity: 1; }
+.m-tabs button:hover { color: var(--oxblood); }
+.m-tab-n { color: #9A9080; letter-spacing: .1em; }
+.m-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.m-grid-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; cursor: pointer; overflow: hidden; background: #DDD5C6; }
+.m-grid-tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+.m-grid-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 10px; text-align: left; font-family: var(--serif); font-size: 17px; line-height: 1.2; color: var(--bone);
+  background: linear-gradient(180deg, rgba(8,10,8,0), rgba(8,10,8,.8)); opacity: 0; transition: opacity .35s; }
+.m-grid-tile:hover img { transform: scale(1.04); }
+.m-grid-tile:hover .m-grid-cap, .m-grid-tile:focus-visible .m-grid-cap { opacity: 1; }
+.m-grid-tile:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+.m-grid-more { display: flex; justify-content: center; padding-top: 22px; }
+.m-grid-more .d-link { color: var(--ink); border-bottom-color: rgba(42,32,23,.35); }
+@media (max-width: 700px) {
+  .m-tabs { gap: 30px; margin-bottom: 14px; }
+  .m-tabs button { font-size: 9px; letter-spacing: .16em; }
+  .m-grid { gap: 2px; margin: 0 -24px; }
+  .m-grid-cap { display: none; }
+}
+@media (min-width: 701px) { .m-grid { max-width: 935px; margin: 0 auto; } }
