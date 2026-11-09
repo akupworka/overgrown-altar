@@ -157,3 +157,13 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - **Search**: `/search/` reads `/search-index.json` (built) and, for members, profiles and thread titles live.
 - **Welcome**: `desk/Welcome.tsx`, first steps for members (not the editor); hidden once done or dismissed.
 - **Daily letter**: `netlify/functions/daily-letter.mts` (13:17 UTC). Messages, replies in your threads, mentions, marks/reflections on your pieces, new work from writers you follow. Off switch: `member_prefs.email_digest` on Edit my page. Uses the same Resend settings as the writer emails.
+
+## The Fellowship (readers with accounts)
+- Role `fellow` in `profiles.role`. Sign-up is open at `/fellowship/` → `netlify/functions/join-fellowship.mts` (creates the account with
+  `generateLink` and sends our own welcome letter through Resend; the Supabase invite template stays for Guild writers).
+- Fellows can't write or upload (`private.is_writer()` on pieces insert and the guild/media buckets). They can message, use the forum,
+  save, follow and respond. Their saves are their **collection**, which is public (`/collection/?of=<id>`, `desk/Collection.tsx`).
+- On the site: `html[data-fellow]` hides writing tools (`gbar.css`); the phone bar's centre button becomes Explore (search). The Desk shows
+  `desk/Fellow.tsx`; the Guild page lists the Fellowship in its own section; on a fellow's page the editor can "Welcome into the Guild"
+  (`public.welcome_to_guild`, the editor only; `guard_profile` allows the editor to move people between member and fellow).
+- `scripts/check.cjs --as fellow` previews it.
