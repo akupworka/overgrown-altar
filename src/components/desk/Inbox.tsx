@@ -217,8 +217,8 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
   return (
     <div className="ib ib-thread">
       <header className="ib-thead">
-        <Link to={mine ? '/guild/members/?view=inbox' : '/guild/desk/#forms'} className="m-back lab">{mine ? 'Inbox' : 'Arrivals'}</Link>
         <div className="ib-who">
+          <Link to={mine ? '/guild/members/?view=inbox' : '/guild/desk/#forms'} className="ib-back"><span className="visually-hidden">{mine ? 'Back to Inbox' : 'Back to Arrivals'}</span></Link>
           {mine ? <>
             <Link to={`/guild/members/?m=${oid}`} className="ib-who-link"><Initials name={o?.display_name || 'A member'} size={44} src={portraitUrl(o?.portrait_path)} /><span className="ib-who-name">{o?.display_name || 'A member'}</span></Link>
             <details className="fo-mod ib-mod">
