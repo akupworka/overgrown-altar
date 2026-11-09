@@ -12,7 +12,9 @@ export interface DispatchItem {
   tag?: string;              // optional: lets a page filter the list (e.g. by kind of piece)
 }
 // live: fill in pieces approved since the site was built (see lib/live.ts). pillar narrows it; max keeps the list short.
-interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark'; live?: { pillar?: string; max?: number; kicker?: 'full' | 'kind' } }
+// paged: show this many rows a page, with numbered pages below (works alongside a page's own search and filters,
+// which hide rows with the hidden attribute; paging uses its own class so the two never fight).
+interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark'; live?: { pillar?: string; max?: number; kicker?: 'full' | 'kind' }; paged?: number }
 const tone = Astro.props.tone ?? 'paper';
 const live = Astro.props.live;
 const BUILT = new Date().toISOString();
@@ -20,7 +22,7 @@ const items = [...Astro.props.items].sort((a, b) => b.date.localeCompare(a.date)
 const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
 <ol class:list={['dispatches', { dark: tone === 'dark' }]} data-live={live ? '' : undefined} data-built={live ? BUILT : undefined}
-  data-pillar={live?.pillar} data-max={live?.max} data-kicker={live?.kicker ?? 'full'}>
+  data-pillar={live?.pillar} data-max={live?.max} data-kicker={live?.kicker ?? 'full'} data-paged={Astro.props.paged || undefined}>
   {items.map((d) => (
     <li data-tag={d.tag}>
       <div class="row-link">
@@ -43,9 +45,31 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
     </li>
   ))}
 </ol>
+{Astro.props.paged && <nav class:list={['pager', 'dl-pager', { 'fo-pager': tone === 'dark' }]} aria-label="Pages of stories" hidden></nav>}
 
 <script>
   import { freshSince } from '../lib/live';
+  import { pagerHtml } from '../lib/pager';
+  // Pages: rows a filter or search has hidden are skipped; any change to those starts again at page one.
+  document.querySelectorAll<HTMLOListElement>('ol.dispatches[data-paged]').forEach((list) => {
+    const per = Number(list.dataset.paged), pager = list.nextElementSibling as HTMLElement | null;
+    if (!pager?.classList.contains('dl-pager')) return;
+    let page = 1;
+    const draw = (scroll = false) => {
+      const rows = [...list.children].filter((r) => !(r as HTMLElement).hidden) as HTMLElement[];
+      const pages = Math.max(1, Math.ceil(rows.length / per)); page = Math.min(page, pages);
+      [...list.children].forEach((r) => r.classList.remove('pg-off'));
+      rows.forEach((r, i) => r.classList.toggle('pg-off', i < (page - 1) * per || i >= page * per));
+      pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
+      if (scroll) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    pager.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
+      if (!b || b.disabled) return; page = Number(b.dataset.go); draw(true);
+    });
+    new MutationObserver(() => { page = 1; draw(); }).observe(list, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+    draw();
+  });
   // New pieces approved since this page was built join the top of the list, drawn from its own first row.
   const fmtLong = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const fmtShort = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -81,6 +105,9 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
   .dispatches { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(42, 32, 23, .25); }
   .dispatches :global(li.is-fresh) { animation: fresh-in .6s ease both; }
   @keyframes fresh-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .dispatches :global(li.pg-off) { display: none; }
+  .dispatches { scroll-margin-top: 110px; }
+  .dl-pager { margin-top: 44px; }
   .dispatches li { border-bottom: 1px solid rgba(42, 32, 23, .18); position: relative; }
   .title::after { content: ''; position: absolute; inset: 0; }   /* the whole row opens the piece */
   .author { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 10px; min-width: 0; transition: color .25s; }

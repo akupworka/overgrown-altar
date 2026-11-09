@@ -19,8 +19,10 @@ import { ROOMS, KINDS } from '../lib/kinds';
 <div class="g3 results" style="margin-top:60px">{pieces.map((a) => (
 <a class="item" href={a.href} data-pillar={a.pillar} data-medium={a.medium} style="display:flex;flex-direction:column;gap:12px"><div class="tile" style="height:260px"><img src={a.image} alt="" loading="lazy" style={a.imagePos ? `object-position:${a.imagePos}` : undefined} /></div><span class="lab" style="color:#62372D">{a.kicker.split(' · ')[0] === 'Dispatch 1' ? 'The Watchtower · Essay' : a.kicker === 'Recovery story' ? 'The Perimeter · Recovery story' : a.kicker}</span><span class="h3" style="font-size:27px">{a.title}</span><span class="lab mut" style="font-size:10px">{a.author.name}</span></a>
 ))}</div>
+<nav class="pager ar-pager" aria-label="Pages of the archive" hidden></nav>
 <p class="it mut empty" style="display:none;margin-top:40px;font-size:22px">Nothing here yet. Try another filter.</p></section>
 <script>
+  import { pagerHtml } from '../lib/pager';
   // Archive search and filters. This runs in the visitor's browser.
   // Each result card carries data-pillar and data-medium tags;
   // we hide the cards that don't match the chosen chips and the search words.
@@ -34,7 +36,23 @@ import { ROOMS, KINDS } from '../lib/kinds';
   empty.textContent = 'Nothing on the altar matches that yet.';
   document.querySelector('.results')!.after(empty);
 
+  // Twelve to a page (four rows of three); a new search or filter starts again at page one.
+  const PER = 12, pager = document.querySelector<HTMLElement>('.ar-pager')!;
+  let page = 1;
+  function paginate(scroll = false) {
+    const on = items.filter((i) => !i.hidden);
+    const pages = Math.max(1, Math.ceil(on.length / PER)); page = Math.min(page, pages);
+    items.forEach((i) => i.classList.remove('pg-off'));
+    on.forEach((i, n) => i.classList.toggle('pg-off', n < (page - 1) * PER || n >= page * PER));
+    pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
+    if (scroll) document.querySelector('.results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  pager.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
+    if (!b || b.disabled) return; page = Number(b.dataset.go); paginate(true);
+  });
   function update() {
+    page = 1;
     const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
     let shown = 0;
     for (const item of items) {
@@ -45,7 +63,9 @@ import { ROOMS, KINDS } from '../lib/kinds';
       if (ok) shown++;
     }
     empty.style.display = shown ? 'none' : 'block';
+    paginate();
   }
+  paginate();
 
   document.querySelectorAll<HTMLButtonElement>('.chip[data-k]').forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -84,6 +104,9 @@ import { ROOMS, KINDS } from '../lib/kinds';
   .ar-filters { display: flex; flex-direction: column; gap: 12px; }
   .ar-filters .chip { font-size: 9.5px; letter-spacing: .16em; padding: 6px 13px; min-height: 30px; }
   .ar-filters .chip[hidden] { display: none; }
+  .results .item.pg-off { display: none !important; }
+  .results { scroll-margin-top: 110px; }
+  .ar-pager { margin-top: 56px; }
   .ar-filters .fl { width: 64px; font-size: 10px; }
   .ar-filters .filters { gap: 7px; }
   .ar-guide { margin-left: 6px; color: var(--oxblood); border-bottom: 1px solid rgba(98,55,45,.35); padding-bottom: 2px; font-size: 10px; white-space: nowrap; }
