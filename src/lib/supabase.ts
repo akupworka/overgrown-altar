@@ -11,7 +11,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
 });
 
-export type Status = 'draft' | 'submitted' | 'returned' | 'approved' | 'declined';
+export type Status = 'draft' | 'submitted' | 'returned' | 'approved' | 'declined' | 'withdrawn';
 export interface Piece {
   id: string; author_id: string; title: string; standfirst: string; body: string;
   pillar: 'watchtower' | 'hearth' | 'perimeter'; medium: string;
@@ -23,6 +23,7 @@ export interface Piece {
   revision_at?: string | null;
   // A writer's request to take a published piece down, with their reason (the editor decides).
   delete_requested_at?: string | null; delete_reason?: string | null;
+  taken_down_at?: string | null;   // taken down by its writer: hidden, restorable for 30 days
 }
 export interface Profile {
   id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor' | 'fellow';
@@ -70,7 +71,7 @@ export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path
 }
 
 export const STATUS_LABEL: Record<Status, string> = {
-  draft: 'Draft', submitted: 'With the editor', returned: 'Returned with a note', approved: 'Published', declined: 'Declined',
+  draft: 'Draft', submitted: 'With the editor', returned: 'Returned with a note', approved: 'Published', declined: 'Declined', withdrawn: 'Taken down',
 };
 export const PILLARS = [
   { value: 'watchtower', label: 'The Watchtower · Prophetic Audits' },

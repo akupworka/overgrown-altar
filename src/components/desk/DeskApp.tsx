@@ -223,7 +223,7 @@ function Desk({ session }: { session: Session }) {
     rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
     if ((p as Profile)?.role === 'editor') {
-      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null,delete_requested_at.not.is.null').order('submitted_at', { ascending: true });
+      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
     setLoaded(true);
@@ -573,11 +573,16 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     if (error) { alert('The copy couldn’t be made: ' + error.message); return; }
     onChanged(); onOpen(data as Piece);
   }
-  const [deleting, setDeleting] = useState<Piece | null>(null);
-  function remove(p: Piece) { setDeleting(p); }
+  const [deleting, setDeleting] = useState<{ piece: Piece; mode: 'take' | 'delete' } | null>(null);
+  function remove(p: Piece) { setDeleting({ piece: p, mode: 'delete' }); }
+  async function restore(p: Piece) {
+    const { error } = await supabase.rpc('restore_piece', { p_id: p.id });
+    if (error) { alert(error.message); return; }
+    onChanged();
+  }
   async function reallyRemove(p: Piece, reason?: string) {
-    if (reason !== undefined) {   // a writer asking for a published piece to come down
-      const { error } = await supabase.rpc('request_deletion', { p_id: p.id, p_reason: reason });
+    if (reason !== undefined) {   // taking a published piece down (kept 30 days, restorable)
+      const { error } = await supabase.rpc('take_down', { p_id: p.id, p_reason: reason });
       if (error) { alert(error.message); return; }
     } else {
       const { data, error } = await supabase.from('pieces').delete().eq('id', p.id).select('id');
@@ -592,6 +597,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     { key: 'with', label: 'With the editor', note: 'Being read. You’ll hear by email.', has: (p) => p.status === 'submitted', filter: 'with' },
     { key: 'live', label: 'Published', has: (p) => p.status === 'approved', filter: 'live' },
     { key: 'declined', label: 'Declined', has: (p) => p.status === 'declined' },
+    { key: 'withdrawn', label: 'Taken down', note: 'Hidden from the site. Restore any of these within 30 days; after that they are deleted for good.', has: (p) => p.status === 'withdrawn' },
   ];
   // One piece, as a card. On a phone the whole card opens the piece, and the rarer actions wait behind "⋯".
   const card = (p: Piece) => {
@@ -605,7 +611,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
               {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.delete_requested_at && <span className="lab d-rev-tag d-del-tag">Asked to take down</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <MoreActions>
@@ -613,10 +619,9 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
                 {live && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
-                {live && !isEditor && (p.delete_requested_at
-                  ? <button type="button" className="d-act-item" onClick={async () => { await supabase.rpc('withdraw_deletion', { p_id: p.id }); onChanged(); }}>Withdraw the request</button>
-                  : <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Ask to take it down</button>)}
-                {p.status !== 'submitted' && (!live || isEditor) && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
+                {live && <button type="button" className="d-act-item d-danger" onClick={() => setDeleting({ piece: p, mode: 'take' })}>Take it down</button>}
+                {p.status === 'withdrawn' && <button type="button" className="d-act-item" onClick={() => restore(p)}>Restore</button>}
+                {p.status !== 'submitted' && (!live || isEditor) && <button type="button" className="d-act-item d-danger" onClick={() => setDeleting({ piece: p, mode: 'delete' })}>{p.status === 'withdrawn' || live ? 'Delete for good' : 'Delete'}</button>}
               </MoreActions>
             </li>
     );
@@ -624,7 +629,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
 
   return (
     <section className="d-section d-home">
-      {deleting && <DeleteWarning piece={deleting} pieces={pieces} profile={profile} tally={tally} ask={deleting.status === 'approved' && !isEditor} onCancel={() => setDeleting(null)} onDelete={(reason) => reallyRemove(deleting, reason)} />}
+      {deleting && <DeleteWarning piece={deleting.piece} pieces={pieces} profile={profile} tally={tally} take={deleting.mode === 'take'} onCancel={() => setDeleting(null)} onDelete={(reason) => reallyRemove(deleting.piece, reason)} />}
       <header className="d-home-head">
         <div className="d-home-hello">
           <span className="eb">The Guild Desk</span>
@@ -1318,6 +1323,10 @@ function FormsRoom() {
   const [reports, setReports] = useState<{ id: string; thread_id: string; reason: string; created_at: string; resolved: boolean; reporter: string }[]>([]);
   const loadReports = () => supabase.from('dm_reports').select('*').eq('resolved', false).order('created_at', { ascending: false }).then(({ data }) => setReports(Array.isArray(data) ? (data as any) : []));
   useEffect(() => { loadReports(); }, []);
+  // Published pieces their writers have taken down (kept 30 days, restorable).
+  const [downs, setDowns] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
+  const loadDowns = () => supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').eq('status', 'withdrawn').order('taken_down_at', { ascending: false }).then(({ data }) => setDowns(Array.isArray(data) ? (data as any) : []));
+  useEffect(() => { loadDowns(); }, []);
   const room = rooms?.find((r) => r.key === pick);
   const items = room?.items ?? [];
   const pages = Math.max(1, Math.ceil(items.length / FORMS_PER));
@@ -1332,6 +1341,19 @@ function FormsRoom() {
         : <>
           {sample && <p className="d-form-sample"><b>These are examples.</b> Your real applications, letters and sign-ups take their place once the site has its Netlify key.{why && <span className="lab d-form-why">{why}</span>}</p>}
           {/* The message always has its place, and the tab row its own box: the site's script wraps filter rows, so nothing is inserted beside them. */}
+          {downs.length > 0 && (
+            <section className="d-reports">
+              <span className="eb">Taken down by their writers · {downs.length}</span>
+              <ul>{downs.map((d) => (
+                <li key={d.id}>
+                  <span className="d-rep-text"><span className="it"><b>{d.title || 'Untitled'}</b> · {d.profiles?.display_name ?? 'A member'}{d.delete_reason ? ` — “${d.delete_reason}”` : ' — no reason given'}</span>
+                    <span className="lab mut">{fmt(d.taken_down_at ?? null)} · {Math.max(0, 30 - Math.floor((Date.now() - Date.parse(d.taken_down_at ?? '')) / 864e5))} days to restore</span></span>
+                  <button type="button" className="ghost d-btn" onClick={async () => { const { error } = await supabase.rpc('restore_piece', { p_id: d.id }); if (error) alert(error.message); loadDowns(); }}>Restore</button>
+                  <button type="button" className="d-textbtn d-danger" onClick={async () => { if (!confirm('Delete it for good now? This cannot be undone.')) return; await supabase.from('pieces').delete().eq('id', d.id); loadDowns(); }}>Delete for good</button>
+                </li>
+              ))}</ul>
+            </section>
+          )}
           {reports.length > 0 && (
             <section className="d-reports">
               <span className="eb">Reported conversations · {reports.length}</span>
@@ -1396,11 +1418,11 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
           {queue.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
-                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.delete_requested_at ? <span className="d-rev-tag d-del-tag">asks to take it down · {fmt(p.delete_requested_at)}</span> : p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
+                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
                 {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
               </div>
-              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.delete_requested_at ? 'Read the request' : p.revision ? 'Read the changes' : 'Read'}</button></div>
+              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button></div>
             </li>
           ))}
         </ul>
@@ -1415,16 +1437,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const asksDown = piece.status === 'approved' && !!piece.delete_requested_at;
-  const rev = piece.status === 'approved' && !asksDown ? piece.revision ?? null : null;
-  async function decideDown(take: boolean) {
-    if (take && !confirm('Take this piece down? It comes off the site within the hour, and the writer’s published count, rank and trophies go down with it.')) return;
-    setBusy(true); setMsg('');
-    const { error } = take ? await supabase.from('pieces').delete().eq('id', piece.id) : await supabase.rpc('withdraw_deletion', { p_id: piece.id });
-    setBusy(false);
-    if (error) return setMsg(error.message);
-    onDecided();
-  }
+  const rev = piece.status === 'approved' ? piece.revision ?? null : null;
   const shown = rev ? { ...piece, ...rev } : piece;
   // The piece's photograph, so the editor sees what readers will see.
   const [photo, setPhoto] = useState('');
@@ -1461,22 +1474,17 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
         {shown.body.trim() ? <div className="gp-body-in-desk"><Body body={shown.body} /></div> : shown.medium === 'photograph' ? <p className="it mut">No words with this photograph.</p> : null}
       </article>
       <div className="d-decide">
-        {asksDown && (<>
-          <div className="d-del-ask"><span className="lab">The writer asks to take it down</span><p className="it">“{piece.delete_reason}”</p></div>
-          <button type="button" className="btn d-btn d-danger-btn" disabled={busy} onClick={() => decideDown(true)}>Take it down</button>
-          <button type="button" className="d-link" disabled={busy} onClick={() => decideDown(false)}>Keep it published</button>
-        </>)}
         {rev && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Put these changes on the live piece?')) applyChanges(true); }}>Approve the changes</button>
           <button type="button" className="d-link d-danger" disabled={busy} onClick={() => { if (confirm('Discard these changes? The live piece stays as it is.')) applyChanges(false); }}>Discard the changes</button>
         </>)}
-        {!rev && !asksDown && mode === 'read' && (<>
+        {!rev && mode === 'read' && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
           <button type="button" className="d-link" onClick={() => setMode('schedule')}>Schedule</button>
           <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
           <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
         </>)}
-        {!rev && !asksDown && mode === 'schedule' && (
+        {!rev && mode === 'schedule' && (
           <div className="d-decide-note">
             <GoLiveField value={goLive} onChange={setGoLive} />
             <div className="d-decide-row">
@@ -1485,7 +1493,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
             </div>
           </div>
         )}
-        {!rev && !asksDown && mode !== 'read' && mode !== 'schedule' && (
+        {!rev && mode !== 'read' && mode !== 'schedule' && (
           <div className="d-decide-note">
             <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
               <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}
@@ -1737,7 +1745,7 @@ export function Loading() {
 
 /** Before a piece is deleted: what goes with it. A published piece counts toward your rank and trophies, so taking it
  *  down can lower them; this says exactly what would be lost, and asks once more. */
-function DeleteWarning({ piece, pieces, profile, tally, ask = false, onCancel, onDelete }: { piece: Piece; pieces: Piece[]; profile: Profile | null; tally: any; ask?: boolean; onCancel: () => void; onDelete: (reason?: string) => void | Promise<void> }) {
+function DeleteWarning({ piece, pieces, profile, tally, take = false, onCancel, onDelete }: { piece: Piece; pieces: Piece[]; profile: Profile | null; tally: any; take?: boolean; onCancel: () => void; onDelete: (reason?: string) => void | Promise<void> }) {
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState('');
   const live = pieces.filter((p) => p.status === 'approved');
@@ -1753,12 +1761,12 @@ function DeleteWarning({ piece, pieces, profile, tally, ask = false, onCancel, o
   return (
     <div className="dl-back" role="dialog" aria-modal="true" aria-labelledby="dl-h" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="dl">
-        <span className="eb dl-k">{ask ? 'Ask the editor' : published ? 'Take down a published piece' : 'Delete'}</span>
-        <h2 id="dl-h" className="dl-h">{ask ? `Ask to take down “${piece.title || 'Untitled'}”?` : `Delete “${piece.title || 'Untitled'}”?`}</h2>
-        <p className="it dl-p">{ask ? 'Published pieces come down only by the editor’s hand. Tell the Editor in Chief why; if they agree, it comes off the site within the hour, with its reflections and its place in every collection.' : published ? 'It will come off the site within the hour, with its reflections and its place in every collection. This cannot be undone.' : 'This cannot be undone.'}</p>
+        <span className="eb dl-k">{take ? 'Take down a published piece' : published || piece.status === 'withdrawn' ? 'Delete for good' : 'Delete'}</span>
+        <h2 id="dl-h" className="dl-h">{take ? `Take down “${piece.title || 'Untitled'}”?` : `Delete “${piece.title || 'Untitled'}”?`}</h2>
+        <p className="it dl-p">{take ? 'It leaves the site straight away: its page, every list, and every collection it was kept in. It stays safe on your Desk for 30 days, and Restore brings it all back exactly as it was. After that it is deleted for good.' : published ? 'It leaves the site and is deleted for good, with its reflections and its place in every collection. This cannot be undone.' : piece.status === 'withdrawn' ? 'It will be deleted for good now, instead of waiting out the 30 days. This cannot be undone.' : 'This cannot be undone.'}</p>
         {published && (
           <div className="dl-lose">
-            <span className="lab dl-lose-k">{ask ? 'If the editor agrees, you’ll lose' : 'What you’ll lose'}</span>
+            <span className="lab dl-lose-k">{take ? 'While it’s down, you’ll lose' : 'What you’ll lose'}</span>
             <ul>
               <li>Your published count goes from <b>{live.length}</b> to <b>{after.length}</b>.</li>
               {rankDrops && <li>Your rank falls from <b>{rankNow!.name}</b> to <b>{rankAfter ? rankAfter.name : 'unranked'}</b>.</li>}
@@ -1767,10 +1775,10 @@ function DeleteWarning({ piece, pieces, profile, tally, ask = false, onCancel, o
             </ul>
           </div>
         )}
-        {ask && <label className="dl-why"><span className="lab">Your reason</span><textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why should it come down?" /></label>}
+        {take && <label className="dl-why"><span className="lab">A word to the editor (optional)</span><textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why it’s coming down, if you’d like them to know" /></label>}
         <div className="dl-acts">
           <button type="button" className="dl-cancel" onClick={onCancel} autoFocus>Keep it</button>
-          <button type="button" className="dl-go" disabled={busy || (ask && reason.trim().length < 3)} onClick={async () => { setBusy(true); await onDelete(ask ? reason.trim() : undefined); setBusy(false); }}>{busy ? 'One moment…' : ask ? 'Send the request' : published ? 'Take it down' : 'Delete'}</button>
+          <button type="button" className="dl-go" disabled={busy} onClick={async () => { setBusy(true); await onDelete(take ? reason.trim() : undefined); setBusy(false); }}>{busy ? 'One moment…' : take ? 'Take it down' : 'Delete for good'}</button>
         </div>
       </div>
     </div>
