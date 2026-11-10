@@ -1853,3 +1853,30 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .dl-go:hover { background: rgba(255, 59, 78, .12); }
 .dl-go:disabled { opacity: .6; }
 @media (max-width: 700px) { .dl { padding: 24px 20px 18px; } .dl-h { font-size: 24px; } .dl-acts { flex-direction: column-reverse; } .dl-acts button { width: 100%; } }
+/* The ⋯ menu on every screen; the inline row of actions retires */
+.d-home .d-item-actions { display: none !important; }
+.d-home .d-act-more { display: block !important; position: absolute; top: 12px; right: 10px; z-index: 2; }
+.d-act-more summary { list-style: none; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; color: var(--muted-dark); }
+.d-act-more summary::-webkit-details-marker { display: none; }
+.d-act-more summary:hover, .d-act-more[open] summary { color: var(--ember); background: rgba(255, 227, 163, .08); }
+.d-home .d-item { position: relative; padding-right: 56px !important; }
+/* Deletion requests */
+.d-del-tag { color: #FF9AA8 !important; }
+.d-del-ask { width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(255, 59, 78, .07); box-shadow: inset 0 0 0 1px rgba(255, 59, 78, .25); }
+.d-del-ask .lab { color: #FF9AA8; font-size: 9px; }
+.d-del-ask p { margin: 6px 0 0; font-size: 18px; color: var(--bone); }
+.d-danger-btn { background: #8A1C33 !important; color: #FFF6F4 !important; }
+.dl-why { display: flex; flex-direction: column; gap: 8px; }
+.dl-why .lab { font-size: 9px; color: #CFC8B8; }
+.dl-why textarea { resize: vertical; padding: 12px 14px; border: 0; border-radius: 12px; background: rgba(243, 236, 220, .04); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .18); color: var(--bone); font-family: var(--serif); font-size: 17px; }
+.dl-why textarea:focus { outline: none; box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55); }
+/* The ⋯ menu's list, on every screen */
+.d-act-list { position: absolute; right: 0; top: calc(100% + 4px); min-width: 190px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px;
+  background: #14170F; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14), 0 18px 40px rgba(0, 0, 0, .6); }
+.d-act-item { display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; padding: 13px 14px; border-radius: 9px; text-decoration: none;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone); }
+.d-act-item:active { background: rgba(243, 236, 220, .06); }
+.d-act-item.d-danger { color: #E8A091; }
+.d-act-item:hover { background: rgba(243, 236, 220, .06); color: var(--ember); }
+.d-act-item.d-danger:hover { color: #FF9AA8; }
+.d-act-more[open] { z-index: 30 !important; } .d-item:has(.d-act-more[open]) { z-index: 30; }

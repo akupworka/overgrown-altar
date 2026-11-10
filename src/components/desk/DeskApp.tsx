@@ -223,7 +223,7 @@ function Desk({ session }: { session: Session }) {
     rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
     if ((p as Profile)?.role === 'editor') {
-      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
+      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null,delete_requested_at.not.is.null').order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
     setLoaded(true);
@@ -575,9 +575,14 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   }
   const [deleting, setDeleting] = useState<Piece | null>(null);
   function remove(p: Piece) { setDeleting(p); }
-  async function reallyRemove(p: Piece) {
-    const { data, error } = await supabase.from('pieces').delete().eq('id', p.id).select('id');
-    if (error || !data?.length) { alert('It couldn’t be deleted just now. Please try again in a moment.'); return; }
+  async function reallyRemove(p: Piece, reason?: string) {
+    if (reason !== undefined) {   // a writer asking for a published piece to come down
+      const { error } = await supabase.rpc('request_deletion', { p_id: p.id, p_reason: reason });
+      if (error) { alert(error.message); return; }
+    } else {
+      const { data, error } = await supabase.from('pieces').delete().eq('id', p.id).select('id');
+      if (error || !data?.length) { alert('It couldn’t be deleted just now. Please try again in a moment.'); return; }
+    }
     setDeleting(null); onChanged();
   }
   // The groups My pieces is organized into (newest first in each).
@@ -591,41 +596,35 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   // One piece, as a card. On a phone the whole card opens the piece, and the rarer actions wait behind "⋯".
   const card = (p: Piece) => {
     const editable = p.status === 'draft' || p.status === 'returned';
-    const openable = editable || p.status === 'approved';
-    const openLabel = editable ? 'Continue writing' : p.revision ? 'Edit your changes' : 'Edit';
+    const live = p.status === 'approved';
+    // Once published, a piece is the editor's to change; a writer can view it, or ask for it to come down.
+    const openable = editable || (live && isEditor);
+    const openLabel = editable ? 'Continue writing' : 'Edit';
     return (
             <li key={p.id} className={`d-item${openable ? ' d-openable' : ''}`}>
               {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.revision && <span className="lab d-rev-tag">Changes with the editor</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.delete_requested_at && <span className="lab d-rev-tag d-del-tag">Asked to take down</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
-              <div className="d-item-actions">
-                {editable && <button type="button" className="d-link" onClick={() => onOpen(p)}>Continue writing</button>}
-                {p.status === 'submitted' && <button type="button" className="d-link" onClick={() => withdraw(p)}>Withdraw to edit</button>}
-                {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
-                {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
-                {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
-                {p.status !== 'submitted' && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
-              </div>
-              {/* Phones: the same actions, folded */}
-              {(openable || p.status === 'submitted' || isEditor) && (
-                <MoreActions>
-                  {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
-                  {p.status === 'approved' && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
-                  {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
-                  {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
-                  {p.status !== 'submitted' && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
-                </MoreActions>
-              )}
+              <MoreActions>
+                {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
+                {live && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
+                {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
+                {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
+                {live && !isEditor && (p.delete_requested_at
+                  ? <button type="button" className="d-act-item" onClick={async () => { await supabase.rpc('withdraw_deletion', { p_id: p.id }); onChanged(); }}>Withdraw the request</button>
+                  : <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Ask to take it down</button>)}
+                {p.status !== 'submitted' && (!live || isEditor) && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
+              </MoreActions>
             </li>
     );
   };
 
   return (
     <section className="d-section d-home">
-      {deleting && <DeleteWarning piece={deleting} pieces={pieces} profile={profile} tally={tally} onCancel={() => setDeleting(null)} onDelete={() => reallyRemove(deleting)} />}
+      {deleting && <DeleteWarning piece={deleting} pieces={pieces} profile={profile} tally={tally} ask={deleting.status === 'approved' && !isEditor} onCancel={() => setDeleting(null)} onDelete={(reason) => reallyRemove(deleting, reason)} />}
       <header className="d-home-head">
         <div className="d-home-hello">
           <span className="eb">The Guild Desk</span>
@@ -1397,11 +1396,11 @@ function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name:
           {queue.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => (
             <li key={p.id} className="d-item">
               <div className="d-item-main">
-                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
+                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.delete_requested_at ? <span className="d-rev-tag d-del-tag">asks to take it down · {fmt(p.delete_requested_at)}</span> : p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
                 {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
               </div>
-              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button></div>
+              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.delete_requested_at ? 'Read the request' : p.revision ? 'Read the changes' : 'Read'}</button></div>
             </li>
           ))}
         </ul>
@@ -1416,7 +1415,16 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const rev = piece.status === 'approved' ? piece.revision ?? null : null;
+  const asksDown = piece.status === 'approved' && !!piece.delete_requested_at;
+  const rev = piece.status === 'approved' && !asksDown ? piece.revision ?? null : null;
+  async function decideDown(take: boolean) {
+    if (take && !confirm('Take this piece down? It comes off the site within the hour, and the writer’s published count, rank and trophies go down with it.')) return;
+    setBusy(true); setMsg('');
+    const { error } = take ? await supabase.from('pieces').delete().eq('id', piece.id) : await supabase.rpc('withdraw_deletion', { p_id: piece.id });
+    setBusy(false);
+    if (error) return setMsg(error.message);
+    onDecided();
+  }
   const shown = rev ? { ...piece, ...rev } : piece;
   // The piece's photograph, so the editor sees what readers will see.
   const [photo, setPhoto] = useState('');
@@ -1453,17 +1461,22 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
         {shown.body.trim() ? <div className="gp-body-in-desk"><Body body={shown.body} /></div> : shown.medium === 'photograph' ? <p className="it mut">No words with this photograph.</p> : null}
       </article>
       <div className="d-decide">
+        {asksDown && (<>
+          <div className="d-del-ask"><span className="lab">The writer asks to take it down</span><p className="it">“{piece.delete_reason}”</p></div>
+          <button type="button" className="btn d-btn d-danger-btn" disabled={busy} onClick={() => decideDown(true)}>Take it down</button>
+          <button type="button" className="d-link" disabled={busy} onClick={() => decideDown(false)}>Keep it published</button>
+        </>)}
         {rev && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Put these changes on the live piece?')) applyChanges(true); }}>Approve the changes</button>
           <button type="button" className="d-link d-danger" disabled={busy} onClick={() => { if (confirm('Discard these changes? The live piece stays as it is.')) applyChanges(false); }}>Discard the changes</button>
         </>)}
-        {!rev && mode === 'read' && (<>
+        {!rev && !asksDown && mode === 'read' && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
           <button type="button" className="d-link" onClick={() => setMode('schedule')}>Schedule</button>
           <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
           <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
         </>)}
-        {!rev && mode === 'schedule' && (
+        {!rev && !asksDown && mode === 'schedule' && (
           <div className="d-decide-note">
             <GoLiveField value={goLive} onChange={setGoLive} />
             <div className="d-decide-row">
@@ -1472,7 +1485,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
             </div>
           </div>
         )}
-        {!rev && mode !== 'read' && mode !== 'schedule' && (
+        {!rev && !asksDown && mode !== 'read' && mode !== 'schedule' && (
           <div className="d-decide-note">
             <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
               <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}
@@ -1724,8 +1737,9 @@ export function Loading() {
 
 /** Before a piece is deleted: what goes with it. A published piece counts toward your rank and trophies, so taking it
  *  down can lower them; this says exactly what would be lost, and asks once more. */
-function DeleteWarning({ piece, pieces, profile, tally, onCancel, onDelete }: { piece: Piece; pieces: Piece[]; profile: Profile | null; tally: any; onCancel: () => void; onDelete: () => void }) {
+function DeleteWarning({ piece, pieces, profile, tally, ask = false, onCancel, onDelete }: { piece: Piece; pieces: Piece[]; profile: Profile | null; tally: any; ask?: boolean; onCancel: () => void; onDelete: (reason?: string) => void | Promise<void> }) {
   const [busy, setBusy] = useState(false);
+  const [reason, setReason] = useState('');
   const live = pieces.filter((p) => p.status === 'approved');
   const published = piece.status === 'approved';
   const after = live.filter((p) => p.id !== piece.id);
@@ -1739,12 +1753,12 @@ function DeleteWarning({ piece, pieces, profile, tally, onCancel, onDelete }: { 
   return (
     <div className="dl-back" role="dialog" aria-modal="true" aria-labelledby="dl-h" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="dl">
-        <span className="eb dl-k">{published ? 'Take down a published piece' : 'Delete'}</span>
-        <h2 id="dl-h" className="dl-h">Delete “{piece.title || 'Untitled'}”?</h2>
-        <p className="it dl-p">{published ? 'It will come off the site within the hour, with its reflections and its place in every collection. This cannot be undone.' : 'This cannot be undone.'}</p>
+        <span className="eb dl-k">{ask ? 'Ask the editor' : published ? 'Take down a published piece' : 'Delete'}</span>
+        <h2 id="dl-h" className="dl-h">{ask ? `Ask to take down “${piece.title || 'Untitled'}”?` : `Delete “${piece.title || 'Untitled'}”?`}</h2>
+        <p className="it dl-p">{ask ? 'Published pieces come down only by the editor’s hand. Tell the Editor in Chief why; if they agree, it comes off the site within the hour, with its reflections and its place in every collection.' : published ? 'It will come off the site within the hour, with its reflections and its place in every collection. This cannot be undone.' : 'This cannot be undone.'}</p>
         {published && (
           <div className="dl-lose">
-            <span className="lab dl-lose-k">What you’ll lose</span>
+            <span className="lab dl-lose-k">{ask ? 'If the editor agrees, you’ll lose' : 'What you’ll lose'}</span>
             <ul>
               <li>Your published count goes from <b>{live.length}</b> to <b>{after.length}</b>.</li>
               {rankDrops && <li>Your rank falls from <b>{rankNow!.name}</b> to <b>{rankAfter ? rankAfter.name : 'unranked'}</b>.</li>}
@@ -1753,9 +1767,10 @@ function DeleteWarning({ piece, pieces, profile, tally, onCancel, onDelete }: { 
             </ul>
           </div>
         )}
+        {ask && <label className="dl-why"><span className="lab">Your reason</span><textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why should it come down?" /></label>}
         <div className="dl-acts">
           <button type="button" className="dl-cancel" onClick={onCancel} autoFocus>Keep it</button>
-          <button type="button" className="dl-go" disabled={busy} onClick={async () => { setBusy(true); await onDelete(); setBusy(false); }}>{busy ? 'Deleting…' : published ? 'Take it down' : 'Delete'}</button>
+          <button type="button" className="dl-go" disabled={busy || (ask && reason.trim().length < 3)} onClick={async () => { setBusy(true); await onDelete(ask ? reason.trim() : undefined); setBusy(false); }}>{busy ? 'One moment…' : ask ? 'Send the request' : published ? 'Take it down' : 'Delete'}</button>
         </div>
       </div>
     </div>

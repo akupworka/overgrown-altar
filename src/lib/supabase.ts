@@ -21,6 +21,8 @@ export interface Piece {
   // A member's changes to a published piece, waiting for the editor (the live piece is unchanged until approved).
   revision?: { title: string; standfirst: string; body: string; image_path: string | null; image_alt: string; image_focus?: string; photo_meta?: import('./photo').PhotoMeta; gallery?: import('./photo').GalleryItem[] } | null;
   revision_at?: string | null;
+  // A writer's request to take a published piece down, with their reason (the editor decides).
+  delete_requested_at?: string | null; delete_reason?: string | null;
 }
 export interface Profile {
   id: string; display_name: string; craft: string; bio: string; portrait_path: string | null; role: 'member' | 'editor' | 'fellow';
