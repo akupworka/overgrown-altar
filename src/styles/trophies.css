@@ -199,7 +199,9 @@
 .tr-mini .tr-tier { white-space: nowrap; font-size: 8.5px !important; letter-spacing: .12em !important; }
 .tr-mini.ahead { opacity: .32; }
 .tr-mini.next { opacity: .7; }
-.tr-mini.next > span:first-child { border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,227,163,.7); }
+.tr-mini.next { opacity: .85; }
+.tr-mini.next > span:first-child { background: radial-gradient(closest-side, rgba(255,227,163,.22), rgba(255,227,163,0)); }   /* a soft glow, whatever the medal's shape */
+.tr-mini.next .tr-tier { color: #E9DDBF; }
 .tr-mini.got .tr-tier { color: var(--ember); }
 .tcat-prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: rgba(243,236,220,.08); overflow: hidden; }
 .tcat-prog i { display: block; height: 100%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
