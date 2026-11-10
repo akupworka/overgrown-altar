@@ -12,6 +12,12 @@ import '../../styles/doorway.css';
 <BaseLayout title="The Guild Desk" description="Members of the Guild sign in to their desk." footer={false} noindex arrival={false}>
   <section class="desk night">
     <!-- A faint memory of the window at the top; the room itself stays quiet. -->
+    <!-- Visitors: the sign-in doorway's backdrop, drawn from the first moment so nothing flickers while the Desk loads -->
+    <div class="dw-backdrop desk-guest-back" aria-hidden="true">
+      <div class="dw-nave"><img src="/images/folios-photo-2-1200.jpg" alt="" fetchpriority="high" /></div>
+      <div class="dw-shaft"></div>
+      <div class="dw-vignette"></div>
+    </div>
     <div class="desk-memory" aria-hidden="true">
       <img src="/images/window-light-on-wall-1200.jpg" alt="" fetchpriority="high" />
     </div>
@@ -22,4 +28,10 @@ import '../../styles/doorway.css';
     </div>
   </section>
 </BaseLayout>
+
+<style is:global>
+  html[data-member] .desk-guest-back { display: none; }
+  html:not([data-member]) .desk-memory { display: none; }
+  html:not([data-member]) .desk { background: transparent; }
+</style>
 

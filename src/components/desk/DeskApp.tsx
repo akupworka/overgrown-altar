@@ -1585,6 +1585,9 @@ export default function DeskApp() {
         setReady(true);
       });
     } else {
+      // Nobody signed in on this device: the sign-in door opens at once, without waiting to ask.
+      let stored = false; try { stored = !!localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token'); } catch {}
+      if (!stored) setReady(true);
       supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
     }
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
