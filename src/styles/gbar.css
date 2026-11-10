@@ -88,3 +88,4 @@ html:not([data-fellow]) .for-fellow { display: none !important; }
     background: rgba(12, 14, 11, .97) !important; box-shadow: inset 0 1px 0 rgba(243, 236, 220, .1), 0 -10px 30px rgba(0, 0, 0, .25) !important; }
   .gbar-choose:not([hidden]) { bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
 }
+[data-inner] .inner-me { display: none !important; }   /* Profile (top right) is your page; the bar needn't repeat it */

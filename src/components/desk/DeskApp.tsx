@@ -243,7 +243,7 @@ function Desk({ session }: { session: Session }) {
   };
   const go = (t: Tab) => {
     if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
-    // "My page" is your own page in the Guild (with Edit my page on it), not the form.
+    // "Profile" is your own page in the Guild (with Edit profile on it), not the form.
     if (t === 'profile') { guildGo(`/guild/members/?m=${uid}`); return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     // Keep the address in step with the room, so the members' bar lights the right one.
@@ -276,10 +276,10 @@ function Desk({ session }: { session: Session }) {
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
   const isFellow = seenRole(profile?.role) === 'fellow';   // the Fellowship: a collection, not pieces; no writing
-  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'My page']] : [
+  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'Profile']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
-    ['profile', 'My page'],
+    ['profile', 'Profile'],
   ];
 
   if (!loaded) return <Loading />;
@@ -1530,7 +1530,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
   return (
     <form className="d-section d-form-page" onSubmit={save}>
       <header className="d-page-head">
-        <span className="eb">My page</span>
+        <span className="eb">Profile</span>
         <h1 className="h1 d-hello">About the author</h1>
         <p className="it mut d-sub">What members see on your page, beside your collected work. <a className="d-inline-link" href={`/guild/members/?m=${profile.id}`}>View my page</a></p>
       </header>

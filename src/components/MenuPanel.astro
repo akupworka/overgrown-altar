@@ -51,7 +51,7 @@ const groups = [
           <section class="mp-group">
             <span class="eb">{g.title}</span>
             {g.links.map(([href, label]) => <a href={href} class="mp-link" aria-current={on(href)}>{label}</a>)}
-            {g.title === 'The Publication' && <a href="/guild/members/" class="mp-link" data-member aria-current={on('/guild/members')}>Guild members</a>}
+            {g.title === 'The Publication' && <a href="/guild/members/" class="mp-link for-guild" data-member aria-current={on('/guild/members')}>The Guild</a>}
           </section>
         ))}
       </nav>
