@@ -1912,3 +1912,10 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   .fw-new { grid-column: 1 / -1; grid-row: 2; padding-left: 66px; font-size: 15px; }
   .fw-n { font-size: 19px; }
 }
+/* Beside your column, a writer's page keeps to its own space: the work and the vault become rounded panels, not full-width bands */
+@media (min-width: 1101px) {
+  .ss-main .m-work { width: 100%; margin: 40px 0 0; padding: 48px 44px 56px; border-radius: 20px; }
+  .ss-main .m-vault { width: 100%; margin: 0; }
+  .ss-main .m-page { width: 100%; }
+}
+@media (min-width: 1101px) { .ss-main .m-page > .m-work, .ss-main .m-page > .m-vault { align-self: stretch; } }
