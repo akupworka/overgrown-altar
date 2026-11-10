@@ -126,7 +126,7 @@ export function WaySide({ member }: { member: string }) {
   return (
     <>
       <a className="ss-rank ss-way-rank" href="/guild/members/?view=way" style={{ '--ink': '#FFE3A3' } as React.CSSProperties}>
-        <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(pewterBadge('shell', 66, true, ['#FFF2C2', '#B07A12'])) }} />
+        <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(pewterBadge('shell', 66, true)) }} />
         <span className="ss-rank-t">
           <span className="lab ss-of">Station {w.current.n} of 7</span>
           <span className="ss-rank-n">{w.current.name}</span>
