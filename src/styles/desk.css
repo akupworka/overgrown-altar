@@ -1742,3 +1742,41 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .wy-pill-lg { font-size: 11px; padding: 4px 15px 4px 5px; gap: 9px; }
 .wy-pill-lg .wy-pill-n { font-size: 14px; }
 .wy-pill:hover { box-shadow: inset 0 0 0 1px rgba(233, 231, 224, .75); }
+
+/* Wide screens: the Desk's left column is you (portrait, rank, trophies), sticky as you scroll. The Guild bar above
+   carries the getting-around, so the old list of links and the big prestige panel in the middle step aside. */
+.ss { display: none; }
+@media (min-width: 1101px) {
+  .d-room:not(.writing) .d-side { gap: 0; }
+  .d-room:not(.writing) .d-side > .d-me, .d-room:not(.writing) .d-side > .d-nav, .d-room:not(.writing) .d-side-links { display: none; }
+  .d-room:not(.writing) .ss { display: flex; flex-direction: column; gap: 22px; margin-bottom: 26px; }
+  .d-room:not(.writing) .d-main > .d-home > .d-standing { display: none; }
+  .ss-me { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; color: var(--bone); }
+  .ss-arch { width: 92px; height: 118px; border-radius: 46px 46px 4px 4px; overflow: hidden; margin-bottom: 8px; box-shadow: 0 0 0 1px var(--brass), 0 18px 40px -20px rgba(0,0,0,.8); }
+  .ss-arch img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease, ease); }
+  .ss-me:hover .ss-arch img { transform: scale(1.05); }
+  .ss-name { font-family: var(--serif); font-size: 28px; line-height: 1.05; }
+  .ss-me:hover .ss-name { color: var(--ember); }
+  .ss-role { font-size: 9px; color: var(--muted-dark); }
+  .ss-rank { display: flex; align-items: center; gap: 12px; padding: 16px 14px; border-radius: 16px; color: var(--bone);
+    background: radial-gradient(ellipse 90% 90% at 18% 30%, color-mix(in srgb, var(--ink) 16%, transparent), transparent 70%), rgba(243,236,220,.02);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 35%, transparent); }
+  .ss-rank:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 65%, transparent); }
+  .ss-crest { flex: none; display: inline-flex; width: 74px; height: 74px; }
+  .ss-rank-t { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .ss-of { font-size: 8.5px; color: var(--muted-dark); }
+  .ss-rank-n { font-family: var(--serif); font-size: 23px; line-height: 1.05; color: var(--ink); }
+  .ss-bar { display: block; height: 2px; border-radius: 2px; background: rgba(243,236,220,.12); overflow: hidden; margin-top: 4px; }
+  .ss-bar i { display: block; height: 100%; background: var(--ink); transform-origin: left; }
+  .ss-next { font-size: 8.5px; }
+  .ss-vault { display: flex; flex-direction: column; gap: 12px; }
+  .ss-k { font-size: 9px; color: var(--muted-dark); display: flex; justify-content: space-between; }
+  .ss-k em { font-style: normal; color: var(--ember); }
+  .ss-medals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; justify-items: center; }
+  .ss-medals > span { display: inline-flex; }
+  .ss-none { font-size: 15px; }
+  .ss-link { align-self: flex-start; color: var(--ember); font-size: 9px; border-bottom: 1px solid rgba(255,227,163,.3); padding-bottom: 2px; }
+  .ss-way { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .d-room:not(.writing) .d-signout { margin-top: 6px; }
+}
+@media (min-width: 1101px) { .d-room:not(.writing) .fl-home > .wy-card { display: none; } }

@@ -21,6 +21,7 @@ import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
 import { FellowHome } from './Fellow';
+import { WayBadge } from './Way';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -287,6 +288,8 @@ function Desk({ session }: { session: Session }) {
             <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'The Fellowship' : 'Writer'}</span>
           </div>
         </div>
+        {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
+        {profile && <SideStanding profile={profile} pieces={pieces} fellow={isFellow} />}
         <nav className="d-nav" aria-label="Desk">
           {items.map(([t, label, n]) => (
             <button key={t} type="button" className={`d-nav-item ${tab === t ? 'on' : ''}`} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
@@ -1635,6 +1638,42 @@ function SeeAs() {
         {opts.map(([v, label]) => <button key={label} type="button" aria-pressed={now === v} onClick={() => now !== v && pick(v)}>{label}</button>)}
       </span>
       {now && <span className="it see-as-note">Everything shows as it does for {now === 'member' ? 'a Guild member' : 'the Fellowship'}. What you post is still under your own name.</span>}
+    </div>
+  );
+}
+
+/** The sticky identity column on wide screens: portrait, name, your rank (crest, how far to the next) and your trophies.
+ *  (The Fellowship's column shows their station on The Way instead.) */
+function SideStanding({ profile, pieces, fellow }: { profile: Profile; pieces: Piece[]; fellow: boolean }) {
+  const tally = useForumTally(profile.id);
+  const live = pieces.filter((p) => p.status === 'approved');
+  const { current, next, toNext } = prestigeFor(live.length);
+  const earned = finestFirst(trophiesFor({ pieces: live, member: profile, forum: tally }).filter((t) => t.earned));
+  const from = current?.at ?? 0, frac = next ? Math.max(0.04, (live.length - from) / (next.at - from)) : 1;
+  return (
+    <div className="ss">
+      <a className="ss-me" href={`/guild/members/?m=${profile.id}`}>
+        <span className="ss-arch"><img src={portraitUrl(profile.portrait_path) || seatFor(profile.display_name)} alt="" /></span>
+        <span className="ss-name">{profile.display_name}</span>
+        <span className="lab ss-role">{profile.role === 'editor' ? 'Editor in Chief' : fellow ? 'The Fellowship' : 'Writer of the Guild'}</span>
+      </a>
+      {fellow ? <div className="ss-way"><WayBadge member={profile.id} size="lg" /><a className="lab ss-link" href="/guild/members/?view=way">The Way →</a></div> : <>
+        <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
+          <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: current ? deskCrest(current.level, 74) : '' }} />
+          <span className="ss-rank-t">
+            <span className="lab ss-of">{current ? `Rank ${current.numeral} of X` : 'Not yet ranked'}</span>
+            <span className="ss-rank-n">{current?.name ?? 'Your first piece'}</span>
+            {next && <span className="ss-bar" aria-hidden="true"><i style={{ transform: `scaleX(${frac})` }} /></span>}
+            {next && <span className="lab mut ss-next">{toNext} to {next.name}</span>}
+          </span>
+        </a>
+        <div className="ss-vault">
+          <span className="lab ss-k">Your trophies <em>{earned.length} of {TROPHIES.length}</em></span>
+          {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: trophySvg(t, 44, tier) }} />)}</span>
+            : <span className="it mut ss-none">They gather as your work is published.</span>}
+          <a className="lab ss-link" href={`/guild/members/?m=${profile.id}#vault`}>Open your vault →</a>
+        </div>
+      </>}
     </div>
   );
 }
