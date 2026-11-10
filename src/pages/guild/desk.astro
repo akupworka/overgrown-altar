@@ -4,7 +4,7 @@
 // pieces live in Supabase, guarded by the database's own rules.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
-import DeskApp from '../../components/desk/DeskApp.tsx';
+import GuildApp from '../../components/desk/GuildApp.tsx';
 import Cross from '../../components/Cross.astro';
 import '../../styles/glass.css';
 import '../../styles/desk.css';
@@ -24,9 +24,9 @@ import '../../styles/doorway.css';
     </div>
     <SiteNav />
     <div class="desk-in">
-      <DeskApp client:only="react">
+      <GuildApp client:only="react">
         <div slot="fallback" class="d-load" role="status" aria-label="Loading"><Cross width={22} color="currentColor" /><span class="d-load-line" aria-hidden="true"><i></i></span></div>
-      </DeskApp>
+      </GuildApp>
       <noscript><p class="it" style="font-size:20px">The Guild Desk needs JavaScript switched on.</p></noscript>
     </div>
   </section>

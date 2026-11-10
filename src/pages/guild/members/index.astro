@@ -3,10 +3,11 @@
 // For signed-in members only; the interactive part is components/desk/MembersApp.tsx.
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SiteNav from '../../../components/SiteNav.astro';
-import MembersApp from '../../../components/desk/MembersApp.tsx';
+import GuildApp from '../../../components/desk/GuildApp.tsx';
 import Cross from '../../../components/Cross.astro';
 import '../../../styles/glass.css';
 import '../../../styles/desk.css';
+import '../../../styles/doorway.css';
 ---
 <BaseLayout title="The Guild" description="The members of the Overgrown Altar Guild." footer={false} noindex arrival={false}>
   <section class="desk night">
@@ -15,9 +16,9 @@ import '../../../styles/desk.css';
     </div>
     <SiteNav />
     <div class="desk-in">
-      <MembersApp client:only="react">
+      <GuildApp client:only="react">
         <div slot="fallback" class="d-load" role="status" aria-label="Loading"><Cross width={22} color="currentColor" /><span class="d-load-line" aria-hidden="true"><i></i></span></div>
-      </MembersApp>
+      </GuildApp>
       <noscript><p class="it" style="font-size:20px">The Guild’s pages need JavaScript switched on.</p></noscript>
     </div>
   </section>

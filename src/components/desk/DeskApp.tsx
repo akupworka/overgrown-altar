@@ -22,6 +22,7 @@ import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
 import { FellowHome } from './Fellow';
+import { guildGo } from './GuildApp';
 import { WaySide } from './Way';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
@@ -181,12 +182,13 @@ function Desk({ session }: { session: Session }) {
   const [loaded, setLoaded] = useState(false);
   // Arriving at /guild/desk/#write (from the menu's "Write a piece") opens a fresh sheet straight away.
   // Links from elsewhere can open a section directly: #write, #my-page, #review.
-  const [tab, setTab] = useState<Tab>(startHash.startsWith('#write') || startHash === '#photograph' ? 'write' : startHash === '#my-page' ? 'profile' : startHash === '#review' ? 'review' : startHash === '#forms' ? 'forms' : 'pieces');
+  const hashNow = typeof window !== 'undefined' ? location.hash : '';   // (the Desk may open long after the page did)
+  const [tab, setTab] = useState<Tab>(hashNow.startsWith('#write') || hashNow === '#photograph' ? 'write' : hashNow === '#my-page' ? 'profile' : hashNow === '#review' ? 'review' : hashNow === '#forms' ? 'forms' : 'pieces');
   // (#review and #my-page stay in the address, so the members' bar and a reload both know which room you're in.)
   const after = useRef<Tab | null>(null);
   const tabNow = useRef(tab); tabNow.current = tab;
   const [editing, setEditing] = useState<Piece | null>(null);
-  const [newMedium, setNewMedium] = useState<string | null>(startHash === '#photograph' ? 'photograph' : null);   // a new piece can start as a photograph
+  const [newMedium, setNewMedium] = useState<string | null>(hashNow === '#photograph' ? 'photograph' : null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
   const isEditor = seenRole(profile?.role) === 'editor';   // (the editor may be seeing the site as a member or the Fellowship)
   // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
@@ -242,7 +244,7 @@ function Desk({ session }: { session: Session }) {
   const go = (t: Tab) => {
     if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
     // "My page" is your own page in the Guild (with Edit my page on it), not the form.
-    if (t === 'profile') { location.href = `/guild/members/?m=${uid}`; return; }
+    if (t === 'profile') { guildGo(`/guild/members/?m=${uid}`); return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     // Keep the address in step with the room, so the members' bar lights the right one.
     else if (t === 'review' || t === 'forms') history.replaceState(history.state, '', location.pathname + location.search + '#' + t);
@@ -262,6 +264,8 @@ function Desk({ session }: { session: Session }) {
   }, []);
   useEffect(() => {
     const onPop = () => {
+      // Off to another Guild room: the Desk waits on its home (a sheet being written saves itself as it closes).
+      if (!location.pathname.startsWith('/guild/desk')) { setTab('pieces'); setReading(null); return; }
       // "Photograph" in the members' bars: a fresh photograph sheet (the address then reads #write like any sheet).
       if (location.hash === '#photograph') { history.replaceState({ desk: 'write' }, '', location.pathname + location.search + '#write'); setEditing(null); setNewMedium('photograph'); setTab('write'); window.scrollTo({ top: 0 }); return; }
       if (location.hash.startsWith('#write')) { if (tabNow.current !== 'write') { setEditing(null); setNewMedium(null); } setTab('write'); return; }
@@ -1630,7 +1634,7 @@ export function PillarTiles() {
 /** The editor's switch: see (and use) the whole site as the editor, a Guild member, or the Fellowship. */
 function SeeAs() {
   const now = viewAs();
-  const pick = (v: ViewAs) => { setViewAs(v); location.href = '/guild/desk/'; };
+  const pick = (v: ViewAs) => { setViewAs(v); location.reload(); };
   const opts: [ViewAs, string][] = [[null, 'Editor'], ['member', 'Guild member'], ['fellow', 'Fellowship']];
   return (
     <div className={`see-as${now ? ' on' : ''}`} role="group" aria-label="See the site as">

@@ -468,6 +468,7 @@ export default function MembersApp() {
     return () => { sub.subscription.unsubscribe(); removeEventListener('popstate', onPop); };
   }, []);
   useEffect(() => {
+    if (!location.pathname.startsWith('/guild/members')) return;   // the Desk is showing
     document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
