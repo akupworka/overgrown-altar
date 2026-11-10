@@ -281,6 +281,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
+        <FollowCounts id={person.id} mine={person.id === me} />
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
         {(site || handle || person.public_email) && (
           <span className="m-pills">
@@ -470,7 +471,7 @@ export default function MembersApp() {
   }, []);
   useEffect(() => {
     if (!location.pathname.startsWith('/guild/members')) return;   // the Desk is showing
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'following' ? 'Following' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -485,7 +486,7 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <Loading />;
-  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
+  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
@@ -503,6 +504,7 @@ export default function MembersApp() {
     : route.view === 'rules' ? <ForumRules />
     : route.view === 'mine' ? <ForumMine me={me} />
     : route.view === 'inbox' ? <InboxList me={me} />
+    : route.view === 'following' ? <Following me={me} />
     : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
     : route.p ? <Reading id={route.p} />
     : route.m ? <MemberPage id={route.m} me={me} />
@@ -530,6 +532,66 @@ function SideLayout({ me, children }: { me: string; children: React.ReactNode })
     <div className="ss-layout">
       <aside className="ss-aside" aria-label="You"><SideColumn me={me} /></aside>
       <div className="ss-main">{children}</div>
+    </div>
+  );
+}
+
+/** Followers and following, under a member's name. Your own "following" opens the list of everyone you follow. */
+function FollowCounts({ id, mine }: { id: string; mine: boolean }) {
+  const [n, setN] = useState<{ ers: number; ing: number } | null>(null);
+  useEffect(() => {
+    Promise.all([
+      supabase.from('follows').select('follower').eq('followed', id),
+      supabase.from('follows').select('followed').eq('follower', id),
+    ]).then(([a, b]) => setN({ ers: (a.data ?? []).length, ing: (b.data ?? []).length }));
+  }, [id]);
+  if (!n) return null;
+  return (
+    <span className="lab m-follows">
+      <span><b>{n.ers}</b> {n.ers === 1 ? 'follower' : 'followers'}</span>
+      {mine ? <Link to="/guild/members/?view=following" className="m-follows-link"><b>{n.ing}</b> following →</Link> : <span><b>{n.ing}</b> following</span>}
+    </span>
+  );
+}
+
+/** Everyone you follow: their picture, name and craft, their newest work, and a way to unfollow. */
+function Following({ me }: { me: string }) {
+  type Row = Profile & { newest?: { title: string; slug: string | null; medium: string; published_at: string | null } };
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const load = async () => {
+    const { data: f } = await supabase.from('follows').select('followed, created_at').eq('follower', me).order('created_at', { ascending: false });
+    const ids = (f ?? []).map((x: any) => x.followed);
+    if (!ids.length) { setRows([]); return; }
+    const [{ data: ppl }, { data: work }] = await Promise.all([
+      supabase.from('profiles').select('*').in('id', ids),
+      supabase.from('pieces').select('author_id, title, slug, medium, published_at').in('author_id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString()).order('published_at', { ascending: false }),
+    ]);
+    const newest = new Map<string, any>();
+    (work ?? []).forEach((w: any) => { if (!newest.has(w.author_id)) newest.set(w.author_id, w); });
+    const byId = new Map((ppl ?? []).map((p: any) => [p.id, p]));
+    setRows(ids.map((id: string) => byId.get(id)).filter(Boolean).map((p: any) => ({ ...p, newest: newest.get(p.id) })));
+  };
+  useEffect(() => { load(); }, [me]);
+  return (
+    <div className="fw">
+      <header className="fw-head">
+        <span className="eb">Writers you follow</span>
+        <h1 className="h1">Following</h1>
+        <p className="it mut d-sub">Their new work comes to your Desk, and to your daily letter.</p>
+      </header>
+      {!rows ? <p className="lab mut">Gathering…</p> : !rows.length ? (
+        <div className="fw-empty"><p className="it">You aren’t following anyone yet.</p><span className="lab mut">Open any writer’s page and tap Follow.</span><Link className="lab fw-go" to="/guild/members/">Meet the Guild →</Link></div>
+      ) : (
+        <ul className="fw-list">
+          {rows.map((p) => (
+            <li key={p.id} className="fw-row">
+              <Link to={`/guild/members/?m=${p.id}`} className="fw-who"><Arch p={p} /><span className="fw-t"><span className="fw-n">{p.display_name}</span><span className="lab mut">{p.craft || (p.role === 'editor' ? 'Editor in Chief' : 'Writer')}</span></span></Link>
+              {p.newest ? <a className="fw-new" href={p.newest.slug ? `/guild/${p.newest.slug}/` : undefined}><span className="lab">Newest</span><span className="it">{p.newest.title}</span></a> : <span className="it mut fw-new">Nothing published yet</span>}
+              <button type="button" className="m-act fw-un" onClick={async () => { if (!confirm(`Stop following ${p.display_name}?`)) return; await supabase.from('follows').delete().eq('follower', me).eq('followed', p.id); load(); }}>Following ✓</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

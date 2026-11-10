@@ -64,7 +64,7 @@ export function ReadingShelf({ me, freshOnly = false }: { me: string; freshOnly?
     <div className="rd-shelf">
       {!!fresh?.length && (
         <section className="d-forum-panel rd-panel">
-          <div className="d-forum-head"><span className="eb">New from writers you follow</span></div>
+          <div className="d-forum-head"><span className="eb">New from writers you follow</span><a className="lab d-forum-link" href="/guild/members/?view=following">Following →</a></div>
           {list(fresh)}
         </section>
       )}

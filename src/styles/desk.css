@@ -1881,3 +1881,34 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .d-act-item.d-danger:hover { color: #FF9AA8; }
 .d-act-more[open] { z-index: 30 !important; } .d-item:has(.d-act-more[open]) { z-index: 30; }
 .s-withdrawn { color: #FF9AA8; }
+
+/* Following: the writers you follow, and the counts under a member's name */
+.m-follows { display: flex; gap: 18px; justify-content: center; font-size: 9.5px; color: var(--muted-dark); }
+.m-follows b { font-family: var(--serif); font-weight: 400; font-size: 17px; letter-spacing: 0; color: var(--bone); margin-right: 4px; }
+.m-follows-link { color: var(--ember); }
+.m-follows-link b { color: var(--ember); }
+.d-tally-link { color: inherit; }
+.d-tally-link:hover { color: var(--ember); }
+.fw { width: 100%; max-width: 880px; display: flex; flex-direction: column; gap: 28px; }
+.fw-head { display: flex; flex-direction: column; gap: 12px; }
+.fw-head .h1 { margin: 0; }
+.fw-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.fw-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 14px 18px; border-radius: 16px; background: rgba(243, 236, 220, .025); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); }
+.fw-who { display: flex; align-items: center; gap: 14px; min-width: 0; color: var(--bone); }
+.fw-who .g-arch { width: 52px; height: 66px; flex: none; }
+.fw-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fw-n { font-family: var(--serif); font-size: 21px; line-height: 1.1; }
+.fw-who:hover .fw-n { color: var(--ember); }
+.fw-t .lab { font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fw-new { display: flex; flex-direction: column; gap: 3px; min-width: 0; color: var(--bone); font-size: 16px; }
+.fw-new .lab { font-size: 8px; color: var(--ember); }
+.fw-new .it { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fw-un { background: none; border: 0; cursor: pointer; white-space: nowrap; }
+.fw-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.fw-empty .it { margin: 0; font-size: 20px; }
+.fw-go { color: var(--ember); }
+@media (max-width: 700px) {
+  .fw-row { grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; padding: 12px 14px; }
+  .fw-new { grid-column: 1 / -1; grid-row: 2; padding-left: 66px; font-size: 15px; }
+  .fw-n { font-size: 19px; }
+}

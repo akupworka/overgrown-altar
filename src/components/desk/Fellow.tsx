@@ -23,7 +23,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
         <div className="d-home-hello">
           <span className="eb">The Fellowship</span>
           <h1 className="h1 d-hello">{greeting()}, {first}</h1>
-          <p className="d-tally"><span><b>{items?.length ?? 0}</b> in your collection</span><span><b>{following}</b> {following === 1 ? 'writer' : 'writers'} followed</span></p>
+          <p className="d-tally"><span><b>{items?.length ?? 0}</b> in your collection</span><a className="d-tally-link" href="/guild/members/?view=following"><b>{following}</b> {following === 1 ? 'writer' : 'writers'} followed →</a></p>
         </div>
         <div className="d-begins">
           <a className="btn d-btn" href="/gallery/">Explore the Gallery</a>
