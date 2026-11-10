@@ -71,16 +71,23 @@ const G: Record<Glyph, string> = {
   sun: '<circle cx="12" cy="12" r="3.5"/><path d="M12 4.5v2M12 17.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M6.7 17.3l1.4-1.4M15.9 8.1l1.4-1.4"/>',
   lamp: '<path d="M8 15h8l-1-3c2-1 2.5-3 1.5-4.5-1.2 1-2.5 1-3.5.2-1 .8-2.3.8-3.5-.2C8.5 9 9 11 11 12l-1 3"/><path d="M7 18h10M12 4.5v1.5"/>',
 };
-export function pewterBadge(glyph: Glyph, size = 64, lit = true): string {
-  const id = `pw${glyph}${size}${lit ? 1 : 0}`;
+// Each family of badges has its own enamel, as painted pilgrim badges did; the pewter stays as the rim.
+export const ENAMEL: Record<string, [string, string]> = {
+  Keeping: ['#8FB2FF', '#1E3F94'], Reading: ['#7FE3C8', '#11624F'], Encouraging: ['#FF9AA8', '#8A1C33'],
+  Company: ['#FFD88A', '#9A5A0C'], Faithfulness: ['#D3B2FF', '#4B2690'], Lamp: ['#FFF2C2', '#B07A12'],
+};
+export const enamelOf = (b: Badge) => ENAMEL[b.id === 'lamp' ? 'Lamp' : b.group];
+
+export function pewterBadge(glyph: Glyph, size = 64, lit = true, enamel?: [string, string]): string {
+  const id = `pw${glyph}${size}${lit ? 1 : 0}${enamel ? enamel[1].slice(1) : ''}`;
   const beads = Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2; return `<circle cx="${(32 + Math.cos(a) * 28.2).toFixed(2)}" cy="${(32 + Math.sin(a) * 28.2).toFixed(2)}" r="1.15"/>`; }).join('');
   return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><defs>
     <radialGradient id="${id}a" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="${lit ? '#F2F0EA' : '#6E6C66'}"/><stop offset=".45" stop-color="${lit ? '#A9A7A0' : '#4A4944'}"/><stop offset="1" stop-color="${lit ? '#4F4E4A' : '#2A2A27'}"/></radialGradient>
-    <radialGradient id="${id}b" cx="40%" cy="32%" r="75%"><stop offset="0" stop-color="${lit ? '#C9C7C0' : '#4E4D48'}"/><stop offset="1" stop-color="${lit ? '#3E3D3A' : '#1F1F1D'}"/></radialGradient></defs>
+    <radialGradient id="${id}b" cx="40%" cy="32%" r="75%"><stop offset="0" stop-color="${lit ? (enamel ? enamel[0] : '#C9C7C0') : '#4E4D48'}"/><stop offset="1" stop-color="${lit ? (enamel ? enamel[1] : '#3E3D3A') : '#1F1F1D'}"/></radialGradient></defs>
     <circle cx="32" cy="32" r="31" fill="url(#${id}a)"/>
     <g fill="${lit ? '#D9D7D0' : '#55544F'}" opacity=".9">${beads}</g>
     <circle cx="32" cy="32" r="25" fill="url(#${id}b)"/>
     <circle cx="32" cy="32" r="25" fill="none" stroke="${lit ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.08)'}" stroke-width=".8"/>
-    <g transform="translate(16 16) scale(1.333)" fill="none" stroke="${lit ? '#F4F2EC' : '#77756F'}" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">${G[glyph]}</g>
+    <g transform="translate(16 16) scale(1.333)" fill="none" stroke="${lit ? (enamel ? '#FFFDF6' : '#F4F2EC') : '#77756F'}" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">${G[glyph]}</g>
   </svg>`;
 }

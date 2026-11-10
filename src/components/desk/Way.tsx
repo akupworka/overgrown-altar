@@ -1,7 +1,8 @@
+import type React from 'react';
 // The Fellowship's room: The Way (seven stations) and its pilgrim badges. See lib/way.ts.
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BADGES, STATIONS, wayFor, pewterBadge, type WayCtx, type Badge } from '../../lib/way';
+import { BADGES, STATIONS, wayFor, pewterBadge, enamelOf, type WayCtx, type Badge } from '../../lib/way';
 import { useForumTally } from './Forum';
 
 export function useWay(member: string | null) {
@@ -27,12 +28,12 @@ export function useWay(member: string | null) {
   return { ctx, ...wayFor(ctx) };
 }
 
-const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" dangerouslySetInnerHTML={{ __html: pewterBadge(b.glyph, size, lit) }} />;
+const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" style={{ '--en': enamelOf(b)[0] } as React.CSSProperties} dangerouslySetInnerHTML={{ __html: pewterBadge(b.glyph, size, lit, enamelOf(b)) }} />;
 
 /** The path of seven stations, with where you stand lit in silver. */
 function Path({ at }: { at: number }) {
   return (
-    <ol className="wy-path" aria-label="The seven stations">
+    <ol className="wy-path" aria-label="The seven stations" style={{ '--at': (at - 1) / 6 } as React.CSSProperties}>
       {STATIONS.map((s) => (
         <li key={s.n} className={s.n < at ? 'past' : s.n === at ? 'here' : ''}>
           <span className="wy-dot" aria-hidden="true" />
@@ -67,9 +68,9 @@ export function WayPage({ me }: { me: string }) {
               const lit = w.earned.includes(b);
               const [have, need] = b.progress ? b.progress(w.ctx) : [0, 0];
               return (
-                <li key={b.id} className={lit ? 'lit' : ''}>
+                <li key={b.id} className={lit ? 'lit' : ''} style={{ '--en': enamelOf(b)[0], '--en2': enamelOf(b)[1] } as React.CSSProperties}>
                   <button type="button" className="wy-b" aria-expanded={open === b.id} onClick={() => setOpen(open === b.id ? null : b.id)}>
-                    <Token b={b} lit={lit} />
+                    <Token b={b} lit={lit} size={76} />
                     <span className="wy-bn">{b.name}</span>
                     {!lit && need > 0 && <span className="wy-bar" aria-hidden="true"><i style={{ transform: `scaleX(${have / need})` }} /></span>}
                   </button>
@@ -97,7 +98,7 @@ export function WayCard({ member, mine }: { member: string; mine: boolean }) {
       </span>
       <Path at={w.current.n} />
       {w.earned.length > 0
-        ? <span className="wy-card-badges">{w.earned.slice(0, 8).map((b) => <span key={b.id} title={b.name}><Token b={b} lit size={40} /></span>)}{w.earned.length > 8 && <em>+{w.earned.length - 8}</em>}</span>
+        ? <span className="wy-card-badges">{w.earned.slice(0, 8).map((b) => <span key={b.id} title={b.name}><Token b={b} lit size={44} /></span>)}{w.earned.length > 8 && <em>+{w.earned.length - 8}</em>}</span>
         : <span className="it mut wy-card-none">{mine ? 'Your first badge comes with your first saved piece.' : 'Just setting out.'}</span>}
     </a>
   );
