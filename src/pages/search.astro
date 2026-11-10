@@ -8,7 +8,7 @@ import SiteNav from '../components/SiteNav.astro';
   <section class="night sr-head">
     <SiteNav />
     <div class="sr-in">
-      <span class="eb">Search the altar</span>
+      <span class="eb sr-k">Explore the altar</span>
       <form class="sr-form" role="search" action="/search/" method="get">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
         <input id="sr-q" type="search" name="q" placeholder="A title, a writer, a word…" aria-label="Search" autocomplete="off" enterkeyhint="search" />
@@ -200,4 +200,12 @@ import SiteNav from '../components/SiteNav.astro';
     :global(.sr-n) { font-size: 18px; }
     :global(.sr-l) { font-size: 15px; }
   }
+  /* Explore first: the search sits small and quiet above the wall */
+  .sr-head { padding-bottom: 18px; }
+  .sr-in { max-width: 960px; gap: 10px; }
+  .sr-form { min-height: 46px; padding: 0 16px; gap: 10px; max-width: 460px; }
+  .sr-form svg { width: 16px; height: 16px; }
+  .sr-form input { font-size: 18px; }
+  .sr-hint { display: none; }
+  @media (max-width: 700px) { .sr-form { max-width: none; min-height: 44px; } .sr-form input { font-size: 17px; } .sr-head { padding-bottom: 12px; } }
 </style>

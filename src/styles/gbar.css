@@ -89,3 +89,5 @@ html:not([data-fellow]) .for-fellow { display: none !important; }
   .gbar-choose:not([hidden]) { bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
 }
 [data-inner] .inner-me { display: none !important; }   /* Profile (top right) is your page; the bar needn't repeat it */
+/* Explore, in gold beside The Way (the Fellowship's computer bar) */
+[data-inner] .inner-explore { color: var(--ember) !important; }

@@ -29,7 +29,7 @@ export function useWay(member: string | null) {
   return { ctx, ...wayFor(ctx) };
 }
 
-const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" style={{ '--en': enamelOf(b)[0] } as React.CSSProperties} dangerouslySetInnerHTML={{ __html: useIds(pewterBadge(b.glyph, size, lit, enamelOf(b))) }} />;
+const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" style={{ '--en': enamelOf(b)[0] } as React.CSSProperties} dangerouslySetInnerHTML={{ __html: useIds(pewterBadge(b.glyph, size, lit, enamelOf(b), !!b.rare)) }} />;
 
 /** The path of seven stations, with where you stand lit in silver. */
 function Path({ at }: { at: number }) {
@@ -68,7 +68,7 @@ export function WayPage({ me }: { me: string }) {
               const lit = w.earned.includes(b);
               const [have, need] = b.progress ? b.progress(w.ctx) : [0, 0];
               return (
-                <li key={b.id} className={`wy-row${lit ? ' lit' : ''}`} style={{ '--en': enamelOf(b)[0] } as React.CSSProperties}>
+                <li key={b.id} className={`wy-row${lit ? ' lit' : ''}${b.rare ? ' rare' : ''}`} style={{ '--en': enamelOf(b)[0] } as React.CSSProperties}>
                   <Token b={b} lit={lit} size={56} />
                   <span className="wy-row-t">
                     <span className="wy-row-n">{b.name}</span>
