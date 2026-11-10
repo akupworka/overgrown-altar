@@ -60,6 +60,9 @@
 /* Phones, signed in: enough room at the foot of every page to clear the bar and the raised Write disc */
 @media (max-width: 700px) {
   html[data-member] body { padding-bottom: 140px !important; }
+  /* Pages that end in the footer: the footer's own dark fills the room for the bar, instead of a blank band below it */
+  html[data-member] body:has(footer.foot) { padding-bottom: 0 !important; }
+  html[data-member] footer.foot { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
   html[data-member] body:has(.desk-in) { padding-bottom: 0 !important; }
   html[data-member] .desk-in { padding-bottom: 160px !important; }
   html[data-member] .desk-in:has(.m-work) { padding-bottom: 0 !important; }

@@ -8,6 +8,7 @@ const groups = [
     { href: '/watchtower', label: 'The Watchtower' },
     { href: '/hearth', label: 'The Hearth' },
     { href: '/perimeter', label: 'The Perimeter' },
+    { href: '/gallery/', label: 'The Gallery' },
     { href: '/folios', label: 'Folios' },
     { href: '/archive', label: 'Archive' },
     { href: '/crafts/', label: 'The Crafts' },
@@ -24,7 +25,9 @@ const groups = [
     { href: '/join/#guild', label: 'Apply to the Guild', who: 'guest' },
     { href: '/guild/desk/', label: 'Sign in', who: 'guest' },
     { href: '/guild/desk/', label: 'My Desk', who: 'member' },
-    { href: '/guild/members/', label: 'The Guild', who: 'member' },
+    { href: '/guild/members/?view=forum', label: 'The Forum', who: 'member' },
+    { href: '/guild/members/', label: 'The Guild', who: 'member', cls: 'for-guild' },
+    { href: '/guild/members/?view=way', label: 'The Way', who: 'member', cls: 'for-fellow' },
   ] },
 ];
 const year = new Date().getFullYear();
@@ -39,7 +42,7 @@ const year = new Date().getFullYear();
       {groups.map((g) => (
         <div class="foot-group">
           <span class="foot-h">{g.title}</span>
-          {g.links.map((l: any) => <a href={l.href} data-guest={l.who === 'guest' ? '' : undefined} data-member={l.who === 'member' ? '' : undefined}>{l.label}</a>)}
+          {g.links.map((l: any) => <a href={l.href} class={l.cls} data-guest={l.who === 'guest' ? '' : undefined} data-member={l.who === 'member' ? '' : undefined}>{l.label}</a>)}
         </div>
       ))}
     </nav>
