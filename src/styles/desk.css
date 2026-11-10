@@ -1486,8 +1486,7 @@
 /* Phones: the Write disc covers Begin and Submit, so those step aside; the rooms come right under the greeting */
 @media (max-width: 700px) {
   .d-home .d-begins { display: none !important; }
-  .d-home > .d-home-head { order: -2; }
-  .d-home > .d-pillars-row { order: -1; grid-template-columns: 1fr 1fr !important; }
+  .d-home > .d-pillars-row { grid-template-columns: 1fr 1fr !important; }
   .d-pl { height: 96px; }
   .d-pl-name { font-size: 19px; }
 }
@@ -1523,8 +1522,6 @@
 }
 /* Computers too: the rooms right under the greeting; Begin and Submit step aside (the Guild bar has Write and Photograph) */
 .d-home .d-begins { display: none !important; }
-.d-home > .d-home-head { order: -2; }
-.d-home > .d-pillars-row { order: -1; }
 @media (min-width: 701px) { .d-pl { height: 150px; } }
 
 /* ---- The Guild's rooms, with your own Guild in them ---- */
@@ -1832,3 +1829,5 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 @keyframes d-load-breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 @keyframes d-load-run { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .d-load svg, .d-load-line i { animation: none; } }
+/* Wide screens: the column beside the Guild page already shows your Desk standing and your prestige, so those two tiles step aside */
+@media (min-width: 1101px) { .ss-main .g-tile-desk, .ss-main .g-tile-pz { display: none !important; } }

@@ -636,10 +636,6 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
             Submit a photograph</button>
         </div>
       </header>
-      {profile && !isEditor && (
-        <Welcome portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
-          sent={pieces.some((p) => p.status !== 'draft')} onWrite={() => onOpen(null)} />
-      )}
       {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}
       {isEditor && (
         <div className="d-inbox">
@@ -655,16 +651,11 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
           </button>
         </div>
       )}
-      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
-      {/* Read the Guild's work: the three pillars, one tap each */}
-      <PillarTiles />
-      {isEditor && <EditorTools />}
-      {/* What the Guild is talking about */}
-      <section className="d-forum-panel">
-        <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
-        {profile?.id && <ForumMineLatest me={profile.id} />}
-      </section>
-      {profile?.id && <ReadingShelf me={profile.id} />}
+      {profile && !isEditor && (
+        <Welcome portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
+          sent={pieces.some((p) => p.status !== 'draft')} onWrite={() => onOpen(null)} />
+      )}
+      {/* The heart of the Desk: your pieces */}
       <div className="d-row-head"><h2 className="eb">My pieces</h2>{pieces.length > 0 && <span className="lab mut">{listed.length} {show === 'all' && !finding ? 'in all' : 'shown'} · newest first</span>}</div>
       {pieces.length > 3 && (
         <div className="filters d-filters" role="group" aria-label="Show">
@@ -720,6 +711,17 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
         )
       )}
       {(show !== 'all' || finding) && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
+      {/* Read the Guild's work: the three pillars, one tap each */}
+      <PillarTiles />
+      {/* What the Guild is talking about */}
+      <section className="d-forum-panel">
+        <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
+        {profile?.id && <ForumMineLatest me={profile.id} />}
+      </section>
+      {profile?.id && <ReadingShelf me={profile.id} />}
+      {/* Phones: your standing (wide screens show it in the column beside) */}
+      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
+      {isEditor && <EditorTools />}
       {/* Phones: the side column is hidden, so Sign out lives at the foot of the Desk. */}
       <button type="button" className="d-signout-foot" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
