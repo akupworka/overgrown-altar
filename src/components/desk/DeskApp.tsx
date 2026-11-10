@@ -573,9 +573,12 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     if (error) { alert('The copy couldn’t be made: ' + error.message); return; }
     onChanged(); onOpen(data as Piece);
   }
-  async function remove(p: Piece) {
-    if (!confirm(`Delete “${p.title || 'Untitled'}”? This cannot be undone.`)) return;
-    await supabase.from('pieces').delete().eq('id', p.id); onChanged();
+  const [deleting, setDeleting] = useState<Piece | null>(null);
+  function remove(p: Piece) { setDeleting(p); }
+  async function reallyRemove(p: Piece) {
+    const { data, error } = await supabase.from('pieces').delete().eq('id', p.id).select('id');
+    if (error || !data?.length) { alert('It couldn’t be deleted just now. Please try again in a moment.'); return; }
+    setDeleting(null); onChanged();
   }
   // The groups My pieces is organized into (newest first in each).
   const GROUPS: { key: string; label: string; note?: string; has: (p: Piece) => boolean; filter?: 'drafts' | 'with' | 'live' }[] = [
@@ -604,7 +607,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
                 {p.status === 'approved' && <button type="button" className="d-link" onClick={() => onOpen(p)}>{p.revision ? 'Edit your changes' : 'Edit'}</button>}
                 {p.status === 'approved' && p.slug && <a className="d-link" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {isEditor && <button type="button" className="d-link" onClick={() => duplicate(p)}>Duplicate</button>}
-                {editable && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
+                {p.status !== 'submitted' && <button type="button" className="lab d-textbtn d-danger" onClick={() => remove(p)}>Delete</button>}
               </div>
               {/* Phones: the same actions, folded */}
               {(openable || p.status === 'submitted' || isEditor) && (
@@ -613,7 +616,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
                   {p.status === 'approved' && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
                   {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                   {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}
-                  {editable && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
+                  {p.status !== 'submitted' && <button type="button" className="d-act-item d-danger" onClick={() => remove(p)}>Delete</button>}
                 </MoreActions>
               )}
             </li>
@@ -622,6 +625,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
 
   return (
     <section className="d-section d-home">
+      {deleting && <DeleteWarning piece={deleting} pieces={pieces} profile={profile} tally={tally} onCancel={() => setDeleting(null)} onDelete={() => reallyRemove(deleting)} />}
       <header className="d-home-head">
         <div className="d-home-hello">
           <span className="eb">The Guild Desk</span>
@@ -1714,6 +1718,46 @@ export function Loading() {
     <div className="d-load" role="status" aria-label="Loading">
       <svg viewBox="0 0 603 883" width="22" height="32" aria-hidden="true"><path fill="currentColor" d={CROSS_PATH} /></svg>
       <span className="d-load-line" aria-hidden="true"><i /></span>
+    </div>
+  );
+}
+
+/** Before a piece is deleted: what goes with it. A published piece counts toward your rank and trophies, so taking it
+ *  down can lower them; this says exactly what would be lost, and asks once more. */
+function DeleteWarning({ piece, pieces, profile, tally, onCancel, onDelete }: { piece: Piece; pieces: Piece[]; profile: Profile | null; tally: any; onCancel: () => void; onDelete: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const live = pieces.filter((p) => p.status === 'approved');
+  const published = piece.status === 'approved';
+  const after = live.filter((p) => p.id !== piece.id);
+  const rankNow = prestigeFor(live.length).current, rankAfter = prestigeFor(after.length).current;
+  const had = trophiesFor({ pieces: live, member: profile ?? {}, forum: tally }).filter((t) => t.earned);
+  const keep = trophiesFor({ pieces: after, member: profile ?? {}, forum: tally }).filter((t) => t.earned);
+  const lost = had.filter((t) => { const k = keep.find((x) => x.trophy.id === t.trophy.id); return !k || k.tier !== t.tier; })
+    .map((t) => { const k = keep.find((x) => x.trophy.id === t.trophy.id); return k ? `${t.trophy.name} drops from ${TIER_LABEL[t.tier]} to ${TIER_LABEL[k.tier]}` : `${t.trophy.name} (${TIER_LABEL[t.tier]})`; });
+  const rankDrops = published && rankNow && rankNow.level !== rankAfter?.level;
+  useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k); }, [onCancel]);
+  return (
+    <div className="dl-back" role="dialog" aria-modal="true" aria-labelledby="dl-h" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className="dl">
+        <span className="eb dl-k">{published ? 'Take down a published piece' : 'Delete'}</span>
+        <h2 id="dl-h" className="dl-h">Delete “{piece.title || 'Untitled'}”?</h2>
+        <p className="it dl-p">{published ? 'It will come off the site within the hour, with its reflections and its place in every collection. This cannot be undone.' : 'This cannot be undone.'}</p>
+        {published && (
+          <div className="dl-lose">
+            <span className="lab dl-lose-k">What you’ll lose</span>
+            <ul>
+              <li>Your published count goes from <b>{live.length}</b> to <b>{after.length}</b>.</li>
+              {rankDrops && <li>Your rank falls from <b>{rankNow!.name}</b> to <b>{rankAfter ? rankAfter.name : 'unranked'}</b>.</li>}
+              {lost.map((l) => <li key={l}>{l}</li>)}
+              {!rankDrops && !lost.length && <li>Your rank and trophies stay as they are.</li>}
+            </ul>
+          </div>
+        )}
+        <div className="dl-acts">
+          <button type="button" className="dl-cancel" onClick={onCancel} autoFocus>Keep it</button>
+          <button type="button" className="dl-go" disabled={busy} onClick={async () => { setBusy(true); await onDelete(); setBusy(false); }}>{busy ? 'Deleting…' : published ? 'Take it down' : 'Delete'}</button>
+        </div>
+      </div>
     </div>
   );
 }
