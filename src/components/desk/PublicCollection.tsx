@@ -25,7 +25,7 @@ export default function PublicCollection() {
         {who.bio && <p className="it pc-bio">{who.bio}</p>}
       </header>
       <CollectionWall items={items} empty={<p className="it">{first} hasn’t gathered anything yet.</p>} />
-      {!document.documentElement.hasAttribute('data-member') && <p className="lab pc-join">Keep a collection of your own: <a href="/fellowship/">join the Fellowship →</a></p>}
+      {!document.documentElement.hasAttribute('data-member') && <p className="lab pc-join">Keep a collection of your own: <a href="/join/#fellowship">join the Fellowship →</a></p>}
     </div>
   );
 }

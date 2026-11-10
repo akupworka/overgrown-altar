@@ -792,11 +792,6 @@
 .d-kind-look .lab, .d-kind-len .lab { display: block; font-style: normal; font-size: 8.5px; color: var(--ember); margin-bottom: 2px; }
 .d-kind-all { align-self: flex-start; font-size: 9.5px; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 2px; }
 
-/* Phones: a fade to black behind the bottom tab bar, so writing melts away before it instead of showing beneath it. */
-@media (max-width: 700px) {
-  .d-tabbar::before { content: ''; position: absolute; z-index: -1; pointer-events: none;
-    display: none; }   /* nothing behind the bar: it floats on the page by itself */
-}
 
 /* Phones: an arrow at the end of the formatting bar, with a fade, until the bar is scrolled to its end */
 .d-tools-wrap { display: contents; }
@@ -1237,26 +1232,6 @@
   .d-home .d-list { gap: 8px !important; }
 }
 @media (max-width: 700px) { .d-act-more[open] { z-index: 30; } .d-home .d-list > .d-item:has(.d-act-more[open]) { z-index: 30; } }
-/* Phones: Write stands out in the tab bar: a dark glass disc, raised, ringed with a thin band of stained glass that turns slowly;
-   the pen in candle gold. (Color only through the glass ring.) */
-@media (max-width: 700px) {
-  .d-tabbar .t-write { color: var(--ember); }
-  .d-tabbar .t-write .d-tabbar-icon { position: relative; width: 54px; height: 54px; margin-top: -32px; border-radius: 50%; align-items: center; justify-content: center;
-    isolation: isolate; overflow: hidden; color: var(--ember);
-    box-shadow: 0 0 0 5px #0E110D, 0 12px 28px rgba(0, 0, 0, .6); transition: transform .35s cubic-bezier(.16,1,.3,1); }
-  /* the glass ring */
-  .d-tabbar .t-write .d-tabbar-icon::before { content: ''; position: absolute; z-index: -2; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; translate: -50% -50%;
-    background: conic-gradient(from 0deg, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF, #B05BFF, #FF3B4E); opacity: .85;
-    animation: t-write-turn 14s linear infinite; }
-  /* the dark pane inside it */
-  .d-tabbar .t-write .d-tabbar-icon::after { content: ''; position: absolute; z-index: -1; inset: 2px; border-radius: 50%;
-    background: radial-gradient(circle at 50% 18%, rgba(255, 236, 190, .16), rgba(255, 236, 190, 0) 55%), linear-gradient(180deg, #1C2017, #0B0D0A);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -8px 16px rgba(0, 0, 0, .45); }
-  .d-tabbar .t-write .d-tabbar-icon svg { width: 22px; height: 22px; }
-  .d-tabbar .t-write:active .d-tabbar-icon { transform: scale(.93); }
-}
-@keyframes t-write-turn { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .d-tabbar .t-write .d-tabbar-icon::before { animation: none; } }
 /* Phones: where the bottom tab bar is showing (the Desk, your own page), the top Guild bar leaves out what the
    tab bar already has (My Desk, Write, Review, My page) and keeps the rest of the Guild, spread evenly. */
 @media (max-width: 700px) {

@@ -7,3 +7,6 @@
 # The Hearth's gallery became The Gallery, its own room.
 /hearth/gallery   /gallery/   301
 /hearth/gallery/  /gallery/   301
+# The Fellowship's own page joined the Join page.
+/fellowship   /join/#fellowship   301
+/fellowship/  /join/#fellowship   301
