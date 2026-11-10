@@ -34,21 +34,30 @@ export const portraitUrl = (path?: string | null) =>
 
 /** Remembers, on this device, who is signed in, so the site header can greet them without loading anything. */
 export const MEMBER_KEY = 'oa_member';
+// The editor can see the whole site as a Guild member or as the Fellowship, to test it ("See the site as" on the Desk).
+// Only the look and the tools change; the database still knows them as the editor.
+export const VIEW_KEY = 'oa_view_as';
+export type ViewAs = 'member' | 'fellow' | null;
+export function viewAs(): ViewAs { try { const v = localStorage.getItem(VIEW_KEY); return v === 'member' || v === 'fellow' ? v : null; } catch { return null; } }
+/** The role the site should behave as: the editor's chosen view, or the real role for everyone else. */
+export function seenRole(role?: string | null) { const v = viewAs(); return role === 'editor' && v ? v : role ?? null; }
+export function setViewAs(v: ViewAs) { try { v ? localStorage.setItem(VIEW_KEY, v) : localStorage.removeItem(VIEW_KEY); } catch {} }
 export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path'> & { role?: string | null }) | null) {
   try {
-    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor', fellow: p.role === 'fellow' }));
-    else localStorage.removeItem(MEMBER_KEY);
+    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor', fellow: seenRole(p.role) === 'fellow' }));
+    else { localStorage.removeItem(MEMBER_KEY); setViewAs(null); }   // signing out ends any "see as"
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.
   if (typeof document === 'undefined') return;
   document.documentElement.toggleAttribute('data-member', !!p);
-  document.documentElement.toggleAttribute('data-editor', p?.role === 'editor');
-  document.documentElement.toggleAttribute('data-fellow', p?.role === 'fellow');   // the Fellowship: no writing tools
+  const seen = seenRole(p?.role);
+  document.documentElement.toggleAttribute('data-editor', seen === 'editor');
+  document.documentElement.toggleAttribute('data-fellow', seen === 'fellow');   // the Fellowship: no writing tools
   document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => (el.hidden = !!p));
   document.querySelectorAll<HTMLElement>('[data-member]').forEach((el) => (el.hidden = !p));
-  document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = p?.role !== 'editor'));
+  document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = seen !== 'editor'));
   const home = document.querySelector<HTMLAnchorElement>('.nav-home');
-  const fel = p?.role === 'fellow';
+  const fel = seen === 'fellow';
   if (home) { home.href = !p ? '/' : fel ? '/guild/desk/' : '/guild/members/'; home.setAttribute('aria-label', !p ? 'Overgrown Altar, home' : fel ? 'Your Desk' : 'The Guild, home for members'); }
   if (!p) return;
   const src = portraitUrl(p.portrait_path);

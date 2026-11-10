@@ -25,6 +25,7 @@ import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
+import { seenRole, viewAs, setViewAs, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -185,7 +186,7 @@ function Desk({ session }: { session: Session }) {
   const [editing, setEditing] = useState<Piece | null>(null);
   const [newMedium, setNewMedium] = useState<string | null>(startHash === '#photograph' ? 'photograph' : null);   // a new piece can start as a photograph
   const [reading, setReading] = useState<Piece | null>(null);
-  const isEditor = profile?.role === 'editor';
+  const isEditor = seenRole(profile?.role) === 'editor';   // (the editor may be seeing the site as a member or the Fellowship)
   // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
   const [arrivalsNew, setArrivalsNew] = useState(0);
   useEffect(() => {
@@ -268,7 +269,7 @@ function Desk({ session }: { session: Session }) {
     };
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
-  const isFellow = profile?.role === 'fellow';   // the Fellowship: a collection, not pieces; no writing
+  const isFellow = seenRole(profile?.role) === 'fellow';   // the Fellowship: a collection, not pieces; no writing
   const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'My page']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
@@ -313,6 +314,7 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
+        {profile?.role === 'editor' && tab !== 'write' && <SeeAs />}
         {isFellow && profile && (tab === 'pieces' || tab === 'write') && <FellowHome profile={profile} />}
         {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
         {!isFellow && tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
@@ -1615,5 +1617,21 @@ export function PillarTiles() {
           </a>
         ))}
       </nav>
+  );
+}
+
+/** The editor's switch: see (and use) the whole site as the editor, a Guild member, or the Fellowship. */
+function SeeAs() {
+  const now = viewAs();
+  const pick = (v: ViewAs) => { setViewAs(v); location.href = '/guild/desk/'; };
+  const opts: [ViewAs, string][] = [[null, 'Editor'], ['member', 'Guild member'], ['fellow', 'Fellowship']];
+  return (
+    <div className={`see-as${now ? ' on' : ''}`} role="group" aria-label="See the site as">
+      <span className="lab see-as-k">See the site as</span>
+      <span className="see-as-opts">
+        {opts.map(([v, label]) => <button key={label} type="button" aria-pressed={now === v} onClick={() => now !== v && pick(v)}>{label}</button>)}
+      </span>
+      {now && <span className="it see-as-note">Everything shows as it does for {now === 'member' ? 'a Guild member' : 'the Fellowship'}. What you post is still under your own name.</span>}
+    </div>
   );
 }

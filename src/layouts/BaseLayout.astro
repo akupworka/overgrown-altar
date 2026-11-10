@@ -59,8 +59,10 @@ const imageUrl = new URL(image, site).toString();
         if (oaT && oaT.refresh_token) {
           document.documentElement.setAttribute('data-member', '');
           var oaM = JSON.parse(localStorage.getItem('oa_member') || '{}');
-          if (oaM.editor) document.documentElement.setAttribute('data-editor', '');
-          if (oaM.fellow) document.documentElement.setAttribute('data-fellow', '');
+          var oaV = localStorage.getItem('oa_view_as');   // the editor, seeing the site as a member or the Fellowship
+          if (oaM.editor && !oaV) document.documentElement.setAttribute('data-editor', '');
+          if (oaM.fellow || (oaM.editor && oaV === 'fellow')) document.documentElement.setAttribute('data-fellow', '');
+          if (oaM.editor && oaV) document.documentElement.setAttribute('data-view-as', oaV);
         }
         // Reading comfort chosen on a piece (text size, night reading), before anything is drawn
         var oaR = JSON.parse(localStorage.getItem('oa_read') || '{}');

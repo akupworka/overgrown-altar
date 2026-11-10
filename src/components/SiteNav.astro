@@ -140,6 +140,14 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         const label = pill?.querySelector('.member-label');
         if (pill && label) { label.textContent = 'Profile'; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', name ? `My profile, signed in as ${name}` : 'My profile'); pill.removeAttribute('aria-current'); }
       }
+      // The editor seeing the site as someone else: a small reminder on every page, with the way back.
+      const va = localStorage.getItem('oa_view_as');
+      if (me.editor && (va === 'member' || va === 'fellow') && !document.querySelector('.see-as-pill')) {
+        const pill = document.createElement('button'); pill.type = 'button'; pill.className = 'see-as-pill';
+        pill.innerHTML = `<span>Seeing as ${va === 'member' ? 'a Guild member' : 'the Fellowship'}</span><b>Back to editor</b>`;
+        pill.addEventListener('click', () => { localStorage.removeItem('oa_view_as'); location.reload(); });
+        document.body.append(pill);
+      }
       // Members: the mark takes you home to the Guild (About stays in the menu and the footer).
       const home = document.querySelector<HTMLAnchorElement>('.nav-home');
       if (home) { const f = !!me.fellow; home.href = f ? '/guild/desk/' : '/guild/members/'; home.setAttribute('aria-label', f ? 'Your Desk' : 'The Guild, home for members'); }

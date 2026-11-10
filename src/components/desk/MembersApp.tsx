@@ -3,6 +3,7 @@
 //   /guild/members/?m=<id>     a member's page: portrait, craft, bio, links, collected work
 //   /guild/members/?p=<id>     reading one of their published pieces
 // What anyone can see is enforced by the database's rules; this only presents it.
+import { seenRole, viewAs } from '../../lib/supabase';
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
 import { WayPage, WayBadge } from './Way';
@@ -256,7 +257,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
   const handle = (person.instagram ?? '').replace(/^@/, '');
   const fellow = person.role === 'fellow';   // the Fellowship: a collection instead of work and prestige
-  const iAmEditor = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').editor; } catch { return false; } })();
+  const iAmEditor = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').editor && !viewAs(); } catch { return false; } })();
   // Six pieces to a page, with pages below; the kind filter narrows the list first.
   const photos = work.filter((w) => w.medium === 'photograph' && w.image_path);
   const writing = work.filter((w) => !(w.medium === 'photograph' && w.image_path));
@@ -475,8 +476,8 @@ export default function MembersApp() {
   useEffect(() => {
     if (!session) return setIsEditor(false);
     supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(({ data }) => {
-      setIsEditor(data?.role === 'editor'); setIsFellow(data?.role === 'fellow');
-      document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = data?.role !== 'editor'));   // the members' bar's Review
+      setIsEditor(seenRole(data?.role) === 'editor'); setIsFellow(seenRole(data?.role) === 'fellow');
+      document.querySelectorAll<HTMLElement>('[data-editor]').forEach((el) => (el.hidden = seenRole(data?.role) !== 'editor'));   // the members' bar's Review
     });
   }, [session]);
 
