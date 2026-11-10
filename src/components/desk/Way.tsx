@@ -117,3 +117,28 @@ export function WayBadge({ member, size = 'sm', tone = 'dark' }: { member: strin
     </a>
   );
 }
+
+/** The Fellowship's part of the side column: their station, and the badges they've earned (in their enamel). */
+export function WaySide({ member }: { member: string }) {
+  const w = useWay(member);
+  if (!w) return null;
+  return (
+    <>
+      <a className="ss-rank ss-way-rank" href="/guild/members/?view=way" style={{ '--ink': '#FFE3A3' } as React.CSSProperties}>
+        <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pewterBadge('shell', 66, true, ['#FFF2C2', '#B07A12']) }} />
+        <span className="ss-rank-t">
+          <span className="lab ss-of">Station {w.current.n} of 7</span>
+          <span className="ss-rank-n">{w.current.name}</span>
+          {w.next && <span className="ss-bar" aria-hidden="true"><i style={{ transform: `scaleX(${Math.max(.04, 1 - w.toNext / (w.next.at - w.current.at))})` }} /></span>}
+          {w.next && <span className="lab mut ss-next">{w.toNext} to {w.next.name}</span>}
+        </span>
+      </a>
+      <div className="ss-vault">
+        <span className="lab ss-k">Your badges <em>{w.count} of {BADGES.length}</em></span>
+        {w.earned.length ? <span className="ss-medals">{w.earned.slice(0, 8).map((b) => <span key={b.id} title={b.name}><Token b={b} lit size={44} /></span>)}</span>
+          : <span className="it mut ss-none">Your first comes with your first saved piece.</span>}
+        <a className="lab ss-link" href="/guild/members/?view=way">Walk The Way →</a>
+      </div>
+    </>
+  );
+}

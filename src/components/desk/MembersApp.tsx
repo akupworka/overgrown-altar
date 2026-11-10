@@ -7,6 +7,7 @@ import { seenRole, viewAs } from '../../lib/supabase';
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
 import { WayPage, WayBadge } from './Way';
+import { SideColumn } from './DeskApp';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
@@ -482,7 +483,7 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <p className="lab mut d-loading">Opening…</p>;
-  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox'].includes(route.view ?? '')))) return <WayPage me={session.user.id} />;
+  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
@@ -493,16 +494,20 @@ export default function MembersApp() {
       <a className="d-link" href="/guild">Apply to the Guild</a>
     </div>
   );
-  if (route.t) return <ForumThread id={route.t} me={session.user.id} isEditor={isEditor} />;
-  if (route.board) return <ForumBoard slug={route.board} me={session.user.id} isEditor={isEditor} />;
-  if (route.view === 'forum') return <ForumIndex me={session.user.id} isEditor={isEditor} />;
-  if (route.view === 'rules') return <ForumRules />;
-  if (route.view === 'mine') return <ForumMine me={session.user.id} />;
-  if (route.view === 'inbox') return <InboxList me={session.user.id} />;
-  if (route.dm) return <InboxThread key={route.dm} id={route.dm} me={session.user.id} isEditor={isEditor} />;
-  if (route.p) return <Reading id={route.p} />;
-  if (route.m) return <MemberPage id={route.m} me={session.user.id} />;
-  return <Directory />;
+  const me = session.user.id;
+  const page = route.t ? <ForumThread id={route.t} me={me} isEditor={isEditor} />
+    : route.board ? <ForumBoard slug={route.board} me={me} isEditor={isEditor} />
+    : route.view === 'forum' ? <ForumIndex me={me} isEditor={isEditor} />
+    : route.view === 'rules' ? <ForumRules />
+    : route.view === 'mine' ? <ForumMine me={me} />
+    : route.view === 'inbox' ? <InboxList me={me} />
+    : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
+    : route.p ? <Reading id={route.p} />
+    : route.m ? <MemberPage id={route.m} me={me} />
+    : <Directory />;
+  // Wide screens: you, your rank and trophies, in a column beside every Guild page (not a conversation, which fills the
+  // screen, and not your own page, which already is you).
+  return route.dm || route.m === me ? page : <SideLayout me={me}>{page}</SideLayout>;
 }
 
 // A Fellowship member's page shows their collection (open to everyone; see /collection/).
@@ -514,5 +519,15 @@ function FellowCollection({ id, first, mine }: { id: string; first: string; mine
         <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
       <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />
     </section>
+  );
+}
+
+/** On wide screens, a page with your column beside it; on narrower ones, the page alone. */
+function SideLayout({ me, children }: { me: string; children: React.ReactNode }) {
+  return (
+    <div className="ss-layout">
+      <aside className="ss-aside" aria-label="You"><SideColumn me={me} /></aside>
+      <div className="ss-main">{children}</div>
+    </div>
   );
 }

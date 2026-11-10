@@ -21,7 +21,7 @@ import { ForumMineLatest, useForumTally } from './Forum';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
 import { FellowHome } from './Fellow';
-import { WayBadge } from './Way';
+import { WaySide } from './Way';
 import { pageList } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
@@ -1644,7 +1644,7 @@ function SeeAs() {
 
 /** The sticky identity column on wide screens: portrait, name, your rank (crest, how far to the next) and your trophies.
  *  (The Fellowship's column shows their station on The Way instead.) */
-function SideStanding({ profile, pieces, fellow }: { profile: Profile; pieces: Piece[]; fellow: boolean }) {
+export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pieces: Piece[]; fellow: boolean }) {
   const tally = useForumTally(profile.id);
   const live = pieces.filter((p) => p.status === 'approved');
   const { current, next, toNext } = prestigeFor(live.length);
@@ -1657,7 +1657,7 @@ function SideStanding({ profile, pieces, fellow }: { profile: Profile; pieces: P
         <span className="ss-name">{profile.display_name}</span>
         <span className="lab ss-role">{profile.role === 'editor' ? 'Editor in Chief' : fellow ? 'The Fellowship' : 'Writer of the Guild'}</span>
       </a>
-      {fellow ? <div className="ss-way"><WayBadge member={profile.id} size="lg" /><a className="lab ss-link" href="/guild/members/?view=way">The Way →</a></div> : <>
+      {fellow ? <WaySide member={profile.id} /> : <>
         <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
           <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: current ? deskCrest(current.level, 74) : '' }} />
           <span className="ss-rank-t">
@@ -1675,5 +1675,26 @@ function SideStanding({ profile, pieces, fellow }: { profile: Profile; pieces: P
         </div>
       </>}
     </div>
+  );
+}
+
+/** The same column, for pages outside the Desk: loads you, then shows SideStanding (and Sign out). */
+export function SideColumn({ me }: { me: string }) {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [pieces, setPieces] = useState<Piece[]>([]);
+  useEffect(() => {
+    Promise.all([
+      supabase.from('profiles').select('*').eq('id', me).maybeSingle(),
+      supabase.from('pieces').select('*').eq('author_id', me).eq('status', 'approved'),
+    ]).then(([{ data: p }, { data: w }]) => { setProfile((p as Profile) ?? null); setPieces(Array.isArray(w) ? (w as Piece[]) : []); });
+  }, [me]);
+  if (!profile) return null;
+  return (
+    <>
+      <SideStanding profile={profile} pieces={pieces} fellow={seenRole(profile.role) === 'fellow'} />
+      <button type="button" className="d-signout" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
+        Sign out</button>
+    </>
   );
 }
