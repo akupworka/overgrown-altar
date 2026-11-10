@@ -21,13 +21,14 @@ export function useCollection(member: string) {
       const order = new Map(ids.map((id: string, i: number) => [id, i]));
       rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
       const authors = [...new Set(rows.map((r) => r.author_id))];
-      const paths = rows.map((r) => r.image_path).filter(Boolean) as string[];
+      const paths = rows.map((r) => r.image_path).filter((x) => x && !x.startsWith('/')) as string[];
       const [{ data: ppl }, signed] = await Promise.all([
         authors.length ? supabase.from('profiles').select('id, display_name').in('id', authors) : Promise.resolve({ data: [] as any[] }),
         paths.length ? supabase.storage.from('guild').createSignedUrls(paths, 3600) : Promise.resolve({ data: [] as any[] }),
       ]);
       const who = new Map((ppl ?? []).map((p: any) => [p.id, p.display_name]));
-      const url = new Map(((signed as any).data ?? []).map((x: any) => [x.path, x.signedUrl]));
+      const url = new Map<string, string>(((signed as any).data ?? []).map((x: any) => [x.path, x.signedUrl]));
+      rows.forEach((r) => { if (r.image_path?.startsWith('/')) url.set(r.image_path, r.image_path); });
       setItems(rows.map((r) => ({ ...r, who: who.get(r.author_id) ?? 'A member', img: r.image_path ? url.get(r.image_path) : undefined })));
     })();
   }, [member]);

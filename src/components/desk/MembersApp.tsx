@@ -88,8 +88,10 @@ function Directory() {
       const { data: ph } = await supabase.from('pieces').select('image_path').eq('status', 'approved').eq('medium', 'photograph').not('image_path', 'is', null).order('published_at', { ascending: false }).limit(4);
       const paths = (Array.isArray(ph) ? ph : []).map((x: any) => x.image_path).filter(Boolean);
       if (paths.length) {
-        const { data: su } = await supabase.storage.from('guild').createSignedUrls(paths, 3600);
-        setShots((su ?? []).map((x) => x.signedUrl).filter(Boolean) as string[]);
+        const store = paths.filter((x: string) => !x.startsWith('/'));
+        const { data: su } = store.length ? await supabase.storage.from('guild').createSignedUrls(store, 3600) : { data: [] as any[] };
+        const m = new Map((su ?? []).map((x: any) => [x.path, x.signedUrl]));
+        setShots(paths.map((x: string) => (x.startsWith('/') ? x : m.get(x))).filter(Boolean) as string[]);
       }
     })();
   }, []);
@@ -248,8 +250,9 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       setWork(pieces);
       const paths = pieces.map((x) => x.image_path).filter(Boolean) as string[];
       if (paths.length) {
-        const { data } = await supabase.storage.from('guild').createSignedUrls(paths, 3600);
-        setThumbs(Object.fromEntries((data ?? []).map((d) => [d.path, d.signedUrl])));
+        const store = paths.filter((x) => !x.startsWith('/'));
+        const { data } = store.length ? await supabase.storage.from('guild').createSignedUrls(store, 3600) : { data: [] as any[] };
+        setThumbs({ ...Object.fromEntries((data ?? []).map((d: any) => [d.path, d.signedUrl])), ...Object.fromEntries(paths.filter((x) => x.startsWith('/')).map((x) => [x, x])) });
       }
     })();
   }, [id]);
@@ -423,7 +426,7 @@ function Reading({ id }: { id: string }) {
       if (!data) return;
       const [{ data: a }, img] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', data.author_id).maybeSingle(),
-        data.image_path ? supabase.storage.from('guild').createSignedUrl(data.image_path, 3600) : Promise.resolve({ data: null }),
+        data.image_path ? (data.image_path.startsWith('/') ? Promise.resolve({ data: { signedUrl: data.image_path } }) : supabase.storage.from('guild').createSignedUrl(data.image_path, 3600)) : Promise.resolve({ data: null }),
       ]);
       setAuthor((a as Profile) ?? null);
       setPhoto((img as any)?.data?.signedUrl ?? '');

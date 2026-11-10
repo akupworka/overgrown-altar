@@ -27,9 +27,10 @@ export function freshSince(built: string, pillar?: string): Promise<FreshPiece[]
     if (pillar) q = q.eq('pillar', pillar);
     const { data } = await q;
     const rows = (Array.isArray(data) ? data : []).filter((r: any) => r && r.slug && r.title) as any[];   // only complete pieces
-    const paths = rows.map((r) => r.image_path).filter(Boolean);
+    const paths = rows.map((r) => r.image_path).filter((x: any) => x && !x.startsWith('/'));
     const signed = paths.length ? (await supabase.storage.from('guild').createSignedUrls(paths, 60 * 60 * 24)).data ?? [] : [];
-    const url = new Map(signed.map((s: any) => [s.path, s.signedUrl]));
+    const url = new Map<string, string>(signed.map((s: any) => [s.path, s.signedUrl]));
+    rows.forEach((r) => { if (r.image_path?.startsWith('/')) url.set(r.image_path, r.image_path); });
     return rows.map((r) => ({
       href: `/guild/${r.slug}/`, title: r.title, standfirst: r.standfirst ?? '', pillar: r.pillar, medium: r.medium,
       kind: MEDIUM_LABEL[r.medium] ?? '', room: PILLAR_LABEL[r.pillar] ?? '',

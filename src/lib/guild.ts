@@ -24,9 +24,11 @@ async function load(): Promise<GuildPiece[]> {
       .select('id, slug, title, standfirst, body, pillar, medium, image_path, image_alt, image_focus, photo_meta, gallery, published_at, author:profiles!pieces_author_id_fkey(id, display_name, craft, bio, portrait_path, website, instagram, public_email, role, created_at)')
       .eq('status', 'approved').not('slug', 'is', null).lte('published_at', new Date().toISOString()).order('published_at', { ascending: false });   // scheduled pieces wait for their time
     if (error) throw error;
-    const paths = (data ?? []).map((p: any) => p.image_path).filter(Boolean);
+    // A path beginning with "/" is one of the site's own photographs (sample pieces); the rest live in storage.
+    const paths = (data ?? []).map((p: any) => p.image_path).filter((x: any) => x && !x.startsWith('/'));
     const signed = paths.length ? (await db.storage.from('guild').createSignedUrls(paths, 60 * 60 * 24 * 365 * 10)).data ?? [] : [];
-    const photo = new Map(signed.map((s: any) => [s.path, s.signedUrl]));
+    const photo = new Map<string, string>(signed.map((s: any) => [s.path, s.signedUrl]));
+    (data ?? []).forEach((p: any) => { if (p.image_path?.startsWith('/')) photo.set(p.image_path, p.image_path); });
     return (data ?? []).map((p: any) => ({
       id: p.id, slug: p.slug, title: p.title, standfirst: p.standfirst, body: p.body, pillar: p.pillar, medium: p.medium,
       image: p.image_path ? photo.get(p.image_path) ?? '' : '', image_alt: p.image_alt, imagePos: p.image_focus || '', photoMeta: p.photo_meta ?? {}, gallery: p.gallery ?? [], published_at: p.published_at,

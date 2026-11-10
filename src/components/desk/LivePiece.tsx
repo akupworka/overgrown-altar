@@ -22,8 +22,8 @@ export default function LivePiece() {
         .eq('slug', m[1]).eq('status', 'approved').maybeSingle();
       if (!data) return;
       if (data.image_path) {
-        const { data: s } = await supabase.storage.from('guild').createSignedUrl(data.image_path, 60 * 60 * 24);
-        setPhoto(s?.signedUrl ?? '');
+        if (data.image_path.startsWith('/')) setPhoto(data.image_path);
+        else { const { data: s } = await supabase.storage.from('guild').createSignedUrl(data.image_path, 60 * 60 * 24); setPhoto(s?.signedUrl ?? ''); }
       }
       setPiece(data);
       document.title = `${data.title} · Overgrown Altar`;

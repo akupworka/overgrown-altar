@@ -776,6 +776,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
 
   useEffect(() => {
     if (!form.image_path) return setPreview(null);
+    if (form.image_path.startsWith('/')) { setPreview(form.image_path); return; }
     supabase.storage.from('guild').createSignedUrl(form.image_path, 3600).then(({ data }) => setPreview(data?.signedUrl ?? null));
   }, [form.image_path]);
 
@@ -1443,6 +1444,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [photo, setPhoto] = useState('');
   useEffect(() => {
     if (!shown.image_path) return setPhoto('');
+    if (shown.image_path.startsWith('/')) { setPhoto(shown.image_path); return; }
     supabase.storage.from('guild').createSignedUrl(shown.image_path, 3600).then(({ data }) => setPhoto(data?.signedUrl ?? ''));
   }, [shown.image_path]);
   async function applyChanges(accept: boolean) {
