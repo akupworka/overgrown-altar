@@ -1823,3 +1823,12 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 @media (min-width: 1101px) {
   .d-room:not(.writing) .d-side, .ss-aside { position: sticky; top: 160px; align-self: start; }
 }
+
+/* Loading a Guild room: the cross and a thin line with a light travelling along it (transform/opacity only) */
+.d-load { min-height: 52vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--ember); }
+.d-load svg { display: block; animation: d-load-breathe 1.8s ease-in-out infinite; }
+.d-load-line { position: relative; width: 72px; height: 1px; background: rgba(255, 227, 163, .18); overflow: hidden; }
+.d-load-line i { position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, #FFE3A3, transparent); animation: d-load-run 1.2s cubic-bezier(.45, 0, .2, 1) infinite; }
+@keyframes d-load-breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes d-load-run { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .d-load svg, .d-load-line i { animation: none; } }

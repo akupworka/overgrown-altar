@@ -14,6 +14,7 @@ import { KINDS } from '../../lib/kinds';
 import { prestigeFor, PRESTIGES, type Prestige } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
 import { seatFor } from '../../lib/seats';
+import { CROSS_PATH } from '../../lib/crossPath';
 import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
@@ -277,7 +278,7 @@ function Desk({ session }: { session: Session }) {
     ['profile', 'My page'],
   ];
 
-  if (!loaded) return <div className="d-loading" aria-busy="true" />;   // a quiet moment, not a flash of words
+  if (!loaded) return <Loading />;
   return (
     <div className={`d-room ${tab === 'write' && !isFellow ? 'writing' : ''}`}>
       <aside className="d-side">
@@ -1601,7 +1602,7 @@ export default function DeskApp() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (!ready) return <div className="d-loading" aria-busy="true" />;
+  if (!ready) return <Loading />;
   if (session && setting) return <SetPassword invited={setting === 'invite'} onDone={() => setSetting(null)} />;
   if (!session) return <>{linkError && <p className="d-photo-msg" role="alert" style={{ maxWidth: 520, margin: '0 auto 20px' }}>{linkError}</p>}<SignIn /></>;
   return <>{linkNote && <p className="d-photo-msg" role="status" style={{ maxWidth: 620, margin: '0 auto 20px' }}>{linkNote}</p>}<Desk session={session} /></>;
@@ -1696,5 +1697,16 @@ export function SideColumn({ me }: { me: string }) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
         Sign out</button>
     </>
+  );
+}
+
+/** While a Guild room opens: the cross, and a thin line with a light travelling along it. (The same look is drawn
+ *  by the page itself before any of this loads; see guild/desk.astro.) */
+export function Loading() {
+  return (
+    <div className="d-load" role="status" aria-label="Loading">
+      <svg viewBox="0 0 603 883" width="22" height="32" aria-hidden="true"><path fill="currentColor" d={CROSS_PATH} /></svg>
+      <span className="d-load-line" aria-hidden="true"><i /></span>
+    </div>
   );
 }
