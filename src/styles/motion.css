@@ -60,3 +60,10 @@
   .glow { animation: candle 8s ease-in-out infinite; }
   @keyframes candle { 0%, 100% { opacity: .8; } 50% { opacity: 1; } }
 }
+/* Between pages, the header and the members' bars stay put; only the room beneath them changes */
+.site-header { view-transition-name: site-header; }
+[data-inner] { view-transition-name: guild-bar; }
+.gbar.d-tabbar { view-transition-name: phone-bar; }
+.desk-memory { view-transition-name: desk-memory; }
+::view-transition-old(site-header), ::view-transition-new(site-header), ::view-transition-old(guild-bar), ::view-transition-new(guild-bar),
+::view-transition-old(phone-bar), ::view-transition-new(phone-bar), ::view-transition-old(desk-memory), ::view-transition-new(desk-memory) { animation: none; }

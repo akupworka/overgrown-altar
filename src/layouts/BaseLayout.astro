@@ -46,6 +46,8 @@ const imageUrl = new URL(image, site).toString();
     <meta name="theme-color" content="#060806" />
     <!-- Added to a phone's home screen, the site opens full-screen like an app -->
     <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Browsers that can (Chrome) get the Desk and the Guild's pages ready the moment the pointer heads for them -->
+    <script type="speculationrules" is:inline>{"prerender":[{"where":{"href_matches":["/guild/desk/*","/guild/members/*"]},"eagerness":"moderate"}]}</script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />

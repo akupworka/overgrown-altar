@@ -277,7 +277,7 @@ function Desk({ session }: { session: Session }) {
     ['profile', 'My page'],
   ];
 
-  if (!loaded) return <p className="lab mut d-loading">Opening the desk…</p>;
+  if (!loaded) return <div className="d-loading" aria-busy="true" />;   // a quiet moment, not a flash of words
   return (
     <div className={`d-room ${tab === 'write' && !isFellow ? 'writing' : ''}`}>
       <aside className="d-side">
@@ -1601,7 +1601,7 @@ export default function DeskApp() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (!ready) return <p className="lab mut d-loading">Opening the desk…</p>;
+  if (!ready) return <div className="d-loading" aria-busy="true" />;
   if (session && setting) return <SetPassword invited={setting === 'invite'} onDone={() => setSetting(null)} />;
   if (!session) return <>{linkError && <p className="d-photo-msg" role="alert" style={{ maxWidth: 520, margin: '0 auto 20px' }}>{linkError}</p>}<SignIn /></>;
   return <>{linkNote && <p className="d-photo-msg" role="status" style={{ maxWidth: 620, margin: '0 auto 20px' }}>{linkNote}</p>}<Desk session={session} /></>;

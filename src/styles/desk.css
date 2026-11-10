@@ -1819,3 +1819,7 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   .ss-main { min-width: 0; display: flex; flex-direction: column; align-items: center; }
   .ss-main > * { max-width: 100%; }
 }
+/* One resting place for your column on every page: just below the Guild bar */
+@media (min-width: 1101px) {
+  .d-room:not(.writing) .d-side, .ss-aside { position: sticky; top: 160px; align-self: start; }
+}
