@@ -8,6 +8,7 @@ import { ago } from './Forum';
 import '../../styles/inbox.css';
 
 interface Thread { id: string; a: string; b: string; last_at: string; last_body: string; last_from: string | null; a_read_at: string; b_read_at: string; a_cleared_at: string; b_cleared_at: string }
+interface Notice { id: string; writer_id: string; piece_id: string; created_at: string; read_at: string | null; title?: string; medium?: string }
 interface Message { id: string; thread_id: string; author_id: string; body: string; created_at: string }
 type People = Record<string, Pick<Profile, 'id' | 'display_name' | 'portrait_path' | 'role'>>;
 
@@ -51,6 +52,7 @@ export async function refreshInboxDot() {
 // ---------------------------------------------------------------- the list
 export function InboxList({ me }: { me: string }) {
   const [threads, setThreads] = useState<Thread[] | null>(null);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [people, setPeople] = useState<People>({});
   const [members, setMembers] = useState<People | null>(null);
   const [picking, setPicking] = useState(false);
@@ -58,13 +60,23 @@ export function InboxList({ me }: { me: string }) {
   const load = useCallback(async () => {
     const { data } = await supabase.from('dm_threads').select('*').or(`a.eq.${me},b.eq.${me}`).order('last_at', { ascending: false });
     const rows = (Array.isArray(data) ? data : []) as Thread[];
+    // Notices: a writer you follow published something. One line each; they can't be answered.
+    const { data: nt } = await supabase.from('inbox_notices').select('id, writer_id, piece_id, created_at, read_at').eq('member_id', me).order('created_at', { ascending: false });
+    const ns = (Array.isArray(nt) ? nt : []) as Notice[];
+    if (ns.length) {
+      const { data: pc } = await supabase.from('pieces').select('id, title, medium').in('id', ns.map((n) => n.piece_id));
+      const by = new Map((pc ?? []).map((x: any) => [x.id, x]));
+      ns.forEach((n) => { const x = by.get(n.piece_id); n.title = x?.title; n.medium = x?.medium; });
+    }
+    setPeople(await loadPeople([...rows.map((t) => other(t, me)), ...ns.map((n) => n.writer_id)]));
+    setNotices(ns.filter((n) => n.title));
     setThreads(rows.filter((t) => t.last_from && t.last_at > cleared(t, me)));   // shows once someone has written, and not since cleared
-    setPeople(await loadPeople(rows.map((t) => other(t, me))));
     refreshInboxDot();
   }, [me]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
-    const ch = supabase.channel('inbox-list').on('postgres_changes', { event: '*', schema: 'public', table: 'dm_threads' }, () => load()).subscribe();
+    const ch = supabase.channel('inbox-list').on('postgres_changes', { event: '*', schema: 'public', table: 'dm_threads' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inbox_notices' }, () => load()).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [load]);
   async function openPicker() {
@@ -74,7 +86,12 @@ export function InboxList({ me }: { me: string }) {
       setMembers(Object.fromEntries((Array.isArray(data) ? data : []).filter((p: any) => p.id !== me).map((p: any) => [p.id, p])));
     }
   }
-  const fresh = (threads ?? []).filter((t) => unread(t, me)).length;
+  const fresh = (threads ?? []).filter((t) => unread(t, me)).length + notices.filter((n) => !n.read_at).length;
+  // Conversations and notices together, newest first
+  const rowsAll: ({ k: 'dm'; at: string; t: Thread } | { k: 'nt'; at: string; n: Notice })[] = [
+    ...(threads ?? []).map((t) => ({ k: 'dm' as const, at: t.last_at, t })),
+    ...notices.map((n) => ({ k: 'nt' as const, at: n.created_at, n })),
+  ].sort((a, b) => (a.at < b.at ? 1 : -1));
   const usage = useUsage(threads);
   const full = !!usage && usage.used >= usage.cap;
   const found = Object.values(members ?? {}).filter((p) => !q.trim() || p.display_name.toLowerCase().includes(q.trim().toLowerCase()));
@@ -88,7 +105,7 @@ export function InboxList({ me }: { me: string }) {
           <button type="button" className="ib-new" onClick={openPicker}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
             {picking ? 'Never mind' : 'New message'}</button>
-          {threads && <span className="lab mut">{threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}{fresh ? ` · ${fresh} new` : ''}</span>}
+          {threads && <span className="lab mut">{threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}{notices.length ? ` · ${notices.length} ${notices.length === 1 ? 'notice' : 'notices'}` : ''}{fresh ? ` · ${fresh} new` : ''}</span>}
         </div>
         <Gauge u={usage} />
       </header>
@@ -111,7 +128,7 @@ export function InboxList({ me }: { me: string }) {
           </ul>
         </section>
       )}
-      {!threads ? <p className="lab mut">Opening your inbox…</p> : threads.length === 0 && !picking ? (
+      {!threads ? <p className="lab mut">Opening your inbox…</p> : rowsAll.length === 0 && !picking ? (
         <div className="ib-empty">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
           <p className="it">No messages yet.</p>
@@ -119,7 +136,31 @@ export function InboxList({ me }: { me: string }) {
         </div>
       ) : (
         <ol className="ib-list">
-          {threads.map((t) => {
+          {rowsAll.map((r) => {
+            if (r.k === 'nt') {
+              const n = r.n, w = people[n.writer_id], isNew = !n.read_at;
+              return (
+                <li key={n.id} className="ib-notice">
+                  <a href={`/guild/members/?p=${n.piece_id}`} className={`ib-row${isNew ? ' new' : ''}`} onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey) return; e.preventDefault();
+                    if (isNew) supabase.rpc('notice_read', { n: n.id }).then(() => refreshInboxDot());
+                    go(`/guild/members/?p=${n.piece_id}`);
+                  }}>
+                    <Initials name={w?.display_name || 'A member'} size={46} src={portraitUrl(w?.portrait_path)} />
+                    <span className="ib-row-text">
+                      <span className="ib-row-top"><span className="ib-row-name">{w?.display_name || 'A member'}</span><span className="lab mut ib-row-when">{ago(n.created_at)}</span></span>
+                      <span className="ib-row-last"><span className="lab ib-notice-k">{n.medium === 'photograph' ? 'New photograph' : 'New piece'}</span> {n.title}</span>
+                    </span>
+                    {isNew && <span className="ib-row-dot" aria-label="New" />}
+                  </a>
+                  <button type="button" className="ib-row-del" aria-label={`Remove the notice about ${n.title}`} onClick={async () => {
+                    setNotices((ns) => ns.filter((x) => x.id !== n.id));
+                    await supabase.from('inbox_notices').delete().eq('id', n.id); refreshInboxDot();
+                  }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3" /></svg></button>
+                </li>
+              );
+            }
+            const t = r.t;
             const o = people[other(t, me)];
             const isNew = unread(t, me);
             return (

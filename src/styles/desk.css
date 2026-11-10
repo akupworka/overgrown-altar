@@ -1784,6 +1784,9 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 
 /* Your column beside every Guild page on wide screens (MembersApp's SideLayout) */
 .ss-aside { display: none; }
+/* The Guild's two halves fill the screen, never wider (phones were pushed off the left edge) */
+.guild-side, .ss-layout, .ss-main { width: 100%; min-width: 0; }
+.ss-layout { margin-inline: auto; }
 @media (min-width: 1101px) {
   .ss-layout { width: 100%; max-width: 1240px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; align-items: start; text-align: left; }
   .ss-aside { display: block; position: sticky; top: 150px; }
@@ -1883,10 +1886,7 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .s-withdrawn { color: #FF9AA8; }
 
 /* Following: the writers you follow, and the counts under a member's name */
-.m-follows { display: flex; gap: 18px; justify-content: center; font-size: 9.5px; color: var(--muted-dark); }
-.m-follows b { font-family: var(--serif); font-weight: 400; font-size: 17px; letter-spacing: 0; color: var(--bone); margin-right: 4px; }
-.m-follows-link { color: var(--ember); }
-.m-follows-link b { color: var(--ember); }
+.m-follows-link { font-size: 9.5px; color: var(--ember); }
 .d-tally-link { color: inherit; }
 .d-tally-link:hover { color: var(--ember); }
 .fw { width: 100%; max-width: 880px; display: flex; flex-direction: column; gap: 28px; }

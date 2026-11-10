@@ -284,7 +284,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
-        <FollowCounts id={person.id} mine={person.id === me} />
+        {person.id === me && <Link to="/guild/members/?view=following" className="lab m-follows-link">Writers you follow →</Link>}
         {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
         {(site || handle || person.public_email) && (
           <span className="m-pills">
@@ -512,9 +512,9 @@ export default function MembersApp() {
     : route.p ? <Reading id={route.p} />
     : route.m ? <MemberPage id={route.m} me={me} />
     : <Directory />;
-  // Wide screens: you, your rank and trophies, in a column beside every Guild page (not a conversation, which fills the
-  // screen, and not your own page, which already is you).
-  return route.dm || route.m === me ? page : <SideLayout me={me}>{page}</SideLayout>;
+  // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a conversation, a member's page
+  // or a piece, which have the screen to themselves).
+  return route.dm || route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
 }
 
 // A Fellowship member's page shows their collection (open to everyone; see /collection/).
@@ -536,24 +536,6 @@ function SideLayout({ me, children }: { me: string; children: React.ReactNode })
       <aside className="ss-aside" aria-label="You"><SideColumn me={me} /></aside>
       <div className="ss-main">{children}</div>
     </div>
-  );
-}
-
-/** Followers and following, under a member's name. Your own "following" opens the list of everyone you follow. */
-function FollowCounts({ id, mine }: { id: string; mine: boolean }) {
-  const [n, setN] = useState<{ ers: number; ing: number } | null>(null);
-  useEffect(() => {
-    Promise.all([
-      supabase.from('follows').select('follower').eq('followed', id),
-      supabase.from('follows').select('followed').eq('follower', id),
-    ]).then(([a, b]) => setN({ ers: (a.data ?? []).length, ing: (b.data ?? []).length }));
-  }, [id]);
-  if (!n) return null;
-  return (
-    <span className="lab m-follows">
-      <span><b>{n.ers}</b> {n.ers === 1 ? 'follower' : 'followers'}</span>
-      {mine ? <Link to="/guild/members/?view=following" className="m-follows-link"><b>{n.ing}</b> following →</Link> : <span><b>{n.ing}</b> following</span>}
-    </span>
   );
 }
 

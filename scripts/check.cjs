@@ -94,6 +94,7 @@ if (flag('heavy')) {
 }
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
+  inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null }],
   forum_tallies: [{ member_id: ME, posts: flag('heavy') ? 1400 : 14, threads: flag('heavy') ? 160 : 3, best_thread: flag('heavy') ? 200 : 6, prayer: 1, boards: 2 }] };
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.

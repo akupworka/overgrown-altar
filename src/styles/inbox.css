@@ -168,3 +168,6 @@ html.ib-open .desk-in { padding: 0 !important; }
 /* Long names in the Inbox list stay on one line; the time keeps its place */
 .ib-row-name { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ib-row-when { flex: none; }
+
+/* A notice: a writer you follow published something (one line, no reply) */
+.ib-notice-k { font-size: 9px; color: var(--brass); margin-right: 6px; vertical-align: 2px; }
