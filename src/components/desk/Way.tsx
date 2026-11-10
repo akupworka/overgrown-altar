@@ -47,7 +47,6 @@ function Path({ at }: { at: number }) {
 /** The Way, in full: your station, the path, and every badge (earned bright; still to come in shadow, with how far along). */
 export function WayPage({ me }: { me: string }) {
   const w = useWay(me);
-  const [open, setOpen] = useState<string | null>(null);
   if (!w) return <p className="lab mut d-loading">Walking out to the road…</p>;
   const groups = [...new Set(BADGES.map((b) => b.group))];
   return (
@@ -58,23 +57,24 @@ export function WayPage({ me }: { me: string }) {
         <p className="it wy-line">{w.current.line}</p>
         <span className="lab wy-count">Station {w.current.n} of 7 · {w.count} of {BADGES.length} badges{w.next ? ` · ${w.toNext} to ${w.next.name}` : ''}</span>
         <Path at={w.current.n} />
-        <p className="it mut wy-about">Medieval pilgrims gathered a small pewter badge at every shrine on the road. Yours are gathered by keeping, reading, encouraging and keeping company. Tap any badge to see what it asks.</p>
+        <p className="it mut wy-about">Medieval pilgrims gathered a small pewter badge at every shrine on the road. Yours are gathered by keeping, reading, encouraging and keeping company.</p>
       </header>
       {groups.map((g) => (
         <section key={g} className="wy-group">
           <h2 className="eb wy-gh">{g}</h2>
-          <ol className="wy-badges">
+          <ol className="wy-list">
             {BADGES.filter((b) => b.group === g).map((b) => {
               const lit = w.earned.includes(b);
               const [have, need] = b.progress ? b.progress(w.ctx) : [0, 0];
               return (
-                <li key={b.id} className={lit ? 'lit' : ''} style={{ '--en': enamelOf(b)[0], '--en2': enamelOf(b)[1] } as React.CSSProperties}>
-                  <button type="button" className="wy-b" aria-expanded={open === b.id} onClick={() => setOpen(open === b.id ? null : b.id)}>
-                    <Token b={b} lit={lit} size={76} />
-                    <span className="wy-bn">{b.name}</span>
-                    {!lit && need > 0 && <span className="wy-bar" aria-hidden="true"><i style={{ transform: `scaleX(${have / need})` }} /></span>}
-                  </button>
-                  {open === b.id && <p className="it wy-note">{b.note}{!lit && need > 1 ? ` (${have} of ${need})` : ''}</p>}
+                <li key={b.id} className={`wy-row${lit ? ' lit' : ''}`} style={{ '--en': enamelOf(b)[0] } as React.CSSProperties}>
+                  <Token b={b} lit={lit} size={56} />
+                  <span className="wy-row-t">
+                    <span className="wy-row-n">{b.name}</span>
+                    <span className="it wy-row-note">{b.note}</span>
+                    {lit ? <span className="lab wy-row-got">Earned</span>
+                      : need > 0 && <span className="wy-row-prog"><span className="wy-bar" aria-hidden="true"><i style={{ transform: `scaleX(${have / need})` }} /></span><span className="lab">{have} of {need}</span></span>}
+                  </span>
                 </li>
               );
             })}
