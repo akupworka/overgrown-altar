@@ -111,8 +111,8 @@ import '../styles/guild.css';
   .jn-door img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transform: scale(1.02); transition: transform 1.6s var(--ease, ease), opacity .6s; }
   .jn-f img { object-position: center 30%; }
   .jn-g img { object-position: center 40%; }
-  .jn-veil { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .35) 35%, rgba(6, 8, 6, .92) 100%); transition: opacity .6s; }
-  .jn-g .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .6) 0%, rgba(6, 8, 6, .4) 35%, rgba(6, 8, 6, .94) 100%); }
+  .jn-veil { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(6, 8, 6, .5) 0%, rgba(6, 8, 6, .25) 28%, rgba(6, 8, 6, .7) 52%, rgba(6, 8, 6, .95) 72%, #060806 100%); transition: opacity .6s; }
+  .jn-g .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .3) 28%, rgba(6, 8, 6, .72) 52%, rgba(6, 8, 6, .95) 72%, #060806 100%); }
   .jn-door + .jn-door { box-shadow: inset 1px 0 0 rgba(255, 227, 163, .25); }
   .jn-in { display: flex; flex-direction: column; gap: 14px; padding: 0 56px 72px; max-width: 560px; transition: transform .7s var(--ease, ease); }
   .jn-t { font-family: var(--serif); font-weight: 400; font-size: 64px; line-height: 1; }
@@ -129,7 +129,15 @@ import '../styles/guild.css';
   .jn-door:hover .jn-go i { transform: translateX(4px); }
   .jn-f:hover .jn-go { background: var(--ember); }
   .jn-g:hover .jn-go { background: rgba(255, 227, 163, .1); }
-  .jn-door.other img { opacity: .45; }
+  /* The half you're not pointing at (or didn't choose) steps back: grey and dim */
+  .jn-door img { transition: transform 1.6s var(--ease, ease), filter .6s, opacity .6s; }
+  .jn-door .jn-in { transition: transform .7s var(--ease, ease), opacity .6s; }
+  @media (hover: hover) {
+    .jn:has(.jn-door:hover) .jn-door:not(:hover) img { filter: grayscale(1) brightness(.55); }
+    .jn:has(.jn-door:hover) .jn-door:not(:hover) .jn-in { opacity: .55; }
+  }
+  .jn-door.other img { filter: grayscale(1) brightness(.55); }
+  .jn-door.other .jn-in { opacity: .55; }
   .jn-door.chosen .jn-go { box-shadow: 0 0 0 1px var(--ember), 0 10px 30px -12px rgba(255, 214, 140, .5); }
   .jn-or { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     background: #0B0D0A; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); font-size: 10px; pointer-events: none; }
@@ -161,7 +169,7 @@ import '../styles/guild.css';
     .jn { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; min-height: calc(100svh - 0px); }
     .jn-door + .jn-door { box-shadow: inset 0 1px 0 rgba(255, 227, 163, .25); }
     .jn-door { min-height: 50svh; }
-    .jn-f .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .62) 40%, rgba(6, 8, 6, .9) 100%); }
+    .jn-f .jn-veil { background: linear-gradient(180deg, rgba(6, 8, 6, .55) 0%, rgba(6, 8, 6, .7) 40%, rgba(6, 8, 6, .95) 75%, #060806 100%); }
     .jn-in { padding: 90px 22px 30px; gap: 8px; }
     .jn-g .jn-in { padding-top: 46px; }
     .jn-t { font-size: 40px; }
