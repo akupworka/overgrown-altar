@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 // The ten prestiges, as a window of stained glass.
 //   Where you stand: your rank inside a ring that fills toward the next, in that rank's own glass.
 //   The climb: ten lancets, rising from Inkling to Seraph (side by side on a computer, a vertical climb on a phone);
@@ -21,7 +22,7 @@ const crestCache = new Map<string, string>();
 function Crest({ lv, size, className = '', ...opts }: { lv: number; size: number; className?: string } & CrestOpts) {
   const key = `${lv}-${size}-${opts.locked ? 'l' : ''}${opts.glow ? 'g' : ''}`;
   if (!crestCache.has(key)) crestCache.set(key, crestSvg(lv, size, opts));
-  return <span className={`pzx-crest ${className}`} dangerouslySetInnerHTML={{ __html: crestCache.get(key)! }} />;
+  return <span className={`pzx-crest ${className}`} dangerouslySetInnerHTML={{ __html: useIds(crestCache.get(key)!) }} />;
 }
 import '../../styles/prestige-page.css';
 
@@ -146,7 +147,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
         const won = finestFirst(st.filter((x) => x.earned));
         return (
           <section className="pzv-tro">
-            <div className="pzv-tro-medals" aria-hidden="true">{won.slice(0, 4).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: trophySvg(t, 56, tier) }} />)}</div>
+            <div className="pzv-tro-medals" aria-hidden="true">{won.slice(0, 4).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 56, tier)) }} />)}</div>
             <div className="pzv-tro-text"><span className="lab pzv-k">Beside the ranks</span><span className="pzv-tro-n"><b>{won.length}</b> of {TROPHIES.length} trophies won</span></div>
             {link('/guild/members/?view=trophies', 'pzv-cta', <>See the trophies <span aria-hidden="true">→</span></>)}
           </section>

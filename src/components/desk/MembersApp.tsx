@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 // The Guild's members area, for signed-in members:
 //   /guild/members/            the directory (everyone listed, alphabetically)
 //   /guild/members/?m=<id>     a member's page: portrait, craft, bio, links, collected work
@@ -133,10 +134,10 @@ function Directory() {
             return (
               <Link className="g-room g-room-small g-tile g-tile-pz" to="/guild/members/?view=prestige">
                 <span className="g-pz-glow" aria-hidden="true" style={{ '--ink': ink } as any} />
-                <span className="g-pz-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: crestSvg(r.current?.level ?? 1, 96, r.current ? { glow: true } : { locked: true }) }} />
+                <span className="g-pz-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(crestSvg(r.current?.level ?? 1, 96, r.current ? { glow: true } : { locked: true })) }} />
                 <span className="g-tile-text"><span className="g-tile-name">The Prestiges</span>
                   <span className="g-pz-rank" style={{ color: ink }}>{r.current ? r.current.name : 'Not yet ranked'}</span>
-                  {won.length > 0 && <span className="g-pz-medals" aria-hidden="true">{won.slice(0, 3).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: trophySvg(t, 30, tier) }} />)}{won.length > 3 && <span className="g-pz-more">+{won.length - 3}</span>}</span>}
+                  {won.length > 0 && <span className="g-pz-medals" aria-hidden="true">{won.slice(0, 3).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 30, tier)) }} />)}{won.length > 3 && <span className="g-pz-more">+{won.length - 3}</span>}</span>}
                 </span>
                 <span className="g-tile-go" aria-hidden="true">→</span>
               </Link>

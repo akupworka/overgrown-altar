@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 // The Guild Desk: where members (and the editor) sign in, write, and submit pieces.
 // Everything a member can see or change is enforced by the database's rules in Supabase;
 // this screen only makes it pleasant to use.
@@ -370,7 +371,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
               <circle cx="75" cy="75" r={R} className="d-pz-track" />
               <circle cx="75" cy="75" r={R} className="d-pz-fill" stroke="url(#d-pz-g)" strokeDasharray={`${C * frac} ${C}`} />
             </svg>
-            {current ? <span className="d-pz-crest" dangerouslySetInnerHTML={{ __html: deskCrest(current.level, 120) }} /> : <span className="d-pz-dot">·</span>}
+            {current ? <span className="d-pz-crest" dangerouslySetInnerHTML={{ __html: useIds(deskCrest(current.level, 120)) }} /> : <span className="d-pz-dot">·</span>}
           </div>
           <div className="d-pz-text">
             {current ? <>
@@ -383,7 +384,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
             </>}
             {next && (
               <span className="d-pz-next">
-                <span className="d-pz-next-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: deskCrest(next.level, 40) }} />
+                <span className="d-pz-next-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(deskCrest(next.level, 40)) }} />
                 <span><b>{toNext}</b> more to <b className="d-pz-next-name" style={{ color: inkOf(next) }}>{next.name}</b></span>
               </span>
             )}
@@ -402,7 +403,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
         {earned.length ? (
           <div className="d-standing-medals">
             {earned.slice(0, 3).map(({ trophy: t, tier }) => (
-              <span key={t.id} className="d-standing-medal" title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: trophySvg(t, 60, tier) }} />
+              <span key={t.id} className="d-standing-medal" title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 60, tier)) }} />
             ))}
           </div>
         ) : <span className="it d-standing-none">Trophies gather here as your work is published.</span>}
@@ -1666,7 +1667,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
       </a>
       {fellow ? <WaySide member={profile.id} /> : <>
         <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
-          <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: current ? deskCrest(current.level, 74) : '' }} />
+          <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(current ? deskCrest(current.level, 74) : '') }} />
           <span className="ss-rank-t">
             <span className="lab ss-of">{current ? `Rank ${current.numeral} of X` : 'Not yet ranked'}</span>
             <span className="ss-rank-n">{current?.name ?? 'Your first piece'}</span>
@@ -1676,7 +1677,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
         </a>
         <div className="ss-vault">
           <span className="lab ss-k">Your trophies <em>{earned.length} of {TROPHIES.length}</em></span>
-          {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: trophySvg(t, 44, tier) }} />)}</span>
+          {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 44, tier)) }} />)}</span>
             : <span className="it mut ss-none">They gather as your work is published.</span>}
           <a className="lab ss-link" href={`/guild/members/?m=${profile.id}#vault`}>Open your vault →</a>
         </div>

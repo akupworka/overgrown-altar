@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 // The prestige badge for the Desk and the members' pages (same look as components/PrestigeBadge.astro).
 import { prestigeFor } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
@@ -10,7 +11,7 @@ export function PrestigeBadge({ published, tone = 'dark', size = 'sm', link = tr
   return (
     <Tag href={link ? '/guild/members/?view=prestige' : undefined} className={`pr${tone === 'paper' ? ' pr-paper' : ''}${size === 'lg' ? ' pr-lg' : ''}`} data-level={p.level}
       style={p.level < 9 ? ({ '--c': p.color } as React.CSSProperties) : undefined} title={`${p.name}: ${p.note}`}>
-      <span className="pr-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: crestSvg(p.level, size === 'lg' ? 30 : 24, { mini: true }) }} /><span className="pr-n">{p.numeral}</span>{p.name}
+      <span className="pr-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(crestSvg(p.level, size === 'lg' ? 30 : 24, { mini: true })) }} /><span className="pr-n">{p.numeral}</span>{p.name}
     </Tag>
   );
 }

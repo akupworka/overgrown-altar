@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 import type React from 'react';
 // The Fellowship's room: The Way (seven stations) and its pilgrim badges. See lib/way.ts.
 import { useEffect, useState } from 'react';
@@ -28,7 +29,7 @@ export function useWay(member: string | null) {
   return { ctx, ...wayFor(ctx) };
 }
 
-const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" style={{ '--en': enamelOf(b)[0] } as React.CSSProperties} dangerouslySetInnerHTML={{ __html: pewterBadge(b.glyph, size, lit, enamelOf(b)) }} />;
+const Token = ({ b, lit, size = 64 }: { b: Badge; lit: boolean; size?: number }) => <span className="wy-token" style={{ '--en': enamelOf(b)[0] } as React.CSSProperties} dangerouslySetInnerHTML={{ __html: useIds(pewterBadge(b.glyph, size, lit, enamelOf(b))) }} />;
 
 /** The path of seven stations, with where you stand lit in silver. */
 function Path({ at }: { at: number }) {
@@ -112,7 +113,7 @@ export function WayBadge({ member, size = 'sm', tone = 'dark' }: { member: strin
   const s = size === 'lg' ? 26 : 20;
   return (
     <a href="/guild/members/?view=way" className={`wy-pill${size === 'lg' ? ' wy-pill-lg' : ''}${tone === 'paper' ? ' wy-pill-paper' : ''}`} title={`${w.current.name}: ${w.current.line}`}>
-      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: pewterBadge('shell', s, true) }} />
+      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(pewterBadge('shell', s, true)) }} />
       <span className="wy-pill-n">{['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][w.current.n - 1]}</span>{w.current.name}
     </a>
   );
@@ -125,7 +126,7 @@ export function WaySide({ member }: { member: string }) {
   return (
     <>
       <a className="ss-rank ss-way-rank" href="/guild/members/?view=way" style={{ '--ink': '#FFE3A3' } as React.CSSProperties}>
-        <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pewterBadge('shell', 66, true, ['#FFF2C2', '#B07A12']) }} />
+        <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(pewterBadge('shell', 66, true, ['#FFF2C2', '#B07A12'])) }} />
         <span className="ss-rank-t">
           <span className="lab ss-of">Station {w.current.n} of 7</span>
           <span className="ss-rank-n">{w.current.name}</span>

@@ -1,3 +1,4 @@
+import { uniqueIds as useIds } from '../../lib/svgIds';
 // The Vault for the members' area (same look as components/TrophyCase.astro).
 // On your own page it adds a fold-out of the trophies still to earn.
 import { TROPHIES, TIER_AT, trophiesFor, finestFirst, trophySvg, TIER_LABEL, unitFor, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
@@ -13,7 +14,7 @@ function Medal({ s, locked, size = 72, big = false, onOpen }: { s: Standing; loc
     <figure className={`tr${big ? ' tr-big' : ''}${locked ? ' locked' : ''}${onOpen ? ' tr-tap' : ''}`} data-tier={tier}
       {...(onOpen ? { role: 'button', tabIndex: 0, 'aria-label': `${t.name}: how to earn it`, onClick: () => onOpen(s), onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(s); } } } : { title: t.note })}>
       {big && <span className="tr-light" aria-hidden="true" />}
-      <span dangerouslySetInnerHTML={{ __html: trophySvg(t, size, tier) }} />
+      <span dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, size, tier)) }} />
       <span className="tr-name">{t.name}</span>
       <span className="tr-tier">{TIER_LABEL[tier]}{t.count && !locked ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
       {t.count && !locked && next
@@ -34,7 +35,7 @@ export function TrophyCard({ s, onClose }: { s: Standing; onClose: () => void })
     <div className="trc-veil" onClick={onClose}>
       <div className="trc" role="dialog" aria-modal="true" aria-label={t.name} data-tier={tier} onClick={(e) => e.stopPropagation()}>
         <button type="button" className="trc-x" onClick={onClose} aria-label="Close">×</button>
-        <span className={`trc-medal${earned ? '' : ' locked'}`} dangerouslySetInnerHTML={{ __html: trophySvg(t, 110, earned ? tier : 'bronze') }} />
+        <span className={`trc-medal${earned ? '' : ' locked'}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 110, earned ? tier : 'bronze')) }} />
         <span className="lab trc-state">{earned ? `${TIER_LABEL[tier]} · earned` : 'Still to earn'}</span>
         <h3 className="trc-name">{t.name}</h3>
         <p className="it trc-note">{t.note}</p>
@@ -127,7 +128,7 @@ export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?
                 const nextUp = !!st && !reached && st.next?.tier === tier;
                 return (
                 <figure key={tier} className={`tr tr-mini${st ? (reached ? ' got' : nextUp ? ' next' : ' ahead') : ''}`} data-tier={tier}>
-                  <span dangerouslySetInnerHTML={{ __html: trophySvg(t, 58, tier) }} />
+                  <span dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 58, tier)) }} />
                   <span className="tr-tier"><span className="tr-mini-name">{TIER_LABEL[tier]} </span>{(t.at ?? TIER_AT)[tier]}</span>
                 </figure>
                 );
@@ -144,7 +145,7 @@ export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?
       <div className="tc-grid">
         {once.map((t) => (
           <figure key={t.id} className={`tr${standings ? ' tr-tap' : ''}${mine(t) && !mine(t)!.earned ? ' locked' : ''}`} data-tier={t.tier} {...(standings ? tap(t) : { title: t.note })}>
-            <span dangerouslySetInnerHTML={{ __html: trophySvg(t) }} />
+            <span dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t)) }} />
             <span className="tr-name">{t.name}</span>
             <span className="tr-tier">{TIER_LABEL[t.tier]}</span>
             <span className="tr-note">{t.note}</span>
