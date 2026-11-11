@@ -75,7 +75,6 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <div class="inner-rooms">
         <a href="/guild/desk/" data-match="desk"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>My Desk<span class="inner-dot" data-gbar-dot hidden></span></a>
         <a href="/guild/members/?view=forum" data-match="forum" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>The Forum</a>
-        <a href="/guild/members/?view=chamber" data-match="chamber" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V10a7 7 0 0 1 14 0v10M3 20h18M12 3v17" /></svg>Chamber<span class="inner-dot" data-chamber-dot hidden></span></a>
         <a href="/guild/members/" data-match="members" data-spa class="for-guild"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>The Guild</a>
         <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>Inbox<span class="inner-n" data-inbox-dot hidden></span></a>
         <a href="/guild/members/?view=library" data-match="library" class="for-guild" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10 4h3v16h-3z" /><path d="m15.5 6 2.8-.8 4 14.3-2.8.8z" /></svg>Library</a>
@@ -84,6 +83,11 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <a href="/search/" data-match="explore" class="inner-explore"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4-4" /></svg>Explore</a>
         <a href="/guild/members/" data-match="me" data-spa data-my-page class="inner-me" aria-hidden="true" tabindex="-1"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
       </div>
+      <!-- The Disputation Chamber: its own button at the far end, counting down to Saturday (or lit while the doors are open) -->
+      <a href="/guild/members/?view=chamber" data-match="chamber" data-spa class="inner-chamber" data-chamber>
+        <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 45V22C5 12 14 4 14 4s9 8 9 18v23z" fill="#F0C56E" /><path d="M25 45V22c0-10 9-18 9-18s9 8 9 18v23z" fill="#8DB3EA" /></svg>
+        <span>Chamber</span><span class="inner-chamber-t" data-chamber-t></span>
+      </a>
     </nav>
   )}
 </header>
@@ -123,6 +127,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
           document.querySelectorAll<HTMLElement>('[data-inbox-dot]').forEach((d) => { d.hidden = n === 0; d.textContent = n > 9 ? '9+' : String(n); });
         });
         dot();
+        // The Chamber's hours, for its button in the members' bar (asked once per visit to a page; the Chamber's own pages ask too).
+        supabase.rpc('chamber').then(({ data }) => { if (data && typeof data === 'object') dispatchEvent(new CustomEvent('oa-chamber-hours', { detail: data })); });
         supabase.channel('inbox-dot').on('postgres_changes', { event: '*', schema: 'public', table: 'dm_threads' }, () => dot()).subscribe();
         room.on('presence', { event: 'sync' }, () => {
           const count = Object.keys(room.presenceState()).length;
@@ -176,8 +182,25 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       if (uid) document.querySelectorAll<HTMLAnchorElement>('[data-my-page]').forEach((a) => (a.href = `/guild/members/?m=${uid}`));
       // The editor's gold dot on Desk: pieces waiting for review, or new arrivals (the Desk keeps this count fresh).
       if (me.editor && Number(localStorage.getItem('oa_desk_waiting') || 0) > 0) document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = false));
-      // The Disputation Chamber is open all Saturday by New York time: a gold dot on its name that day.
-      if (new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(new Date()) === 'Sat') document.querySelectorAll<HTMLElement>('[data-chamber-dot]').forEach((d) => (d.hidden = false));
+      // The Disputation Chamber's button: time until the doors open (Saturday, by New York's clock), or "Open" while they are.
+      // The device's clock answers at once; the server's hours (which know a special sitting) correct it when they arrive.
+      const chamber = inner.querySelector<HTMLElement>('[data-chamber]'), chamberT = inner.querySelector<HTMLElement>('[data-chamber-t]');
+      if (chamber && chamberT) {
+        let hours: { open: boolean; opens: number } | null = null;
+        const guess = () => {
+          const now = new Date(), p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).formatToParts(now).map((x) => [x.type, x.value]));
+          const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.weekday), since = ((+p.hour % 24) * 3600 + +p.minute * 60 + +p.second) * 1000;
+          return { open: dow === 6, opens: now.getTime() - since + (dow === 6 ? 7 : 6 - dow) * 864e5 };
+        };
+        const paint = () => {
+          const h = hours ?? guess(), m = Math.max(0, Math.floor((h.opens - Date.now()) / 60000)), d = Math.floor(m / 1440), hr = Math.floor((m % 1440) / 60);
+          chamber.classList.toggle('open', h.open);
+          chamberT.textContent = h.open ? 'Open' : d ? `${d}d ${hr}h` : hr ? `${hr}h ${m % 60}m` : `${Math.max(1, m)}m`;
+          chamber.setAttribute('aria-label', h.open ? 'The Disputation Chamber: the doors are open' : `The Disputation Chamber: opens in ${chamberT.textContent}`);
+        };
+        paint(); setInterval(paint, 30000);
+        addEventListener('oa-chamber-hours', (e) => { const x = (e as CustomEvent).detail; if (x && typeof x.open === 'boolean') { hours = { open: x.open, opens: Date.parse(x.opens) + (Date.now() - Date.parse(x.now)) }; paint(); } });
+      }
     } catch {}
     const here = () => {
       const q = new URLSearchParams(location.search), path = location.pathname, h = location.hash;
@@ -442,6 +465,15 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .inner-rooms a.inner-explore .inner-ic { opacity: 1; }
   .inner-rooms a.inner-explore:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .85); background-color: rgba(255, 227, 163, .06); }
   .inner-rooms a.inner-explore[aria-current] { background-color: var(--ember); color: #12160F; box-shadow: none; }
+  /* The Chamber: a button of its own at the far end, two panes of glass and a countdown */
+  .inner-chamber { flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 16px 0 12px; border-radius: 999px; color: var(--bone); white-space: nowrap;
+    background: linear-gradient(100deg, rgba(240, 197, 110, .12), rgba(141, 179, 234, .14)); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .24); transition: box-shadow .25s, color .25s; }
+  .inner-chamber:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .7); }
+  .inner-chamber-t { padding-left: 10px; border-left: 1px solid rgba(243, 236, 220, .25); color: var(--ember); font-variant-numeric: tabular-nums; }
+  .inner-chamber.open { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .7); }
+  .inner-chamber.open .inner-chamber-t::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #8FD6A4; vertical-align: 1px; }
+  .inner-chamber[aria-current] { background: var(--ember); color: #12160F; box-shadow: none; }
+  .inner-chamber[aria-current] .inner-chamber-t { color: #12160F; border-color: rgba(18, 22, 15, .3); }
   /* Narrower computers and tablets: the whole bar still fits, Write included */
   @media (max-width: 1320px) { .inner { padding: 0 28px; } .inner-mark { margin-right: 14px; } .inner-rooms a { padding: 0 10px; } .inner-rooms a::after { left: 10px; right: 10px; } }
   @media (max-width: 1120px) { .inner-rooms a:not(.inner-explore) .inner-ic { display: none; } .inner-rooms a.inner-explore { margin-left: 8px; } }

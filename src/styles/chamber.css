@@ -9,7 +9,16 @@
 .ch-head { display: flex; flex-direction: column; gap: 12px; }
 .ch-head .h1 { margin: 0; font-size: 64px; }
 .ch-sub { margin: 0; max-width: 700px; font-size: 20px; line-height: 1.5; }
+.ch > .ch-back { margin-bottom: -12px; }
 .ch-back { align-self: flex-start; }   /* (the round arrow is the site's own: .fo-back in global.css) */
+/* the lobby's head: the stone hall, the emblem, the name */
+.ch-hero { position: relative; align-items: center; text-align: center; gap: 14px; padding: 56px 32px 52px; border-radius: 4px; overflow: hidden; isolation: isolate; box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .22); }
+.ch-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 46%; z-index: -2; filter: brightness(.42) contrast(1.05); }
+.ch-hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 40%, rgba(6, 8, 6, .35), rgba(6, 8, 6, .86) 78%), linear-gradient(90deg, rgba(240, 197, 110, .12), transparent 30%, transparent 70%, rgba(141, 179, 234, .14)); }
+.ch-hero .eb { color: var(--ember); }
+.ch-hero .ch-sub { max-width: 620px; color: #D9D2C2; }
+.ch-emblem { display: block; flex: none; }
+.ch-hero .ch-emblem { margin-bottom: 4px; }
 .ch-err { margin: 0; padding: 12px 16px; border-radius: 4px; font-family: var(--serif); font-size: 18px; color: #F3C9BD; background: rgba(98, 55, 45, .35); box-shadow: inset 0 0 0 1px rgba(230, 169, 154, .35); }
 .ch-none { margin: 0; font-size: 19px; padding: 6px 0 2px; }
 .ch-live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #8FD6A4; margin-right: 10px; vertical-align: 1px; animation: ch-pulse 2.4s ease-in-out infinite; }
@@ -41,7 +50,7 @@
   color: var(--bone); background: linear-gradient(100deg, rgba(240, 197, 110, .07), rgba(243, 236, 220, .03) 42%, rgba(141, 179, 234, .08)); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .22); transition: box-shadow .4s; }
 .ch-door:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55); }
 .ch-door.open { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .5); }
-.ch-door-mark { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .35); }
+.ch-door-mark { display: grid; place-items: center; width: 58px; height: 58px; }
 .ch-door-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .ch-door-state { font-size: 10px; color: var(--ember); }
 .ch-door-name { font-family: var(--serif); font-size: 30px; line-height: 1.1; }
@@ -49,7 +58,7 @@
 /* shut, it keeps quiet; on a Saturday it stands tall */
 .ch-door:not(.open) { padding: 14px 22px; gap: 18px; }
 .ch-door:not(.open) .ch-door-mark { width: 44px; height: 44px; }
-.ch-door:not(.open) .ch-door-mark svg { width: 22px; height: 22px; }
+.ch-door:not(.open) .ch-door-mark svg { width: 28px; height: 28px; }
 .ch-door:not(.open) .ch-door-name { font-size: 23px; }
 .ch-door:not(.open) .ch-door-line { font-size: 15.5px; }
 .ch-door:not(.open) .ch-door-state { color: var(--muted-dark); }
@@ -149,13 +158,18 @@
 .ch-chair.empty .ch-chair-name { font-style: italic; font-size: 22px; color: #ABA597; }
 .ch-chair-floor { font-size: 9px; color: var(--bone); animation: ch-pulse 2.4s ease-in-out infinite; }
 .ch-chair .ch-btn { margin-top: 6px; }
-.ch-v-big { align-self: center; font-size: 30px; padding: 0 16px; }
+.ch-v-big { font-size: 26px; padding: 0; }
+/* between the chairs: the clock, where every eye in the room goes */
+.ch-mid { align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 132px; padding: 14px 18px; background: rgba(6, 8, 6, .55); box-shadow: inset 1px 0 0 var(--ch-line), inset -1px 0 0 var(--ch-line); }
+.ch-mid-clock { font-family: var(--serif); font-weight: 500; font-size: 54px; line-height: .95; color: var(--bone); font-variant-numeric: lining-nums tabular-nums; }
+.ch-mid.lapsed .ch-mid-clock { color: var(--rose); }
+.ch-mid-turn { font-size: 8.5px; color: var(--muted-dark); white-space: nowrap; }
 
-.ch-turn { position: relative; width: 100%; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 6px 18px; padding: 14px 16px 18px; }
+.ch-turn { position: relative; width: 100%; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 6px 18px; padding: 4px 16px 16px; }
 .ch-turn .lab { font-size: 9.5px; color: var(--muted-dark); }
 .ch-turn-who { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--bone); }
 .ch-turn-clock { font-family: var(--serif); font-size: 26px; line-height: 1; color: var(--ember); font-variant-numeric: lining-nums tabular-nums; }
-.ch-turn.lapsed .ch-turn-clock { font-size: 17px; font-style: italic; color: var(--rose); }
+.ch-turn.lapsed .ch-turn-who { color: var(--rose); }
 .ch-turn-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(243, 236, 220, .1); overflow: hidden; }
 .ch-turn-bar i { display: block; height: 100%; background: var(--ember); transform-origin: left center; transition: transform 1s linear; }
 .ch-turn.lapsed .ch-turn-bar i { background: var(--rose); }
@@ -182,7 +196,17 @@
 .ch-sp { width: min(100%, 720px); display: flex; flex-direction: column; gap: 10px; padding: 18px 22px 18px; border-radius: 3px; background: rgba(var(--c-rgb), .05); box-shadow: inset 2px 0 0 var(--c); }
 .ch-sp.ch-ag { align-self: flex-end; box-shadow: inset -2px 0 0 var(--c); }
 .ch-sp header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 14px; }
-.ch-sp-kind { font-size: 9px; color: var(--c); }
+.ch-sp-kind { display: inline-flex; align-items: baseline; gap: 12px; font-size: 9px; color: var(--c); }
+.ch-sp-n { font-family: var(--serif); font-style: normal; font-size: 17px; letter-spacing: .06em; line-height: 1; color: var(--brass); min-width: 1.4em; }
+.ch-sp-marks { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; }
+.ch-mark { display: inline-flex; align-items: center; gap: 7px; }
+.ch-mark svg { opacity: .55; }
+.ch-mark.on { color: var(--ember); border-color: var(--ember); }
+.ch-mark.on svg { opacity: 1; }
+.ch-named { font-size: 9px; color: var(--muted-dark); }
+.ch-sp.telling { box-shadow: inset 2px 0 0 var(--c), inset 0 0 0 1px rgba(255, 227, 163, .5); background: linear-gradient(180deg, rgba(255, 227, 163, .09), rgba(var(--c-rgb), .05) 60%); }
+.ch-sp.ch-ag.telling { box-shadow: inset -2px 0 0 var(--c), inset 0 0 0 1px rgba(255, 227, 163, .5); }
+.ch-telling { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; font-size: 9px; color: var(--ember); padding-bottom: 2px; }
 .ch-sp-who { font-family: var(--serif); font-style: italic; font-size: 16px; color: #ABA597; }
 .ch-sp-body { display: flex; flex-direction: column; gap: 12px; }
 .ch-sp-body p { margin: 0; font-family: var(--serif); font-size: 20px; line-height: 1.55; color: var(--body-dark); white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -220,9 +244,13 @@
 @media (max-width: 700px) {
   .ch { gap: 24px; }
   .ch-head .h1 { font-size: 40px; }
+  .ch-hero { padding: 36px 16px 32px; border-radius: 14px; gap: 10px; }
+  .ch-hero .ch-emblem { width: 46px; height: 46px; }
+  .ch > .ch-back { margin-bottom: -10px; }
   .ch-sub { font-size: 17px; }
-  .ch-door { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 18px 16px; border-radius: 14px; }
-  .ch-door-mark { display: none; }
+  .ch-door { gap: 12px; padding: 18px 16px; border-radius: 14px; }
+  .ch-door-mark { width: 34px; height: 44px; }
+  .ch-door-mark svg { width: 30px; height: 30px; }
   .ch-door-name { font-size: 24px; }
   .ch-door-line { font-size: 15px; }
   .ch-door:not(.open) { padding: 14px 16px; }
@@ -257,7 +285,10 @@
   .ch-chair-name { font-size: 19px; }
   .ch-chair.empty .ch-chair-name { font-size: 16px; }
   .ch-chair-side { font-size: 8px; letter-spacing: .16em; }
-  .ch-v-big { font-size: 20px; padding: 0 4px; }
+  .ch-v-big { font-size: 17px; }
+  .ch-mid { min-width: 0; padding: 10px 8px; gap: 4px; }
+  .ch-mid-clock { font-size: 30px; }
+  .ch-mid-turn { font-size: 7px; letter-spacing: .12em; }
   .ch-turn { gap: 4px 12px; padding: 10px 8px 14px; }
   .ch-gallery { padding: 14px 14px 16px; border-radius: 14px; }
   .ch-gallery-n { font-size: 8.5px !important; letter-spacing: .14em; }

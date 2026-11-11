@@ -194,7 +194,17 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   and a 20-second poll as a safety net.
 - Preview: `node scripts/check.cjs "/guild/members/?view=chamber" --chamber open [--free]`, and `?d=dl1` (your turn; `--closing`,
   `--lapsed`), `?d=dl2` (watching), `?d=do1` (empty chair), `?d=dc1` (a concluded record).
-- Not done: the database test as mock members (see PRELAUNCH), a bell notice when your chair is taken, trophies, suggested motions.
+- The gallery's vote (owner asked 11 Nov 2026: "let the viewers vote on the best response"): each watcher may name ONE speech
+  per disputation "the telling point" (`dispute_marks`, one row per watcher; `dispute_mark(speech)`, `dispute_unmark(dispute)`),
+  while it is under way or for a day after it concludes. The tally is sealed until it is over (the table's read rule shows you
+  only your own mark before then), so speakers cannot play to the crowd; the record then shows "The telling point · named by N".
+  This was shaped on purpose so it is not a like button (the owner ruled likes out): keep it one mark each, and sealed.
+- Looks (11 Nov 2026, after "is it as elite as it can be?"): the Chamber's emblem (`Emblem`: two lancets, gold and blue), the
+  stone-hall header on its page, the clock at the centre between the two chairs, Roman numerals on the speeches.
+- Members' bar: the Chamber is a button of its own at the far right (`.inner-chamber` in `SiteNav.astro`), counting down to
+  Saturday or showing "Open" (the owner asked for this). It asks `chamber()` once per page for the true hours.
+- The database rules were tested as mock members on 11 Nov 2026 (all held). Not done: a bell notice when your chair is taken,
+  trophies, suggested motions. Sample disputations are in the live database until launch (see PRELAUNCH).
 
 ## Readers and members (added Nov 2026)
 - **App install**: `public/manifest.webmanifest`, `icon-192/512.png`, apple meta in `BaseLayout`. iPhone home-screen apps keep their own sign-in.

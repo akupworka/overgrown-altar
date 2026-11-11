@@ -20,6 +20,7 @@ interface Dispute {
 }
 interface Speech { id: string; dispute_id: string; author_id: string | null; n: number; kind: 'opening' | 'reply' | 'closing' | 'lapsed'; body: string; conceded: string | null; granted: boolean; struck: boolean; created_at: string }
 interface Lean { dispute_id: string; member_id: string; first_side: Stand; side: Stand }
+interface Mark { dispute_id: string; member_id: string; speech_id: string }
 export interface Hours { open: boolean; special: boolean; closes: string | null; opens: string; now: string; sitting: string; writer: boolean; chair: boolean; sat_out: boolean }
 type People = Record<string, Pick<Profile, 'id' | 'display_name' | 'portrait_path' | 'role'>>;
 
@@ -105,6 +106,18 @@ const sittingDay = (d: string) => new Date(d + 'T12:00:00Z').toLocaleDateString(
 
 // ---------------------------------------------------------------- small parts
 
+/** The Chamber's own mark: two lancets of glass facing one another, gold For and blue Against. */
+export function Emblem({ size = 48 }: { size?: number }) {
+  return (
+    <svg className="ch-emblem" width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M5 45V22C5 12 14 4 14 4s9 8 9 18v23z" fill="#F0C56E" />
+      <path d="M25 45V22c0-10 9-18 9-18s9 8 9 18v23z" fill="#8DB3EA" />
+      <path d="M14 4v41M34 4v41M5 26h18M25 26h18M5 36h18M25 36h18" stroke="#0B0D0A" strokeWidth="1.6" fill="none" />
+      <path d="M5 45V22C5 12 14 4 14 4s9 8 9 18v23zM25 45V22c0-10 9-18 9-18s9 8 9 18v23z" stroke="#0B0D0A" strokeWidth="1.6" fill="none" strokeLinejoin="round" />
+    </svg>
+  );
+}
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 function Seat({ p, size = 56, empty = false }: { p?: People[string]; size?: number; empty?: boolean }) {
   if (empty || !p) return <span className="ch-arch ch-arch-empty" style={{ ['--s' as any]: size + 'px' }} aria-hidden="true"><svg viewBox="0 0 24 24" width={size * 0.36} height={size * 0.36} fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"><path d="M12 6v12M6 12h12" /></svg></span>;
   return <span className="ch-arch" style={{ ['--s' as any]: size + 'px' }} aria-hidden="true"><img src={portraitUrl(p.portrait_path) || seatFor(p.display_name)} alt="" /></span>;
@@ -120,10 +133,11 @@ function Glass({ f, u, a, label }: { f: number; u: number; a: number; label?: st
     </span>
   );
 }
+const Star = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.7 6.6L12 16.7l-5.9 3.6 1.7-6.6-5.2-4.4 6.8-.5z" /></svg>;
 const MANNER: [string, string][] = [
   ['One motion, two chairs', 'A member lays down a motion and opens their case. The chair across stands empty until another member takes it.'],
-  ['In turn, against the clock', 'Three to five turns each, six minutes a turn, and never more than 1,200 characters. Everyone else watches from the gallery.'],
-  ['Close with an open hand', 'Each speaker ends by naming the strongest point made against them. No winner is declared; the gallery only shows how it moved.'],
+  ['In turn, against the clock', 'Three to five turns each, six minutes a turn, and never more than 1,200 characters. The gallery watches, stands where it is persuaded, and each watcher may name one telling point.'],
+  ['Close with an open hand', 'Each speaker ends by naming the strongest point made against them. No winner is declared: the room shows how the gallery moved, and the point it found most telling.'],
 ];
 function Manner() {
   return (
@@ -154,7 +168,7 @@ export function ChamberDoor() {
     : `Opens ${localTime(hours.opens)}, in ${inWords(Date.parse(hours.opens) - now())}`;
   return (
     <Link to={HOME} className={`ch-door${hours.open ? ' open' : ''}`}>
-      <span className="ch-door-mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 20V10a7 7 0 0 1 14 0v10M3 20h18M12 3v17" /></svg></span>
+      <span className="ch-door-mark" aria-hidden="true"><Emblem size={34} /></span>
       <span className="ch-door-text">
         <span className="lab ch-door-state">{hours.open ? <><i className="ch-live-dot" aria-hidden="true" />The doors are open</> : 'Saturdays · the doors are shut'}</span>
         <span className="ch-door-name">The Disputation Chamber</span>
@@ -278,11 +292,13 @@ export function Chamber({ me }: { me: string }) {
 
   return (
     <div className="ch">
-      <header className="ch-head">
-        <Link to="/guild/members/" className="fo-back lab ch-back">The Guild</Link>
+      <Link to="/guild/members/" className="fo-back lab ch-back">The Guild</Link>
+      <header className="ch-head ch-hero">
+        <img className="ch-hero-img" src="/images/what-we-believe-1200.jpg" alt="" />
+        <Emblem size={58} />
         <span className="eb">Saturdays · for members</span>
         <h1 className="h1">The Disputation Chamber</h1>
-        <p className="it mut ch-sub">Two chairs, one motion, and the Guild watching from the gallery. Friendly disputation, in turn and in the open, so that iron may sharpen iron.</p>
+        <p className="it ch-sub">Two chairs, one motion, and the Guild watching from the gallery. Friendly disputation, in turn and in the open, so that iron may sharpen iron.</p>
       </header>
 
       {hours.open ? (
@@ -381,6 +397,7 @@ export function Disputation({ id, me }: { id: string; me: string }) {
   const [d, setD] = useState<Dispute | null | undefined>(undefined);
   const [speeches, setSpeeches] = useState<Speech[]>([]);
   const [leans, setLeans] = useState<Lean[]>([]);
+  const [marks, setMarks] = useState<Mark[]>([]);
   const [people, setPeople] = useState<People>({});
   const [here, setHere] = useState<string[]>([]);
   const [typing, setTyping] = useState<string | null>(null);
@@ -388,11 +405,13 @@ export function Disputation({ id, me }: { id: string; me: string }) {
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null), typingWait = useRef(0), lastTyped = useRef(0), seen = useRef(0), end = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
-    const [{ data: one }, { data: sp }, { data: ln }] = await Promise.all([
+    const [{ data: one }, { data: sp }, { data: ln }, { data: mk }] = await Promise.all([
       supabase.from('disputes').select('*').eq('id', id).maybeSingle(),
       supabase.from('dispute_speeches').select('*').eq('dispute_id', id).order('n'),
       supabase.from('dispute_leans').select('*').eq('dispute_id', id),
+      supabase.from('dispute_marks').select('*').eq('dispute_id', id),   // (while it is under way the database shows you only your own)
     ]);
+    setMarks((Array.isArray(mk) ? mk : []) as Mark[]);
     const row = (one && !Array.isArray(one) ? one : null) as Dispute | null;
     setD(row); setSpeeches((Array.isArray(sp) ? sp : []) as Speech[]); setLeans((Array.isArray(ln) ? ln : []) as Lean[]);
     if (row) setPeople(await loadPeople([row.opener_id, row.taker_id, row.ended_by]));
@@ -403,6 +422,7 @@ export function Disputation({ id, me }: { id: string; me: string }) {
     ch.on('postgres_changes', { event: '*', schema: 'public', table: 'disputes', filter: `id=eq.${id}` }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'dispute_speeches', filter: `dispute_id=eq.${id}` }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'dispute_leans', filter: `dispute_id=eq.${id}` }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dispute_marks', filter: `dispute_id=eq.${id}` }, () => load())
       .on('presence', { event: 'sync' }, () => setHere(Object.keys(ch.presenceState())))
       .on('broadcast', { event: 'typing' }, ({ payload }: any) => {
         if (!payload?.who || payload.who === me) return;
@@ -441,6 +461,11 @@ export function Disputation({ id, me }: { id: string; me: string }) {
   const at = count('side'), first = count('first_side'), myLean = leans.find((l) => l.member_id === me)?.side;
   const watching = here.filter((h) => h !== d.opener_id && h !== d.taker_id).length;
   const over = d.status === 'concluded' || d.status === 'adjourned';
+  // The gallery's one mark each: sealed while the disputation runs, counted once it is over.
+  const myMark = marks.find((m) => m.member_id === me)?.speech_id;
+  const tally: Record<string, number> = {}; marks.forEach((m) => { tally[m.speech_id] = (tally[m.speech_id] || 0) + 1; });
+  const most = over ? Math.max(0, ...Object.values(tally)) : 0;
+  const canMark = !iSpeak && (d.status === 'live' || (d.status === 'concluded' && !!d.ended_at && now() - Date.parse(d.ended_at) < 864e5));
 
   const act = async (name: string, fn: string, args: Record<string, unknown>, otherwise: string) => {
     setBusy(name); setErr('');
@@ -452,6 +477,12 @@ export function Disputation({ id, me }: { id: string; me: string }) {
   const lean = (side: Stand) => {
     setLeans((ls) => [...ls.filter((l) => l.member_id !== me), { dispute_id: id, member_id: me, side, first_side: ls.find((l) => l.member_id === me)?.first_side ?? side }]);
     act('lean', 'dispute_lean', { p_id: id, p_side: side }, 'Your place in the gallery could not be kept.');
+  };
+  const mark = (speech: string) => {
+    const off = myMark === speech;
+    setMarks((ms) => [...ms.filter((m) => m.member_id !== me), ...(off ? [] : [{ dispute_id: id, member_id: me, speech_id: speech }])]);
+    if (off) act('mark', 'dispute_unmark', { p_id: id }, 'Your mark could not be taken back.');
+    else act('mark', 'dispute_mark', { p_speech: speech }, 'Your mark could not be kept.');
   };
   const typed = () => { const t = Date.now(); if (t - lastTyped.current < 2500) return; lastTyped.current = t; chan.current?.send({ type: 'broadcast', event: 'typing', payload: { who: me } }); };
 
@@ -479,14 +510,15 @@ export function Disputation({ id, me }: { id: string; me: string }) {
         <h1 className="ch-motion">{d.motion}</h1>
         <div className="ch-chairs">
           {chair(forId, 'for')}
-          <span className="ch-v ch-v-big" aria-hidden="true">v.</span>
+          <div className={`ch-mid${lapsed ? ' lapsed' : ''}`}>
+            <span className="ch-v ch-v-big" aria-hidden="true">v.</span>
+            {d.status === 'live' && <><b className="ch-mid-clock" aria-label="Time left on the clock">{lapsed ? '0:00' : clock(leftMs)}</b><span className="lab ch-mid-turn">Turn {Math.min(next, total)} of {total}</span></>}
+          </div>
           {chair(agId, 'against')}
         </div>
         {d.status === 'live' && (
           <div className={`ch-turn${lapsed ? ' lapsed' : ''}`} role="status">
-            <span className="lab">Turn {Math.min(next, total)} of {total}</span>
-            <span className="ch-turn-who">{firstName(people, d.turn_of)} has the floor</span>
-            <span className="ch-turn-clock" aria-label="Time left on the clock">{lapsed ? 'The clock has run out' : clock(leftMs)}</span>
+            <span className="ch-turn-who">{firstName(people, d.turn_of)} has the floor{lapsed ? ', and the clock has run out' : ''}</span>
             <span className="ch-turn-bar" aria-hidden="true"><i style={{ transform: `scaleX(${Math.max(0, Math.min(1, leftMs / (d.turn_seconds * 1000)))})` }} /></span>
           </div>
         )}
@@ -516,15 +548,22 @@ export function Disputation({ id, me }: { id: string; me: string }) {
         {speeches.map((s) => {
           const side = sideOf(s.author_id), mine = s.author_id === me;
           if (s.kind === 'lapsed') return <p key={s.id} className="it mut ch-lapsed">{firstName(people, s.author_id)} let the clock run out.</p>;
+          const named = tally[s.id] || 0, telling = over && most > 0 && named === most, isMine = myMark === s.id;
+          const canGrant = iSpeak && !mine && (d.status === 'live' || d.status === 'concluded');
           return (
-            <article key={s.id} className={`ch-sp ch-${side === 'for' ? 'for' : 'ag'}${mine ? ' mine' : ''}`}>
-              <header><span className="lab ch-sp-kind">{s.kind === 'opening' ? 'Opening' : s.kind === 'closing' ? 'Closing' : 'Reply'} · {SIDE[side]}</span><span className="ch-sp-who">{nameOf(people, s.author_id)}</span></header>
+            <article key={s.id} className={`ch-sp ch-${side === 'for' ? 'for' : 'ag'}${mine ? ' mine' : ''}${telling ? ' telling' : ''}`}>
+              {telling && <span className="lab ch-telling"><Star />The telling point · named by {named} in the gallery</span>}
+              <header><span className="lab ch-sp-kind"><i className="ch-sp-n" aria-hidden="true">{ROMAN[s.n] ?? s.n}</i>{s.kind === 'opening' ? 'Opening' : s.kind === 'closing' ? 'Closing' : 'Reply'} · {SIDE[side]}</span><span className="ch-sp-who">{nameOf(people, s.author_id)}</span></header>
               {s.struck ? <p className="it mut ch-struck">Struck from the record by the chair.</p> : <div className="ch-sp-body">{s.body.split(/\n{2,}/).map((p, i) => <p key={i}>{p}</p>)}</div>}
               {s.conceded && !s.struck && <p className="ch-conceded"><span className="lab">The strongest point against me</span>{s.conceded}</p>}
-              {!s.struck && (s.granted || (iSpeak && !mine && (d.status === 'live' || d.status === 'concluded')) || hours.chair) && (
+              {!s.struck && (s.granted || canGrant || canMark || (over && named > 0 && !telling) || hours.chair) && (
                 <footer>
-                  {s.granted ? <span className="lab ch-granted"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Point granted</span>
-                    : iSpeak && !mine && (d.status === 'live' || d.status === 'concluded') ? <button type="button" className="lab ch-quiet" disabled={busy === 'g' + s.id} onClick={() => act('g' + s.id, 'dispute_grant', { p_speech: s.id }, 'The point could not be granted.')}>Grant the point</button> : <span />}
+                  <span className="ch-sp-marks">
+                    {s.granted ? <span className="lab ch-granted"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Point granted</span>
+                      : canGrant && <button type="button" className="lab ch-quiet" disabled={busy === 'g' + s.id} onClick={() => act('g' + s.id, 'dispute_grant', { p_speech: s.id }, 'The point could not be granted.')}>Grant the point</button>}
+                    {canMark && <button type="button" className={`lab ch-quiet ch-mark${isMine ? ' on' : ''}`} aria-pressed={isMine} onClick={() => mark(s.id)}><Star />{isMine ? 'Your telling point' : 'Name the telling point'}</button>}
+                    {over && named > 0 && !telling && <span className="lab ch-named">Named by {named}</span>}
+                  </span>
                   {hours.chair && <button type="button" className="lab ch-quiet ch-strike" disabled={busy === 's' + s.id} onClick={() => { if (confirm('Strike this from the record? It cannot be put back.')) act('s' + s.id, 'dispute_chair', { p_id: id, p_action: 'strike', p_speech: s.id }, 'It could not be struck.'); }}>Strike</button>}
                 </footer>
               )}

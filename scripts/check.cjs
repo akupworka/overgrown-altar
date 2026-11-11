@@ -154,7 +154,9 @@ const leanRows = (d, list) => list.map(([first_side, side], i) => ({ dispute_id:
 const leans = [...leanRows('dl1', [['undecided', 'for'], ['for', 'for'], ['against', 'against'], ['undecided', 'undecided'], ['against', 'for'], ['for', 'for'], ['undecided', 'against']]),
   ...leanRows('dl2', [['for', 'for'], ['undecided', 'against'], ['against', 'against']]), ...leanRows('do1', [['undecided', 'undecided'], ['for', 'for']]),
   ...leanRows('dc1', [['undecided', 'for'], ['against', 'for'], ['against', 'against'], ['undecided', 'against'], ['for', 'for'], ['undecided', 'undecided']])];
-Object.assign(tables, { disputes, dispute_speeches: speeches, dispute_leans: leans });
+// the gallery's marks: sealed while a disputation runs (you see only your own), counted in the record
+const marks = [...['dc1-s3', 'dc1-s3', 'dc1-s3', 'dc1-s4', 'dc1-s6', 'dc1-s3', 'dc1-s4'].map((speech_id, i) => ({ dispute_id: 'dc1', member_id: 'g' + i, speech_id })), { dispute_id: 'dl2', member_id: ME, speech_id: 'dl2-s2' }];
+Object.assign(tables, { disputes, dispute_speeches: speeches, dispute_leans: leans, dispute_marks: marks });
 const chamberHours = () => ({ open: chamberOpen, special: false, closes: chamberOpen ? iso(nowMs + 7.2 * 3600000) : null, opens: iso(nowMs + (chamberOpen ? 7 * 86400000 : (3 * 24 + 14) * 3600000 + 22 * 60000)),
   now: iso(Date.now()), sitting: sittingToday, writer: who !== 'fellow', chair: who === 'editor' || who === 'staff', sat_out: false });
 
