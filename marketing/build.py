@@ -100,6 +100,45 @@ body { font-family:'Cormorant',serif; color:#F3ECDC; -webkit-font-smoothing:anti
 .rare svg { width:100%; height:auto; display:block; }
 .rare .lab { font-size:1.6rem; letter-spacing:.26em; line-height:1.5; color:#E6DFD0; }
 .fmt-h .rare .lab { font-size:1.9rem; }
+/* the second set of reels: reply cards, sound, read-aloud lines, a paper sheet, a computer's window, numerals */
+.cards { position:absolute; left:6rem; right:6rem; top:30rem; display:flex; flex-direction:column; gap:2.6rem; }
+.topfade { position:absolute; left:0; right:0; top:0; height:40rem; background:linear-gradient(180deg, #060806 0, #060806 21rem, rgba(6,8,6,0) 100%); }
+.rc { display:grid; grid-template-columns:auto minmax(0,1fr); gap:2.6rem; align-items:start; padding:3rem 3.2rem 3.2rem; border-radius:1.6rem; background:rgba(243,236,220,.05); box-shadow:inset 0 0 0 1px rgba(255,227,163,.22), 0 3rem 8rem rgba(0,0,0,.5); text-align:left; }
+.rc.me { box-shadow:inset 0 0 0 1px rgba(255,227,163,.6), 0 3rem 8rem rgba(0,0,0,.5); }
+.rc-av { display:block; width:8.4rem; height:10.4rem; border-radius:99rem 99rem .4rem .4rem; overflow:hidden; box-shadow:0 0 0 1px rgba(255,227,163,.6); }
+.rc-av img { width:100%; height:100%; object-fit:cover; display:block; }
+.rc-b { display:flex; flex-direction:column; gap:.9rem; min-width:0; }
+.rc-n { font-size:4.5rem; line-height:1; }
+.rc-r { font-size:1.7rem !important; letter-spacing:.26em !important; color:#9F945E !important; }
+.rc-t { font-size:4.7rem; line-height:1.28; color:#E6DFD0; margin-top:.8rem; }
+.bars { display:flex; align-items:center; justify-content:center; gap:1rem; height:18rem; }
+.bars i { display:block; width:.55rem; height:100%; border-radius:1rem; background:#FFE3A3; }
+.bars.sm { height:7rem; gap:.7rem; } .bars.sm i { width:.4rem; }
+.rls { display:flex; flex-direction:column; align-items:center; gap:3rem; text-align:center; }
+.rl { font-weight:500; font-size:8.2rem; line-height:1.12; text-wrap:balance; }
+.steps3 { display:flex; flex-direction:column; align-items:center; gap:3.4rem; }
+.steps3 .rl { font-size:9.6rem; }
+.sheet { position:absolute; left:8rem; right:8rem; top:56rem; height:84rem; padding:8rem 7rem; border-radius:.5rem; background:#EFE9DD; color:#2A2017; text-align:left; display:flex; flex-direction:column; gap:3.4rem; box-shadow:0 6rem 16rem rgba(0,0,0,.85), 0 0 0 1px rgba(255,227,163,.25); }
+.sheet .sk { font-family:'Alte Haas',sans-serif; font-size:1.9rem; letter-spacing:.34em; text-transform:uppercase; color:#62372D; }
+.sheet .st { font-weight:500; font-size:9rem; line-height:1.04; min-height:18.8rem; }
+.sheet .sr { height:1px; background:#9F945E; width:100%; }
+.sheet .sl { font-size:4.7rem; line-height:1.42; color:#3A3026; }
+.pan { position:absolute; inset:0; will-change:transform; }
+.rigw { position:absolute; left:7rem; top:68rem; width:176rem; height:112rem; transform-style:preserve-3d; transform-origin:20% 50%; will-change:transform; }
+.win { position:absolute; inset:0; border-radius:2rem; overflow:hidden; background:#0B0D0A; box-shadow:0 0 0 .3rem #23271F, 0 0 0 .5rem rgba(159,148,94,.7), 0 8rem 18rem rgba(0,0,0,.9), 0 0 24rem rgba(255,227,163,.12); }
+.win-bar { position:relative; height:5.4rem; display:flex; align-items:center; gap:1rem; padding:0 2.4rem; background:#14170F; box-shadow:inset 0 -1px 0 rgba(243,236,220,.1); }
+.win-bar i { width:1.3rem; height:1.3rem; border-radius:50%; background:rgba(243,236,220,.22); }
+.win-bar span { position:absolute; left:14rem; font-family:'Alte Haas',sans-serif; font-size:1.5rem; letter-spacing:.2em; text-transform:uppercase; color:#ABA597; padding:1rem 2.4rem .9rem; border-radius:99rem; box-shadow:inset 0 0 0 1px rgba(243,236,220,.16); }
+.win-view { position:relative; height:calc(100% - 5.4rem); overflow:hidden; }
+.win-view img { position:absolute; left:0; top:0; width:100%; height:auto; display:block; will-change:transform; }
+.numz { font-weight:500; font-size:56rem; line-height:.84; color:#FFE3A3; font-variant-numeric:lining-nums tabular-nums; letter-spacing:-.02em; }
+.roll { display:inline-block; height:.84em; overflow:hidden; vertical-align:top; }
+.rin { display:flex; flex-direction:column; will-change:transform; }
+.rin span { display:block; height:.84em; line-height:.84; }
+.numw { font-style:italic; font-size:11.5rem; line-height:1; margin-top:-2rem; }
+.ten { display:grid; grid-template-columns:repeat(5, 15rem); gap:2rem 2.4rem; justify-content:center; margin-top:1rem; }
+.ten svg { width:100%; height:auto; display:block; }
+.one-t { width:46rem; } .one-t svg { width:100%; height:auto; display:block; }
 /* the reels: the real interface inside a phone, cut with the film */
 .sc.paper { background:#E9E3D7; color:#2A2017; } .sc.paper .eb { color:#62372D; } .sc.paper .rule2 { height:1px; width:16rem; background:#9F945E; }
 .stage3d { position:absolute; inset:0; perspective:170rem; perspective-origin:50% 40%; }
@@ -312,7 +351,7 @@ def crests(tin,levels,step=470,hold=1500,eb='Ten prestiges'):
     out=''; end=tin+len(levels)*step+hold
     for i,lv in enumerate(levels):
         m=MARKS['crests'][lv-1]; t=tin+200+i*step; last=i==len(levels)-1
-        r=('%d,%d,200,220' % (t,t+step+170)) if not last else ('%d,%d,400,400' % (t,end-150))
+        r=('%d,%d,200,220' % (t,t+step+90)) if not last else ('%d,%d,400,400' % (t,end-150))
         out+='<div class="cz" data-r="%s" data-dy="0" data-pop>%s<span class="num">%s</span><span class="nm">%s</span>%s</div>' % (r,_uid(m['svg']),m['numeral'],m['name'],('<span class="note">%s</span>' % m['note']) if last else '')
     return sc(tin,end,'<div class="glow"></div><div class="topline eb" data-r="%d,%d,500,400">%s</div><div class="stage">%s</div>' % (tin+100,end-150,eb,out),400,400), end
 def wall(tin,tout,eb='Fifty-four trophies'):
@@ -373,6 +412,85 @@ BODY+=reel('reel4',22000,[
   *room(12100,'03','The Perimeter','True accounts from the edge<br>of the unseen.','chapel-and-cross-under-a','72% 50%','perimeter','Testimony.'),
   soon(16900,22000,'Read in the Fellowship. Write for the Guild.'),
 ])
+# ---- five more reels: the thread, listening, the desk on a computer, one piece's journey, the numbers ----
+def SEAT(n): return R+'/images/seats/seat-%d.jpg' % n
+def card(t,tout,seat,name,role,text,me=False): return '<div class="rc%s" data-r="%d,%d,800,400" data-dy="5"><span class="rc-av"><img src="%s"></span><span class="rc-b"><span class="rc-n">%s</span><span class="lab rc-r">%s</span><span class="rc-t">%s</span></span></div>' % (' me' if me else '',t,tout,SEAT(seat),name,role,text)
+def window(tin,tout,shot,eb,big,x1='-62',y0='-3',y1='-9',tilt='-16,5,-7,2',x0='0'):
+    cap='<div class="cap2"><div class="eb" data-r="%d,%d,600,400">%s</div><div class="big" data-r="%d,%d,800,400">%s</div></div>' % (tin+250,tout-150,eb,tin+450,tout-150,big)
+    w=('<div class="stage3d"><div class="pan" data-k="%d,%d,1,1,%s,0,%s,0"><div class="rigw" data-tilt="%d,%d,%s"><div class="win" data-r="%d,%d,900,450" data-dy="10">'
+       '<div class="win-bar"><i></i><i></i><i></i><span>overgrownaltar.com</span></div><div class="win-view"><img src="%s/desk-%s.jpg" data-k="%d,%d,1,1,0,%s,0,%s"></div></div></div></div></div>') % (tin+300,tout,x0,x1,tin,tout,tilt,tin+150,tout,SHOTS,shot,tin,tout,y0,y1)
+    return sc(tin,tout,backdrop(tin,tout)+cap+w)
+def rollnum(tin,vals,dur=1000): return '<span class="roll"><span class="rin" data-roll="%d,%d">%s</span></span>' % (tin,dur,''.join('<span>%s</span>' % v for v in vals))
+def number(tin,tout,vals,word,extra='',bg='',dur=900):
+    num=('<div class="numz" data-r="%d,%d,500,350" data-pop>%s</div>' % (tin+80,tout-80,rollnum(tin+150,vals,dur))) if len(vals)>1 else ('<div class="numz" data-r="%d,%d,400,300" data-pop>%s</div>' % (tin+80,tout-80,vals[0]))
+    return sc(tin,tout,bg+'<div class="in" style="gap:1rem">'+num+'<div class="numw" data-r="%d,%d,600,300">%s</div>%s</div>' % (tin+350,tout-80,word,extra),300,300)
+_tname={t['name']:t for t in MARKS['trophies']}
+
+# 6 · THE THREAD: the Guild talking between pieces
+_T6=3200
+BODY+=reel('reel6',22500,[
+  sc(0,3400,'<div class="in">'+EL('250,3200,700,400','The Forum · a thread in The Nave',**{'class':'eb'})+'<div class="big-it" style="font-size:11.6rem" data-type="700,17" data-r="600,3200,1,400" data-dy="0">What are you reading this week?</div><div class="thread" data-draw="2500,3200,600"></div></div>',1,500),
+  sc(3200,12900,backdrop(3200,12900)+'<div class="pan" data-k="5600,11800,1,1,0,0,0,-40"><div class="cards">'
+     +card(3500,12700,4,'Thomas Ashgrove','Of the Guild','Back in the Psalms of Ascent, one a morning, before the phone comes on. Psalm 126 undid me on Tuesday.')
+     +card(5100,12700,9,'Clara Penhallow','Of the Guild','Gilead, for the third time. The way Ames blesses his son without being asked is the kind of writing I keep failing to do.')
+     +card(6700,12700,2,'Hester Vane','Editor','Augustine’s Confessions, Book X, slowly. Whole pages on memory, and I no longer think that is a digression.')
+     +card(8300,12700,7,'Eden Albright','Of the Guild','George Herbert. “Love bade me welcome” is eighteen lines I would trade my whole notebook for.',True)
+     +card(9900,12700,11,'Miriam Hale','Of the Fellowship','Reading all of you, mostly. Then Herbert, because Eden will not stop quoting him.')
+     +'</div></div><div class="topfade"></div><div class="topline eb" style="top:17rem" data-r="3300,12700,600,400">A thread in The Nave</div>'),
+  phone(12700,16300,'thread','-30','Threads · replies · mentions','No feed. No noise.',y0='-4'),
+  title(16100,18800,'what-we-believe','54% 50%',EL('16400,18600,700,400','Proverbs 27:17',**{'class':'eb'})+EL('16700,18600,900,400','Iron sharpens iron.',**{'class':'big-it huge'})+'<div class="thread" data-draw="17400,18600"></div>',veil='veil deep'),
+  soon(18600,22500,'A table to talk at.'),
+])
+# 7 · LISTEN: every piece can be read aloud
+BODY+=reel('reel7',22500,[
+  sc(0,3200,'<div class="in"><div class="bars" data-bars="150,3000,30"></div>'+EL('900,3000,900,400','Listen.',**{'class':'big-it huge','style':'color:#FFE3A3'})+'</div>',1,500),
+  sc(3000,8800,backdrop(3000,8800)+'<div class="cap2"><div class="eb" data-r="3300,8600,600,400">Every piece, read aloud</div><div class="big-it" data-r="3500,8600,800,400">Close your eyes.</div><div class="bars sm" data-bars="3700,8600,22"></div></div>'
+     +'<div class="stage3d"><div class="rig" style="top:76rem" data-tilt="3000,8800,-6,4,5,2"><div class="phone" data-r="3150,8800,900,450" data-dy="14"><div class="screen"><img src="%s/listen.jpg"></div></div></div></div>' % SHOTS),
+  sc(8600,16600,'<div class="glow"></div><div class="topline eb" data-r="8900,16400,600,400">What the Stones Remember</div><div class="in" style="padding-top:34rem;padding-bottom:44rem"><div class="rls">'
+     +'<div class="rl" data-read="9000,11100,16400">The abbey has had no roof since the reign of a king nobody here could name.</div>'
+     +'<div class="rl" data-read="11300,13400,16400">Rain comes straight down into the nave,</div>'
+     +'<div class="rl" data-read="13600,16400,16400,1">and in spring the grass grows where the choir once stood.</div>'
+     +'</div></div><div class="pips" style="bottom:46rem"><div class="bars sm" data-bars="8900,16400,34"></div></div>',500,500),
+  phone(16400,19300,'reading-night','-28','Night reading','Or read in the dark.',italic=True,y0='-6'),
+  soon(19100,22500,'Read it. Or let it be read to you.'),
+])
+# 8 · THE DESK: the Guild on a computer, in slow close-up
+BODY+=reel('reel8',22500,[
+  sc(0,2800,'<div class="in">'+EL('250,2600,700,400','On your computer',**{'class':'eb'})+EL('600,2600,900,400','A desk worth sitting at.',**{'class':'big-it huge'})+'<div class="thread" data-draw="1400,2600"></div></div>',1,500),
+  window(2600,6500,'guild','The Guild','Your house.'),
+  window(6300,10200,'write','The writing room','A clean page.',x1='-58',y0='-6',y1='-6',tilt='-4,3,-14,5',x0='-10'),
+  window(10000,13900,'prestige','The prestiges','Your standing.',x1='-66',y0='-6',y1='-16'),
+  window(13700,17600,'thread','The forum','Your company.',x1='-40',y0='-8',y1='-20',tilt='-5,3,-13,4',x0='-4'),
+  window(17400,19500,'vault','Your vault','Your work, kept.',x1='-50',y0='-22',y1='-30'),
+  soon(19300,22500,'On your phone. On your desk.'),
+])
+# 9 · ONE PIECE: from a typed title to a trophy
+_c9,_e9=crests(14200,[5,6],1000,1400,'Your prestige rises')
+BODY+=reel('reel9',23500,[
+  sc(0,5600,backdrop(0,5600)+'<div class="cap2">'+EL('200,5400,600,400','It begins at your desk',**{'class':'eb'})+EL('400,5400,800,400','One piece.',**{'class':'big-it'})+'</div>'
+     +'<div class="sheet" data-r="300,5600,900,450" data-dy="10"><span class="sk">The Hearth · Essay</span><div class="st" data-type="1100,15">What the Stones Remember</div><div class="sr"></div><div class="sl" data-type="3000,34">The abbey has had no roof since the reign of a king nobody here could name.</div></div>',1,500),
+  sc(5400,8800,'<div class="glow"></div><div class="in"><div class="steps3">'
+     +'<div class="rl" data-read="5600,6500,8600">Sent to the editor.</div><div class="rl" data-read="6600,7500,8600">Read, line by line.</div><div class="rl" data-read="7600,8600,8600,1" style="color:#FFE3A3;font-style:italic;font-weight:400">Published.</div></div></div>',400,400),
+  phone(8600,11700,'reading','-26','In The Hearth','It is read.',italic=True,y0='-4'),
+  number(11500,14300,['0','3','6','9','12','15','17'],'stayed with readers.',dur=1300),
+  _c9,
+  sc(_e9-200,_e9+2700,'<div class="glow"></div><div class="in">'+EL('%d,%d,600,400' % (_e9,_e9+2500),'A trophy is won',**{'class':'eb'})+'<div class="one-t" data-r="%d,%d,800,500" data-pop>%s</div>' % (_e9+150,_e9+2500,_uid(_tname['First Light']['svg']))+EL('%d,%d,800,400' % (_e9+500,_e9+2500),'First Light',**{'class':'caps'})+'</div>',400,400),
+  soon(_e9+2500,23500,'Write something that lasts.'),
+])
+# 10 · BY THE NUMBERS: fast, and counted
+_tri=('<div class="tri">'+''.join('<div class="pane">%s<div class="veil" style="background:rgba(6,8,6,.8) !important"></div></div>' % img(p,g,'4300,6900,1.12,1.03,0,1,0,-1',pos) for p,g,pos in [('duomo-spires','gray','center 30%'),('window-of-the-ascension-and','','center 45%'),('chapel-and-cross-under-a','gray','72% 50%')])+'</div>')
+_ten='<div class="ten">'+''.join('<div data-r="%d,11500,400,300" data-pop>%s</div>' % (9300+i*110,_uid(c['svg'])) for i,c in enumerate(MARKS['crests']))+'</div>'
+BODY+=reel('reel10',20500,[
+  number(0,1600,['0'],'likes.'),
+  number(1500,3100,['0'],'followers.'),
+  number(3000,4500,['0'],'algorithm.'),
+  number(4300,6900,['0','1','2','3'],'rooms.',bg=_tri,dur=700),
+  number(6700,9000,['0','2','4','6','8','9'],'crafts.',extra=EL('7500,8900,600,300','Essays · Prose · Poetry · Fiction · Photographs · Testimony · and more',**{'class':'lab','style':'margin-top:3rem;line-height:1.8;max-width:80rem'}),dur=800),
+  sc(8800,11700,'<div class="glow"></div><div class="in" style="gap:1rem"><div class="numz" style="font-size:40rem" data-r="8900,11500,500,350" data-pop>'+rollnum(9000,['0','2','4','6','8','10'],800)+'</div><div class="numw" data-r="9200,11500,600,300">prestiges.</div>'+_ten+'</div>',300,300),
+  sc(11500,14600,'<div class="wall" style="opacity:.34" data-wall="11600,14200">'+''.join('<div class="tw">%s</div>' % _uid(t['svg']) for t in MARKS['trophies'])+'</div><div class="in" style="gap:1rem"><div class="numz" data-r="11600,14400,500,350" data-pop>'+rollnum(11700,['0','9','18','27','36','45','54'],1000)+'</div><div class="numw" data-r="11900,14400,600,300">trophies.</div></div>',300,300),
+  number(14400,16900,['1'],'altar.',bg=img('window-of-the-ascension-and','','14400,16900,1.14,1.04,0,-2,0,1','center 42%')+'<div class="veil deep"></div>'),
+  soon(16700,20500,'Three rooms, one altar.'),
+])
 # 5 · THE FELLOWSHIP: for those who come to read (it opens on paper, not on night)
 BODY+=reel('reel5',21000,[
   sc(0,4300,'<div class="in">'+EL('300,4100,700,500','For readers',**{'class':'eb'})+EL('700,4100,900,500','Not everyone here writes.',**{'class':'big-it','style':'color:#2A2017'})+'<div class="rule2" data-draw="1700,4100"></div>'+EL('2100,4100,900,500','Some come to read.',**{'class':'big-it huge','style':'color:#62372D'})+'</div>',1,600,'paper'),
@@ -405,7 +523,7 @@ ad.querySelectorAll('[data-r]').forEach((el) => {
 });
 ad.querySelectorAll('[data-wall]').forEach((wall) => { const [w0, w1] = wall.dataset.wall.split(',').map(Number), cols = fmt === 'v' ? 6 : 9; wall.querySelectorAll('.tw').forEach((el, i) => { const tin = w0 + ((i % cols) + Math.floor(i / cols)) * 95, a = { opacity: 0, transform: 'scale(.6)' }, b = { opacity: 1, transform: 'scale(1)' }, c = { opacity: 0, transform: 'scale(1)' };
   anims.push(el.animate([{ ...a, offset: 0 }, { ...a, offset: at(tin), easing: EASE }, { ...b, offset: at(tin + 520) }, { ...b, offset: at(w1) }, { ...c, offset: at(w1 + 400) }, { ...c, offset: 1 }], { duration: T, fill: 'both' })); }); });
-ad.querySelectorAll('[data-tilt]').forEach((el) => { const [tin, tout] = el.dataset.tilt.split(',').map(Number), a = 'rotateY(-9deg) rotateX(5deg) translateZ(0)', b = 'rotateY(7deg) rotateX(2deg) translateZ(0)';
+ad.querySelectorAll('[data-tilt]').forEach((el) => { const [tin, tout, ry0 = -9, rx0 = 5, ry1 = 7, rx1 = 2] = el.dataset.tilt.split(',').map(Number), a = `rotateY(${ry0}deg) rotateX(${rx0}deg) translateZ(0)`, b = `rotateY(${ry1}deg) rotateX(${rx1}deg) translateZ(0)`;
   anims.push(el.animate([{ transform: a, offset: 0 }, { transform: a, offset: at(tin) }, { transform: b, offset: at(tout) }, { transform: b, offset: 1 }], { duration: T, fill: 'both' })); });
 ad.querySelectorAll('[data-draw]').forEach((el) => {
   const [tin, tout, dur = 1100] = el.dataset.draw.split(',').map(Number);
@@ -421,6 +539,37 @@ ad.querySelectorAll('[data-k]').forEach((el) => {
   const a = `translate(${x0}%, ${y0}%) scale(${s0})`, b = `translate(${x1}%, ${y1}%) scale(${s1})`;
   const kf = [{ transform: a, offset: 0 }]; if (at(tin) > 0) kf.push({ transform: a, offset: at(tin) }); kf.push({ transform: b, offset: at(tout) }); if (at(tout) < 1) kf.push({ transform: b, offset: 1 });
   anims.push(el.animate(kf, { duration: T, fill: 'both' }));
+});
+// sound: thin bars that rise and fall (the same every time: the numbers come from a fixed seed)
+let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+ad.querySelectorAll('[data-bars]').forEach((el) => {
+  const [tin, tout, n = 26] = el.dataset.bars.split(',').map(Number);
+  for (let i = 0; i < n; i++) { const b = document.createElement('i'); el.append(b);
+    const kf = [{ transform: 'scaleY(.06)', opacity: 0, offset: 0 }, { transform: 'scaleY(.06)', opacity: 0, offset: at(tin) }];
+    const mid = 1 - Math.abs(i - (n - 1) / 2) / (n / 2) * 0.55;
+    for (let t = tin + 300; t < tout - 300; t += 170) kf.push({ transform: `scaleY(${(0.12 + rnd() * 0.88 * mid).toFixed(3)})`, opacity: 1, offset: at(t), easing: 'ease-in-out' });
+    kf.push({ transform: 'scaleY(.06)', opacity: 0, offset: at(tout) }); if (at(tout) < 1) kf.push({ transform: 'scaleY(.06)', opacity: 0, offset: 1 });
+    anims.push(b.animate(kf, { duration: T, fill: 'both' })); }
+});
+// a line being read: it arrives, holds the light, then dims as the next one comes
+ad.querySelectorAll('[data-read]').forEach((el) => {
+  const [tin, dim, tout, low = 0.26] = el.dataset.read.split(',').map(Number), y = 2.4 * rem;
+  const kf = [{ opacity: 0, transform: `translateY(${y}px)`, offset: 0 }, { opacity: 0, transform: `translateY(${y}px)`, offset: at(tin), easing: EASE }, { opacity: 1, transform: 'translateY(0px)', offset: at(tin + 700) },
+    { opacity: 1, transform: 'translateY(0px)', offset: at(Math.max(tin + 700, dim)) }, { opacity: low, transform: 'translateY(0px)', offset: at(Math.max(tin + 700, dim) + 450) }, { opacity: low, transform: 'translateY(0px)', offset: at(tout - 400) }, { opacity: 0, transform: 'translateY(0px)', offset: at(tout) }];
+  if (at(tout) < 1) kf.push({ opacity: 0, transform: 'translateY(0px)', offset: 1 });
+  kf.forEach((k, i) => { if (i && k.offset < kf[i - 1].offset) k.offset = kf[i - 1].offset; });
+  anims.push(el.animate(kf, { duration: T, fill: 'both' }));
+});
+// words typed a letter at a time
+ad.querySelectorAll('[data-type]').forEach((el) => {
+  const [tin, cps = 16] = el.dataset.type.split(',').map(Number), text = el.textContent; el.textContent = '';
+  [...text].forEach((ch, i) => { const sp = document.createElement('span'); sp.textContent = ch; el.append(sp); const t = at(tin + (i * 1000) / cps);
+    anims.push(sp.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: Math.min(t, 0.9999), easing: 'steps(1, end)' }, { opacity: 1, offset: Math.min(t + 0.0001, 1) }, { opacity: 1, offset: 1 }], { duration: T, fill: 'both' })); });
+});
+// a number that rolls up to its value
+ad.querySelectorAll('[data-roll]').forEach((el) => {
+  const [tin, dur = 1100] = el.dataset.roll.split(',').map(Number), n = el.children.length, end = `translateY(${-((n - 1) / n) * 100}%)`;
+  anims.push(el.animate([{ transform: 'translateY(0%)', offset: 0 }, { transform: 'translateY(0%)', offset: at(tin), easing: 'cubic-bezier(.2,.9,.2,1)' }, { transform: end, offset: at(tin + dur) }, { transform: end, offset: 1 }], { duration: T, fill: 'both' }));
 });
 anims.forEach((a) => a.pause());
 window.T = T;
