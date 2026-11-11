@@ -116,6 +116,11 @@ const G = {
   letter: 'M3 6h18v12H3zM3.5 6.5l8.5 7 8.5-7',
   answer: 'M4 4h16v11H11l-5 4v-4H4zM13.5 7L10.5 9.5l3 2.5M10.5 9.5h4a2 2 0 0 1 2 2v.5',
   blades: 'M5 4l11.5 11.5M19 4L7.5 15.5M14.5 17.5l3-3M9.5 17.5l-3-3M17.5 17.5l2 2M6.5 17.5l-2 2',
+  // The rarest
+  wheat: 'M12 21V7M12 7c-1.8-.8-2.8-2.2-2.8-4 1.8.3 2.8 1.4 2.8 3 0-1.6 1-2.7 2.8-3 0 1.8-1 3.2-2.8 4zM12 12c-2-.7-3.3-2-3.6-4M12 12c2-.7 3.3-2 3.6-4M12 16.5c-2-.7-3.3-2-3.6-4M12 16.5c2-.7 3.3-2 3.6-4',
+  psalter: 'M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM5 18a2 2 0 0 1 2-2h12M12 7v6M9.5 9.5h5',
+  roses: 'M12 4a3.2 3.2 0 1 0 .01 0M6.3 13.2a3.2 3.2 0 1 0 .01 0M17.7 13.2a3.2 3.2 0 1 0 .01 0',
+  ten: 'M12 3a9 9 0 1 0 .01 0M8.5 8l7 8M15.5 8l-7 8',
 };
 
 const isSignal = (p: TrophyPiece) => p.pillar === 'watchtower';
@@ -176,17 +181,17 @@ export const TROPHIES: Trophy[] = [
   { id: 'first-light', name: 'First Light', tier: 'bronze', glyph: G.candle, note: 'Published a first piece.', earned: (c) => c.pieces.length >= 1 },
   { id: 'sitter', name: 'The Sitter', tier: 'bronze', glyph: G.arch, note: 'Added a portrait to their page.', earned: (c) => !!(c.member.portrait_path || c.member.portrait) },
   { id: 'signed', name: 'Signed & Sealed', tier: 'bronze', glyph: G.signature, note: 'Wrote their craft and a few lines about themselves.', earned: (c) => !!(c.member.bio?.trim() && c.member.craft?.trim()) },
-  { id: 'voice', name: 'Set in Stone', tier: 'silver', glyph: G.quotes, note: 'Set a line apart as a pull quote.', earned: (c) => has(c, (p) => /(^|\n)> /.test(p.body)) },
-  { id: 'verse', name: 'Chapter & Verse', tier: 'silver', glyph: G.verse, note: 'Brought Scripture into a piece.', earned: (c) => has(c, (p) => /(^|\n)\+ /.test(p.body)) },
+  { id: 'voice', name: 'Set in Stone', tier: 'bronze', glyph: G.quotes, note: 'Set a line apart as a pull quote.', earned: (c) => has(c, (p) => /(^|\n)> /.test(p.body)) },
+  { id: 'verse', name: 'Chapter & Verse', tier: 'bronze', glyph: G.verse, note: 'Brought Scripture into a piece.', earned: (c) => has(c, (p) => /(^|\n)\+ /.test(p.body)) },
   { id: 'long-form', name: 'The Long Form', tier: 'silver', glyph: G.scroll, note: 'Published a piece of more than 2,000 words.', earned: (c) => has(c, (p) => words(p.body) > 2000) },
-  { id: 'illuminated', name: 'The Illuminated Page', tier: 'gold', glyph: G.illumin, note: 'One piece with every mark of the craft: a heading, a pull quote, Scripture, italic and bold.', earned: (c) => has(c, (p) => /(^|\n)## /.test(p.body) && /(^|\n)> /.test(p.body) && /(^|\n)\+ /.test(p.body) && /\*\*[^*]+\*\*/.test(p.body) && /(^|[^*])\*[^*]+\*([^*]|$)/.test(p.body)) },
+  { id: 'illuminated', name: 'The Illuminated Page', tier: 'silver', glyph: G.illumin, note: 'One piece with every mark of the craft: a heading, a pull quote, Scripture, italic and bold.', earned: (c) => has(c, (p) => /(^|\n)## /.test(p.body) && /(^|\n)> /.test(p.body) && /(^|\n)\+ /.test(p.body) && /\*\*[^*]+\*\*/.test(p.body) && /(^|[^*])\*[^*]+\*([^*]|$)/.test(p.body)) },
   { id: 'three-rooms', name: 'Three Rooms', tier: 'gold', glyph: G.arches, note: 'Published in all three pillars.', earned: (c) => ['watchtower', 'hearth', 'perimeter'].every((x) => has(c, (p) => p.pillar === x)) },
   { id: 'polymath', name: 'The Polymath', tier: 'gold', glyph: G.compass, note: 'Published four different kinds of work.', earned: (c) => kinds(c) >= 4 },
   { id: 'seasons', name: 'Every Season', tier: 'gold', glyph: G.hourglass, note: 'Published in four different months.', earned: (c) => months(c) >= 4 },
   // Photography, won once
   { id: 'let-it-speak', name: 'Let It Speak', tier: 'bronze', glyph: G.silent, note: 'Published a photograph and kept its words to 150 or fewer.', earned: (c) => has(c, (p) => isPhoto(p) && words(p.body) <= 150) },
   { id: 'field-notes', name: 'Field Notes', tier: 'bronze', glyph: G.notes, note: 'Gave every detail behind the lens: digital or film, camera, lens, settings, where and when.', earned: (c) => has(c, fullNotes) },
-  { id: 'contact-sheet', name: 'The Contact Sheet', tier: 'silver', glyph: G.frames, note: 'Published a photograph with all four smaller frames beneath it.', earned: (c) => has(c, (p) => isPhoto(p) && (p.gallery?.length ?? 0) >= 4) },
+  { id: 'contact-sheet', name: 'The Contact Sheet', tier: 'bronze', glyph: G.frames, note: 'Published a photograph with all four smaller frames beneath it.', earned: (c) => has(c, (p) => isPhoto(p) && (p.gallery?.length ?? 0) >= 4) },
   { id: 'thousand-words', name: 'Worth a Thousand Words', tier: 'silver', glyph: G.thousand, note: 'Published a photograph with a thousand words or more beside it.', earned: (c) => has(c, (p) => isPhoto(p) && words(p.body) >= 1000) },
   { id: 'grain-and-pixel', name: 'Grain & Pixel', tier: 'gold', glyph: G.grain, note: 'Published photographs on film and digitally.', earned: (c) => has(c, isFilm) && has(c, isDigital) },
   // The forum, won once
@@ -197,21 +202,28 @@ export const TROPHIES: Trophy[] = [
   // The company kept, won once
   { id: 'company', name: 'Company Kept', tier: 'bronze', glyph: G.witnesses, note: 'Follows five of the Guild’s writers.', earned: (c) => gv(c, 'following') >= 5 },
   { id: 'letter', name: 'A Letter at the Door', tier: 'bronze', glyph: G.letter, note: 'A reader wrote a reflection on one of their pieces.', earned: (c) => gv(c, 'reflections_in') >= 1 },
-  { id: 'writer-answers', name: 'The Writer Answers', tier: 'silver', glyph: G.answer, note: 'Answered a reader’s reflection.', earned: (c) => gv(c, 'answers') >= 1 },
-  { id: 'iron', name: 'Iron Sharpens Iron', tier: 'silver', glyph: G.blades, note: 'Brought a draft to the Workshop for another member’s notes.', earned: (c) => gv(c, 'shared') >= 1 },
+  { id: 'writer-answers', name: 'The Writer Answers', tier: 'bronze', glyph: G.answer, note: 'Answered a reader’s reflection.', earned: (c) => gv(c, 'answers') >= 1 },
+  { id: 'iron', name: 'Iron Sharpens Iron', tier: 'bronze', glyph: G.blades, note: 'Brought a draft to the Workshop for another member’s notes.', earned: (c) => gv(c, 'shared') >= 1 },
   { id: 'light-left-on', name: 'A Light Left On', tier: 'gold', glyph: G.lantern, note: 'Twenty-five times, a reader said their work stayed with them.', earned: (c) => gv(c, 'stayed_in') >= 25 },
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s founding year.', earned: (c) => (c.member.created_at ?? '').startsWith('2026') },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its Editor in Chief.', earned: (c) => c.member.role === 'editor' },
   { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every trophy for a kind of published work raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.craft).every((t) => t.count!(c) >= t.at!.gold) },
   { id: 'encouragement', name: 'Son of Encouragement', tier: 'rainbow', glyph: G.shield, note: 'The Good Word, The Amen and The Workbench all raised to gold.', earned: (c) => ['good-word', 'amen', 'workbench'].every((id) => { const t = TROPHIES.find((x) => x.id === id)!; return t.count!(c) >= t.at!.gold; }) },
+  // The rarest: years of work, or all of it
+  { id: 'hundredfold', name: 'The Hundredfold', tier: 'rainbow', glyph: G.wheat, note: 'A hundred pieces published: seed that fell on good ground.', earned: (c) => c.pieces.length >= 100 },
+  { id: 'psalter', name: 'The Psalter', tier: 'rainbow', glyph: G.psalter, note: 'A hundred and fifty poems published: a psalter of their own.', earned: (c) => count(c, isLyre) >= 150 },
+  { id: 'three-windows', name: 'Three Windows', tier: 'rainbow', glyph: G.roses, note: 'Three of the growing trophies raised all the way to rainbow glass.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && t.count(c) >= t.at.rainbow).length >= 3 },
+  { id: 'decade', name: 'A Decade at the Table', tier: 'rainbow', glyph: G.ten, note: 'Ten years kept with the Guild.', earned: (c) => yearsAt(c) >= 10 },
+  { id: 'cathedral', name: 'The Cathedral', tier: 'rainbow', glyph: G.tower, note: 'Every other trophy won, the Founding Stone, the Keys and the Decade aside.', earned: (c) => TROPHIES.filter((t) => !['cathedral', 'founder', 'keys', 'decade'].includes(t.id)).every((t) => t.earned(c)) },
 ];
 
 /** The catalogue's shelves: every trophy sits on one (anything not named falls to the last). */
 export const TROPHY_GROUPS: { name: string; ids: string[] }[] = [
   { name: 'The work', ids: ['signal-fire', 'perimeter-stone', 'road-back', 'scribes-quill', 'hearthstone', 'lyre', 'inkwell', 'first-light', 'voice', 'verse', 'long-form', 'illuminated', 'three-rooms', 'polymath', 'seasons'] },
   { name: 'Photography', ids: ['stained-glass', 'darkroom', 'daylight-lens', 'let-it-speak', 'field-notes', 'contact-sheet', 'thousand-words', 'grain-and-pixel'] },
-  { name: 'The company kept', ids: ['common-table', 'open-door', 'good-word', 'amen', 'workbench', 'readers-chair', 'first-word', 'kindled', 'every-room', 'burden-bearer', 'company', 'letter', 'writer-answers', 'iron', 'light-left-on'] },
-  { name: 'Faithfulness', ids: ['years', 'unbroken', 'sitter', 'signed', 'founder', 'keys', 'living-stones', 'encouragement'] },
+  { name: 'The company kept', ids: ['common-table', 'open-door', 'good-word', 'amen', 'workbench', 'readers-chair', 'sitter', 'signed', 'first-word', 'company', 'letter', 'writer-answers', 'iron', 'kindled', 'every-room', 'burden-bearer', 'light-left-on'] },
+  { name: 'Faithfulness', ids: ['years', 'unbroken'] },
+  { name: 'The rarest', ids: ['founder', 'keys', 'living-stones', 'encouragement', 'three-windows', 'hundredfold', 'psalter', 'decade', 'cathedral'] },
 ];
 export const groupOf = (t: Trophy) => TROPHY_GROUPS.find((g) => g.ids.includes(t.id))?.name ?? TROPHY_GROUPS[TROPHY_GROUPS.length - 1].name;
 
@@ -303,7 +315,7 @@ function laurel() {   // two sprays of leaves, rising from the base around the e
 }
 
 /** The trophy as an SVG string (used by both the Astro pages and the members' app). */
-export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = false): string {
+export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = false, still = false): string {
   const [dk, lt, md] = locked ? IRON : METAL[as];
   const k = locked ? `${as}-l` : as;
   const halo = locked ? '' : as === 'rainbow' ? '#B05BFF' : as === 'gold' ? '#E7C35A' : '';
@@ -353,7 +365,7 @@ export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = fals
     body = `<path d="${scallop(37.5)}" fill="url(#m-${k})"/>`
       + `<path d="${scallop(37.5)}" fill="none" stroke="url(#s-${k})" stroke-width="1"/>`
       + `<circle cx="40" cy="40" r="32" fill="#141412"/>`
-      + petals + tracery
+      + (!locked && !still ? `<g class="tr-turn">${petals}${tracery}</g>` : petals + tracery)   // a rose window's glass turns, very slowly; rim, emblem and shadow stay still
       + `<circle cx="40" cy="40" r="32" fill="none" stroke="${md}" stroke-width="1"/>`
       + `<circle cx="40" cy="40" r="14.5" fill="#141412"/><circle cx="40" cy="40" r="13.2" fill="url(#c-tr)"/>`
       + `<circle cx="40" cy="40" r="32" fill="url(#s-${k})" opacity=".35"/>`

@@ -9,8 +9,8 @@ import '../../styles/trophies.css';
 type Standing = ReturnType<typeof trophiesFor>[number];
 
 // One trophy's drawing. It is made once and kept, so opening a card or switching a tab doesn't redraw every trophy on the page.
-function Svg({ t, size, tier, locked = false, className }: { t: Trophy; size?: number; tier?: Tier; locked?: boolean; className?: string }) {
-  const html = useMemo(() => useIds(trophySvg(t, size, tier ?? t.tier, locked)), [t.id, size, tier, locked]);
+function Svg({ t, size, tier, locked = false, still = false, className }: { t: Trophy; size?: number; tier?: Tier; locked?: boolean; still?: boolean; className?: string }) {
+  const html = useMemo(() => useIds(trophySvg(t, size, tier ?? t.tier, locked, still)), [t.id, size, tier, locked, still]);
   return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
@@ -139,7 +139,7 @@ export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?
                 const nextUp = !!st && !reached && st.next?.tier === tier;
                 return (
                 <figure key={tier} className={`tr tr-mini${st ? (reached ? ' got' : nextUp ? ' next' : ' ahead') : ''}`} data-tier={tier}>
-                  <Svg t={t} size={58} tier={tier} />
+                  <Svg t={t} size={58} tier={tier} still={!reached} />
                   <span className="tr-tier"><span className="tr-mini-name">{TIER_LABEL[tier]} </span>{numShort(at[tier])}</span>
                 </figure>
                 );

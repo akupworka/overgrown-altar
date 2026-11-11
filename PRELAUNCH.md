@@ -102,8 +102,9 @@ use still working:
       traffic a month, 500 MB of text (far off). Members themselves are not a limit (50,000 active a month).
 
 ## Check on a real iPhone (built and tested in Chrome only)
-- [ ] The trophies (11 Nov 2026: 46 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
-      vault or at Prestiges → Trophies; trophies still to earn show in dark iron; gold and rainbow keep a soft halo.
+- [ ] The trophies (11 Nov 2026: 51 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
+      vault or at Prestiges → Trophies; trophies still to earn show in dark iron; gold and rainbow keep a soft halo;
+      the coloured glass of an earned rainbow trophy turns slowly and smoothly (its centre and rim stay still).
 - [ ] The share sheet shows the OA mark beside a piece's title, not a compass.
 - [ ] A link to the home page, and a link to a piece, each preview with the right card in Messages.
 - [ ] "Share as a social post": the preview opens, swiping shows the second picture, "Save to images" puts both in Photos.

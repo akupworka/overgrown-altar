@@ -5,6 +5,11 @@
    dark iron of a trophy still to earn are all drawn inside the SVG (lib/trophies.ts). */
 .tr-svg { display: block; overflow: visible; transition: transform .5s cubic-bezier(.16,1,.3,1); }
 .tr:hover .tr-svg { transform: translateY(-3px) rotate(-2deg); }
+/* A rainbow trophy is a rose window: its ring of coloured glass turns, one slow round a minute (the rim, the emblem and
+   the shadow stay still). Only transform moves. */
+.tr-turn { transform-box: view-box; transform-origin: 40px 40px; animation: tr-turn 60s linear infinite; }
+@keyframes tr-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tr-turn { animation: none; } }
 .tr-name { font-family: var(--serif); font-size: 18px; line-height: 1.15; }
 .tr-tier { font-family: var(--sans); font-size: 8.5px; letter-spacing: .22em; text-transform: uppercase; }
 .tr[data-tier='bronze'] .tr-tier { color: #C98A5B; }
