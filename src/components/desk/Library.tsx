@@ -29,7 +29,8 @@ export function Shelf({ books, onRemove, from }: { books: Book[]; onRemove?: (id
 }
 
 /** Private or public: the keeper of a library decides. Private (as every library begins), only they see its shelves. Public,
- *  anyone can: on their vault inside the Guild and on their public page. Shows nothing until the choice can be read. */
+ *  signed-in members can, on the keeper's vault inside the Guild; never visitors to the website. Shows nothing until the
+ *  choice can be read. */
 export function LibraryVisibility({ me, onChange }: { me: string; onChange?: (open: boolean) => void }) {
   const [open, setOpen] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -50,7 +51,7 @@ export function LibraryVisibility({ me, onChange }: { me: string; onChange?: (op
           {open ? <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="2.8" /></> : <><rect x="5" y="10.5" width="14" height="10" rx="1.5" /><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" /></>}
         </svg>
       </span>
-      <span className="lb-vis-t"><b>{open ? 'Public' : 'Private'}</b><span>{open ? 'Anyone can see these shelves on your page.' : 'Only you can see these shelves.'}</span></span>
+      <span className="lb-vis-t"><b>{open ? 'Public' : 'Private'}</b><span>{open ? 'Members can see these shelves on your vault.' : 'Only you can see these shelves.'}</span></span>
       <button type="button" className="lab lb-vis-btn" onClick={flip} disabled={busy} aria-pressed={open}>{open ? 'Make private' : 'Make public'}</button>
     </div>
   );

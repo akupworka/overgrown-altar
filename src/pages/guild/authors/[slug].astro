@@ -13,7 +13,6 @@ import PrestigeBadge from '../../../components/PrestigeBadge.astro';
 import TrophyCase from '../../../components/TrophyCase.astro';
 import { getAuthors, guildUrl, MEDIUM_LABEL, PILLAR_LABEL, readingMinutes, type GuildAuthor, type GuildPiece } from '../../../lib/guild';
 import '../../../styles/guild-piece.css';
-import '../../../styles/library.css';
 
 export async function getStaticPaths() {
   return (await getAuthors()).map(({ author, pieces }) => ({ params: { slug: author.slug }, props: { author, pieces } }));
@@ -52,14 +51,12 @@ import { seatFor } from '../../../lib/seats';
   <section class="sec paper">
     <div class="au-shelf" data-per={PER_PAGE}>
       <div class="au-head"><span class="eb">The work</span><span class="lab mut"><span class="au-count">{(written.length ? written : photos).length} {written.length ? (written.length === 1 ? 'piece' : 'pieces') : (photos.length === 1 ? 'photograph' : 'photographs')}</span> · newest first</span></div>
-      {/* Writing and photographs each have a tab when there are both. The Library tab is added by the page's script, only if
-          this writer has opened their library (the database says so, not this page). */}
-      <div class="au-tabs" role="tablist" aria-label="Work" hidden={!(written.length > 0 && photos.length > 0)}>
-          {written.length > 0 && <button type="button" role="tab" class="on" aria-selected="true" data-tab="writing"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span class="au-tab-n">{written.length}</span></button>}
-          {photos.length > 0 && <button type="button" role="tab" class:list={[{ on: !written.length }]} aria-selected={written.length ? "false" : "true"} data-tab="photos"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span class="au-tab-n">{photos.length}</span></button>}
-          <button type="button" role="tab" aria-selected="false" data-tab="library" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4h3.5v16H4.5zM8 4h3.5v16H8zM13 6.2l3.3-.9 3.9 14.5-3.3.9z" /></svg>Library<span class="au-tab-n">0</span></button>
-      </div>
-      <div class="au-lib" data-feed="library" hidden><ol class="lb-shelf"></ol></div>
+      {written.length > 0 && photos.length > 0 && (
+        <div class="au-tabs" role="tablist" aria-label="Work">
+          <button type="button" role="tab" class="on" aria-selected="true" data-tab="writing"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span class="au-tab-n">{written.length}</span></button>
+          <button type="button" role="tab" aria-selected="false" data-tab="photos"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span class="au-tab-n">{photos.length}</span></button>
+        </div>
+      )}
       {photos.length > 0 && (
         <ol class="au-grid" data-feed="photos" hidden={written.length > 0}>
           {photos.map((g) => (
@@ -85,8 +82,6 @@ import { seatFor } from '../../../lib/seats';
 
 <script>
   import { pagerHtml } from '../../../lib/pager';
-  import { supabase } from '../../../lib/supabase';
-  import { shelfHtml } from '../../../lib/shelf';
   // Six pieces at a time, with pages below; the kind filter narrows the list first.
   const shelf = document.querySelector<HTMLElement>('.au-shelf');
   if (shelf) {
@@ -120,32 +115,8 @@ import { seatFor } from '../../../lib/seats';
       tabs.forEach((x) => { const on = x === t; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); });
       shelf.querySelectorAll<HTMLElement>('[data-feed]').forEach((f) => (f.hidden = f.dataset.feed !== t.dataset.tab));
       const n = Number(t.querySelector('.au-tab-n')?.textContent || 0);
-      count.textContent = t.dataset.tab === 'library' ? `${n} ${n === 1 ? 'artifact' : 'artifacts'}` : t.dataset.tab === 'photos' ? `${n} ${n === 1 ? 'photograph' : 'photographs'}` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+      count.textContent = t.dataset.tab === 'photos' ? `${n} ${n === 1 ? 'photograph' : 'photographs'}` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
     }));
-
-    // Their library, if they have opened it: the database hands its shelves to anyone only then (a private library answers
-    // with nothing, and no tab appears). The covers come from the site's own index, which already holds every published piece.
-    const who = document.querySelector<HTMLElement>('[data-author-id]')?.dataset.authorId, libTab = shelf.querySelector<HTMLButtonElement>('[data-tab="library"]');
-    if (who && libTab) (async () => {
-      const { data: kept } = await supabase.from('library').select('piece_id, created_at').eq('member_id', who).order('created_at', { ascending: false });
-      const ids = (kept ?? []).map((k: any) => k.piece_id);
-      if (!ids.length) return;
-      const ask = (cols: string) => supabase.from('pieces').select(cols).in('id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString());
-      let { data: pcs, error } = await ask('id, slug, title, medium, pillar, words');
-      if (error) ({ data: pcs } = await ask('id, slug, title, medium, pillar'));
-      const index: { pieces: { href: string; who: string; image?: string }[] } = await fetch('/search-index.json').then((r) => r.json()).catch(() => ({ pieces: [] }));
-      const path = (h: string) => h.replace(/\/+$/, '');
-      const known = new Map(index.pieces.map((x) => [path(x.href), x]));
-      const order = new Map(ids.map((id: string, i: number) => [id, i]));
-      const books = ((pcs ?? []) as any[]).filter((x) => x.slug).sort((x, y) => (order.get(x.id) ?? 0) - (order.get(y.id) ?? 0)).map((x) => {
-        const seen = known.get(`/guild/${x.slug}`);
-        return { href: `/guild/${x.slug}/`, title: x.title || 'Untitled', who: seen?.who ?? 'A member of the Guild', medium: x.medium, words: x.words, img: seen?.image, pillar: x.pillar };
-      });
-      if (!books.length) return;
-      shelf.querySelector('.au-lib .lb-shelf')!.innerHTML = shelfHtml(books);
-      libTab.querySelector('.au-tab-n')!.textContent = String(books.length);
-      libTab.hidden = false; const list = shelf.querySelector<HTMLElement>('.au-tabs')!; list.hidden = false; list.classList.add('au-tabs-3');
-    })();
   }
 </script>
 
@@ -159,9 +130,6 @@ import { seatFor } from '../../../lib/seats';
   .au-tabs button.on::before { opacity: 1; }
   .au-tab-n { color: #9A9080; letter-spacing: .1em; }
   [data-feed][hidden] { display: none; }
-  .au-tabs[hidden], .au-tabs button[hidden] { display: none !important; }
-  /* with the Library beside Writing and Photographs, three fit a phone without their icons */
-  @media (max-width: 700px) { .au-tabs.au-tabs-3 { max-width: 100%; } .au-tabs.au-tabs-3 button { padding: 10px 9px !important; gap: 5px; letter-spacing: .1em; font-size: 9px; } .au-tabs.au-tabs-3 button > svg { display: none; } .au-tabs.au-tabs-3 .au-tab-n { min-width: 18px; padding: 0 5px; } }
   /* the two feeds as one rounded switch */
   .au-shelf:has(.au-tabs) .au-head { display: flex; justify-content: center; text-align: center; }
   .au-shelf:has(.au-tabs) .au-head > .lab { display: none; }
