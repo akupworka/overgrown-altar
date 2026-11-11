@@ -2279,9 +2279,13 @@ a.m-byline:hover { color: var(--oxblood); }
 .wy-pill { padding: 5px 11px 5px 13px !important; gap: 7px; line-height: 1.2; }
 .wy-pill-lg { padding: 7px 16px 7px 18px !important; gap: 9px; }
 .wy-pill-n { line-height: 1; }
-/* Phones: Write and Photograph open the Desk, side by side under the greeting (the bar's centre button explores) */
+/* Phones: Write and Photograph sit beside your name at the top of the Desk (the bar's centre button explores) */
+.d-me-make { display: none; }
 @media (max-width: 700px) {
-  .d-home .d-home-head .d-begins { display: flex !important; width: 100%; gap: 10px; margin-top: 4px; }
-  .d-home .d-home-head .d-begins > a { min-height: 50px !important; font-size: 10px !important; letter-spacing: .2em !important; gap: 10px; }
-  .d-home .d-home-head .d-begins svg { width: 16px; height: 16px; }
+  .d-side > .d-me { flex: 1 1 100%; min-width: 0; }   /* the strip runs the full width, so the buttons reach the right edge */
+  .d-me-text { flex: 1 1 auto; }
+  .d-me-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d-me-make { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
+  .d-me-make .ss-write { min-height: 40px; padding: 0 16px 0 14px; gap: 8px; font-size: 9.5px; letter-spacing: .18em; }
+  .d-me-make .ss-photo { min-height: 0; width: 40px; height: 40px; padding: 0; }
 }

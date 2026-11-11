@@ -296,6 +296,15 @@ function Desk({ session }: { session: Session }) {
             <span className="d-me-name">{name}</span>
             <span className={`lab ${roleClass(isEditor ? profile?.role : isFellow ? 'fellow' : 'member')}`}>{isEditor ? roleLabel(profile?.role) : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
           </div>
+          {/* Phones: writing and photographs begin here, beside your name (computers have them in the column and the Guild bar) */}
+          {!isFellow && (
+            <div className="d-me-make" data-writer>
+              <a className="ss-write" href="/guild/desk/#write">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>Write</a>
+              <a className="ss-photo" href="/guild/desk/#photograph" aria-label="Submit a photograph" title="Photograph">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></svg></a>
+            </div>
+          )}
         </div>
         {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
         {profile && <SideStanding profile={profile} pieces={pieces} fellow={isFellow} />}
@@ -649,13 +658,6 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
           <p className="d-tally">
             <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
           </p>
-        </div>
-        {/* Phones: writing and photographs begin here (computers have them in the column and the Guild bar) */}
-        <div className="d-begins ss-make" data-writer>
-          <a className="ss-write" href="/guild/desk/#write">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>Write</a>
-          <a className="ss-photo" href="/guild/desk/#photograph">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></svg>Photograph</a>
         </div>
       </header>
       {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}
