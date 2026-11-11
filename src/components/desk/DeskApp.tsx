@@ -1556,6 +1556,15 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     portrait_path: profile.portrait_path,
   });
   const [msg, setMsg] = useState('');
+  // An editor's name can't be taken: say so as it is typed, and hold Save until the name changes (the database refuses it too).
+  const [taken, setTaken] = useState(false);
+  useEffect(() => {
+    const n = f.display_name.trim();
+    if (!n || n.toLowerCase() === profile.display_name.trim().toLowerCase()) { setTaken(false); return; }
+    let live = true;
+    const t = setTimeout(() => { supabase.rpc('name_taken', { n }).then(({ data }) => { if (live) setTaken(data === true); }); }, 250);
+    return () => { live = false; clearTimeout(t); };
+  }, [f.display_name, profile.display_name]);
   // The daily letter (messages, replies, mentions, responses, new from writers you follow): on unless turned off.
   const [letters, setLetters] = useState(true);
   useEffect(() => { supabase.from('member_prefs').select('email_digest').eq('member_id', profile.id).maybeSingle().then(({ data }) => { if (data) setLetters(data.email_digest !== false); }); }, [profile.id]);
@@ -1587,13 +1596,14 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
   }
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (taken) return;
     const shown = showEmail ? email.trim() : '';
     if (shown && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(shown)) { setEmailMsg('That email address doesn’t look complete. Please check it.'); return; }
     const clean = { ...f, display_name: f.display_name.trim(), craft: f.craft.trim(), instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim(), public_email: shown || null };
     if (!clean.display_name) { setMsg('Your page needs a name before it can be saved.'); return; }
     if (clean.website && !/^https?:\/\//.test(clean.website)) clean.website = 'https://' + clean.website;
     const { error } = await supabase.from('profiles').update(clean).eq('id', profile.id);
-    setMsg(error ? (/editors/.test(error.message) ? error.message : 'Your page couldn’t be saved. Please check your name and web address, then try again.') : 'Saved. Members now see this on your page.'); if (!error) onSaved();
+    setMsg(error ? (/editors/.test(error.message) ? 'That name is taken. It belongs to one of the editors.' : 'Your page couldn’t be saved. Please check your name and web address, then try again.') : 'Saved. Members now see this on your page.'); if (!error) onSaved();
   }
   return (
     <form className="d-section d-form-page" onSubmit={save}>
@@ -1611,7 +1621,8 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
         <span className="d-hint">A photograph of you, or of your work. Square works best. Any photo works; it’s resized automatically.</span>
       </div>
       {portraitMsg && <p className="d-photo-msg" role="status">{portraitMsg}</p>}
-      <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" required maxLength={80} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" required maxLength={80} aria-invalid={taken || undefined} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} />
+        {taken && <span className="d-taken" role="alert">Taken · that name belongs to one of the editors</span>}</label>
       <label className="d-lbl"><span className="lab">{profile.role === 'fellow' ? 'What you love · e.g. Poetry, old churches' : 'Your craft · e.g. Essayist, Photographer'}</span><input className="field" maxLength={120} value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
       <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} maxLength={2000} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
       <div className="d-two">
@@ -1631,7 +1642,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       <label className="d-check"><input type="checkbox" checked={f.listed} onChange={(e) => setF({ ...f, listed: e.target.checked })} /><span>Show me in the Guild directory</span></label>
       <label className="d-check"><input type="checkbox" checked={letters} onChange={(e) => toggleLetters(e.target.checked)} /><span>Email me a daily letter when something is waiting: messages, replies, mentions, and new work from writers I follow (saved straight away)</span></label>
       <p className="it d-notice" role="status">{msg}</p>
-      <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
+      <div className="d-actions"><button className="btn d-btn" type="submit" disabled={taken}>Save my page</button></div>
       <div className="d-account">
         <a className="d-link" href={`/guild/members/?m=${profile.id}`}>View my vault</a>
         <a className="d-link" href="/guild/members/">The Guild</a>

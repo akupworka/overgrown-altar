@@ -30,7 +30,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 
     <div class="nav-links">
       {links.map((l) => (
-        <a href={l.href} class:list={[{ 'nav-explore': l.href === '/search' }]} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' ? '' : undefined}>
+        <a href={l.href} class:list={[{ 'nav-explore': l.href === '/search' }]} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' || l.href === '/search' ? '' : undefined}>
           {l.href === '/search' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>}{l.label}</a>
       ))}
     </div>
@@ -69,7 +69,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   </nav>
   {(
     <!-- The Guild's own rooms: for members, on every page of the site (the html data-member flag shows it). -->
-    <nav class="inner lab" aria-label="The Guild" data-inner data-member>
+    <nav class="inner lab" aria-label="The Guild" data-inner data-member data-inside={inside ? '' : undefined}>
       <span class="inner-mark" aria-hidden="true">The Guild</span>
       <div class="inner-rooms">
         <a href="/guild/desk/" data-match="desk"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>My Desk<span class="inner-dot" data-gbar-dot hidden></span></a>
@@ -390,6 +390,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     .nav-links { display: none; }
   }
   @media (min-width: 1321px) { .nav-right .icon-link { display: none; } }   /* Explore is in the row of rooms */
+  :global(html[data-member]) .nav-right .icon-link { display: none; }   /* members: Explore is the button in their own bar, once only */
   /* Phones: monogram, Sign in, and the menu button. */
   @media (max-width: 760px) {
     .nav { height: 60px; padding: 0 14px 0 20px; }
@@ -446,7 +447,17 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     box-shadow: 0 6px 18px rgba(0,0,0,.45); transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; }
   .inner .inner-write:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.55); color: var(--ember); }
   .inner .inner-write[aria-current] { color: #FFF1CC; }
-  @media (max-width: 1320px) { .inner { padding: 0 48px; } }
+  /* Explore: the one way in for members, a gold-ringed button at the end of the rooms */
+  .inner-rooms a.inner-explore { align-self: center; height: 34px; margin-left: 12px; padding: 0 18px 0 15px; border-radius: 999px; color: var(--ember);
+    box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .45); transition: color .25s, box-shadow .25s, background-color .25s; }
+  .inner-rooms a.inner-explore::after { display: none; }
+  .inner-rooms a.inner-explore .inner-ic { opacity: 1; }
+  .inner-rooms a.inner-explore:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .85); background-color: rgba(255, 227, 163, .06); }
+  .inner-rooms a.inner-explore[aria-current] { background-color: var(--ember); color: #12160F; box-shadow: none; }
+  /* Narrower computers and tablets: the whole bar still fits, Write included */
+  @media (max-width: 1320px) { .inner { padding: 0 28px; } .inner-mark { margin-right: 14px; } .inner-rooms a { padding: 0 10px; } .inner-rooms a::after { left: 10px; right: 10px; } }
+  @media (max-width: 1120px) { .inner-rooms a:not(.inner-explore) .inner-ic { display: none; } .inner-rooms a.inner-explore { margin-left: 8px; } .inner .inner-photo { padding: 8px 14px; margin-right: 8px; } .inner .inner-write { padding: 8px 16px; } }
+  @media (max-width: 980px) { .inner-mark { display: none; } .inner { padding: 0 18px; } }
   /* Phones: the bar at the foot of the page does this job. */
   @media (max-width: 700px) { .inner { display: none !important; } }
   @media (max-width: 760px) {

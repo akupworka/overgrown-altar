@@ -6,7 +6,7 @@
   <h2 class="h2 fs-h">Take your place.</h2>
   <p class="it mut fs-sub">It’s free. We’ll email you a link to choose your password.</p>
   <form class="fs-form" novalidate>
-    <label class="fs-lbl"><span class="lab">Your name</span><input class="field" name="name" autocomplete="name" required maxlength="80" /></label>
+    <label class="fs-lbl"><span class="lab">Your name</span><input class="field" name="name" autocomplete="name" required maxlength="80" /><span class="fs-taken" role="alert" hidden>Taken · please choose another name</span></label>
     <label class="fs-lbl"><span class="lab">Email</span><input class="field" name="email" type="email" autocomplete="email" inputmode="email" required /></label>
     <label class="fs-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
     <button type="submit" class="btn fs-go">Join the Fellowship</button>
@@ -21,15 +21,27 @@
 </div>
 
 <script>
+  import { supabase } from '../lib/supabase';
   const form = document.querySelector<HTMLFormElement>('.fs-form')!;
   const msg = form.querySelector<HTMLElement>('.fs-msg')!, go = form.querySelector<HTMLButtonElement>('.fs-go')!;
   const since = Date.now();
+  // An editor's name can't be taken: say so as it is typed, and hold the button until the name changes.
+  const nameBox = form.querySelector<HTMLInputElement>('input[name="name"]')!, takenMsg = form.querySelector<HTMLElement>('.fs-taken')!;
+  let wait = 0, asked = '';
+  const isTaken = async (n: string) => { const { data } = await supabase.rpc('name_taken', { n }); return data === true; };
+  const showTaken = (on: boolean) => { takenMsg.hidden = !on; go.disabled = on; if (on) nameBox.setAttribute('aria-invalid', 'true'); else nameBox.removeAttribute('aria-invalid'); };
+  nameBox.addEventListener('input', () => {
+    clearTimeout(wait); const n = nameBox.value.trim(); asked = n;
+    if (!n) return showTaken(false);
+    wait = window.setTimeout(async () => { const t = await isTaken(n).catch(() => false); if (asked === n) showTaken(t); }, 250);
+  });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = new FormData(form), name = String(f.get('name') ?? '').trim(), email = String(f.get('email') ?? '').trim();
     if (!name) { msg.textContent = 'Please tell us your name.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'That email address doesn’t look right.'; return; }
     go.disabled = true; go.textContent = 'One moment…'; msg.textContent = '';
+    if (await isTaken(name).catch(() => false)) { go.textContent = 'Join the Fellowship'; showTaken(true); return; }
     const res = await fetch('/.netlify/functions/join-fellowship', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, website: f.get('website'), since }) }).catch(() => null);
     const out = res ? await res.json().catch(() => ({})) : {};
@@ -52,6 +64,9 @@
   .fs-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .fs-go { margin-top: 6px; }
   .fs-go:disabled { opacity: .6; }
+  .fs-taken { font-family: var(--sans); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: #E8A091; }
+  .fs-taken[hidden] { display: none; }
+  .fs-lbl .field[aria-invalid='true'] { box-shadow: inset 0 0 0 1px rgba(232, 160, 145, .7); }
   .fs-msg { margin: 0; min-height: 1.2em; font-size: 17px; color: var(--ember); }
   .fs-done[hidden], .fs-form[hidden] { display: none; }
   .fs-done-h { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; color: var(--ember); }

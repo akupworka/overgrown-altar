@@ -29,12 +29,14 @@ use still working:
 - [x] A piece with the editor must have a title and its words (a photograph: its picture), also if rewritten while there.
 - [x] Pace limits for everyone but editors: 6 forum posts a minute and 60 an hour; 3 new threads in ten minutes and
       12 a day; 12 messages a minute and 80 an hour; 10 Workshop notes a minute and 100 an hour.
-- [x] One post tags eight members at most. A hundred unfinished pieces a writer. Three open reports a conversation.
+- [x] One post tags eight members at most. Twenty unfinished pieces a writer (drafts and returned pieces).
+      A conversation is reported once by each person until the editor has dealt with it.
 - [x] The 5-photographs-a-month limit: tested, and it holds.
-- [ ] Decide: editors (staff included) can read every member's unsent drafts in the database, though the Desk never
-      shows them. Keep, or close it so drafts are private until sent or shared.
-- [ ] Decide: a writer can keep rewriting a piece, and change its room, while it is with the editor. Keep, or freeze it.
-- [ ] Decide: Fellowship readers can start forum threads and message Guild writers. Intended?
+- [x] Decided 11 Nov 2026: a draft is its writer's alone until sent or shared. Editors (staff included) can no longer
+      read, change or delete other members' drafts or see their unsent photographs.
+- [x] Decided: a piece is frozen while it is with the editor. The writer withdraws it to edit, then sends it again.
+- [x] Decided: Fellowship readers starting forum threads and messaging Guild writers is intended.
+- [x] An editor's name shows "Taken" as it is typed (About the author, and the Fellowship join form), and Save waits.
 - [ ] Small: a writer can delete the first post of their own thread by going around the forum's buttons.
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
 

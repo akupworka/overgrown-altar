@@ -12,6 +12,8 @@
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank)
+//   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
+//   --width N         the computer's width (default 1280; the row of rooms in the header shows from 1321)
 //   --out <dir>       where screenshots go (default: a temporary folder; never inside the repo)
 //
 // It starts `astro preview` on port 4321 itself if nothing is running there, and stops it afterwards.
@@ -23,7 +25,7 @@ const os = require('os'), path = require('path'), fs = require('fs');
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
 const flag = (name) => args.includes('--' + name);
-const VALUED = ['--as', '--pieces', '--only', '--click', '--out'];
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type'];
 const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
 if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
 const who = opt('as', 'editor');
@@ -142,7 +144,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
   const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: ME, role: 'authenticated', exp: 4102444800 })}.sig`;
   const session = { access_token: jwt, refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: 4102444800,
     user: { id: ME, aud: 'authenticated', role: 'authenticated', email: 'eden@example.com', app_metadata: {}, user_metadata: {}, created_at: t(1) } };
-  const sizes = [['phone', { viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true }], ['computer', { viewport: { width: 1280, height: 900 } }]]
+  const sizes = [['phone', { viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true }], ['computer', { viewport: { width: Number(opt('width', 1280)), height: 900 } }]]
     .filter(([name]) => !opt('only') || opt('only') === name);
   const browser = await chromium.launch();
   let failed = false;
@@ -165,6 +167,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
         { kind: 'published', at: t(3), who: null, who_name: null, who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
         { kind: 'save', at: t(2), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
       ] } });
+      if (url.pathname.endsWith('/rpc/name_taken')) return route.fulfill({ json: /^\s*watchman\s*$/i.test((route.request().postDataJSON() || {}).n || '') });
       if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
       const table = url.pathname.split('/rest/v1/')[1];
       if (req.method() !== 'GET') { const body = JSON.parse(req.postData() || '{}'); const row = Array.isArray(body) ? body[0] : body; return route.fulfill({ json: one ? { id: 'new', ...row } : [{ id: 'new', ...row }] }); }
@@ -179,6 +182,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
     await page.goto(BASE + target, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     if (opt('click')) { await page.click(opt('click')); await page.waitForTimeout(600); }
+    if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     const file = path.join(out, `${name}.png`);
     await page.screenshot({ path: file, fullPage: flag('full') });

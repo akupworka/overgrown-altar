@@ -26,6 +26,9 @@ export default async (req: Request) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'That email address doesn’t look right.' }, 400);
 
   const db = createClient(SUPABASE_URL, service, { auth: { persistSession: false } });
+  // An editor's name can't be taken (the form says so as it is typed; this holds the same line).
+  const { data: taken } = await db.rpc('name_taken', { n: name });
+  if (taken === true) return json({ error: 'That name is taken. Please choose another.' }, 400);
   const { data, error } = await db.auth.admin.generateLink({
     type: 'invite', email,
     options: { redirectTo: 'https://overgrownaltar.com/guild/desk/', data: { display_name: name, tier: 'fellow' } },
