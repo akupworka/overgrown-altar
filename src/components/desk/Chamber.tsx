@@ -321,7 +321,8 @@ export function Chamber({ me }: { me: string }) {
 
       <Manner />
 
-      {!hours.open && (
+      {/* the record of the sitting before: always when the doors are shut, and beside an open floor when there is one */}
+      {(!hours.open || last.length > 0) && (
         <section className="ch-sec">
           <div className="ch-sec-head"><span className="eb">The last sitting</span>{lastDay && <span className="lab mut">{sittingDay(lastDay)}</span>}</div>
           {last.length ? <div className="ch-cards">{last.map(card)}</div> : <p className="it mut ch-none">No disputation has been held yet. On Saturday the first chair is yours.</p>}

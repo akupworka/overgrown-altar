@@ -96,9 +96,14 @@ use still working:
   own width).
 
 ## The Disputation Chamber (built 11 Nov 2026; not yet tried by real people)
-- [ ] **The Chamber's rules have not been tested against the real database.** The test that acts as pretend members (Saturday
-  lock, turns, the clock, the closing concession, the chair's powers, the Fellowship kept to the gallery) was written and
-  stopped at a Supabase confirmation that went unanswered. Run it before launch (ask Claude to "run the Chamber test").
+- [x] The Chamber's rules were tested against the real database on 11 Nov 2026, acting as pretend members (Saturday lock,
+  turns, the clock, the closing concession, three motions a sitting, the chair's powers, the Fellowship kept to the gallery,
+  direct writes refused). Every refusal held, and the test undid itself.
+- [ ] **Remove the sample disputations before opening** (11 Nov 2026: ten were added between pretend members, at the owner's
+  word, to fill the room: three concluded, three under way with an hour-long clock, four empty chairs; their dates were set
+  three days ahead so they are not cleared before Saturday). Delete every row of `disputes` whose speakers are pretend members.
+- [ ] **The doors were opened by hand until Saturday night, 14 Nov 2026 (New York).** After that the Chamber keeps its own
+  Saturdays. To shut it sooner: the Chamber page, bottom, "Shut the doors".
 - [ ] Try a whole disputation with two accounts: as Editor in Chief, open the Chamber, press "Open the doors for three
   hours", lay down a motion; from a second account take the chair; speak in turn to the close. Watch from a third if you can.
 - [ ] On a real iPhone: writing a speech with the keyboard up, the clock counting down, a new speech arriving while you watch.
