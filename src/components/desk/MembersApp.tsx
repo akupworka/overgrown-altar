@@ -653,12 +653,12 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
     } catch { /* they closed the share sheet */ }
   };
   const shareAsCard = async () => {
-    setSaid((v) => ({ ...v, card: 'Making the post…' }));
+    setSaid((v) => ({ ...v, card: 'Making the post…' })); setTimeout(() => setSaid((v) => ({ ...v, card: undefined })), 700);   // (the post opens over the page)
     try {
       const { shareCard } = await import('../../lib/shareCard');
       const out = await shareCard({ quote: piece.title, title: piece.title, standfirst: piece.standfirst || undefined, author: author || 'A member', kicker: `${pillarName(piece.pillar)} · ${mediumName(piece.medium)}`,
         image: photo || undefined, fallback: ROOM_PHOTO[piece.pillar] ?? ROOM_PHOTO.hearth });
-      flash('card', out === 'saved' ? 'Post saved' : out === 'shared' ? 'Shared' : 'Social post');
+      if (out !== 'cancelled') flash('card', out === 'saved' ? 'Post saved' : 'Shared');
     } catch { flash('card', 'Couldn’t make the post'); }
   };
   return (

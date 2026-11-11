@@ -1,7 +1,8 @@
-// "Social post": a piece made into a tall picture for Instagram or messages, set like a small advertisement for it:
+// "Social post": a piece made into a tall picture for Instagram or messages, set like a small advertisement for it,
+// and shown to the reader before they share or save it:
 // the piece's photograph darkened like glass at night, its title and the line beneath it (or a line the reader chose),
 // the writer, and "Read it on Overgrown Altar".
-// Drawn in the reader's browser; on a phone it opens the share sheet, on a computer it saves the picture.
+// Drawn in the reader's browser.
 export interface CardInput { quote: string; title: string; author: string; kicker: string; image?: string; fallback: string; standfirst?: string }
 const W = 1080, H = 1350;
 
@@ -84,14 +85,49 @@ export async function drawCard(c: CardInput): Promise<Blob> {
   try { return await blob(); } catch { paint(await loadImage(c.fallback).catch(() => null)); return blob(); }   // (a photograph that can't be copied: use the room's)
 }
 
-/** Draw the card, then hand it to the phone's share sheet, or save it on a computer. Returns what happened. */
-export async function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled'> {
-  const file = new File([await drawCard(c)], `${c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'overgrown-altar'}.jpg`, { type: 'image/jpeg' });
-  const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-  if (matchMedia('(pointer: coarse)').matches && nav.canShare?.({ files: [file] })) {
-    try { await nav.share({ files: [file], title: c.title }); return 'shared'; } catch { return 'cancelled'; }
-  }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  return 'saved';
+/** Make the post and show it: the picture itself, large, with Share and Save under it. (A phone's own share sheet shows
+ *  only a file's name and a paper icon, so the reader sees the real thing here first, and shares or saves from here.)
+ *  Returns what they did. */
+export function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled'> {
+  return new Promise((resolve) => {
+    const name = `${c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'overgrown-altar'}.jpg`;
+    const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+    const touch = matchMedia('(pointer: coarse)').matches;
+    let url = '', file: File | null = null, did: 'shared' | 'saved' | 'cancelled' = 'cancelled';
+    const box = document.createElement('div');
+    box.className = 'sp'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Your social post');
+    box.innerHTML = `<div class="sp-in">
+      <button type="button" class="sp-x" data-sp-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="eb sp-k">Your social post</span>
+      <div class="sp-frame"><span class="lab sp-wait">Making the post…</span></div>
+      <div class="sp-acts" hidden>
+        <button type="button" class="sp-btn sp-share" data-sp-share hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M8 7.5L12 4l4 3.5M6 12v7h12v-7"/></svg>Share</button>
+        <a class="sp-btn sp-save" data-sp-save><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M8 11.5l4 3.5 4-3.5M6 19h12"/></svg>Save picture</a>
+      </div>
+      <span class="lab sp-hint" hidden>${touch ? 'Or press and hold the picture to save it to your photos.' : 'Saved pictures go to your downloads.'}</span>
+    </div>`;
+    const close = () => {
+      box.remove(); document.documentElement.classList.remove('sp-open'); removeEventListener('keydown', onKey);
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 4000);
+      resolve(did);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    box.addEventListener('click', async (e) => {
+      const t = e.target as HTMLElement;
+      if (t === box || t.closest('[data-sp-close]')) return close();
+      if (t.closest('[data-sp-save]')) { did = 'saved'; return; }   // (the link itself saves the picture)
+      if (t.closest('[data-sp-share]') && file) { try { await nav.share({ files: [file] }); did = 'shared'; } catch { /* they closed the share sheet */ } }
+    });
+    addEventListener('keydown', onKey);
+    document.body.append(box); document.documentElement.classList.add('sp-open');
+    drawCard(c).then((blob) => {
+      if (!box.isConnected) return;
+      file = new File([blob], name, { type: 'image/jpeg' }); url = URL.createObjectURL(file);
+      const img = new Image(); img.src = url; img.alt = `${c.title}, by ${c.author}: a social post`; img.className = 'sp-img';
+      box.querySelector('.sp-frame')!.replaceChildren(img);
+      const save = box.querySelector<HTMLAnchorElement>('[data-sp-save]')!; save.href = url; save.download = name;
+      box.querySelector<HTMLElement>('[data-sp-share]')!.hidden = !(nav.canShare?.({ files: [file] }) && typeof nav.share === 'function');
+      box.querySelector<HTMLElement>('.sp-acts')!.hidden = false; box.querySelector<HTMLElement>('.sp-hint')!.hidden = false;
+    }).catch(() => { const w = box.querySelector('.sp-wait'); if (w) w.textContent = 'The post couldn’t be made. Close this and try again.'; });
+  });
 }

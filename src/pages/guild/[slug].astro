@@ -148,10 +148,10 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
     const go = async (quote: string, el: HTMLElement, idle: string) => {
       const d = btn.dataset; el.textContent = 'Making the post…';
       try {
-        const out = await shareCard({ quote, title: d.title!, standfirst: d.standfirst || undefined, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback! });
-        el.textContent = out === 'saved' ? 'Saved to your downloads' : idle;
-      } catch { el.textContent = 'The post couldn’t be made'; }
-      setTimeout(() => { el.textContent = idle; }, 2600);
+        // (the post opens over the page, to be seen first and shared or saved from there)
+        setTimeout(() => { el.textContent = idle; }, 600);
+        await shareCard({ quote, title: d.title!, standfirst: d.standfirst || undefined, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback! });
+      } catch { el.textContent = 'The post couldn’t be made'; setTimeout(() => { el.textContent = idle; }, 2600); }
     };
     pill.addEventListener('pointerdown', (e) => e.preventDefault());   // keep the selection while tapping
     pill.addEventListener('click', () => { go(picked, pill, 'Post this line').then(() => { pill.hidden = true; }); });
