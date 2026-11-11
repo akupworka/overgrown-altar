@@ -67,6 +67,7 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
       )}
       {p.body.trim() && <Body body={p.body} />}
       <div class="gp-sign"><Cross width={20} color="#62372D" /><span>{first}</span></div>
+      <span data-read-end aria-hidden="true"></span>
       <!-- Share: the phone's share sheet, or the link copied on a computer (BaseLayout's [data-share]). -->
       <div class="gp-share">
         <button type="button" class="gp-share-btn" data-share>

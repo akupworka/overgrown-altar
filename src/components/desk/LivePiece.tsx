@@ -61,6 +61,7 @@ export default function LivePiece() {
           {isPhoto && photo && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} gallery={piece.gallery} />}
           {piece.body.trim() && <Body body={piece.body} />}
           <div className="gp-sign"><span>{(a.display_name || '').split(' ')[0]}</span></div>
+          <span data-read-end aria-hidden="true" />
           <aside className="gp-author" aria-label="About the author">
             <a className="gp-arch" href={aUrl} aria-hidden="true" tabIndex={-1}><img src={portrait || seatFor(a.display_name)} alt="" data-initials={initials} /></a>
             <div className="gp-author-text">

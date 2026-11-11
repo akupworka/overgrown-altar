@@ -729,7 +729,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
         {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
-      {profile?.id && <ReadingShelf me={profile.id} />}
+      {profile?.id && <ReadingShelf me={profile.id} savedOnly />}   {/* new work from writers you follow lives on the Guild page */}
       {/* Phones: your standing (wide screens show it in the column beside) */}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {isEditor && <EditorTools />}

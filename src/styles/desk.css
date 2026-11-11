@@ -1810,7 +1810,7 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 @keyframes d-load-run { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .d-load svg, .d-load-line i { animation: none; } }
 /* Wide screens: the column beside the Guild page already shows your Desk standing and your prestige, so those two tiles step aside */
-@media (min-width: 1101px) { .ss-main .g-tile-desk, .ss-main .g-tile-pz { display: none !important; } }
+@media (min-width: 1101px) { .ss-main .g-tiles .g-tile.g-tile-desk, .ss-main .g-tiles .g-tile.g-tile-pz { display: none !important; } }
 
 /* The Way's badges as a list: badge, name, what it asks, and how far along (no tapping, no lone tiles) */
 .wy-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 10px; }
@@ -1936,3 +1936,28 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .rt-n { font-family: var(--serif); font-size: 14px; letter-spacing: 0; opacity: .7; }
 .rt-go { margin-left: auto; color: var(--oxblood); font-size: 9.5px; }
 @media (max-width: 700px) { .rt-go { margin-left: 0; width: 100%; } }
+
+/* The Guild page, elevated: the Forum and the writers you follow as two equal panels, then the rooms as a row of windows */
+.g-rooms { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch; }
+.g-follow-none { margin: 6px 0 0; font-size: 17px; color: #CFC8B8; }
+.g-follow .g-room-go, .g-room-forum .g-room-go { white-space: nowrap; }
+.g-room-forum .fo-latest-row { padding: 11px 0; }
+@media (max-width: 860px) { .g-rooms { grid-template-columns: minmax(0, 1fr) !important; } }
+@media (min-width: 701px) {
+  .g-tiles { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 12px !important; }
+  .g-tiles .g-tile { display: flex !important; flex-direction: column; justify-content: flex-end; align-items: flex-start !important; text-align: left !important;
+    gap: 8px !important; min-height: 176px; padding: 18px 18px 16px !important; border-radius: 14px; }
+  .g-tiles .g-tile .g-tile-photo { opacity: .55; }
+  .g-tiles .g-tile::before { background: linear-gradient(180deg, rgba(10,12,9,.05) 0%, rgba(10,12,9,.5) 45%, rgba(10,12,9,.92) 100%) !important; }
+  .g-tiles .g-tile:hover .g-tile-photo { opacity: .7; }
+  .g-tiles .g-tile-mark, .g-tiles .g-tile-crest-mark { width: 28px !important; height: 28px !important; justify-content: flex-start; }
+  .g-tiles .g-tile-mark svg { width: 22px !important; height: 22px !important; }
+  .g-tiles .g-tile-crest-mark > span { width: 28px; height: 28px; justify-content: flex-start; }
+  .g-tiles .g-tile-crest-mark svg { width: 28px !important; height: 28px !important; }
+  .g-tiles .g-tile-text { align-items: flex-start; }
+  .g-tiles .g-tile-name { font-size: 22px !important; line-height: 1.1; }
+  .g-tiles .g-tile .g-room-line { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; color: #CFC8B8; }
+  .g-tiles .g-tile .g-tile-go { display: none !important; }
+}
+@media (min-width: 701px) and (max-width: 1100px) { .g-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (min-width: 701px) { .g-tiles .g-tile .g-room-line { min-height: 2.7em; } }

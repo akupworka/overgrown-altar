@@ -16,7 +16,7 @@ async function withNames(rows: Row[]) {
 }
 
 /** On the Desk: what you saved, and what's new from the writers you follow. Shows nothing until there is something. */
-export function ReadingShelf({ me, freshOnly = false }: { me: string; freshOnly?: boolean }) {
+export function ReadingShelf({ me, freshOnly = false, savedOnly = false }: { me: string; freshOnly?: boolean; savedOnly?: boolean }) {
   const [saved, setSaved] = useState<Row[] | null>(null);
   const [fresh, setFresh] = useState<Row[] | null>(null);
   const [savedAll, setSavedAll] = useState(0);
@@ -46,7 +46,7 @@ export function ReadingShelf({ me, freshOnly = false }: { me: string; freshOnly?
     await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', id);
   }
   if (freshOnly && !fresh?.length) return null;
-  if (!saved?.length && !fresh?.length) return null;
+  if (!saved?.length && (savedOnly || !fresh?.length)) return null;
   const list = (rows: Row[], removable = false) => (
     <ol className="rd-list">
       {rows.map((r) => (
@@ -62,7 +62,7 @@ export function ReadingShelf({ me, freshOnly = false }: { me: string; freshOnly?
   );
   return (
     <div className="rd-shelf">
-      {!!fresh?.length && (
+      {!savedOnly && !!fresh?.length && (
         <section className="d-forum-panel rd-panel">
           <div className="d-forum-head"><span className="eb">New from writers you follow</span><a className="lab d-forum-link" href="/guild/members/?view=following">Following →</a></div>
           {list(fresh)}

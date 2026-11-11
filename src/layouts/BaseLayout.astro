@@ -262,5 +262,44 @@ const imageUrl = new URL(image, site).toString();
         });
       }
     </script>
+    <script>
+      // Read ticks: reaching the end of a piece marks it read (on this device only; nothing is sent anywhere), and
+      // wherever that piece is listed (the rooms, the Gallery, the Archive, Explore, writers' pages) a small tick shows.
+      const KEY = 'oa_read';
+      const load = (): string[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+      const norm = (p: string) => (p.endsWith('/') ? p : p + '/');
+      let read = new Set(load());
+      const markRead = () => {
+        const here = norm(location.pathname);
+        if (read.has(here)) return;
+        read.add(here);
+        try { localStorage.setItem(KEY, JSON.stringify([...read].slice(-1500))); } catch {}
+      };
+      const watched = new WeakSet<Element>();
+      const end = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { markRead(); end.disconnect(); } }));
+      const tick = () => {
+        document.querySelectorAll('[data-read-end]').forEach((el) => { if (!watched.has(el)) { watched.add(el); end.observe(el); } });
+        if (!read.size) return;
+        const here = norm(location.pathname);
+        document.querySelectorAll<HTMLAnchorElement>('a[href]:not([data-read-done])').forEach((a) => {
+          a.setAttribute('data-read-done', '');
+          if (a.getAttribute('aria-hidden') === 'true' || a.closest('nav, header, footer, .gbar, [data-no-tick]')) return;
+          let path = ''; try { const u = new URL(a.href); if (u.origin !== location.origin) return; path = norm(u.pathname); } catch { return; }
+          if (path === here || !read.has(path) || path === '/' || path.split('/').filter(Boolean).length < 2) return;
+          // A card with both a picture and a title for the same piece: one tick, on the title
+          const card = a.closest('li, article, .item') ?? a.parentElement;
+          if (a.querySelector('img') && card && [...card.querySelectorAll<HTMLAnchorElement>('a[href]')].some((o) => o !== a && !o.querySelector('img') && o.getAttribute('aria-hidden') !== 'true' && (() => { try { return norm(new URL(o.href).pathname) === path; } catch { return false; } })())) return;
+          const mark = document.createElement('span');
+          mark.className = 'read-tick'; mark.setAttribute('role', 'img'); mark.setAttribute('aria-label', 'Read');
+          a.classList.add(a.querySelector('img') ? 'has-read-tile' : 'has-read');
+          a.append(mark);
+        });
+      };
+      let wait: number | undefined;
+      const soon = () => { clearTimeout(wait); wait = window.setTimeout(tick, 250); };
+      tick();
+      new MutationObserver(soon).observe(document.body, { childList: true, subtree: true });
+      addEventListener('pageshow', () => { read = new Set(load()); document.querySelectorAll('[data-read-done]').forEach((a) => a.removeAttribute('data-read-done')); document.querySelectorAll('.read-tick').forEach((t) => t.remove()); tick(); });
+    </script>
   </body>
 </html>

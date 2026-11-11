@@ -119,9 +119,12 @@ function Directory() {
             <Link className="lab g-room-go" to="/guild/members/?view=forum">All forums →</Link>
           </div>
           <p className="it mut g-room-sub">The latest conversations among the Guild.</p>
-          <ForumLatest count={4} />
+          <ForumLatest count={5} />
         </section>
-        <div className="g-room-side">
+        {meId && <FollowingNew me={meId} />}
+      </div>
+      {/* The rooms, as a row of windows */}
+      <div className="g-room-side g-tiles">
           <a className="g-room g-room-small g-tile g-tile-desk" href="/guild/desk/">
             <img className="g-tile-photo" src="/images/window-light-on-wall-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span>
@@ -171,9 +174,8 @@ function Directory() {
             <span className="g-tile-text"><span className="g-tile-name">About</span><span className="g-room-line">Who we are, and what we believe.</span></span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>
-        </div>
       </div>
-      <div className="g-people-head"><span className="eb">Members</span>{members && <span className="lab mut">{members.filter((m) => m.role !== 'fellow').length} at the table</span>}</div>
+      <div className="g-people-head" id="members"><span className="eb">Members</span>{members && <span className="lab mut">{members.filter((m) => m.role !== 'fellow').length} at the table</span>}</div>
       {members && members.length > 3 && (
         <label className="g-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
@@ -453,6 +455,60 @@ function Reading({ id }: { id: string }) {
         {piece.status === 'approved' && <ReadTools piece={piece} />}
       </article>
     </div>
+  );
+}
+
+/** On the Guild page: the newest work from the writers you follow (opened inside the Guild, to read and keep). */
+function FollowingNew({ me }: { me: string }) {
+  type Row = { id: string; title: string; medium: string; published_at: string; author_id: string; image_path: string | null; who?: Profile; img?: string };
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const [following, setFollowing] = useState(0);
+  useEffect(() => {
+    (async () => {
+      const { data: f } = await supabase.from('follows').select('followed').eq('follower', me);
+      const ids = (f ?? []).map((x: any) => x.followed); setFollowing(ids.length);
+      if (!ids.length) { setRows([]); return; }
+      const { data } = await supabase.from('pieces').select('id, title, medium, published_at, author_id, image_path').in('author_id', ids)
+        .eq('status', 'approved').lte('published_at', new Date().toISOString()).order('published_at', { ascending: false }).limit(5);
+      const list = (data ?? []) as Row[];
+      const [{ data: ppl }, signed] = await Promise.all([
+        list.length ? supabase.from('profiles').select('*').in('id', [...new Set(list.map((r) => r.author_id))]) : Promise.resolve({ data: [] as any[] }),
+        (() => { const st = list.map((r) => r.image_path).filter((x) => x && !x.startsWith('/')) as string[]; return st.length ? supabase.storage.from('guild').createSignedUrls(st, 3600) : Promise.resolve({ data: [] as any[] }); })(),
+      ]);
+      const who = new Map((ppl ?? []).map((p: any) => [p.id, p]));
+      const url = new Map(((signed as any).data ?? []).map((x: any) => [x.path, x.signedUrl]));
+      setRows(list.map((r) => ({ ...r, who: who.get(r.author_id), img: r.image_path ? (r.image_path.startsWith('/') ? r.image_path : url.get(r.image_path)) : undefined })));
+    })();
+  }, [me]);
+  if (!rows) return null;
+  return (
+    <section className="g-room g-room-forum g-follow">
+      <div className="g-room-head">
+        <span className="eb">Writers you follow</span>
+        {following > 0 && <Link className="lab g-room-go" to="/guild/members/?view=following">Following →</Link>}
+      </div>
+      <p className="it mut g-room-sub">{following ? 'The newest work from the writers you keep up with.' : 'Their newest work, gathered in one place.'}</p>
+      {!following ? <p className="it g-follow-none">Open any writer’s page and tap Follow. <a href="#members" className="g-room-go">Meet the Guild ↓</a></p>
+        : !rows.length ? <p className="it g-follow-none">Nothing new from them yet. It will appear here the moment it’s published.</p>
+        : (
+          <ol className="fo-latest">
+            {rows.map((r) => {
+              const name = r.who?.display_name ?? 'A member';
+              return (
+                <li key={r.id}>
+                  <Link to={`/guild/members/?p=${r.id}`} className="fo-latest-row">
+                    <span className="fo-latest-img"><img src={r.img || portraitUrl(r.who?.portrait_path) || seatFor(name)} alt="" loading="lazy" /></span>
+                    <span className="fo-latest-text">
+                      <span className="fo-latest-title">{r.title}</span>
+                      <span className="lab mut">{mediumName(r.medium).split(' / ')[0]} · {name} · {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+    </section>
   );
 }
 
