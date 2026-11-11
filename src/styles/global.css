@@ -130,7 +130,7 @@ p, .body { text-wrap: pretty; }
 .hin { position: relative; z-index: 1; }
 /* A hero with its text centered (hero-c) or at the bottom left (pill-in). */
 .hero-c { position: absolute; left: 0; right: 0; top: 230px; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.pill-h { height: 860px; }
+.pill-h { height: 620px; }
 .pill-in { position: absolute; left: 120px; bottom: 110px; width: 820px; z-index: 1; display: flex; flex-direction: column; gap: 22px; }
 
 /* ---------- 9b. Article lists: numbered "matrix" rows, drop caps ---------- */
@@ -192,7 +192,7 @@ textarea.field { resize: vertical; }
   .m-only { display: block; }
   
   .hero-c { top: 128px; padding: 0 24px; }
-  .pill-h { height: 600px; }
+  .pill-h { height: 500px; }
   .pill-in { left: 24px; right: 24px; width: auto; bottom: 48px; }
   /* Header text sits at the bottom on phones, so shade from the bottom up. */
   .veil-l { background: linear-gradient(180deg, rgba(8,10,8,.45) 0%, rgba(8,10,8,.5) 35%, rgba(8,10,8,.94) 100%); }
@@ -516,3 +516,18 @@ html.sp-open { overflow: hidden; }
 .sp-save:hover, .sp-save:focus-visible { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
 .sp-hint { font-size: 8.5px; line-height: 1.7; color: #8C8679; text-align: center; max-width: 340px; }
 @media (prefers-reduced-motion: reduce) { .sp { animation: none; } }
+
+/* The kind of each piece, where a room lists several kinds (the Hearth, the Perimeter): bold, with a small pane of
+   its own glass colour beside it. The same pane sits on the filter above, so the colours can be learned. */
+[data-kinds] li[data-tag] :is(.he-card-k, .kicker), [data-kinds] .chip[data-show]:not([data-show='all']) { font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+[data-kinds] li[data-tag] :is(.he-card-k, .kicker) { color: var(--ink); }
+[data-kinds] li[data-tag] :is(.he-card-k, .kicker)::before, [data-kinds] .chip[data-show]:not([data-show='all'])::before {
+  content: ''; flex: none; width: 8px; height: 8px; border-radius: 1.5px; transform: rotate(45deg); background: var(--kind, var(--oxblood)); }
+[data-kinds] :is(li[data-tag='prose'], .chip[data-show='prose']) { --kind: #E0A12B; }
+[data-kinds] :is(li[data-tag='poetry'], .chip[data-show='poetry']) { --kind: #9A5BEA; }
+[data-kinds] :is(li[data-tag='fiction'], .chip[data-show='fiction']) { --kind: #3E7BFF; }
+[data-kinds] :is(li[data-tag='testimony'], .chip[data-show='testimony']) { --kind: #E0434F; }
+[data-kinds] :is(li[data-tag='deliverance'], .chip[data-show='deliverance']) { --kind: #9A5BEA; }
+[data-kinds] :is(li[data-tag='recovery'], .chip[data-show='recovery']) { --kind: #2FB985; }
+[data-kinds] :is(li[data-tag='personal'], .chip[data-show='personal']) { --kind: #E0A12B; }
+.he-card-cap .he-card-k::before { background: var(--kind, var(--ember)) !important; }

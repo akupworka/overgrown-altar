@@ -146,12 +146,14 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
         {writers.length > 0 && (
           <div class="wt-writers">
             <span class="lab mut">The writers</span>
+            <div class="wt-writers-row">
             {writers.map((w) => (
               <a class="wt-writer" href={authorUrl(w)}>
                 <Avatar name={w.display_name} src={w.portrait || undefined} size={44} id={w.id} />
                 <span><span class="wt-writer-n">{w.display_name}</span>{w.craft && <span class="lab mut wt-writer-c">{w.craft}</span>}</span>
               </a>
             ))}
+            </div>
           </div>
         )}
       </div>
@@ -267,6 +269,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .wt-forms { color: var(--oxblood); border-bottom: 1px solid rgba(98,55,45,.35); padding-bottom: 3px; }
   .wt-write-cta [hidden] { display: none; }
   .wt-writers { display: flex; flex-direction: column; gap: 14px; padding-left: 40px; border-left: 1px solid rgba(42, 32, 23, .15); }
+  .wt-writers-row { display: contents; }
   .wt-writer { display: flex; align-items: center; gap: 14px; }
   .wt-writer > span:last-child { display: flex; flex-direction: column; gap: 3px; }
   .wt-writer-n { font-family: var(--serif); font-size: 21px; transition: color .3s; }
@@ -342,5 +345,22 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     .wt-writers { padding-left: 0; padding-top: 24px; border-left: 0; border-top: 1px solid rgba(42, 32, 23, .15); }
     .list-head { flex-direction: column; align-items: stretch !important; gap: 18px !important; }
     .wt-search { min-width: 0; }
+  }
+  /* Phones: a shorter page. Four "Also new" (the rest are in the list below), the method as three tight rows,
+     and the writers in one row you swipe. */
+  @media (max-width: 700px) {
+    .also-grid > .also-card:nth-child(n+5) { display: none; }
+    .method-steps { margin-top: 22px !important; }
+    .method-steps li { display: grid !important; grid-template-columns: 46px minmax(0, 1fr); column-gap: 14px; row-gap: 3px; align-items: start; text-align: left; padding: 16px 0 !important; }
+    .method-steps li + li::before { display: none; }
+    .method-steps .num { grid-row: 1 / span 2; font-size: 30px !important; line-height: 1.1; text-align: center; }
+    .method-k { font-size: 21px !important; line-height: 1.2; }
+    .method-d { font-size: 15.5px !important; max-width: none; }
+    .wt-writers { min-width: 0; }
+    .wt-writers-row { display: flex; gap: 16px; min-width: 0; margin: 0 -22px; padding: 4px 22px 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .wt-writers-row::-webkit-scrollbar { display: none; }
+    .wt-writers-row .wt-writer { flex: none; width: 92px; flex-direction: column; text-align: center; gap: 8px; scroll-snap-align: start; }
+    .wt-writers-row .wt-writer > span:last-child { align-items: center; }
+    .wt-writer-n { font-size: 16px !important; line-height: 1.2; }
   }
 </style>

@@ -196,7 +196,8 @@ const up = () => fetch(BASE).then(() => true, () => false);
     if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
     // A whole-page picture: walk down the page first, so everything that fades in as you reach it has arrived.
     if (flag('full')) { await page.evaluate(async () => { for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 180)); } scrollTo(0, 0); await new Promise((r) => setTimeout(r, 400)); }); }
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+    // (measured against the screen's own width: a phone quietly zooms out to fit a page that is too wide, which would hide it)
+    const overflow = await page.evaluate((w) => document.documentElement.scrollWidth > w + 1, ctxOpts.viewport.width);
     const file = path.join(out, `${name}.png`);
     await page.screenshot({ path: file, fullPage: flag('full') });
     console.log(`${name}: ${file}${overflow ? '  ⚠ page scrolls sideways' : ''}${errors.length ? '  ⚠ errors: ' + errors.join(' | ') : '  no page errors'}`);

@@ -61,7 +61,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   </section>
 
   <!-- The work, as a gallery -->
-  <section class="sec paper" id="work">
+  <section class="sec paper" id="work" data-kinds>
     <div class="row" style="padding-bottom:22px">
       <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Guild</span><h2 class="h2">The work</h2></div>
       <span class="lab mut he-total">{works.length} {works.length === 1 ? 'piece' : 'pieces'} · newest first</span>
@@ -75,8 +75,10 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
         {works.map((w) => (
           <li data-tag={w.kind}>
             <a class="he-card-img" href={w.href} tabindex="-1" aria-hidden="true"><img class:list={[{ mono: !w.hasPhoto }]} src={w.image} alt="" loading="lazy" style={w.pos} /></a>
-            <span class="lab he-card-k">{w.kindLabel}</span>
-            <a class="he-card-t" href={w.href}>{w.title}</a>
+            <span class="he-card-cap">
+              <span class="lab he-card-k">{w.kindLabel}</span>
+              <a class="he-card-t" href={w.href}>{w.title}</a>
+            </span>
             {w.standfirst && <span class="it he-card-sf">{w.standfirst}</span>}
             {w.authorHref
               ? <a class="he-card-by" href={w.authorHref}><Avatar name={w.author.display_name} src={w.author.portrait || undefined} size={24} id={w.author.id} /><span class="lab mut">{w.author.display_name}</span></a>
@@ -104,8 +106,15 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
         ))}
       </div>
     )}
-    <div class="he-cta">
-      <a class="btn" href="/guild/desk/#write" data-member hidden>Bring your work to the table</a>
+    <!-- The open chair: what the Hearth takes, and where to learn what the editor looks for -->
+    <div class="he-write">
+      <span class="eb">Write for The Hearth</span>
+      <h2 class="h2 he-write-h">Bring your work to the fire.</h2>
+      <p class="it mut he-write-p">The Hearth takes prose, poetry and fiction. Every piece is read by the editor before it is published.</p>
+      <a class="lab he-forms" href="/crafts/#hearth">What each craft is, and what the editor looks for →</a>
+      <div class="he-cta">
+        <a class="btn" href="/guild/desk/#write" data-member hidden>Bring your work to the table</a>
+      </div>
     </div>
   </section>
   <Subscribe />
@@ -208,6 +217,19 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-card-t:hover, .he-grid li:hover .he-card-t { color: var(--oxblood); }
   .he-card-sf { font-size: 17px; line-height: 1.45; color: var(--muted-paper); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .he-card-by { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
+  /* The picture carries its own caption: it fades to night at the foot, with the kind and the title set on it;
+     the writer's name sits beneath. (Every card is the same height, whatever the length of its title.) */
+  .he-grid li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; }
+  .he-card-img { grid-area: 1 / 1; position: relative; margin: 0; }
+  .he-card-img::after { content: ''; position: absolute; inset: 30% 0 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8, 10, 8, 0), rgba(8, 10, 8, .5) 42%, rgba(8, 10, 8, .93)); }
+  .he-card-cap { grid-area: 1 / 1; align-self: end; z-index: 1; display: flex; flex-direction: column; gap: 9px; padding: 0 20px 20px; pointer-events: none; }
+  .he-card-cap > * { pointer-events: auto; }
+  .he-card-cap .he-card-k { color: #F3ECDC !important; font-size: 9.5px; }
+  .he-card-cap .he-card-t { color: #F6F0E2; font-size: 25px; line-height: 1.14; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 14px rgba(0, 0, 0, .55); }
+  .he-card-cap .he-card-t:hover, .he-grid li:hover .he-card-cap .he-card-t { color: var(--ember); }
+  .he-grid .he-card-sf { display: none; }
+  .he-grid .he-card-by { margin-top: 12px; }
   a.he-card-by:hover .lab { color: var(--oxblood); }
   .he-card-by .lab { font-size: 9px; }
   .he-none { margin: 28px 0 0; font-size: 19px; }
@@ -218,11 +240,26 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   /* The table */
   .he-makers { margin-top: 44px; display: grid; grid-template-columns: repeat(4, minmax(0, 150px)); justify-content: center; justify-items: center; gap: 28px 40px; }
   @media (min-width: 1300px) { .he-makers:has(> :nth-child(7)) { grid-template-columns: repeat(8, minmax(0, 130px)); gap: 28px 26px; } }
-  @media (max-width: 700px) { .he-makers { grid-template-columns: repeat(2, minmax(0, 150px)); } }
+  /* Phones: the makers in one row you swipe, instead of two screens of faces */
+  @media (max-width: 700px) {
+    .he-makers { display: flex; justify-content: flex-start; align-self: stretch; min-width: 0; max-width: none; gap: 18px; margin: 30px -22px 0; padding: 4px 22px 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .he-makers::-webkit-scrollbar { display: none; }
+    .he-maker { flex: none; width: 96px; scroll-snap-align: start; }
+    .he-maker-n { font-size: 16px; }
+    .he-write { margin-top: 44px; padding: 30px 22px; }
+    .he-write-h { font-size: 28px !important; }
+    .he-write-p { font-size: 17px; }
+  }
   .he-maker { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 120px; max-width: 100%; }
   .he-maker-n { font-family: var(--serif); font-size: 19px; line-height: 1.15; text-align: center; transition: color .3s; }
   .he-maker:hover .he-maker-n { color: var(--oxblood); }
   .he-maker-c { font-size: 9px; text-align: center; }
+  .he-write { margin: 64px auto 0; padding: 48px 40px; max-width: 820px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+    border-radius: 4px; background: rgba(255, 255, 255, .28); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .12); }
+  .he-write-h { font-size: 40px; line-height: 1.08; }
+  .he-write-p { margin: 0; font-size: 19px; line-height: 1.5; max-width: 560px; }
+  .he-forms { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); padding-bottom: 3px; }
+  .he-write .he-cta { margin-top: 10px; }
   .he-cta { margin-top: 44px; display: flex; justify-content: center; gap: 14px; }
   .he-cta [hidden] { display: none; }
 
@@ -249,6 +286,9 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
         .he-grid { grid-template-columns: 1fr 1fr; gap: 30px 16px; }
     .he-card-t { font-size: 19px; }
     .he-card-sf { display: none; }
+    .he-card-cap { padding: 0 12px 12px; gap: 6px; }
+    .he-card-cap .he-card-t { font-size: 17px; }
+    .he-card-cap .he-card-k { font-size: 8px; }
     .he-total { display: none; }
     .he-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); margin-left: auto; margin-right: auto; }
     .he-cta .btn { text-align: center; }

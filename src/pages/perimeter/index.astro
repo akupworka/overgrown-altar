@@ -46,7 +46,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
   </section>
 
   <!-- Every story, newest first, with a filter -->
-  <section class="sec paper" id="stories">
+  <section class="sec paper" id="stories" data-kinds>
     <div class="row" style="padding-bottom:22px">
       <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Perimeter</span><h2 class="h2">Stories</h2></div>
       <span class="lab mut pe-total">{items.length} {items.length === 1 ? 'piece' : 'pieces'} · newest first</span>

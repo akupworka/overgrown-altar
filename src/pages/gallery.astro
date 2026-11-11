@@ -137,6 +137,9 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
   @media (max-width: 1100px) and (min-width: 701px) { .gx-head { padding-left: 24px; padding-right: 24px; } .gx-body { padding: 0 24px 90px; } .gx-wall { gap: 8px; } }
   @media (max-width: 700px) {
     .gx-head { padding: 112px 16px 22px; }
+    /* the filter row bleeds to the page's edge, which is 16px here (not the usual 24): it was making the page 8px too wide */
+    .gx-filters { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+    .gx-head :global(.filters-more) { right: -16px; }
     .gx-sub { font-size: 17px; }
     .gx-body { padding: 0 0 80px; }
     .gx-wall { gap: 3px; }

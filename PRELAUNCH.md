@@ -74,6 +74,16 @@ use still working:
 - The writer answers a reader's reflection, once; the reader gets a bell line.
 - Inbox: "Mark all as read", and clearing notices now updates the count beside Inbox.
 
+## The three rooms, reviewed 11 Nov 2026 (look once on a real phone)
+- Hearth and Perimeter: shorter opening picture; each kind (prose, poetry, fiction; testimony, deliverance, recovery,
+  personal) in bold with its own glass-coloured pane, on the cards and on the filters.
+- Hearth cards: the kind and title sit on the picture, which fades to night at its foot; the writer's name beneath.
+  A "Write for The Hearth" card at the foot. The makers swipe in one row on phones.
+- Watchtower on phones: four "Also new", the method as three tight rows, the writers in one swiping row.
+- Undecided by the owner: whether the Hearth and the Perimeter should open with their newest work, as the Watchtower does.
+- The Gallery was 8px too wide on phones (the old check could not see it; the check now measures against the phone's
+  own width).
+
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
       one build per change plus the hourly rebuild when something was published.
