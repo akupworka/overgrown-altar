@@ -39,7 +39,9 @@ export function initBell(supabase: SupabaseClient) {
   const btn = document.querySelector<HTMLButtonElement>('[data-bell]'), panel = document.querySelector<HTMLElement>('[data-bell-panel]'), badge = document.querySelector<HTMLElement>('[data-bell-n]');
   if (!btn || !panel || !badge) return;
   let items: Item[] = [], seen = '', cleared = false;
-  const count = () => { const n = gather(items.filter((i) => !seen || i.at > seen)).length; badge.hidden = n === 0; badge.textContent = n > 9 ? '9+' : String(n); return n; };
+  // The number on the bell is what has not been cleared yet (it stays until each line is ticked away, or all are cleared).
+  const count = () => { const n = gather(items).length; badge.hidden = n === 0; badge.textContent = n > 99 ? '99+' : String(n); return n; };
+  const fresh = () => items.some((i) => !seen || i.at > seen);
   const load = async () => {
     const { data } = await supabase.rpc('bell');
     items = (data?.items ?? []) as Item[]; seen = data?.seen ?? ''; count();
@@ -56,7 +58,7 @@ export function initBell(supabase: SupabaseClient) {
     e.preventDefault(); e.stopPropagation();
     if (!panel.hidden) return close();
     draw(); panel.hidden = false; btn.setAttribute('aria-expanded', 'true');
-    if (count()) { await supabase.rpc('bell_seen'); badge.hidden = true; setTimeout(() => { seen = new Date().toISOString(); }, 0); }
+    if (fresh()) { await supabase.rpc('bell_seen'); setTimeout(() => { seen = new Date().toISOString(); }, 0); }   // opened: nothing is "new" any more, but the number stays
   });
   // Clearing: one line by its tick, or everything. The panel stays open; the line slips away.
   panel.addEventListener('click', (e) => {

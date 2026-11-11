@@ -506,6 +506,13 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     if (error) return setMsg(error.message);
     setEditing(null); load();
   }
+  // Report a post to the editors (only they see the report; one open report a person a post).
+  async function reportPost(p: Post) {
+    const reason = prompt('Tell the editors what is wrong with this post. Only they will see your report.');
+    if (reason === null) return;
+    const { error } = await supabase.from('forum_reports').insert({ post_id: p.id, reporter: me, reason: reason.trim().slice(0, 1000) });
+    alert(error ? error.message : 'Reported. An editor will look at it. Thank you for keeping the table safe.');
+  }
   async function removePost(p: Post) {
     if (!confirm('Delete this post? It can’t be brought back.')) return;
     const { error } = await supabase.from('forum_posts').delete().eq('id', p.id);
@@ -573,6 +580,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                     {open && <button type="button" className="fo-act" onClick={() => quote(p)}><span aria-hidden="true">❝</span> Quote</button>}
                     {mine && <button type="button" className="fo-act" onClick={() => setEditing({ id: p.id, body: p.body })}>Edit</button>}
                     {i > 0 && (mine || isEditor) && <button type="button" className="fo-act fo-danger" onClick={() => removePost(p)}>Delete</button>}
+                    {!mine && <button type="button" className="fo-act fo-report" onClick={() => reportPost(p)}>Report</button>}
                   </span>
                 )}
               </div>

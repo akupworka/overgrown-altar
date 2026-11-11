@@ -2051,11 +2051,10 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 @media (min-width: 1101px) {
   body:has(.guild-side:not([hidden]) :is(.ss-aside, .d-room:not(.writing) .d-side) .ss-make) :is(.inner-write, .inner-photo) { display: none !important; }
 }
-/* On the Desk and the Guild's own pages the pair waits out of sight while the page draws (no blink on refresh),
-   and shows only once a page with no column has drawn: writing, a member's page, a piece being read, the Prestiges. */
+/* On the Desk and the Guild's own pages (computers) the top bar never carries Write or Photograph: they live in the
+   column under your name, and My Desk is one click away from the pages that have no column. */
 @media (min-width: 1101px) {
   [data-inner][data-inside] :is(.inner-write, .inner-photo) { display: none !important; }
-  html:not([data-fellow]) body:has(.guild-side:not([hidden]) :is(.d-room.writing, .m-page, .m-reading, .pzx)) [data-inner][data-inside] :is(.inner-write, .inner-photo) { display: inline-flex !important; }
 }
 
 /* The Guild page's two panels hold their place while they load (no jump when the lists arrive) */
@@ -2351,4 +2350,19 @@ html[data-night] .d-reader .d-paper .d-paper-standfirst { color: var(--muted-pap
   .d-reader .d-rail .d-decide-row { flex-direction: column; align-items: stretch; gap: 8px; }
   .d-reader .d-rail .d-decide-note .field { font-size: 16px; }
   .d-reader .d-rail .d-decide-note .d-golive { max-width: none; }
+}
+
+/* Reported forum posts (the editors' queue): the reason, then a line of the post itself */
+.d-rep-quote { display: block; font-family: var(--serif); font-size: 16px; color: #CFC8B8; }
+
+/* Passing a piece to another editor: their names, one to a line in the rail */
+.d-pass-row { flex-wrap: wrap; }
+/* "Ask for changes" (editors, reading a published piece) */
+.rt-ask[aria-pressed='true'] { background: var(--oxblood); color: #F3ECDC; }
+/* The decision bar on a phone: short words, two to a row */
+.d-decide .d-short { display: none; }
+@media (max-width: 700px) {
+  .d-decide .d-long { display: none; }
+  .d-decide .d-short { display: inline; }
+  .d-reader .d-decide .d-link { flex: 1 1 40%; white-space: nowrap; }
 }

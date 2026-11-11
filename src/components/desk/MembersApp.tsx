@@ -353,10 +353,6 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
               Write a piece
             </a></>}
-            <Link className="m-act" to="/guild/members/?view=library">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10 4h3v16h-3z" /><path d="m15.5 6 2.8-.8 4 14.3-2.8.8z" /></svg>
-              My library
-            </Link>
             <a className="m-act" href="/guild/desk/#my-page">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
               Edit your vault
@@ -449,7 +445,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
 
 // ---------------------------------------------------------------- reading a piece
 
-function Reading({ id }: { id: string }) {
+function Reading({ id, isEditor = false }: { id: string; isEditor?: boolean }) {
   const [piece, setPiece] = useState<Piece | null | undefined>(undefined);
   const [author, setAuthor] = useState<Profile | null>(null);
   const [photo, setPhoto] = useState('');
@@ -516,7 +512,7 @@ function Reading({ id }: { id: string }) {
           </Link>
         )}
         {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
-        {piece.status === 'approved' && <ReadTools piece={piece} author={author?.display_name ?? ''} photo={photo} />}
+        {piece.status === 'approved' && <ReadTools piece={piece} author={author?.display_name ?? ''} photo={photo} isEditor={isEditor} />}
       </article>
       {piece.status !== 'approved' && <WorkshopNotes piece={piece} />}
     </div>
@@ -580,8 +576,18 @@ function FollowingNew({ me }: { me: string }) {
 /** Under a piece read inside the Guild: tell the writer it stayed with you, keep it, share it (its public link, or a social post:
  *  a tall picture for Instagram and messages), and a way to its own page (where the reflections are). */
 const ROOM_PHOTO: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
-function ReadTools({ piece, author, photo }: { piece: Piece; author: string; photo: string }) {
+function ReadTools({ piece, author, photo, isEditor = false }: { piece: Piece; author: string; photo: string; isEditor?: boolean }) {
   const [me, setMe] = useState<string | null>(null);
+  // Editors: send a published piece back to its writer with a note. Only then can the writer send changes.
+  const [asked, setAsked] = useState(false);
+  useEffect(() => { if (isEditor) supabase.from('piece_change_requests').select('piece_id').eq('piece_id', piece.id).maybeSingle().then(({ data }) => setAsked(!!data)); }, [isEditor, piece.id]);
+  const askChanges = async () => {
+    const note = prompt(asked ? 'Changes have already been asked for. Write a new note to replace the first:' : 'What should the writer change? They get your note, and can then edit the piece and send it back for your approval. The piece stays on the site as it is meanwhile.');
+    if (!note || !note.trim()) return;
+    const { error } = await supabase.rpc('ask_for_changes', { p_id: piece.id, p_note: note.trim() });
+    if (error) { alert(error.message); return; }
+    setAsked(true);
+  };
   // One library each: the Fellowship's stands on their page (`saves`); the Guild's and editors' is private (`library`)
   const shelf = typeof document !== 'undefined' && document.documentElement.hasAttribute('data-fellow') ? 'saves' : 'library';
   const [later, setLater] = useState(false);
@@ -635,6 +641,9 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
   };
   return (
     <div className="rt">
+      {isEditor && !mine && <button type="button" className="rt-btn rt-ask" aria-pressed={asked} onClick={askChanges}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
+        {asked ? 'Changes asked for' : 'Ask for changes'}</button>}
       {!mine && <button type="button" className="rt-btn" aria-pressed={marked} onClick={toggleMark}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={marked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
         {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
@@ -709,7 +718,7 @@ export default function MembersApp() {
     : route.view === 'following' ? <Following me={me} />
     : route.view === 'library' ? <Library me={me} />
     : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
-    : route.p ? <Reading id={route.p} />
+    : route.p ? <Reading id={route.p} isEditor={isEditor} />
     : route.m ? <MemberPage id={route.m} me={me} />
     : <Directory me={me} />;
   // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a member’s page

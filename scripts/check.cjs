@@ -99,6 +99,8 @@ if (flag('heavy')) {
 ['/images/duomo-spires-1200.jpg', '/images/four-lancet-window-1200.jpg', null, '/images/labyrinth-stained-light-1200.jpg', '/images/window-light-on-wall-1200.jpg', null, '/images/ascension-window-wide-1200.jpg'].forEach((img, i) => { if (pieces[i] && img) pieces[i].image_path = img; });
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
+  piece_change_requests: [{ piece_id: 'mine1', note: 'The middle section repeats the opening. Could you cut one of them, and look again at the last line?', asked_at: t(5) }],
+  forum_reports: [{ id: 'fr1', reason: 'This reads as an advertisement.', created_at: t(3), resolved: false, assigned_to: ME, post: { id: 'p1', thread_id: 't1', body: 'Have you tried my new course on writing? Link in my vault. It will change everything about how you work.' } }],
   inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null, kind: 'published' }, { id: 'nt2', member_id: ME, writer_id: 'm2', piece_id: 'wd1', created_at: t(7), read_at: null, kind: 'draft' }],
   saves: [...['mine0', 'mine1', 'mine3', 'mine4', 'mine6', 'a2'].map((piece_id, i) => ({ member_id: 'f1', piece_id, created_at: t(9 - i) }))],
   library: [...['a2', 'mine0', 'mine1', 'mine2', 'mine3', 'mine4', 'mine5', 'mine6', 'mine7'].map((piece_id, i) => ({ member_id: ME, piece_id, created_at: t(9 - i) })),

@@ -595,6 +595,9 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   const [deleting, setDeleting] = useState<{ piece: Piece; mode: 'take' | 'delete' } | null>(null);
   const [sharing, setSharing] = useState<Piece | null>(null);   // the Workshop: a draft being shared for notes
   const shares = useMyShares(profile?.id ?? '', sharing);
+  // Published pieces an editor has sent back for a change: the note, and the way in to make it.
+  const [asks, setAsks] = useState<Map<string, string>>(new Map());
+  useEffect(() => { supabase.from('piece_change_requests').select('piece_id, note').then(({ data }) => setAsks(new Map((Array.isArray(data) ? data : []).map((r: any) => [r.piece_id, r.note])))); }, [pieces.length]);
   function remove(p: Piece) { setDeleting({ piece: p, mode: 'delete' }); }
   async function restore(p: Piece) {
     const { error } = await supabase.rpc('restore_piece', { p_id: p.id });
@@ -625,8 +628,9 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     const editable = p.status === 'draft' || p.status === 'returned';
     const live = p.status === 'approved';
     // Once published, a piece is the editor's to change; a writer can view it, or ask for it to come down.
-    const openable = editable || (live && isEditor);
-    const openLabel = editable ? 'Continue writing' : 'Edit';
+    const asked = live && !isEditor ? asks.get(p.id) : undefined;   // ...or the writer's, once an editor asks for a change
+    const openable = editable || (live && isEditor) || !!asked;
+    const openLabel = editable ? 'Continue writing' : asked ? 'Make the change' : 'Edit';
     return (
             <li key={p.id} className={`d-item${openable || live ? ' d-openable' : ''}`}>
               {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
@@ -635,6 +639,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
                 <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}{editable && shares.get(p.id) ? <span className="lab d-rev-tag ws-tag">In the Workshop · {shares.get(p.id)} {shares.get(p.id) === 1 ? 'reader' : 'readers'}</span> : null}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
+                {asked && <p className="d-note"><span className="lab">{p.revision ? 'Your changes are with the editor · the note was' : 'The editor asks for a change'}</span>{asked}</p>}
               </div>
               <MoreActions>
                 {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
@@ -800,6 +805,10 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
     supabase.storage.from('guild').createSignedUrl(form.image_path, 3600).then(({ data }) => setPreview(data?.signedUrl ?? null));
   }, [form.image_path]);
 
+  // A published piece opened because an editor asked for a change: their note stays in view while you work.
+  const [ask, setAsk] = useState('');
+  useEffect(() => { if (live && !isEditor && id) supabase.from('piece_change_requests').select('note').eq('piece_id', id).maybeSingle().then(({ data }) => setAsk((data as any)?.note ?? '')); }, [live, isEditor, id]);
+  const askNote = ask ? <p className="d-note"><span className="lab">The editor asks for a change</span>{ask}</p> : null;
   const save = useCallback(async (status: 'draft' | 'submitted' = 'draft') => {
     setState('saving'); setMsg('');
     if (live && id) {
@@ -1083,7 +1092,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         </div>
         <p className="it d-notice" role="alert">{msg}</p>
 
-        {step === 0 && <>{note}{paper}</>}
+        {step === 0 && <>{askNote}{note}{paper}</>}
 
         {step === 1 && (
           <div className="d-step">
@@ -1165,7 +1174,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         </div>
         {msg && <p className="it d-notice d-bar-notice" role="alert">{msg}</p>}
       </div>
-      {note}
+      {askNote}{note}
 
       <div className="d-write-grid">
         {paper}
@@ -1346,7 +1355,10 @@ function FormsRoom({ me }: { me: string }) {
   // Reported conversations (members' direct messages), for the editor to read and resolve.
   const [reports, setReports] = useState<{ id: string; thread_id: string; reason: string; created_at: string; resolved: boolean; reporter: string }[]>([]);
   const loadReports = () => supabase.from('dm_reports').select('*').eq('resolved', false).order('created_at', { ascending: false }).then(({ data }) => setReports(Array.isArray(data) ? (data as any) : []));
-  useEffect(() => { loadReports(); }, []);
+  // Reported forum posts, for any editor to read and resolve.
+  const [postReports, setPostReports] = useState<{ id: string; reason: string; created_at: string; assigned_to: string | null; post: { id: string; thread_id: string; body: string } | null }[]>([]);
+  const loadPostReports = () => supabase.from('forum_reports').select('id, reason, created_at, assigned_to, post:forum_posts(id, thread_id, body)').eq('resolved', false).order('created_at', { ascending: false }).then(({ data }) => setPostReports(Array.isArray(data) ? (data as any) : []));
+  useEffect(() => { loadReports(); loadPostReports(); }, []);
   // Published pieces their writers have taken down (kept 30 days, restorable).
   const [downs, setDowns] = useState<(Piece & { profiles?: { display_name: string } })[]>([]);
   const loadDowns = () => supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').eq('status', 'withdrawn').order('taken_down_at', { ascending: false }).then(({ data }) => setDowns(Array.isArray(data) ? (data as any) : []));
@@ -1387,6 +1399,20 @@ function FormsRoom({ me }: { me: string }) {
                   {r.assigned_to && r.assigned_to !== me && <button type="button" className="d-textbtn" onClick={async () => { const { error } = await supabase.rpc('take_over', { kind: 'report', item: r.id }); if (error) alert(error.message); loadReports(); }}>Take it</button>}
                   <a className="ghost d-btn" href={`/guild/members/?dm=${r.thread_id}`}>Read it</a>
                   <button type="button" className="d-textbtn" onClick={async () => { await supabase.from('dm_reports').update({ resolved: true }).eq('id', r.id); loadReports(); }}>Resolve</button>
+                </li>
+              ))}</ul>
+            </section>
+          )}
+          {postReports.length > 0 && (
+            <section className="d-reports">
+              <span className="eb">Reported forum posts · {postReports.length}</span>
+              <ul>{postReports.map((r) => (
+                <li key={r.id}>
+                  <span className="d-rep-text"><span className="it">{r.reason || 'No reason given.'}</span>
+                    {r.post && <span className="d-rep-quote">“{r.post.body.replace(/\s+/g, ' ').slice(0, 140)}{r.post.body.length > 140 ? '…' : ''}”</span>}
+                    <span className="lab mut">{fmt(r.created_at)}{r.assigned_to && <> · {r.assigned_to === me ? <b className="d-with">yours</b> : <span className="d-with">with {editorNames.get(r.assigned_to) ?? 'another editor'}</span>}</>}</span></span>
+                  {r.post && <a className="ghost d-btn" href={`/guild/members/?t=${r.post.thread_id}#post-${r.post.id}`}>Read it</a>}
+                  <button type="button" className="d-textbtn" onClick={async () => { await supabase.from('forum_reports').update({ resolved: true }).eq('id', r.id); loadPostReports(); }}>Resolve</button>
                 </li>
               ))}</ul>
             </section>
@@ -1472,7 +1498,7 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
 }
 
 function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void; onDecided: () => void }) {
-  const [mode, setMode] = useState<'read' | 'return' | 'decline' | 'schedule'>('read');
+  const [mode, setMode] = useState<'read' | 'return' | 'decline' | 'schedule' | 'pass'>('read');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -1500,6 +1526,24 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   async function applyChanges(accept: boolean) {
     setBusy(true); setMsg('');
     const { error } = await supabase.from('pieces').update(accept && rev ? { ...rev, revision: null, revision_at: null } : { revision: null, revision_at: null }).eq('id', piece.id);
+    setBusy(false);
+    if (error) return setMsg(error.message);
+    if (accept) await supabase.from('piece_change_requests').delete().eq('piece_id', piece.id);   // the change asked for has been made
+    onDecided();
+  }
+  // Pass it on: the other editors (never the piece's own writer), and the handing over.
+  const [others, setOthers] = useState<{ id: string; display_name: string }[]>([]);
+  useEffect(() => {
+    (async () => {
+      const [{ data }, { data: s }] = await Promise.all([supabase.from('profiles').select('id, display_name').in('role', ['editor', 'staff']), supabase.auth.getSession()]);
+      const mine = s.session?.user.id;
+      setOthers((Array.isArray(data) ? data : []).filter((e: any) => e.id !== mine && e.id !== piece.author_id) as any);
+    })();
+  }, [piece.id]);
+  async function pass(to: { id: string; display_name: string }) {
+    if (!confirm(`Pass this piece to ${to.display_name}? It leaves your list and joins theirs.`)) return;
+    setBusy(true); setMsg('');
+    const { error } = await supabase.rpc('pass_piece', { p_id: piece.id, to_editor: to.id });
     setBusy(false);
     if (error) return setMsg(error.message);
     onDecided();
@@ -1548,9 +1592,19 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
           <span className="lab d-decide-what">{(piece as any).profiles?.display_name ?? 'A member'} · {shown.medium === 'photograph' ? 'photograph' : `${words(shown.body).toLocaleString()} words`}</span>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
           <button type="button" className="d-link" onClick={() => setMode('schedule')}>Schedule</button>
-          <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
+          <button type="button" className="d-link" onClick={() => setMode('return')}>Send back<span className="d-long"> with a note</span></button>
+          {others.length > 0 && <button type="button" className="d-link" disabled={busy} onClick={() => others.length === 1 ? pass(others[0]) : setMode('pass')}>Pass<span className="d-short"> on</span><span className="d-long"> to another editor</span></button>}
           <button type="button" className="d-link d-danger" onClick={() => setMode('decline')}>Decline</button>
         </>)}
+        {!rev && mode === 'pass' && (
+          <div className="d-decide-note">
+            <span className="lab d-decide-what">Pass this piece to</span>
+            <div className="d-decide-row d-pass-row">
+              {others.map((e) => <button key={e.id} type="button" className="d-link" disabled={busy} onClick={() => pass(e)}>{e.display_name}</button>)}
+              <button type="button" className="d-link" onClick={() => setMode('read')}>Cancel</button>
+            </div>
+          </div>
+        )}
         {!rev && mode === 'schedule' && (
           <div className="d-decide-note">
             <GoLiveField value={goLive} onChange={setGoLive} />
@@ -1560,7 +1614,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
             </div>
           </div>
         )}
-        {!rev && mode !== 'read' && mode !== 'schedule' && (
+        {!rev && (mode === 'return' || mode === 'decline') && (
           <div className="d-decide-note">
             <label className="d-lbl"><span className="lab">{mode === 'return' ? 'Your note to the writer' : 'A word to the writer (optional)'}</span>
               <textarea className="field" style={{ height: 130 }} value={note} onChange={(e) => setNote(e.target.value)}

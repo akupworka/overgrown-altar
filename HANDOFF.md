@@ -39,6 +39,11 @@ Start by reading this file, then `README.md`.
 - BaseLayout: Open Graph/Twitter previews (`image` prop), OA favicon + apple-touch-icon, Share/Print, first-visit
   "arrival" (cross draws itself, `components/Arrival.astro`, once per browser). `/enter/` is a drawn doorway.
 
+## Parked: the Dispatches letter
+The weekly letter is not built. Its menu links were removed on 11 Nov 2026 (`menu.astro`, `MenuPanel.astro`); the
+sign-up doorway (`Subscribe.astro`, Netlify form "dispatches") still stands at the foot of the public pages and keeps
+collecting addresses. When the letter exists, put the links back ("Receive the Dispatches" → `/#subscribe`).
+
 ## Parked: Folios
 Folios (the publication's bound, printed collections) are a later chapter. The owner asked for them to be taken off the
 site everywhere but remembered. Nothing was deleted:

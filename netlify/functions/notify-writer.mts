@@ -65,15 +65,26 @@ export default async (req: Request) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY, resend = process.env.RESEND_API_KEY;
   if (!service || !resend) return new Response('not configured', { status: 202 });
-  let id = '';
-  try { id = String((await req.json()).piece_id ?? ''); } catch { return new Response('Bad request', { status: 400 }); }
+  let id = '', kind = '';
+  try { const b = await req.json(); id = String(b.piece_id ?? ''); kind = String(b.kind ?? ''); } catch { return new Response('Bad request', { status: 400 }); }
   if (!/^[0-9a-f-]{36}$/.test(id)) return new Response('Bad request', { status: 400 });
 
   const db = createClient(SUPABASE_URL, service, { auth: { persistSession: false } });
   const { data: p } = await db.from('pieces').select('id, title, slug, status, editor_note, author_id, updated_at, writer_notified, published_at').eq('id', id).maybeSingle();
   if (!p || !['approved', 'returned', 'declined'].includes(p.status)) return new Response('nothing to send', { status: 200 });
-  if (p.writer_notified === p.status) return new Response('already sent', { status: 200 });
-  if (Date.now() - Date.parse(p.updated_at) > 10 * 60 * 1000) return new Response('too old', { status: 200 });
+  // "Ask for changes" on a published piece: the editor's note goes to the writer, once for each asking.
+  let ask: { note: string; asked_at: string } | null = null;
+  if (kind === 'changes') {
+    const { data: r } = await db.from('piece_change_requests').select('note, asked_at').eq('piece_id', id).maybeSingle();
+    if (!r || p.status !== 'approved') return new Response('nothing to send', { status: 200 });
+    if (p.writer_notified === 'changes:' + r.asked_at) return new Response('already sent', { status: 200 });
+    if (Date.now() - Date.parse(r.asked_at) > 10 * 60 * 1000) return new Response('too old', { status: 200 });
+    ask = r as any;
+  } else {
+    if (p.writer_notified === p.status) return new Response('already sent', { status: 200 });
+    if (Date.now() - Date.parse(p.updated_at) > 10 * 60 * 1000) return new Response('too old', { status: 200 });
+  }
+  const told = ask ? 'changes:' + ask.asked_at : p.status;
 
   const [{ data: who }, { data: prof }] = await Promise.all([
     db.auth.admin.getUserById(p.author_id),
@@ -82,13 +93,17 @@ export default async (req: Request) => {
   const to = who?.user?.email;
   if (!to) return new Response('no address', { status: 200 });
   // Pretend members (the sample accounts) have no real address: mark the decision as told, and send nothing.
-  if (/@sample\.overgrownaltar\.com$/i.test(to)) { await db.from('pieces').update({ writer_notified: p.status }).eq('id', p.id); return new Response('sample member: nothing sent', { status: 200 }); }
+  if (/@sample\.overgrownaltar\.com$/i.test(to)) { await db.from('pieces').update({ writer_notified: told }).eq('id', p.id); return new Response('sample member: nothing sent', { status: 200 }); }
   const first = (prof?.display_name ?? '').split(/\s+/)[0] || 'friend';
   const title = p.title || 'your piece';
   // Approved for a later date: the writer hears when it will go live.
   const later = p.status === 'approved' && p.published_at && Date.parse(p.published_at) > Date.now() + 5 * 60 * 1000;
   const when = later ? new Date(p.published_at).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' }) : '';
-  const mail = later
+  const mail = ask
+    ? { subject: `A note from the editor: ${title}`, html: letter({ header: 'editor', eyebrow: 'A change, please', heading: 'One more pass.', preview: `The editor asks for a change to ${title}.`,
+        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> again and asks for a change. It stays on the site as it is while you work. Open your Desk, make the change, and send it back.`,
+        note: ask.note || undefined, button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
+    : later
     ? { subject: `Accepted: ${title}`, html: letter({ header: 'published', eyebrow: 'Accepted', heading: 'It has a date.', preview: `${title} goes live ${when}.`,
         lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and set it to go live on ${esc(when)}. Thank you for bringing it to the table.`,
         button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
@@ -112,6 +127,6 @@ export default async (req: Request) => {
     }),
   });
   if (!res.ok) return new Response('send failed: ' + (await res.text()).slice(0, 200), { status: 502 });
-  await db.from('pieces').update({ writer_notified: p.status }).eq('id', p.id);
+  await db.from('pieces').update({ writer_notified: told }).eq('id', p.id);
   return new Response('sent', { status: 200 });
 };

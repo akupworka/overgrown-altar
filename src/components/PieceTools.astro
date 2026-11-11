@@ -178,7 +178,7 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
         li.append(av, t); list.append(li);
       }
       none.hidden = rows.length > 0;
-      form.hidden = false;
+      form.hidden = mine && !mineId;   // a reflection is a reader's response: the writer reads them, and does not leave one on their own piece
       send.textContent = mineId ? 'Update your reflection' : 'Leave a reflection';
       cnt.textContent = `${box.value.length} / 600`;
     };

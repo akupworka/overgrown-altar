@@ -16,7 +16,6 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
       was done when half were removed), and the 25 mock pieces on the owner's own account
       (`pieces.sanity_id like 'mock-desk-%'`). This also clears the test notifications and the sample Workshop drafts.
       Sample members never get email (their daily letters are off, and both email functions skip their addresses).
-- [ ] **Decide about the two extra Watchman profiles** ("Watchman (Guild)", "Watchman (Fellow)"): keep for testing or remove.
 - [ ] **Open the lock.** Set `SITE_PUBLIC=true` in Netlify's environment variables and redeploy. Then check the site is
       no longer hidden from search engines, and that the "Opening soon" door is no longer what visitors meet.
 - [ ] **Let search engines in.** `public/robots.txt` still says `Disallow: /`; change it to `Allow: /` on opening day.
@@ -39,16 +38,26 @@ use still working:
 - [x] Decided: a piece is frozen while it is with the editor. The writer withdraws it to edit, then sends it again.
 - [x] Decided: Fellowship readers starting forum threads and messaging Guild writers is intended.
 - [x] An editor's name shows "Taken" as it is typed (About the author, and the Fellowship join form), and Save waits.
-- [ ] Small: a writer can delete the first post of their own thread by going around the forum's buttons.
-- [x] Decided 11 Nov 2026: a writer changes a published piece only when the editor asks. Writers cannot send changes
-      on their own (the database refuses it, and the Desk does not offer it).
-- [ ] Decide: a reported conversation can be read by every editor, staff included, not only the Editor in Chief
-      (the report box tells the member "the Editor in Chief"). Limit it to whoever the report is assigned to, or
-      change the wording.
-- [ ] Small: a writer can leave a reflection on their own piece (they cannot mark it "stayed with me").
-- [ ] Supabase's own checks (11 Nov 2026): turn on "leaked password protection" in the sign-in settings (an auth
-      setting, so ask the owner first; it may need the paid plan). Speed checks found nothing that matters at this size.
+- [x] Decided 11 Nov 2026 (the owner's checkbox answers), all in and tested:
+      - A reported conversation is read only by the Editor in Chief and the editor it is assigned to (while open);
+        only the Editor in Chief passes a report to another editor.
+      - A writer changes a published piece only when an editor uses "Ask for changes" (a note to the writer, by email
+        and on their Desk); the live piece stays up until an editor approves what comes back.
+      - No reflection on your own piece. A thread's opening post cannot be deleted on its own.
+      - Members can report a forum post (one open report each a post); the queue is on the Desk under Arrivals.
+      - An editor can pass a waiting piece to another editor from the review panel.
+      - The bell's number is what has not been cleared yet.
+      - Kept: the online count in the phone header; every member's vault visible to members.
+      - Removed: the "My library" button on the vault (the Library tab stays); the menu links to the Dispatches
+        letter (the sign-up box at the foot of the public pages still collects addresses).
+- [ ] Remove the owner's two test accounts ("Watchman (Guild)", "Watchman (Fellow)") with the sample data.
+- [ ] Turn on "leaked password protection" in Supabase's sign-in settings when moving to the paid plan (ask first).
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
+
+## Asked for by the owner, not built yet (11 Nov 2026)
+- A private, privacy-friendly visitor count.
+- Mute or follow a forum thread (which threads ring your bell).
+- The writer answers a reader's reflection, once.
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
