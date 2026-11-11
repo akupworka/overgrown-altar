@@ -31,7 +31,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
 
     <div class="nav-links">
       {links.map((l) => (
-        <a href={l.href} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' || l.href === '/folios' ? '' : undefined}>{l.label}</a>
+        <a href={l.href} class:list={[{ 'nav-explore': l.href === '/search' }]} aria-current={current.startsWith(l.href) ? 'page' : undefined} data-guest={l.href === '/about' || l.href === '/folios' ? '' : undefined}>
+          {l.href === '/search' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>}{l.label}</a>
       ))}
     </div>
 
@@ -331,6 +332,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .nav-links a + a::before { content: ''; position: absolute; left: -25px; top: 50%; width: 5px; height: 5px; margin-top: -3px;
     transform: rotate(45deg); background: #9F945E; opacity: .55; pointer-events: none; }
   .nav-links a[hidden] + a::before { display: none; }
+  .nav-links a.nav-explore { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ember); }
   @media (prefers-reduced-motion: reduce) { .nav-links a::after { transition: none; } }
   .nav-right { justify-self: end; display: flex; align-items: center; gap: 18px; }
   .icon-link, .menu-link { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }

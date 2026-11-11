@@ -2112,3 +2112,12 @@ a.m-byline:hover { color: var(--oxblood); }
 .ss-vault { gap: 16px !important; }
 .ss-medals { gap: 16px 10px !important; padding: 4px 0 6px; }
 .ss-vault-btn { margin-top: 6px; }
+/* Write (white) and Photograph side by side in the column */
+.ss-make { flex-direction: row !important; gap: 8px; }
+.ss-make > a { flex: 1 1 0; min-width: 0; min-height: 46px !important; gap: 7px; font-size: 9px !important; letter-spacing: .14em !important; padding: 0 6px; white-space: nowrap; }
+.ss-make svg { flex: none; width: 14px; height: 14px; }
+.ss-write, .ss-write:hover { border: 0 !important; background: var(--bone) !important; color: #12160F !important; box-shadow: none !important; transform: none !important; }
+.ss-write:hover { background: var(--ember) !important; }
+.ss-write svg { color: #12160F !important; }
+/* Sign out sits closer under the vault button */
+@media (min-width: 1101px) { .d-room:not(.writing) .ss, .ss-aside .ss { margin-bottom: 12px !important; } }
