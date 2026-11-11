@@ -2276,6 +2276,6 @@ a.m-byline:hover { color: var(--oxblood); }
 .ws-draft.fresh .ws-draft-t .lab, .ws-draft-t .lab { color: var(--muted-dark) !important; font-size: 8.5px; }
 .ws-draft-go, .ws-draft:hover .ws-draft-go { flex: none !important; min-height: 0 !important; padding: 0 !important; background: none !important; color: var(--ember) !important; font-size: 16px !important; letter-spacing: 0; }
 /* The Fellowship's badge without its trophy mark: even padding, numeral and name centred as one */
-.wy-pill { padding: 5px 13px !important; gap: 7px; line-height: 1.2; }
-.wy-pill-lg { padding: 7px 18px !important; gap: 9px; }
+.wy-pill { padding: 5px 11px 5px 13px !important; gap: 7px; line-height: 1.2; }
+.wy-pill-lg { padding: 7px 16px 7px 18px !important; gap: 9px; }
 .wy-pill-n { line-height: 1; }
