@@ -1,6 +1,6 @@
 ---
 // The reader's tools around a published piece.
-//   part="top"     comfort for everyone (text size, night reading) and, for members, Save for later
+//   part="top"     comfort for everyone (text size, night reading) and, for members, Save (to their collection, shown on their vault)
 //   part="end"     for members: "This stayed with me", and the Guild's reflections (one short reflection each)
 //   part="follow"  for members: follow the writer
 // Members only see and use the Guild's parts; visitors see the reading comfort alone.
@@ -23,7 +23,7 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     </a>
     <button type="button" class="pt-btn pt-save" data-member aria-pressed="false" data-piece={pieceId}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
-      <span class="pt-save-w">Save for later</span>
+      <span class="pt-save-w">Save to collection</span>
     </button>
   </div>
 )}
@@ -93,7 +93,7 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     if (save) {
       const { data } = await supabase.from('saves').select('piece_id').eq('member_id', me).eq('piece_id', piece);
       let on = !!(data && data.length);
-      const show = () => { save.setAttribute('aria-pressed', String(on)); save.querySelector('.pt-save-w')!.textContent = on ? 'Saved' : 'Save for later'; };
+      const show = () => { save.setAttribute('aria-pressed', String(on)); save.querySelector('.pt-save-w')!.textContent = on ? 'In your collection' : 'Save to collection'; };
       show();
       save.addEventListener('click', async () => {
         on = !on; show();

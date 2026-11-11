@@ -419,6 +419,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
         </>)}
       </section>
+      {/* What they've saved: the Guild and editors keep a collection too (shown once there is something in it) */}
+      <FellowCollection id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} quiet />
       <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person, forum: tally }} mine={person.id === me} name={person.display_name} /></div>
       </>)}
     </div>
@@ -563,7 +565,7 @@ function ReadTools({ piece }: { piece: Piece }) {
         {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
       {!mine && <button type="button" className="rt-btn" aria-pressed={saved} onClick={toggleSave}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
-        {saved ? 'Saved' : 'Save for later'}</button>}
+        {saved ? 'In your collection' : 'Save to your collection'}</button>}
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Reflections, on its page →'}</a>}
     </div>
   );
@@ -632,10 +634,11 @@ export default function MembersApp() {
 }
 
 // A Fellowship member's page shows their collection (open to everyone; see /collection/).
-function FellowCollection({ id, first, mine }: { id: string; first: string; mine: boolean }) {
+function FellowCollection({ id, first, mine, quiet = false }: { id: string; first: string; mine: boolean; quiet?: boolean }) {
   const items = useCollection(id);
+  if (quiet && (!items || (!items.length && !mine))) return null;   // on a writer's page: nothing until something is saved
   return (
-    <section className="m-work m-coll">
+    <section className="m-work m-coll" id="collection">
       <div className="m-work-head"><span className="eb">{mine ? 'Your collection' : `${first}’s collection`}</span>
         <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
       <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />

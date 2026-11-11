@@ -70,7 +70,7 @@ export function ReadingShelf({ me, freshOnly = false, savedOnly = false }: { me:
       )}
       {!freshOnly && !!saved?.length && (
         <section className="d-forum-panel rd-panel">
-          <div className="d-forum-head"><span className="eb">Saved for later</span>{savedAll > 4 && <span className="lab mut">{savedAll} saved</span>}</div>
+          <div className="d-forum-head"><span className="eb">Your collection</span><a className="lab d-forum-link" href={`/guild/members/?m=${me}#collection`}>{savedAll > 4 ? `All ${savedAll} →` : 'On your vault →'}</a></div>
           {list(saved, true)}
         </section>
       )}
