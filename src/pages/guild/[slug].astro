@@ -150,7 +150,9 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
       try {
         // (the post opens over the page, to be seen first and shared or saved from there)
         setTimeout(() => { el.textContent = idle; }, 600);
-        await shareCard({ quote, title: d.title!, standfirst: d.standfirst || undefined, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback! });
+        // (the piece's opening paragraphs go with it, for the second picture of the carousel)
+        const excerpt = [...flow.querySelectorAll<HTMLElement>(':scope > p.body')].slice(0, 8).map((p) => p.innerText);
+        await shareCard({ quote, title: d.title!, standfirst: d.standfirst || undefined, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback!, excerpt });
       } catch { el.textContent = 'The post couldn’t be made'; setTimeout(() => { el.textContent = idle; }, 2600); }
     };
     pill.addEventListener('pointerdown', (e) => e.preventDefault());   // keep the selection while tapping

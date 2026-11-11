@@ -506,8 +506,24 @@ html.sp-open { overflow: hidden; }
 .sp-k { color: var(--ember); }
 .sp-x { position: absolute; right: -4px; top: -10px; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; color: #CFC8B8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .2); }
 .sp-x:hover, .sp-x:focus-visible { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
-.sp-frame { width: min(100%, calc((100vh - 250px) * .8), calc((100svh - 250px) * .8)); min-width: 200px; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center;
+/* one picture, or two side by side to swipe between (a carousel); on wide screens both show at once */
+.sp-strip { display: flex; justify-content: center; gap: 14px; width: 100%; }
+.sp-frame { flex: none; width: min(100%, calc((100vh - 270px) * .8), calc((100svh - 270px) * .8)); min-width: 200px; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center;
   background: #0E110C; box-shadow: 0 0 0 1px rgba(159, 148, 94, .45), 0 30px 70px rgba(0, 0, 0, .7); }
+.sp-strip.sp-two { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 2px; margin: -2px; }
+.sp-strip.sp-two::-webkit-scrollbar { display: none; }
+.sp-strip.sp-two .sp-frame { scroll-snap-align: center; width: min(86%, calc((100vh - 290px) * .8), calc((100svh - 290px) * .8)); }
+.sp-strip.sp-two .sp-frame:first-child { margin-left: auto; } .sp-strip.sp-two .sp-frame:last-child { margin-right: auto; }
+.sp-dots { display: flex; gap: 7px; margin: -4px 0; }
+.sp-dots[hidden] { display: none; }
+.sp-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(243, 236, 220, .28); transition: background-color .2s; }
+.sp-dots i.on { background: var(--ember); }
+@media (min-width: 900px) {
+  .sp:has(.sp-two) .sp-in { width: min(100%, 860px); }
+  .sp-strip.sp-two { overflow: visible; justify-content: center; }
+  .sp-strip.sp-two .sp-frame { width: min(48%, calc((100vh - 270px) * .8)); margin: 0 !important; }
+  .sp-dots { display: none; }
+}
 .sp-img { display: block; width: 100%; height: 100%; object-fit: contain; -webkit-touch-callout: default; user-select: auto; }
 .sp-wait { color: #A9A293; }
 .sp-acts { display: flex; gap: 10px; width: 100%; justify-content: center; }
@@ -518,5 +534,5 @@ html.sp-open { overflow: hidden; }
 .sp-share:hover, .sp-share:focus-visible { background: var(--ember); }
 .sp-save { flex: 1 1 0; max-width: 200px; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3); }   /* beside it: Share */
 .sp-save:hover, .sp-save:focus-visible { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
-.sp-hint { font-size: 8.5px; color: #8C8679; text-align: center; }
+.sp-hint { font-size: 8.5px; line-height: 1.7; color: #8C8679; text-align: center; max-width: 340px; }
 @media (prefers-reduced-motion: reduce) { .sp { animation: none; } }

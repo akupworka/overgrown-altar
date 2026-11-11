@@ -657,7 +657,8 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
     try {
       const { shareCard } = await import('../../lib/shareCard');
       const out = await shareCard({ quote: piece.title, title: piece.title, standfirst: piece.standfirst || undefined, author: author || 'A member', kicker: `${pillarName(piece.pillar)} · ${mediumName(piece.medium)}`,
-        image: photo || undefined, fallback: ROOM_PHOTO[piece.pillar] ?? ROOM_PHOTO.hearth });
+        image: photo || undefined, fallback: ROOM_PHOTO[piece.pillar] ?? ROOM_PHOTO.hearth,
+        excerpt: [...document.querySelectorAll<HTMLElement>('.m-reading .d-paper > p.body')].slice(0, 8).map((p) => p.innerText) });   // its opening lines, for the second picture
       if (out !== 'cancelled') flash('card', out === 'saved' ? 'Post saved' : 'Shared');
     } catch { flash('card', 'Couldn’t make the post'); }
   };
