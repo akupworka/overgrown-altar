@@ -345,10 +345,10 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
       )}
       {pages > 1 && (
         <nav className="pager fo-pager" aria-label="Pages of threads">
-          <button type="button" className="pg-step" disabled={cur === 1} onClick={() => { setPage(cur - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Newer threads">‹<span className="pg-word">Newer</span></button>
+          <button type="button" className="pg-step" disabled={cur === 1} onClick={() => setPage(cur - 1)} aria-label="Newer threads">‹<span className="pg-word">Newer</span></button>
           {pageList(cur, pages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
-            : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{n}</button>)}
-          <button type="button" className="pg-step" disabled={cur === pages} onClick={() => { setPage(cur + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Older threads"><span className="pg-word">Older</span>›</button>
+            : <button key={n} type="button" className="pg-n" aria-current={n === cur ? 'page' : undefined} onClick={() => setPage(n)}>{n}</button>)}
+          <button type="button" className="pg-step" disabled={cur === pages} onClick={() => setPage(cur + 1)} aria-label="Older threads"><span className="pg-word">Older</span>›</button>
         </nav>
       )}
     </div>
@@ -521,10 +521,10 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const showPost = (postId: string) => { setPPage(pageOf(postId)); setTimeout(() => document.getElementById(`post-${postId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
   const postPager = pPages > 1 && (
     <nav className="pager fo-pager" aria-label="Pages of replies">
-      <button type="button" className="pg-step" disabled={pCur === 1} onClick={() => { setPPage(pCur - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Earlier replies">‹<span className="pg-word">Earlier</span></button>
+      <button type="button" className="pg-step" disabled={pCur === 1} onClick={() => setPPage(pCur - 1)} aria-label="Earlier replies">‹<span className="pg-word">Earlier</span></button>
       {pageList(pCur, pPages).map((n, i) => n === '…' ? <span key={'g' + i} className="pg-gap" aria-hidden="true">…</span>
-        : <button key={n} type="button" className="pg-n" aria-current={n === pCur ? 'page' : undefined} onClick={() => { setPPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{n}</button>)}
-      <button type="button" className="pg-step" disabled={pCur === pPages} onClick={() => { setPPage(pCur + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Later replies"><span className="pg-word">Later</span>›</button>
+        : <button key={n} type="button" className="pg-n" aria-current={n === pCur ? 'page' : undefined} onClick={() => setPPage(n)}>{n}</button>)}
+      <button type="button" className="pg-step" disabled={pCur === pPages} onClick={() => setPPage(pCur + 1)} aria-label="Later replies"><span className="pg-word">Later</span>›</button>
     </nav>
   );
   async function send(e: FormEvent) {

@@ -147,11 +147,12 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
           <a class="lab wt-forms" href="/crafts/#watchtower">What we look for in a dispatch →</a>
           <div class="wt-write-cta">
             <a class="btn" href="/guild/desk/#write" data-member hidden>Write a dispatch</a>
+            <a class="btn" href="/join/#guild" data-guest>Apply to the Guild</a>
           </div>
         </div>
         {writers.length > 0 && (
           <div class="wt-writers">
-            <span class="lab mut">The writers</span>
+            <span class="lab mut wt-writers-k">The writers of The Watchtower</span>
             <div class="wt-writers-row">
             {writers.map((w) => (
               <a class="wt-writer" href={authorUrl(w)}>
@@ -266,22 +267,24 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
 
   /* Write for The Watchtower */
   .blog-2 { padding-top: 80px !important; }
-  .wt-write { margin-top: 80px; padding: 48px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; align-items: start;
+  /* The invitation, centred; beneath it the writers, four to a row under a hairline (so the card has no empty half). */
+  .wt-write { margin-top: 80px; padding: 60px 56px 52px; display: flex; flex-direction: column; align-items: center; gap: 44px;
     background: linear-gradient(180deg, #F1ECE2, #EDE6D9); box-shadow: inset 0 0 0 1px rgba(159, 148, 94, .45); border-radius: 4px; }
   .blog-2 .blog-col > .wt-write:first-child { margin-top: 0; }
-  .wt-write-text { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
-  .wt-write-h { font-size: 40px; line-height: 1.08; }
-  .wt-write-p { margin: 0; font-size: 19px; line-height: 1.5; }
-  .wt-write-cta { margin-top: 6px; }
-  .wt-forms { color: var(--oxblood); border-bottom: 1px solid rgba(98,55,45,.35); padding-bottom: 3px; }
+  .wt-write-text { display: flex; flex-direction: column; gap: 16px; align-items: center; text-align: center; max-width: 760px; }
+  .wt-write-h { font-size: 46px; line-height: 1.08; margin: 0; }
+  .wt-write-p { margin: 0; font-size: 20px; line-height: 1.5; max-width: 600px; }
+  .wt-write-cta { margin-top: 10px; }
   .wt-write-cta [hidden] { display: none; }
-  .wt-writers { display: flex; flex-direction: column; gap: 14px; padding-left: 40px; border-left: 1px solid rgba(42, 32, 23, .15); }
-  .wt-writers-row { display: contents; }
-  .wt-writer { display: flex; align-items: center; gap: 14px; }
-  .wt-writer > span:last-child { display: flex; flex-direction: column; gap: 3px; }
-  .wt-writer-n { font-family: var(--serif); font-size: 21px; transition: color .3s; }
+  .wt-writers { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 26px; padding-top: 36px; border-top: 1px solid rgba(42, 32, 23, .15); }
+  .wt-writers-k { letter-spacing: .28em; }
+  .wt-writers-row { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 26px; }
+  .wt-writer { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .wt-writer > span:last-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .wt-writer-n { font-family: var(--serif); font-size: 21px; line-height: 1.15; transition: color .3s; }
   .wt-writer:hover .wt-writer-n { color: var(--oxblood); }
   .wt-writer-c { font-size: 9px; }
+  @media (max-width: 1100px) and (min-width: 701px) { .wt-writers-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   .list-title { display: flex; flex-direction: column; gap: 8px; }
   .list-head { align-items: flex-end !important; padding-bottom: 18px !important; border-bottom: 0; }
@@ -337,11 +340,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     .wt-pull { min-height: 0; }
     .wt-pull-in { padding: 72px 24px; }
     .blog-2 { padding-top: 56px !important; }
-    .wt-write { margin-top: 56px; padding: 30px 22px; grid-template-columns: 1fr; gap: 30px; }
+    .wt-write { margin-top: 56px; padding: 34px 22px 30px; gap: 30px; align-items: stretch; }
+    .wt-write-text { align-items: center; }
     .wt-write-h { font-size: 28px !important; }
     .wt-write-p { font-size: 17px; }
     .wt-write-cta, .wt-write-cta .btn { align-self: stretch; text-align: center; width: 100%; }
-    .wt-writers { padding-left: 0; padding-top: 24px; border-left: 0; border-top: 1px solid rgba(42, 32, 23, .15); }
+    .wt-writers { padding-top: 24px; gap: 16px; align-items: stretch; }
+    .wt-writers-k { text-align: center; }
     .list-head { flex-direction: column; align-items: stretch !important; gap: 18px !important; }
     .wt-search { min-width: 0; }
   }

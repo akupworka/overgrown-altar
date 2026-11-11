@@ -101,7 +101,6 @@ import { seatFor } from '../../../lib/seats';
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
       pager.hidden = pages < 2;
       pager.innerHTML = pagerHtml(page, pages);
-      if (scroll) shelf.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     pager.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');
