@@ -10,7 +10,7 @@ export const COVERS: Cover[] = [
   { key: 'bay-window', name: 'The bay window', src: '/images/bay-window-of-stained-glass-1200.jpg', pos: 'center 34%' },
   { key: 'four-lancets', name: 'Four lancets', src: '/images/four-lancet-window-1200.jpg', pos: 'center 46%' },
   { key: 'light-on-the-wall', name: 'Light on the wall', src: '/images/window-light-on-wall-1200.jpg', pos: 'center 50%' },
-  { key: 'candlelit', name: 'The candlelit chapel', src: '/images/format-guild-1200.jpg', pos: 'center 52%' },
+  { key: 'dome', name: 'Light in the dome', src: '/images/manifesto-photo-1200.jpg', pos: 'center 50%' },
   { key: 'candles-and-glass', name: 'Candles and glass', src: '/images/archive-photo-1200.jpg', pos: 'center 52%' },
   { key: 'nave', name: 'The nave', src: '/images/folios-photo-2-1200.jpg', pos: 'center 70%' },
   { key: 'stone-cross', name: 'The stone cross', src: '/images/untangling-mental-strongholds-1200.jpg', pos: 'center 42%' },
