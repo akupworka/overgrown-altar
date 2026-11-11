@@ -158,7 +158,8 @@ export function TrophyCatalogue({ only, ctx }: { only?: 'growing' | 'once'; ctx?
       {once.map((g) => (
       <section key={g.name} className="tcat-shelf">
       <h3 className="lab tcat-shelf-h">{g.name}<span>{g.items.length}</span></h3>
-      <div className="tc-grid">
+      {/* Even rows, never a lone trophy left over: eight sit four and four, nine five and four, six three and three. */}
+      <div className="tc-grid tcat-once" style={{ '--cols': Math.ceil(g.items.length / Math.ceil(g.items.length / 5)) } as React.CSSProperties}>
         {g.items.map((t) => { const lock = !!mine(t) && !mine(t)!.earned; return (
           <figure key={t.id} className={`tr${standings ? ' tr-tap' : ''}${lock ? ' locked' : ''}`} data-tier={t.tier} {...(standings ? tap(t) : { title: t.note })}>
             <Svg t={t} locked={lock} />

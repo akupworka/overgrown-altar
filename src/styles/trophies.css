@@ -35,6 +35,13 @@
 .tcat-shelf-h { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--ember); font-size: 11px; letter-spacing: .26em; font-weight: 400; }
 .tcat-shelf-h::after { content: ''; flex: 1; height: 1px; background: rgba(243,236,220,.12); order: 1; }
 .tcat-shelf-h span { order: 2; color: var(--muted-dark); letter-spacing: .12em; }
+/* Won once, on a computer: at most five to a row, each shelf's rows kept even and centred under its name. */
+@media (min-width: 701px) {
+  .tcat-once { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px 26px; margin: 10px auto 0;
+    max-width: calc(var(--cols, 5) * 200px + (var(--cols, 5) - 1) * 26px); }
+  .tcat-once .tr { flex: 0 0 200px; max-width: 200px; }
+  .tcat-once .tr-note { max-width: 190px; }
+}
 .tcat-rows { display: flex; flex-direction: column; border-top: 1px solid rgba(243,236,220,.1); }
 .tcat-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(243,236,220,.08); }
 .tcat-text { display: flex; flex-direction: column; gap: 6px; }
