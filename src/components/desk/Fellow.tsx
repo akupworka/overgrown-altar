@@ -25,10 +25,6 @@ export function FellowHome({ profile }: { profile: Profile }) {
           <h1 className="h1 d-hello">{greeting()}, {first}</h1>
           <p className="d-tally"><span><b>{items?.length ?? 0}</b> in your library</span><a className="d-tally-link" href="/guild/members/?view=following"><b>{following}</b> {following === 1 ? 'writer' : 'writers'} followed →</a></p>
         </div>
-        <div className="d-begins">
-          <a className="btn d-btn" href="/gallery/">Explore the Gallery</a>
-          <a className="ghost d-btn" href="/search/">Search the altar</a>
-        </div>
       </header>
       <PillarTiles />
       <WayCard member={profile.id} mine />
