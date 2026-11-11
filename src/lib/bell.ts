@@ -5,7 +5,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { portraitUrl } from './supabase';
 
-interface Item { kind: string; at: string; n?: number; who: string | null; who_name: string | null; who_portrait: string | null; piece: string | null; piece_title: string | null; piece_slug: string | null; thread: string | null; thread_title: string | null }
+interface Item { kind: string; at: string; n?: number; who: string | null; who_name: string | null; who_portrait: string | null; piece: string | null; piece_title: string | null; piece_slug: string | null; post?: string | null; thread: string | null; thread_title: string | null }
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 const ago = (d: string) => { const m = Math.max(1, Math.round((Date.now() - +new Date(d)) / 6e4)); return m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 60)} h` : m < 43200 ? `${Math.round(m / 1440)} d` : new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
 
@@ -16,8 +16,9 @@ function line(r: { first: Item; names: string[]; n: number }): { html: string; h
   const piece = `“${esc(i.piece_title || 'Untitled')}”`, thread = `“${esc(i.thread_title || 'a thread')}”`;
   const pieceUrl = i.piece_slug ? `/guild/${i.piece_slug}/` : `/guild/members/?p=${i.piece}`;
   switch (i.kind) {
-    case 'mention': return { html: `${who} mentioned you in ${thread}`, href: `/guild/members/?t=${i.thread}` };
-    case 'reply': return { html: `${who} replied in ${thread}`, href: `/guild/members/?t=${i.thread}` };
+    // (a mention or a reply opens on the comment itself: the thread turns to its page and brings it into view)
+    case 'mention': return { html: `${who} mentioned you in ${thread}`, href: `/guild/members/?t=${i.thread}${i.post ? `#post-${i.post}` : ''}` };
+    case 'reply': return { html: `${who} replied in ${thread}`, href: `/guild/members/?t=${i.thread}${i.post ? `#post-${i.post}` : ''}` };
     case 'reflection': return { html: `${who} left a reflection on ${piece}`, href: pieceUrl };
     case 'mark': return { html: `${piece} stayed with ${who}`, href: pieceUrl };
     case 'save': return { html: `${who} saved ${piece} to ${r.n > 1 ? 'their libraries' : 'their library'}`, href: pieceUrl };
@@ -63,6 +64,22 @@ export function initBell(supabase: SupabaseClient) {
   // Clearing: one line by its tick, or everything. The panel stays open; the line slips away.
   panel.addEventListener('click', (e) => {
     const t = e.target as HTMLElement, all = t.closest('[data-bell-all]'), yes = t.closest('[data-bell-yes]'), no = t.closest('[data-bell-no]'), one = t.closest('[data-bell-done]');
+    // Opening a line also clears it: it is ticked away, then you are taken to what it was about.
+    const row = !all && !yes && !no && !one ? t.closest<HTMLAnchorElement>('a.bell-row') : null;
+    if (row && !(e as MouseEvent).metaKey && !(e as MouseEvent).ctrlKey) {
+      const key = row.closest('li')?.dataset.key, href = row.getAttribute('href') || '/';
+      if (key == null) return;
+      e.preventDefault(); e.stopPropagation();
+      items = items.filter((i) => keyOf(i) !== key); count(); cleared = true;
+      const sent = supabase.rpc('bell_clear', { p_key: key }).then(() => {}, () => {});
+      close();
+      if (location.pathname.startsWith('/guild/members') && href.startsWith('/guild/members')) {   // inside the Guild: change page in place
+        history.pushState(null, '', href); dispatchEvent(new PopStateEvent('popstate')); dispatchEvent(new HashChangeEvent('hashchange'));
+        return;
+      }
+      Promise.race([sent, new Promise((r) => setTimeout(r, 700))]).then(() => location.assign(href));   // elsewhere: let the tick be saved, then go
+      return;
+    }
     if (!all && !yes && !no && !one) return;
     e.preventDefault(); e.stopPropagation();
     // "Clear all" asks once, in place, before it empties the bell.

@@ -212,7 +212,7 @@ export function InboxThread({ id, me, isEditor }: { id: string; me: string; isEd
     const o = t.a === me ? t.b : t.a;
     const { data: bl } = await supabase.from('dm_blocks').select('blocked').eq('blocker', me).eq('blocked', o);
     setBlocked(!!(bl && bl.length));
-    if (me === t.a || me === t.b) { await supabase.rpc('dm_read', { t: id }); refreshInboxDot(); }
+    if ((me === t.a || me === t.b) && !(document as any).prerendering) { await supabase.rpc('dm_read', { t: id }); refreshInboxDot(); }   // (never while the page is only being made ready in the background)
   }, [id, me]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {

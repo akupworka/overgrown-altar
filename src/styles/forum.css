@@ -502,3 +502,14 @@
   /* the "new posts" pill: smaller, and clear of the words */
   .fo-pill { min-height: 36px; padding: 0 14px; font-size: 9px; }
 }
+
+/* The comment you were brought to (from the bell, or a report): ringed in candle gold */
+.fo-post.fo-jump { box-shadow: inset 0 0 0 1.5px var(--ember), 0 0 0 4px rgba(255, 227, 163, .08); }
+
+/* Editors: a post with a report waiting is ringed in red, with the reason and a tick to leave it be */
+.fo-post.reported { box-shadow: inset 0 0 0 1.5px #E8715F !important; background: rgba(232, 113, 95, .06) !important; }
+.fo-reported { grid-column: 1 / -1; width: 100%; box-sizing: border-box; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin: 12px 0 4px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(232, 113, 95, .08); box-shadow: inset 0 0 0 1px rgba(232, 113, 95, .4); }
+.fo-reported .lab { color: #F0A99A; font-size: 9px; }
+.fo-reported .it { flex: 1 1 200px; font-size: 17px; color: var(--bone); }
+.fo-reported .fo-fine { color: #BFE8CF !important; box-shadow: inset 0 0 0 1px rgba(127, 224, 176, .45) !important; background: rgba(127, 224, 176, .06) !important; min-height: 38px; padding: 6px 14px !important; border-radius: 999px !important; }

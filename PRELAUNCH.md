@@ -49,6 +49,12 @@ use still working:
       - "Take it" works only on a piece its editor has not opened yet (the hold lapses after a week, so nothing
         gets stuck; the editor who has it can always pass it on).
       - The bell's number is what has not been cleared yet.
+      - Opening a bell line clears it and lands on the comment it is about (the thread turns to its page).
+      - "Take a sabbath" on Waiting for you: while an editor rests, new pieces and reports go to the others.
+      - An editor sees a reported forum post ringed in red, with the reason and "It's fine, leave it"; the Arrivals
+        tile counts reports waiting.
+      - Fixed: Chrome was opening conversations, threads and pieces in the background when the mouse rested on
+        their links, which marked them read. They now wait for a real click.
       - Kept: the online count in the phone header; every member's vault visible to members.
       - Removed: the "My library" button on the vault (the Library tab stays); the menu links to the Dispatches
         letter (the sign-up box at the foot of the public pages still collects addresses).

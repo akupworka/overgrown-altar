@@ -416,6 +416,41 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
   const [pieces, setPieces] = useState<Record<string, number>>({});   // each poster's published pieces, for their prestige
   const [since] = useState(() => seenMap()[id] ?? firstVisit());
   const [pPage, setPPage] = useState<number | null>(null);
+  // Arriving at one comment (…#post-<id>, from the bell or a report): turn to its page, bring it into view, ring it in gold.
+  const [jump, setJump] = useState(0);
+  useEffect(() => { const on = () => setJump((n) => n + 1); addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
+  useEffect(() => {
+    const m = location.hash.match(/^#post-([\w-]+)$/);
+    if (!m || !posts.length) return;
+    const at = posts.findIndex((x) => x.id === m[1]);
+    if (at < 0) return;
+    setPPage(Math.floor(at / FORUM_PER) + 1);
+    const t = setTimeout(() => {
+      const el = document.getElementById(`post-${m[1]}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('fo-jump');
+      history.replaceState(history.state, '', location.pathname + location.search);   // once shown, the address is the thread's again
+    }, 150);
+    return () => clearTimeout(t);
+  }, [posts.length > 0, id, jump]);
+  // Editors: the posts here with a report waiting. Each is ringed in red, with the reason and a tick if it is fine as it is.
+  const [reported, setReported] = useState<Record<string, { id: string; reason: string }[]>>({});
+  const loadReported = useCallback(() => {
+    if (!isEditor) return;
+    supabase.from('forum_reports').select('id, post_id, reason, post:forum_posts!inner(thread_id)').eq('resolved', false).eq('post.thread_id', id).then(({ data }) => {
+      const m: Record<string, { id: string; reason: string }[]> = {};
+      (Array.isArray(data) ? data : []).forEach((r: any) => { (m[r.post_id] ||= []).push({ id: r.id, reason: r.reason }); });
+      setReported(m);
+    });
+  }, [isEditor, id]);
+  useEffect(() => { loadReported(); }, [loadReported, posts.length]);
+  async function reportFine(postId: string) {
+    const ids = (reported[postId] ?? []).map((r) => r.id);
+    if (!ids.length) return;
+    setReported((m) => { const n = { ...m }; delete n[postId]; return n; });
+    await supabase.from('forum_reports').update({ resolved: true }).in('id', ids);
+    loadReported();
+  }
   // @mentions: everyone at the table, and what's being typed after an @
   const [everyone, setEveryone] = useState<{ id: string; display_name: string }[]>([]);
   const [atQ, setAtQ] = useState<string | null>(null);
@@ -558,7 +593,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           const who = people[p.author_id];
           const mine = p.author_id === me;
           return (
-            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}${p.created_at > since && !mine ? ' fresh' : ''}${p.id.startsWith('sending-') ? ' sending' : ''}`} id={`post-${p.id}`}>
+            <li key={p.id} className={`fo-post${i === 0 ? ' first' : ''}${p.created_at > since && !mine ? ' fresh' : ''}${p.id.startsWith('sending-') ? ' sending' : ''}${reported[p.id] ? ' reported' : ''}`} id={`post-${p.id}`}>
               <div className="fo-who">
                 <Link to={`/guild/members/?m=${p.author_id}`} className="fo-who-link">
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
@@ -575,6 +610,13 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                     <span className="fo-post-acts"><button type="button" className="btn d-btn" onClick={saveEdit}>Save</button><button type="button" className="d-textbtn" onClick={() => setEditing(null)}>Cancel</button></span>
                   </div>
                 ) : <PostBody body={p.body} />}
+                {reported[p.id] && (
+                  <div className="fo-reported" role="note">
+                    <span className="lab">Reported{reported[p.id].length > 1 ? ` · ${reported[p.id].length} times` : ''}</span>
+                    <span className="it">{reported[p.id].map((r) => r.reason || 'No reason given.').join(' · ')}</span>
+                    <button type="button" className="fo-act fo-fine" onClick={() => reportFine(p.id)}><span aria-hidden="true">✓</span> It’s fine, leave it</button>
+                  </div>
+                )}
                 {editing?.id !== p.id && !p.id.startsWith('sending-') && (
                   <span className="fo-post-acts">
                     {open && <button type="button" className="fo-act" onClick={() => quote(p)}><span aria-hidden="true">❝</span> Quote</button>}

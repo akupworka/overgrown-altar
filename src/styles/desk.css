@@ -2366,3 +2366,9 @@ html[data-night] .d-reader .d-paper .d-paper-standfirst { color: var(--muted-pap
   .d-decide .d-short { display: inline; }
   .d-reader .d-decide .d-link { flex: 1 1 40%; white-space: nowrap; }
 }
+
+/* An editor's sabbath: the way in (a quiet button under the heading), and the notice while it lasts */
+.d-sabbath-btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; }
+.d-sabbath { display: flex; align-items: center; justify-content: space-between; gap: 14px 22px; flex-wrap: wrap; margin-top: 6px; padding: 16px 20px; border-radius: 14px;
+  background: rgba(255, 227, 163, .06); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .35); }
+.d-sabbath .it { font-size: 18px; color: var(--bone); flex: 1 1 260px; }

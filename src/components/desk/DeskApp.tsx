@@ -211,13 +211,20 @@ function Desk({ session }: { session: Session }) {
       setArrivalsNew((out.rooms ?? []).reduce((n: number, r: any) => n + (r.items ?? []).filter((x: any) => !seen.has(x.id)).length, 0));
     })();
   }, [isEditor, tab]);
+  // ...and the reports waiting there too (reported conversations that are yours to read, and reported forum posts).
+  const [reportsNew, setReportsNew] = useState(0);
+  useEffect(() => {
+    if (!isEditor) return;
+    Promise.all([supabase.from('dm_reports').select('id').eq('resolved', false), supabase.from('forum_reports').select('id').eq('resolved', false)])
+      .then(([a, b]) => setReportsNew((Array.isArray(a.data) ? a.data.length : 0) + (Array.isArray(b.data) ? b.data.length : 0)));
+  }, [isEditor, tab]);
   // The gold dot on the Desk tab of the Guild bar, here and (remembered) on the Guild's other pages.
   useEffect(() => {
     if (!isEditor) return;
-    const n = mineQ.length + arrivalsNew;
+    const n = mineQ.length + arrivalsNew + reportsNew;
     try { localStorage.setItem('oa_desk_waiting', String(n)); } catch {}
     document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = n === 0));
-  }, [isEditor, mineQ.length, arrivalsNew]);
+  }, [isEditor, mineQ.length, arrivalsNew, reportsNew]);
 
   const load = useCallback(async () => {
     const [{ data: p }, { data: mine }] = await Promise.all([
@@ -339,7 +346,7 @@ function Desk({ session }: { session: Session }) {
       <div className="d-main">
         {isEditorRole(profile?.role) && tab !== 'write' && <SeeAs />}
         {isFellow && profile && (tab === 'pieces' || tab === 'write') && <FellowHome profile={profile} />}
-        {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? mineQ.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
+        {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? mineQ.length : 0} arrivals={isEditor ? arrivalsNew + reportsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
         {!isFellow && tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
@@ -679,7 +686,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
           </button>
           <button type="button" className={`d-inbox-tile${arrivals ? ' lit' : ''}`} onClick={onArrivals}>
             <span className="d-inbox-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg></span>
-            <span className="d-inbox-text"><span className="eb">Arrivals</span><span className="it">{arrivals ? `${arrivals} new` : 'All read'}</span></span>
+            <span className="d-inbox-text"><span className="eb">Arrivals</span><span className="it">{arrivals ? `${arrivals} to look at` : 'All read'}</span></span>
             {arrivals > 0 && <span className="d-inbox-n">{arrivals}</span>}
           </button>
         </div>
@@ -1461,6 +1468,17 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
   const [page, setPage] = useState(1);
   const [editors, setEditors] = useState<Map<string, string>>(new Map());
   useEffect(() => { supabase.from('profiles').select('id, display_name').in('role', ['editor', 'staff']).then(({ data }) => setEditors(new Map((data ?? []).map((p: any) => [p.id, p.display_name])))); }, []);
+  // A sabbath: while an editor rests, the rotation hands new pieces and reports to the others.
+  const [resting, setResting] = useState<Set<string>>(new Set());
+  const loadRest = () => supabase.from('editor_sabbath').select('editor_id').then(({ data }) => setResting(new Set((Array.isArray(data) ? data : []).map((r: any) => r.editor_id))));
+  useEffect(() => { loadRest(); }, []);
+  const onSabbath = resting.has(me), hasOthers = editors.size > 1;
+  async function sabbath(on: boolean) {
+    if (on && !confirm('Take a sabbath? New pieces and reports go to the other editors until you return. What is already with you stays with you; pass it on first if it should not wait.')) return;
+    const { error } = on ? await supabase.from('editor_sabbath').insert({ editor_id: me }) : await supabase.from('editor_sabbath').delete().eq('editor_id', me);
+    if (error) alert(error.message);
+    loadRest();
+  }
   // The rotation hands each piece to one editor in turn; yours first, then what the others are reading (take one to cover).
   const mine = queue.filter((p: any) => p.revision || !p.assigned_to || p.assigned_to === me);
   const others = queue.filter((p: any) => !p.revision && p.assigned_to && p.assigned_to !== me);
@@ -1472,7 +1490,7 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
   const row = (p: Piece & { profiles?: { display_name: string } }, theirs = false) => (
     <li key={p.id} className="d-item">
       <div className="d-item-main">
-        <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}{theirs && <> · <span className="d-with">with {editors.get((p as any).assigned_to) ?? 'another editor'}{opened(p) ? ' · opened' : ''}</span></>}</span>
+        <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}{theirs && <> · <span className="d-with">with {editors.get((p as any).assigned_to) ?? 'another editor'}{resting.has((p as any).assigned_to) ? ' · on sabbath' : ''}{opened(p) ? ' · opened' : ''}</span></>}</span>
         <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
         {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
       </div>
@@ -1484,7 +1502,13 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
   );
   return (
     <section className="d-section">
-      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces handed to you in turn, oldest first. Each new piece goes to the editor with the least waiting.</p></header>
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces handed to you in turn, oldest first. Each new piece goes to the editor with the least waiting.</p>
+        {hasOthers && (onSabbath
+          ? <div className="d-sabbath" role="status"><span className="it">You are on sabbath. New pieces and reports go to the other editors until you return.</span><button type="button" className="btn d-btn" onClick={() => sabbath(false)}>Return to the desk</button></div>
+          : <button type="button" className="ghost d-btn d-sabbath-btn" onClick={() => sabbath(true)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3c1.6 2 2.4 3.4 2.4 4.8A2.4 2.4 0 0 1 12 10.2 2.4 2.4 0 0 1 9.6 7.8C9.6 6.4 10.4 5 12 3z" /><path d="M9 12h6v9H9z" /></svg>
+              Take a sabbath</button>)}
+      </header>
       {mine.length === 0 ? <p className="it mut d-empty">Nothing is waiting for you. The table is quiet.</p> : (
         <ul className="d-list">{mine.slice((cur - 1) * per, cur * per).map((p) => row(p))}</ul>
       )}

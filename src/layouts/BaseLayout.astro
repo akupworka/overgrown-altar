@@ -48,7 +48,9 @@ const imageUrl = new URL(image, site).toString();
     <!-- Added to a phone's home screen, the site opens full-screen like an app -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <!-- Browsers that can (Chrome) get the Desk and the Guild's pages ready the moment the pointer heads for them -->
-    <script type="speculationrules" is:inline>{"prerender":[{"where":{"href_matches":["/guild/desk/*","/guild/members/*"]},"eagerness":"moderate"}]}</script>
+    <!-- The Guild's rooms are made ready when the mouse rests on their links, but never a conversation, a thread or a
+         piece: opening those marks them read, and that must wait for a real click. -->
+    <script type="speculationrules" is:inline>{"prerender":[{"where":{"and":[{"href_matches":["/guild/desk/*","/guild/members/*"]},{"not":{"href_matches":"/*\\?*(^|&)(dm|t|p)=*"}}]},"eagerness":"moderate"}]}</script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />

@@ -10,6 +10,7 @@
 //   --pieces N        how many published pieces the signed-in member has (default 12; prestige ranks follow)
 //   --only phone|computer        check one size only
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
+//   --sabbath         the signed-in editor is on sabbath (otherwise the other editor is)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
@@ -99,8 +100,9 @@ if (flag('heavy')) {
 ['/images/duomo-spires-1200.jpg', '/images/four-lancet-window-1200.jpg', null, '/images/labyrinth-stained-light-1200.jpg', '/images/window-light-on-wall-1200.jpg', null, '/images/ascension-window-wide-1200.jpg'].forEach((img, i) => { if (pieces[i] && img) pieces[i].image_path = img; });
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
+  editor_sabbath: flag('sabbath') ? [{ editor_id: ME }] : [{ editor_id: 'e9' }],
   piece_change_requests: [{ piece_id: 'mine1', note: 'The middle section repeats the opening. Could you cut one of them, and look again at the last line?', asked_at: t(5) }],
-  forum_reports: [{ id: 'fr1', reason: 'This reads as an advertisement.', created_at: t(3), resolved: false, assigned_to: ME, post: { id: 'p1', thread_id: 't1', body: 'Have you tried my new course on writing? Link in my vault. It will change everything about how you work.' } }],
+  forum_reports: [{ id: 'fr1', post_id: 'p3', 'post.thread_id': 'th2', reason: 'This reads as an advertisement.', created_at: t(3), resolved: false, assigned_to: ME, post: { id: 'p1', thread_id: 't1', body: 'Have you tried my new course on writing? Link in my vault. It will change everything about how you work.' } }],
   inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null, kind: 'published' }, { id: 'nt2', member_id: ME, writer_id: 'm2', piece_id: 'wd1', created_at: t(7), read_at: null, kind: 'draft' }],
   saves: [...['mine0', 'mine1', 'mine3', 'mine4', 'mine6', 'a2'].map((piece_id, i) => ({ member_id: 'f1', piece_id, created_at: t(9 - i) }))],
   library: [...['a2', 'mine0', 'mine1', 'mine2', 'mine3', 'mine4', 'mine5', 'mine6', 'mine7'].map((piece_id, i) => ({ member_id: ME, piece_id, created_at: t(9 - i) })),
@@ -162,7 +164,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
       if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
       if (url.pathname.endsWith('/rpc/piece_counts')) { const m = {}; pieces.filter((p) => p.status === 'approved').forEach((p) => { m[p.author_id] = (m[p.author_id] || 0) + 1; }); return route.fulfill({ json: Object.entries(m).map(([author_id, n]) => ({ author_id, n })) }); }
       if (url.pathname.endsWith('/rpc/bell')) return route.fulfill({ json: { seen: t(5), items: [
-        { kind: 'mention', at: t(8), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: 'th2', thread_title: 'What are you reading this week?' },
+        { kind: 'mention', at: t(8), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: 'th2', thread_title: 'What are you reading this week?', post: 'p3' },
         { kind: 'mark', at: t(7), n: 14, who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
         { kind: 'reflection', at: t(6), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: 'mine1', piece_title: 'Published piece 2', piece_slug: 'mine1', thread: null, thread_title: null },
         { kind: 'follow', at: t(4), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: null, thread_title: null },
