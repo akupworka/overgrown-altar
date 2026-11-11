@@ -49,7 +49,7 @@ export const STATIONS: Station[] = [
   { n: 1, name: 'Wayfarer', at: 0, line: 'Setting out.' },
   { n: 2, name: 'Pilgrim', at: 1, line: 'On the road, with something kept.' },
   { n: 3, name: 'Lamplighter', at: 3, line: 'Carrying a little light for others.' },
-  { n: 4, name: 'Keeper of the Flame', at: 5, line: 'Faithful in reading and in encouragement.' },
+  { n: 4, name: 'Flamekeeper', at: 5, line: 'Faithful in reading and in encouragement.' },
   { n: 5, name: 'Companion', at: 7, line: 'Known at the table.' },
   { n: 6, name: 'Elder', at: 10, line: 'One the Fellowship leans on.' },
   { n: 7, name: 'Friend of the Altar', at: 13, line: 'The whole Way walked.' },
