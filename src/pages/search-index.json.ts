@@ -12,7 +12,6 @@ const PAGES = [
   { href: '/hearth/', title: 'The Hearth', line: 'Prose, poetry and fiction.' },
   { href: '/perimeter/', title: 'The Perimeter', line: 'Testimony and the unseen.' },
   { href: '/gallery/', title: 'The Gallery', line: 'Photographs of the Guild.' },
-  { href: '/folios/', title: 'Folios', line: 'Collected editions.' },
   { href: '/crafts/', title: 'The Crafts', line: 'Each craft, and what the editor looks for.' },
   { href: '/guild/', title: 'Join the Guild', line: 'A round-table guild for creative believers.' },
   { href: '/contact/', title: 'Contact', line: 'Write to the editor.' },

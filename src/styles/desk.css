@@ -2285,3 +2285,11 @@ html[data-night] .m-reading .d-paper .rt-n { background: rgba(243, 236, 220, .12
 .m-work-night .m-tabs button:not(.on):hover { color: var(--ember) !important; }
 .m-work-night .m-tabs .m-tab-n { background: rgba(243, 236, 220, .1); }
 .m-work-night .m-tabs button.on .m-tab-n { background: rgba(18, 22, 15, .12); }
+/* The Guild page's room tiles, now five (Folios is parked): no tile is left alone with a gap beside it */
+@media (min-width: 1101px) { .ss-main .g-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }   /* Crafts, Gallery, About (your Desk and the Prestiges are in the column) */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .g-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  .g-tiles .g-tile { grid-column: span 2; }
+  .g-tiles .g-tile:nth-last-child(-n+2) { grid-column: span 3; }
+}
+@media (max-width: 700px) { .g-tiles .g-tile:last-child:nth-child(odd) { grid-column: 1 / -1; } }

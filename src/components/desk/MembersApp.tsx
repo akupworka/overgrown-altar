@@ -167,12 +167,6 @@ function Directory({ me }: { me?: string } = {}) {
             <span className="g-tile-text"><span className="g-tile-name">The Gallery</span><span className="g-room-line">Every photograph the Guild has made, newest first.</span></span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>
-          <a className="g-room g-room-small g-tile" href="/folios">
-            <img className="g-tile-photo" src="/images/folios-photo-1200.jpg" alt="" loading="lazy" />
-            <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 4h10l4 4v12H5z" /><path d="M15 4v4h4M8 12h8M8 15h8M8 18h5" /></svg></span>
-            <span className="g-tile-text"><span className="g-tile-name">Folios</span><span className="g-room-line">The publication’s bound collections.</span></span>
-            <span className="g-tile-go" aria-hidden="true">→</span>
-          </a>
           <a className="g-room g-room-small g-tile" href="/about">
             <img className="g-tile-photo" src="/images/what-we-believe-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5M12 8h.01" /></svg></span>

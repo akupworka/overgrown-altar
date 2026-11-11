@@ -39,6 +39,17 @@ Start by reading this file, then `README.md`.
 - BaseLayout: Open Graph/Twitter previews (`image` prop), OA favicon + apple-touch-icon, Share/Print, first-visit
   "arrival" (cross draws itself, `components/Arrival.astro`, once per browser). `/enter/` is a drawn doorway.
 
+## Parked: Folios
+Folios (the publication's bound, printed collections) are a later chapter. The owner asked for them to be taken off the
+site everywhere but remembered. Nothing was deleted:
+- The page is kept, unbuilt, at `src/parked/folios.astro` (it was `src/pages/folios.astro`, served at /folios).
+- Its photographs are still in `public/images` (`folios-photo*.jpg`; the home page and the door use `folios-photo-2`).
+- To bring Folios back: move the file to `src/pages/folios.astro`, then restore its links: the header list in
+  `SiteNav.astro`, the footer list in `SiteFooter.astro`, "The Publication" in `MenuPanel.astro` and `pages/menu.astro`,
+  the page entry in `pages/search-index.json.ts`, the tile on the Guild page (`desk/MembersApp.tsx`, beside The Gallery),
+  the third button on `pages/start-here.astro`, and the print-sales line in `pages/legal.astro`. The commit that parked
+  it shows each exact line.
+
 ## Branches
 
 NOTE (latest): Guild writing and publishing now live in **Supabase**, not Sanity. The `sanity` branch was
