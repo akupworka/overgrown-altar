@@ -449,6 +449,9 @@ function Reading({ id, isEditor = false }: { id: string; isEditor?: boolean }) {
   const [piece, setPiece] = useState<Piece | null | undefined>(undefined);
   const [author, setAuthor] = useState<Profile | null>(null);
   const [photo, setPhoto] = useState('');
+  // How it has been received (its writer and the editors only): stayed-with-me marks, reflections, saves. Numbers, never names.
+  const [stats, setStats] = useState<{ marks: number; reflections: number; saves: number } | null>(null);
+  useEffect(() => { setStats(null); supabase.rpc('piece_stats', { p_id: id }).then(({ data }) => setStats((data as any) ?? null)); }, [id]);
   // Listen: the piece read aloud while you read along (the device's own voice; lib/listen). Set up once the page is drawn.
   const paper = useRef<HTMLElement>(null), listenBtn = useRef<HTMLButtonElement>(null);
   const [listenMin, setListenMin] = useState(0);
@@ -510,6 +513,13 @@ function Reading({ id, isEditor = false }: { id: string; isEditor?: boolean }) {
             <Initials name={author.display_name} size={36} src={portraitUrl(author.portrait_path)} />
             <span className="lab">{author.display_name}{piece.published_at ? ` · ${fmt(piece.published_at)}` : ''}</span>
           </Link>
+        )}
+        {stats && piece.status === 'approved' && (
+          <p className="lab m-stats" aria-label="How this piece has been received">
+            <span><b>{stats.marks}</b> stayed with {stats.marks === 1 ? 'a reader' : 'readers'}</span>
+            <span><b>{stats.reflections}</b> {stats.reflections === 1 ? 'reflection' : 'reflections'}</span>
+            <span><b>{stats.saves}</b> {stats.saves === 1 ? 'save' : 'saves'}</span>
+          </p>
         )}
         {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
         {piece.status === 'approved' && <ReadTools piece={piece} author={author?.display_name ?? ''} photo={photo} isEditor={isEditor} />}
