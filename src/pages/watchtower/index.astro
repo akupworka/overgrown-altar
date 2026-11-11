@@ -26,7 +26,8 @@ const newest = newestFirst.slice(0, 3);           // the three newest, under arc
 const alsoNew = newestFirst.slice(3, 9);           // six more, as picture cards like the Hearth's: the words on the picture, the writer beneath
 const rest = newestFirst.slice(9);                 // everything earlier, as a searchable list
 
-// The writers of The Watchtower.
+// The writers of The Watchtower: the eight who published most recently (pieces arrive newest first), so the list turns
+// over as new writers publish and never grows crowded. A phone shows the first six.
 const guildPieces = await guildPillar('watchtower');
 const writers = [...new Map(guildPieces.map((g) => [g.author.id, g.author] as [string, GuildAuthor])).values()].slice(0, 8);
 // The line set large between the dispatches is the journal's own, and always the same: where every dispatch ends.
@@ -281,7 +282,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .wt-writers-row { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 26px; }
   .wt-writer { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .wt-writer > span:last-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .wt-writer-n { font-family: var(--serif); font-size: 21px; line-height: 1.15; transition: color .3s; }
+  .wt-writer-n { font-family: var(--serif); font-size: 21px; line-height: 1.15; transition: color .3s; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .wt-writer:hover .wt-writer-n { color: var(--oxblood); }
   .wt-writer-c { font-size: 9px; }
   @media (max-width: 1100px) and (min-width: 701px) { .wt-writers-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -368,9 +369,10 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     .method-k { font-size: 21px !important; line-height: 1.2; }
     .method-d { font-size: 15.5px !important; max-width: none; }
     .wt-writers { min-width: 0; }
-    .wt-writers-row { display: flex; gap: 16px; min-width: 0; margin: 0 -22px; padding: 4px 22px 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-    .wt-writers-row::-webkit-scrollbar { display: none; }
-    .wt-writers-row .wt-writer { flex: none; width: 92px; flex-direction: column; text-align: center; gap: 8px; scroll-snap-align: start; }
+    /* six on a phone, three to a row: never a crowd, never a row to swipe */
+    .wt-writers-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 8px; }
+    .wt-writers-row .wt-writer:nth-child(n+7) { display: none; }
+    .wt-writers-row .wt-writer { flex-direction: column; text-align: center; gap: 8px; }
     .wt-writers-row .wt-writer > span:last-child { align-items: center; }
     .wt-writer-n { font-size: 16px !important; line-height: 1.2; }
   }
