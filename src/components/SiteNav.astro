@@ -208,7 +208,12 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       show(); addEventListener('scroll', show, { passive: true }); vv?.addEventListener('resize', show); vv?.addEventListener('scroll', show);
     }
     // When the keyboard closes, ask the phone to measure again.
-    addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); anchor(); }, 120));
+    // (only for typing boxes: a page button leaving focus mustn't stop the page mid-scroll)
+    addEventListener('focusout', (e) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || !(t.matches('input, textarea, select') || t.isContentEditable)) return;
+      setTimeout(() => { scrollTo(scrollX, scrollY); anchor(); }, 120);
+    });
     const mark = () => {
       const now = here();
       inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));

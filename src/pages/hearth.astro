@@ -120,13 +120,14 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   const none = document.querySelector<HTMLElement>('.he-none');
   const pager = document.querySelector<HTMLElement>('.he-pager');
   let kind = 'all', page = 1;
+  const per = () => (innerWidth > 1000 ? 12 : PER_PAGE);   // two full rows on computers (6 or 4 across), 6 on phones
   const draw = (scroll = false) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
     const shown = cards.filter((c) => kind === 'all' || c.dataset.tag === kind);
-    const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
+    const pages = Math.max(1, Math.ceil(shown.length / per()));
     page = Math.min(page, pages);
     cards.forEach((c) => { c.hidden = true; });
-    shown.slice((page - 1) * PER_PAGE, page * PER_PAGE).forEach((c) => { c.hidden = false; });
+    shown.slice((page - 1) * per(), page * per()).forEach((c) => { c.hidden = false; });
     if (none) none.hidden = shown.length > 0 || cards.length === 0;
     if (pager) { pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages); }
     if (scroll) toListTop(document.getElementById('work'));
@@ -222,6 +223,16 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-cta { margin-top: 44px; display: flex; justify-content: center; gap: 14px; }
   .he-cta [hidden] { display: none; }
 
+  /* Computers: six across (four on smaller screens), with the type sized to match */
+  @media (min-width: 1001px) {
+    .he-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px 26px; }
+    .he-card-t { font-size: 22px; }
+    .he-card-sf { font-size: 15.5px; }
+  }
+  @media (min-width: 1401px) {
+    .he-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 44px 24px; }
+    .he-card-t { font-size: 20px; }
+  }
   @media (max-width: 1000px) {
     .he-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
