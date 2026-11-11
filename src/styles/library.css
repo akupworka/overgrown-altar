@@ -93,31 +93,32 @@
   .lb-book.lb-photo .lb-cover { left: 6px !important; right: 6px !important; top: 72% !important; bottom: 3px !important; }
   .lb-book.lb-photo .lb-t { font-size: 12px; }
 }
-/* A short piece on the shelf (a poem, a page of prose) is a single sheet: cream paper with a turned corner, its picture at the head,
-   the title in ink, a few faint lines of writing, the writer's name at the foot. Long forms stay books. */
-.lb-book.lb-page > a { border-radius: 1px; background: #F3ECDC; color: #2A2017; box-shadow: none;
+/* A short piece on the shelf (a poem, a page of prose) is a single sheet, every one the same size: cream paper with a turned
+   corner, its picture across the head, then the kind, the title and a small rule set in the middle like a broadside,
+   and the writer's name at the foot. Long forms stay books. */
+.lb-book.lb-page { width: var(--bw) !important; height: var(--bh) !important; }
+.lb-book.lb-page > a { border-radius: 1px; color: #2A2017; box-shadow: none; background: linear-gradient(180deg, #F7F1E3, #EEE6D4);
   clip-path: polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 0 100%); }
 .lb-book.lb-page > a::before { inset: 0 0 auto auto !important; width: 17px; height: 17px; z-index: 3;
-  background: linear-gradient(225deg, rgba(0, 0, 0, 0) 50%, #D8CDB6 50%) !important; box-shadow: -2px 2px 4px rgba(42, 32, 23, .28); }
-/* the turned corner */
+  background: linear-gradient(225deg, rgba(0, 0, 0, 0) 50%, #D8CDB6 50%) !important; box-shadow: -2px 2px 4px rgba(42, 32, 23, .28); }   /* the turned corner */
 .lb-book.lb-page > a::after { display: none !important; }
-.lb-book.lb-page img { inset: 10px 10px auto 10px; width: calc(100% - 20px); height: 34%; opacity: 1 !important; }
+.lb-book.lb-page img { inset: 9px 9px auto 9px; width: calc(100% - 18px); height: 40%; opacity: 1 !important; }
 .lb-book.lb-page.lb-plain img { display: none; }
-.lb-book.lb-page .lb-cover { left: 12px !important; right: 12px !important; top: calc(34% + 20px) !important; bottom: 10px !important; gap: 4px !important; }
-.lb-book.lb-page.lb-plain .lb-cover { top: 22px !important; }
-.lb-book.lb-page .lb-k { margin: 0; padding: 0; background: none; color: #8A3A2E; }
-.lb-book.lb-page .lb-t { font-size: 15px; line-height: 1.12; color: #2A2017; text-shadow: none; -webkit-line-clamp: 3; }
-.lb-book.lb-page .lb-cover::after { content: ''; order: 2; flex: 1 1 0; min-height: 0; width: 100%; margin: 5px 0 4px;
-  background: repeating-linear-gradient(180deg, rgba(42, 32, 23, .17) 0 1px, rgba(42, 32, 23, 0) 1px 7px);
-  -webkit-mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); }
-.lb-book.lb-page .lb-w { order: 3; margin-top: 0 !important; color: #7A705F; -webkit-line-clamp: 1; }
+.lb-book.lb-page .lb-cover { left: 12px !important; right: 12px !important; top: calc(40% + 9px) !important; bottom: 11px !important;
+  align-items: center !important; text-align: center !important; justify-content: flex-start; gap: 6px !important; }
+.lb-book.lb-page.lb-plain .lb-cover { top: 14px !important; }
+.lb-book.lb-page .lb-k { flex: none; margin: auto 0 0; padding: 0; background: none; color: #8A3A2E; }   /* (with the name's own auto margin: the title sits midway, the name at the foot) */
+.lb-book.lb-page .lb-t { flex: none; font-size: 16px; line-height: 1.14; color: #2A2017; text-shadow: none; -webkit-line-clamp: 3; text-wrap: balance; }
+.lb-book.lb-page .lb-cover::after { content: ''; order: 2; flex: none; width: 22px; height: 1px; margin: 2px 0 0; background: #8A3A2E; opacity: .55; }   /* a small rule under the title */
+.lb-book.lb-page .lb-w { order: 3; flex: none; margin-top: auto !important; color: #7A705F; -webkit-line-clamp: 1; }
 @media (max-width: 700px) {
   .lb-book.lb-page > a { clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%); }
   .lb-book.lb-page > a::before { width: 13px; height: 13px; }
-  .lb-book.lb-page img { inset: 7px 7px auto 7px; width: calc(100% - 14px); }
-  .lb-book.lb-page .lb-cover { left: 9px !important; right: 9px !important; top: calc(34% + 14px) !important; bottom: 7px !important; gap: 3px !important; }
-  .lb-book.lb-page.lb-plain .lb-cover { top: 16px !important; }
-  .lb-book.lb-page .lb-t { font-size: 12.5px; }
+  .lb-book.lb-page img { inset: 6px 6px auto 6px; width: calc(100% - 12px); height: 38%; }
+  .lb-book.lb-page .lb-cover { left: 7px !important; right: 7px !important; top: calc(38% + 6px) !important; bottom: 7px !important; gap: 4px !important; }
+  .lb-book.lb-page.lb-plain .lb-cover { top: 10px !important; }
+  .lb-book.lb-page .lb-t { font-size: 13px; line-height: 1.12; }
+  .lb-book.lb-page .lb-cover::after { width: 16px; margin-top: 1px; }
 }
 /* Private or public: the keeper's switch, above their shelves */
 .lb-vis { display: flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%; padding: 8px 8px 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); }
@@ -136,6 +137,6 @@
 :is(.m-lib-tab, .au-lib) :is(.lb-vis-ic, .lb-vis-t b) { color: var(--oxblood); }
 :is(.m-lib-tab, .au-lib) .lb-vis-btn { background: var(--ink); color: var(--bone); }
 :is(.m-lib-tab, .au-lib) .lb-vis-btn:hover { background: var(--oxblood); }
-:is(.m-lib-tab, .au-lib) .lb-book.lb-page > a { background: #FBF7EC; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .2); }
+:is(.m-lib-tab, .au-lib) .lb-book.lb-page > a { background: linear-gradient(180deg, #FDFAF1, #F6F0E2); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .2); }
 :is(.m-lib-tab, .au-lib) .lb-book.lb-photo > a { background: #FBF7EC; box-shadow: 0 10px 20px rgba(42, 32, 23, .3), inset 0 0 0 1px rgba(42, 32, 23, .14); }
 .m-lib-none { margin: 0; text-align: center; font-size: 19px; color: var(--muted-paper, #6E6457); }
