@@ -107,7 +107,7 @@ export function SharedWithYou({ me }: { me: string }) {
       const { data: sh } = await supabase.from('draft_shares').select('piece_id').eq('reader_id', me);
       const ids = (sh ?? []).map((s: any) => s.piece_id);
       if (!ids.length) { setRows([]); return; }
-      const { data: pc } = await supabase.from('pieces').select('id, title, medium, author_id, status, updated_at').in('id', ids).neq('status', 'approved').order('updated_at', { ascending: false });
+      const { data: pc } = await supabase.from('pieces').select('id, title, medium, author_id, status, updated_at').in('id', ids).in('status', ['draft', 'returned']).order('updated_at', { ascending: false });   // still being worked on: once it is sent to the editor, it leaves
       const ppl = await loadPeople((pc ?? []).map((p: any) => p.author_id));
       // New: a draft just shared, or a note you haven't read yet (the same unread notices the Inbox shows)
       const { data: nt } = await supabase.from('inbox_notices').select('piece_id').eq('member_id', me).in('kind', ['draft', 'note']).is('read_at', null);
