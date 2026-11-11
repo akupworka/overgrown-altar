@@ -28,7 +28,7 @@ import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
 import { WorkshopNotes, SharedWithYou } from './Workshop';
-import { Library, Shelf } from './Library';
+import { Library, LibraryVisibility, Shelf } from './Library';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -242,7 +242,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const [work, setWork] = useState<Piece[]>([]);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [kind, setKind] = useState('all');
-  const [tab, setTab] = useState<'writing' | 'photos' | null>(null);   // like a profile's posts and reels: writing, or photographs
+  const [tab, setTab] = useState<'writing' | 'photos' | 'library' | null>(null);   // like a profile's posts and reels: writing, or photographs
   const [photoShown, setPhotoShown] = useState(12);
   const tally = useForumTally(id);   // their part in the forum, for its trophies
   const [page, setPage] = useState(1);
@@ -264,6 +264,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
     })();
   }, [id]);
 
+  const shelf = useCollection(id, 'library');   // their library's shelves (empty for anyone but its keeper, unless they have opened it)
+  const gone = useLibraryGone();
   if (person === undefined) return <p className="lab mut d-loading">Opening the page…</p>;
   if (person === null) return <div className="m-gate"><p className="it mut d-empty">This member’s page could not be found.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
@@ -274,7 +276,11 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   // Six pieces to a page, with pages below; the kind filter narrows the list first.
   const photos = work.filter((w) => w.medium === 'photograph' && w.image_path);
   const writing = work.filter((w) => !(w.medium === 'photograph' && w.image_path));
-  const view = tab ?? (writing.length || !photos.length ? 'writing' : 'photos');
+  // Their library: always there on your own vault; on another's, only when they have opened it (and the database agrees).
+  const mineLib = person.id === me && !fellow;
+  const books = (shelf ?? []).filter((b) => !gone.set.has(b.id));
+  const showLib = !fellow && (mineLib || (!!person.library_public && books.length > 0));
+  const view = tab === 'library' && !showLib ? 'writing' : tab ?? (writing.length || !photos.length ? 'writing' : 'photos');
   const kinds = KINDS.map((k) => ({ ...k, n: writing.filter((w) => w.medium === k.value).length })).filter((k) => k.n > 0);
   const shown = kind === 'all' ? writing : writing.filter((w) => w.medium === kind);
   const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
@@ -370,17 +376,27 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <WayTrophies member={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
       </>) : (<>
       <section className="m-work">
-        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
+        <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'library' ? `${books.length} ${books.length === 1 ? 'artifact' : 'artifacts'}` : view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
         {/* Writing and photographs, each in its own place */}
-        {writing.length > 0 && photos.length > 0 && (
-          <div className="m-tabs" role="tablist" aria-label="Work">
-            <button type="button" role="tab" aria-selected={view === 'writing'} className={view === 'writing' ? 'on' : ''} onClick={() => setTab('writing')}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span className="m-tab-n">{writing.length}</span></button>
-            <button type="button" role="tab" aria-selected={view === 'photos'} className={view === 'photos' ? 'on' : ''} onClick={() => setTab('photos')}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span className="m-tab-n">{photos.length}</span></button>
+        {((writing.length > 0 && photos.length > 0) || showLib) && (
+          <div className={`m-tabs${showLib ? ' m-tabs-3' : ''}`} role="tablist" aria-label="Work">
+            {(writing.length > 0 || !photos.length) && <button type="button" role="tab" aria-selected={view === 'writing'} className={view === 'writing' ? 'on' : ''} onClick={() => setTab('writing')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>Writing<span className="m-tab-n">{writing.length}</span></button>}
+            {photos.length > 0 && <button type="button" role="tab" aria-selected={view === 'photos'} className={view === 'photos' ? 'on' : ''} onClick={() => setTab('photos')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" /><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" /></svg>Photographs<span className="m-tab-n">{photos.length}</span></button>}
+            {showLib && (
+              <button type="button" role="tab" aria-selected={view === 'library'} className={view === 'library' ? 'on' : ''} onClick={() => setTab('library')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 4h3.5v16H4.5zM8 4h3.5v16H8zM13 6.2l3.3-.9 3.9 14.5-3.3.9z" /></svg>Library<span className="m-tab-n">{books.length}</span></button>
+            )}
           </div>
         )}
-        {view === 'photos' ? (<>
+        {view === 'library' ? (
+          <div className="m-lib-tab">
+            {mineLib && <LibraryVisibility me={me} />}
+            {books.length ? <Shelf books={books} from={`shelf-${id}`} onRemove={mineLib ? (pid) => gone.take(me, pid) : undefined} />
+              : <p className="it m-lib-none">{mineLib ? 'Nothing on your shelves yet. Tap “Save to library” on any piece or photograph, and it waits for you here.' : 'These shelves are empty.'}</p>}
+          </div>
+        ) : view === 'photos' ? (<>
           <ol className="m-grid">
             {photos.slice(0, photoShown).map((w) => (
               <li key={w.id}>
@@ -701,6 +717,12 @@ export default function MembersApp() {
 }
 
 // A Fellowship member's page is their library: everything they've saved, standing on shelves for others to see.
+/** Pieces just taken off a library shelf (hidden at once; removed from the library behind the scenes). */
+function useLibraryGone() {
+  const [set, setSet] = useState<Set<string>>(new Set());
+  const take = async (member: string, piece: string) => { setSet((g) => new Set(g).add(piece)); await supabase.from('library').delete().eq('member_id', member).eq('piece_id', piece); };
+  return { set, take };
+}
 function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boolean }) {
   const items = useCollection(id);
   const [gone, setGone] = useState<Set<string>>(new Set());

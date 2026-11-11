@@ -1,3 +1,4 @@
+@import './library.css';
 /* The Guild Desk and member pages. */
 /* ---- The room ---- */
 .desk { position: relative; min-height: 100vh; min-height: 100svh; background: #0A0C0A; color: var(--bone); overflow: hidden; }
@@ -791,7 +792,6 @@
 .d-kind-look, .d-kind-len { font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.5; color: #ABA597; }
 .d-kind-look .lab, .d-kind-len .lab { display: block; font-style: normal; font-size: 8.5px; color: var(--ember); margin-bottom: 2px; }
 .d-kind-all { align-self: flex-start; font-size: 9.5px; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 2px; }
-
 
 /* Phones: an arrow at the end of the formatting bar, with a fade, until the bar is scrolled to its end */
 .d-tools-wrap { display: contents; }
@@ -2122,56 +2122,11 @@ a.m-byline:hover { color: var(--oxblood); }
 /* Sign out sits closer under the vault button */
 @media (min-width: 1101px) { .d-room:not(.writing) .ss, .ss-aside .ss { margin-bottom: 12px !important; } }
 
-/* ---- Your library: saved for later, standing on shelves like books ---- */
-.lb { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 30px; text-align: left; }
-.lb-head { display: flex; flex-direction: column; gap: 12px; }
-.lb-head .h1 { margin: 0; font-size: clamp(44px, 6vw, 64px); }
-.lb-shelf { --bw: 136px; --bh: 196px; --pitch: 240px; list-style: none; margin: 0; padding: 0 14px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: calc(var(--pitch) - var(--bh)) 22px;
-  min-height: var(--pitch); padding-bottom: calc(var(--pitch) - var(--bh));
-  /* a plank under every row of books: a lit front edge, the board, and its shadow on the wall */
-  background-image: linear-gradient(180deg, transparent calc(var(--bh) - 1px), rgba(255, 227, 163, .5) calc(var(--bh) - 1px), rgba(255, 227, 163, .5) var(--bh), #2A2118 var(--bh), #17120C calc(var(--bh) + 12px), rgba(0, 0, 0, .55) calc(var(--bh) + 12px), transparent calc(var(--bh) + 30px));
-  background-size: 100% var(--pitch); background-repeat: repeat-y; }
-.lb-book { position: relative; flex: none; width: var(--bw); height: var(--bh); transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
-.lb-book:nth-child(5n + 2) { height: calc(var(--bh) - 12px); }
-.lb-book:nth-child(7n + 4) { height: calc(var(--bh) - 22px); width: calc(var(--bw) - 10px); }
-.lb-book:nth-child(4n + 3) { height: calc(var(--bh) - 6px); }
-.lb-book > a { position: absolute; inset: 0; display: block; overflow: hidden; border-radius: 2px 5px 5px 2px; color: var(--bone); background: #1B2A22;
-  box-shadow: inset 9px 0 10px -6px rgba(0, 0, 0, .75), inset -3px 0 0 rgba(233, 226, 214, .32), inset -4px 0 0 rgba(0, 0, 0, .35), 0 -1px 0 rgba(255, 255, 255, .06), 8px 0 14px -8px rgba(0, 0, 0, .9); }
-.lb-watchtower > a { background: #1C2433; }
-.lb-perimeter > a { background: #3A1A1E; }
-.lb-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; }
-.lb-book > a::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;   /* the hinge, and a darkening so the title reads */
-  background: linear-gradient(90deg, rgba(0, 0, 0, .45) 0, rgba(0, 0, 0, .1) 9px, rgba(255, 255, 255, .1) 10px, transparent 12px), linear-gradient(180deg, rgba(8, 10, 8, .55), rgba(8, 10, 8, .2) 45%, rgba(8, 10, 8, .8)); }
-.lb-book > a::after { content: ''; position: absolute; z-index: 1; left: 17px; right: 9px; top: 9px; bottom: 9px; border: 1px solid rgba(201, 180, 110, .55); pointer-events: none; }   /* a gilt frame */
-.lb-cover { position: absolute; z-index: 2; left: 24px; right: 15px; top: 18px; bottom: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
-.lb-k { font-size: 7px; letter-spacing: .2em; color: #E7CF8A; }
-.lb-t { font-family: var(--serif); font-size: 16px; line-height: 1.15; color: #F6F0E2; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; text-wrap: balance; }
-.lb-w { margin-top: auto; font-size: 7px; letter-spacing: .16em; color: #D9D2C2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.lb-x { position: absolute; z-index: 3; top: -9px; right: -9px; width: 26px; height: 26px; border: 0; border-radius: 50%; cursor: pointer; background: #12160F; color: #CFC8B8; font-size: 15px; line-height: 1;
-  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3), 0 4px 10px rgba(0, 0, 0, .5); opacity: 0; transition: opacity .25s, color .25s; }
-.lb-x::after { content: ''; position: absolute; inset: -9px; }
-.lb-x:hover { color: #E8A091; }
-.lb-book:hover .lb-x, .lb-x:focus-visible { opacity: 1; }
-@media (hover: hover) { .lb-book:hover { transform: translateY(-10px) rotate(-1.2deg); } }
-@media (hover: none) { .lb-x { opacity: .85; } }
-.lb-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.lb-shelf-empty { width: 100%; --bh: 90px; --pitch: 124px; min-height: 124px; padding: 0; }
-.lb-empty .it { margin: 0; font-size: 22px; }
-.lb-go { color: var(--ember); margin-top: 6px; }
-@media (max-width: 700px) {
-  .lb { gap: 22px; }
-  .lb-shelf { --bw: 100px; --bh: 148px; --pitch: 184px; padding: 0 6px; gap: calc(var(--pitch) - var(--bh)) 12px; justify-content: flex-start; }
-  .lb-cover { left: 19px; right: 11px; top: 14px; bottom: 12px; gap: 6px; }
-  .lb-book > a::after { left: 14px; right: 7px; top: 7px; bottom: 7px; }
-  .lb-t { font-size: 13px; }
-  .lb-k, .lb-w { font-size: 6.5px !important; }
-}
-@media (prefers-reduced-motion: reduce) { .lb-book { transition: none; } }
+   
 
 .ws-new { margin-right: 10px; position: relative; top: -2px; }
 .g-wrap > .ws-panel { width: 100%; box-sizing: border-box; }
-.lb-x { width: 22px; height: 22px; font-size: 13px; top: -7px; right: -7px; }
-@media (hover: none) { .lb-x { opacity: .7; } }
+
 /* The identity column never moves: it starts exactly where it stays (no drift as the page scrolls), and it tightens
    on shorter screens so all of it, down to Sign out, is always in view. */
 @media (min-width: 1101px) {
@@ -2191,24 +2146,7 @@ a.m-byline:hover { color: var(--oxblood); }
   .ss-arch { width: 68px !important; height: 88px !important; }
 }
 
-/* Library covers: the picture the writer chose, shown whole and bright; the title sits on a dark foot */
-.lb-shelf { --bw: 150px; --bh: 210px; --pitch: 256px; }
-.lb-book img { opacity: 1 !important; }
-.lb-book.lb-plain img { opacity: .55 !important; }   /* a room's photograph standing in: quieter */
-.lb-book > a::before { background: linear-gradient(90deg, rgba(0, 0, 0, .5) 0, rgba(0, 0, 0, .12) 8px, rgba(255, 255, 255, .14) 9px, transparent 11px), linear-gradient(180deg, rgba(8, 10, 8, .5) 0, rgba(8, 10, 8, 0) 22%, rgba(8, 10, 8, 0) 42%, rgba(8, 10, 8, .92) 82%) !important; }
-.lb-book > a::after { display: none; }
-.lb-book.lb-plain > a::after { display: block; }
-.lb-cover { left: 20px !important; right: 12px !important; top: 12px !important; bottom: 12px !important; align-items: flex-start !important; text-align: left !important; gap: 5px !important; }
-.lb-k { margin-bottom: auto; padding: 3px 7px; border-radius: 999px; background: rgba(8, 10, 8, .6); color: #F2DE9E; }
-.lb-t { font-size: 17px; line-height: 1.12; -webkit-line-clamp: 4; text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
-.lb-w { margin-top: 2px !important; color: #E6DFD0; }
-.lb-book.lb-plain .lb-cover { left: 26px !important; right: 18px !important; top: 20px !important; bottom: 18px !important; }
-@media (max-width: 700px) {
-  .lb-shelf { --bw: 106px; --bh: 152px; --pitch: 190px; }
-  .lb-cover { left: 15px !important; right: 9px !important; top: 9px !important; bottom: 9px !important; }
-  .lb-book.lb-plain .lb-cover { left: 20px !important; right: 13px !important; top: 15px !important; bottom: 13px !important; }
-  .lb-t { font-size: 13.5px; }
-}
+   
 
 /* A Fellowship member's page: their library on shelves (dark, edge to edge), then their badges */
 .m-lib { width: 100vw; margin: 34px calc(50% - 50vw) 0; padding: 64px max(24px, calc(50vw - 490px)) 70px; box-sizing: border-box; text-align: left; display: flex; flex-direction: column; gap: 30px;
@@ -2291,47 +2229,9 @@ a.m-byline:hover { color: var(--oxblood); }
 }
 /* Phones: the Desk's page numbers sit close under the list they turn; the room is below them, before what follows */
 @media (max-width: 700px) { .d-home > .d-pager { margin-top: 0 !important; margin-bottom: 24px; } }
-/* A photograph on the shelf is a polaroid: cream paper, the picture set in, its title written in the wide margin below, leaning a little */
-.lb-book.lb-photo { transform: rotate(-2.2deg); }
-.lb-book.lb-photo:nth-child(even) { transform: rotate(1.8deg); }
-.lb-book.lb-photo > a { border-radius: 2px; background: #F1EBDD; box-shadow: 0 12px 24px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(42, 32, 23, .08); }
-.lb-book.lb-photo > a::before, .lb-book.lb-photo > a::after { display: none !important; }
-.lb-book.lb-photo img { inset: 8px 8px auto 8px; width: calc(100% - 16px); height: calc(72% - 8px); opacity: 1 !important; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2); }
-.lb-book.lb-photo .lb-cover { left: 9px !important; right: 9px !important; top: 72% !important; bottom: 4px !important; align-items: center !important; justify-content: center; text-align: center !important; gap: 3px !important; }
-.lb-book.lb-photo .lb-k { display: none; }
-.lb-book.lb-photo .lb-t { font-style: italic; font-size: 14px; line-height: 1.1; color: #2A2017; text-shadow: none; -webkit-line-clamp: 2; }
-.lb-book.lb-photo .lb-w { margin-top: 0 !important; color: #7A705F; -webkit-line-clamp: 1; }
-@media (hover: hover) { .lb-book.lb-photo:hover { transform: translateY(-10px) rotate(0deg); } }
-@media (max-width: 700px) {
-  .lb-book.lb-photo img { inset: 6px 6px auto 6px; width: calc(100% - 12px); height: calc(72% - 6px); }
-  .lb-book.lb-photo .lb-cover { left: 6px !important; right: 6px !important; top: 72% !important; bottom: 3px !important; }
-  .lb-book.lb-photo .lb-t { font-size: 12px; }
-}
-/* A short piece on the shelf (a poem, a page of prose) is a single sheet: cream paper with a turned corner, its picture at the head,
-   the title in ink, a few faint lines of writing, the writer's name at the foot. Long forms stay books. */
-.lb-book.lb-page > a { border-radius: 1px; background: #F3ECDC; color: #2A2017; box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 0 100%); }
-.lb-book.lb-page > a::before { inset: 0 0 auto auto !important; width: 17px; height: 17px; z-index: 3;
-  background: linear-gradient(225deg, rgba(0, 0, 0, 0) 50%, #D8CDB6 50%) !important; box-shadow: -2px 2px 4px rgba(42, 32, 23, .28); }   /* the turned corner */
-.lb-book.lb-page > a::after { display: none !important; }
-.lb-book.lb-page img { inset: 10px 10px auto 10px; width: calc(100% - 20px); height: 34%; opacity: 1 !important; }
-.lb-book.lb-page.lb-plain img { display: none; }
-.lb-book.lb-page .lb-cover { left: 12px !important; right: 12px !important; top: calc(34% + 20px) !important; bottom: 10px !important; gap: 4px !important; }
-.lb-book.lb-page.lb-plain .lb-cover { top: 22px !important; }
-.lb-book.lb-page .lb-k { margin: 0; padding: 0; background: none; color: #8A3A2E; }
-.lb-book.lb-page .lb-t { font-size: 15px; line-height: 1.12; color: #2A2017; text-shadow: none; -webkit-line-clamp: 3; }
-.lb-book.lb-page .lb-cover::after { content: ''; order: 2; flex: 1 1 0; min-height: 0; width: 100%; margin: 5px 0 4px;
-  background: repeating-linear-gradient(180deg, rgba(42, 32, 23, .17) 0 1px, rgba(42, 32, 23, 0) 1px 7px);
-  -webkit-mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); }
-.lb-book.lb-page .lb-w { order: 3; margin-top: 0 !important; color: #7A705F; -webkit-line-clamp: 1; }
-@media (max-width: 700px) {
-  .lb-book.lb-page > a { clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%); }
-  .lb-book.lb-page > a::before { width: 13px; height: 13px; }
-  .lb-book.lb-page img { inset: 7px 7px auto 7px; width: calc(100% - 14px); }
-  .lb-book.lb-page .lb-cover { left: 9px !important; right: 9px !important; top: calc(34% + 14px) !important; bottom: 7px !important; gap: 3px !important; }
-  .lb-book.lb-page.lb-plain .lb-cover { top: 16px !important; }
-  .lb-book.lb-page .lb-t { font-size: 12.5px; }
-}
+
+   
+
 /* Under a piece read in the Guild: the two share buttons sit side by side on phones (the others run full width) */
 @media (max-width: 700px) { .rt-btn.rt-half { flex: 1 1 calc(50% - 5px); min-width: 0; padding: 0 8px; letter-spacing: .12em; white-space: nowrap; } }
 /* Listen, on a piece read inside the Guild: one pill under the title */
@@ -2340,3 +2240,5 @@ a.m-byline:hover { color: var(--oxblood); }
 .m-listen[aria-pressed='true'] { background: var(--oxblood); color: #F3ECDC; }
 .m-listen-m { opacity: .7; }
 @media (max-width: 700px) { .rt-btn.m-listen { flex: none; width: 100%; justify-content: center; min-height: 44px; } }
+/* A vault's work tabs with the Library beside Writing and Photographs: three fit a phone without their icons */
+@media (max-width: 700px) { .m-tabs.m-tabs-3 { max-width: 100%; } .m-tabs.m-tabs-3 button { padding: 10px 9px !important; gap: 5px; letter-spacing: .1em; font-size: 9px; } .m-tabs.m-tabs-3 button > svg { display: none; } .m-tabs.m-tabs-3 .m-tab-n { min-width: 18px; padding: 0 5px; } }

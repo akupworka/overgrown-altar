@@ -1,18 +1,11 @@
 // Your library: the pieces you've saved for later, standing on shelves, each with the cover its writer chose. Private to you (the `library`
 // table; a Fellowship member's library is `saves`, which also stands on their page). Opening one reads it inside the Guild.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useCollection } from './Collection';
-
-// A piece without a picture of its own wears its room's photograph
-const ROOM: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
-const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
+import { MEDIUM, ROOM, shapeOf } from '../../lib/shelf';
 
 type Book = NonNullable<ReturnType<typeof useCollection>>[number];
-// How a piece stands on the shelf. A photograph is a polaroid. Short forms (poetry, and prose under a thousand words) are a
-// single page. Everything long-form (essays, fiction, testimony and the like, or prose that runs long) is a book.
-const shapeOf = (b: { medium: string; words?: number }) =>
-  b.medium === 'photograph' ? ' lb-photo' : b.medium === 'poetry' || (b.medium === 'prose' && (b.words ?? 0) < 1000) ? ' lb-page' : '';
 /** Pieces standing on shelves: books, single pages and polaroids. `onRemove` adds the small × that takes one down;
  *  `from` is remembered in the link, so the piece's back button returns to these shelves. */
 export function Shelf({ books, onRemove, from }: { books: Book[]; onRemove?: (id: string) => void; from?: string }) {
@@ -35,6 +28,34 @@ export function Shelf({ books, onRemove, from }: { books: Book[]; onRemove?: (id
   );
 }
 
+/** Private or public: the keeper of a library decides. Private (as every library begins), only they see its shelves. Public,
+ *  anyone can: on their vault inside the Guild and on their public page. Shows nothing until the choice can be read. */
+export function LibraryVisibility({ me, onChange }: { me: string; onChange?: (open: boolean) => void }) {
+  const [open, setOpen] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    supabase.from('profiles').select('library_public').eq('id', me).maybeSingle().then(({ data, error }) => { if (!error && data) setOpen(!!(data as any).library_public); });
+  }, [me]);
+  if (open === null) return null;
+  const flip = async () => {
+    const to = !open; setBusy(true);
+    const { error } = await supabase.from('profiles').update({ library_public: to } as any).eq('id', me);
+    setBusy(false);
+    if (!error) { setOpen(to); onChange?.(to); }
+  };
+  return (
+    <div className={`lb-vis${open ? ' open' : ''}`}>
+      <span className="lb-vis-ic" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          {open ? <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="2.8" /></> : <><rect x="5" y="10.5" width="14" height="10" rx="1.5" /><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" /></>}
+        </svg>
+      </span>
+      <span className="lb-vis-t"><b>{open ? 'Public' : 'Private'}</b><span>{open ? 'Anyone can see these shelves on your page.' : 'Only you can see these shelves.'}</span></span>
+      <button type="button" className="lab lb-vis-btn" onClick={flip} disabled={busy} aria-pressed={open}>{open ? 'Make private' : 'Make public'}</button>
+    </div>
+  );
+}
+
 export function Library({ me }: { me: string }) {
   const fellow = typeof document !== 'undefined' && document.documentElement.hasAttribute('data-fellow');
   const table = fellow ? 'saves' : 'library';   // the Fellowship's library is the one on their page; the Guild's is private
@@ -50,7 +71,8 @@ export function Library({ me }: { me: string }) {
       <header className="lb-head">
         <span className="eb">The Library</span>
         <h1 className="h1">Your library</h1>
-        <p className="it mut d-sub">{fellow ? 'The artifacts you’ve saved. These shelves also stand on your page, for others to see.' : 'The artifacts you’ve set aside for later. Only you can see these shelves.'}</p>
+        <p className="it mut d-sub">{fellow ? 'The artifacts you’ve saved. These shelves also stand on your page, for others to see.' : 'The artifacts you’ve set aside for later.'}</p>
+        {!fellow && <LibraryVisibility me={me} />}
         {items && books.length > 0 && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} waiting for you</span>}
       </header>
       {!items ? <p className="lab mut">Opening the library…</p> : books.length === 0 ? (

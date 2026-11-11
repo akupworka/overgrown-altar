@@ -35,14 +35,14 @@ const ME = '22222222-2222-2222-2222-222222222222';
 const t = (d) => `2026-11-0${d}T09:00:00Z`;
 const profiles = [
   { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : who === 'staff' ? 'staff' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
-  { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', library_public: true, website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'e9', display_name: 'Hester Vane', craft: 'Essays', bio: '', portrait_path: null, role: who === 'staff' ? 'editor' : 'staff', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'f1', display_name: 'Miriam Hale', craft: 'Poetry, old churches', bio: 'Reads slowly, keeps what stays.', portrait_path: null, role: 'fellow', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm3', display_name: 'Thomas Ashgrove', craft: 'Poetry', bio: '', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(2) },
 ];
 const piece = (id, author, title, status, medium = 'essay', pillar = 'hearth') => ({
   id, author_id: author, title, standfirst: 'A line about what it holds.', body: 'The stones keep the psalms. '.repeat(60),
-  pillar, medium, image_path: null, image_alt: '', image_focus: '', photo_meta: {}, gallery: [], status, editor_note: status === 'returned' ? 'Lovely. Tighten the ending.' : '',
+  pillar, medium, image_path: medium === 'photograph' ? '/images/four-lancet-window-1200.jpg' : null, image_alt: '', image_focus: '', photo_meta: {}, gallery: [], status, editor_note: status === 'returned' ? 'Lovely. Tighten the ending.' : '',
   submitted_at: t(2), published_at: status === 'approved' ? t(3) : null, created_at: t(1), updated_at: t(4), slug: id, revision: null, revision_at: null, writer_notified: true });
 const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
@@ -99,7 +99,8 @@ const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
   inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null, kind: 'published' }, { id: 'nt2', member_id: ME, writer_id: 'm2', piece_id: 'wd1', created_at: t(7), read_at: null, kind: 'draft' }],
   saves: [...['mine0', 'mine1', 'mine3', 'mine4', 'mine6', 'a2'].map((piece_id, i) => ({ member_id: 'f1', piece_id, created_at: t(9 - i) }))],
-  library: [...['a2', 'mine0', 'mine1', 'mine2', 'mine3', 'mine4', 'mine5', 'mine6', 'mine7'].map((piece_id, i) => ({ member_id: ME, piece_id, created_at: t(9 - i) }))],
+  library: [...['a2', 'mine0', 'mine1', 'mine2', 'mine3', 'mine4', 'mine5', 'mine6', 'mine7'].map((piece_id, i) => ({ member_id: ME, piece_id, created_at: t(9 - i) })),
+    ...['mine0', 'mine2', 'mine4', 'mine1'].map((piece_id, i) => ({ member_id: 'm2', piece_id, created_at: t(8 - i) }))],   // Jane has opened her library (library_public)
   draft_shares: [{ piece_id: 'd1', reader_id: 'm2', created_at: t(5) }, { piece_id: 'wd1', reader_id: ME, created_at: t(6) }],
   draft_notes: [{ id: 'dn1', piece_id: 'wd1', author_id: ME, body: 'The opening is strong. The second stanza loses me a little: who is speaking?', created_at: t(6) }, { id: 'dn2', piece_id: 'wd1', author_id: 'm2', body: 'Thank you. It is the bell itself; I will make that plainer.', created_at: t(7) },
     { id: 'dn3', piece_id: 'd1', author_id: 'm2', body: 'I would cut the first paragraph and begin at the window.', created_at: t(6) }],
