@@ -119,7 +119,7 @@ export function WayTrophies({ member, first, mine }: { member: string; first: st
       <Path at={w.current.n} />
       {w.earned.length > 0
         ? <ul className="m-fw-list">{w.earned.map((b) => <li key={b.id} className={b.rare ? 'rare' : ''} title={b.note}><Token b={b} lit size={72} /><span className="m-fw-n">{b.name}</span></li>)}</ul>
-        : <p className="it mut m-fw-none">{mine ? 'Your first badge comes with the first piece you add to your vault.' : 'Just setting out.'}</p>}
+        : <p className="it mut m-fw-none">{mine ? 'Your first badge comes with the first piece you save.' : 'Just setting out.'}</p>}
       {mine && <a className="lab m-fw-go" href="/guild/members/?view=way">Walk the Way →</a>}
     </section>
   );

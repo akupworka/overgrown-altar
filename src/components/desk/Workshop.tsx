@@ -116,30 +116,22 @@ export function SharedWithYou({ me }: { me: string }) {
     })();
   }, [me]);
   if (!rows?.length) return null;
-  const fresh = rows.filter((r) => r.fresh).length;
   return (
-    <section className="ws-panel" aria-label="The Workshop">
-      <div className="ws-panel-head">
-        <span className="ws-panel-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /><path d="M13 20h7" /></svg></span>
-        <span className="ws-panel-t"><span className="eb">The Workshop</span>
-          <span className="it ws-panel-line">{rows.length === 1 ? 'A writer has asked for your eye on a draft.' : `${rows.length} writers have asked for your eye on a draft.`}</span></span>
-        {fresh > 0 && <span className="lab fo-new ws-panel-n">{fresh} new</span>}
-      </div>
-      <ol className="ws-drafts">
-        {rows.map((r) => (
-          <li key={r.id}>
-            <a className={`ws-draft${r.fresh ? ' fresh' : ''}`} href={`/guild/members/?p=${r.id}`}>
-              <Face p={r.person} size={44} />
-              <span className="ws-draft-t">
-                <span className="ws-draft-title">{r.title}</span>
-                <span className="lab mut">{r.medium === 'photograph' ? 'A photograph' : 'A draft'} by {r.who}{r.fresh ? ' · new for you' : ''}</span>
-              </span>
-              <span className="lab ws-draft-go">Read &amp; leave notes<span aria-hidden="true"> →</span></span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </section>
+    <ol className="ws-panel" aria-label="The Workshop: drafts shared with you">
+      {rows.map((r) => (
+        <li key={r.id}>
+          <a className="ws-draft" href={`/guild/members/?p=${r.id}`}>
+            <Face p={r.person} size={36} />
+            <span className="ws-draft-t">
+              <span className="ws-draft-title">{r.title}</span>
+              <span className="lab mut">The Workshop · {r.medium === 'photograph' ? 'a photograph' : 'a draft'} by {r.who}, for your notes</span>
+            </span>
+            {r.fresh && <span className="lab fo-new ws-panel-n">New</span>}
+            <span className="ws-draft-go" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ol>
   );
 }
 

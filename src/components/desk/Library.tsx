@@ -1,5 +1,5 @@
 // Your library: the pieces you've saved for later, standing on shelves, each with the cover its writer chose. Private to you (the `library`
-// table; "Add to vault" is the public one, shown on your vault page). Opening a book reads it inside the Guild.
+// table; a Fellowship member's library is `saves`, which also stands on their page). Opening one reads it inside the Guild.
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useCollection } from './Collection';
@@ -31,19 +31,21 @@ export function Shelf({ books, onRemove }: { books: Book[]; onRemove?: (id: stri
 }
 
 export function Library({ me }: { me: string }) {
-  const items = useCollection(me, 'library');
+  const fellow = typeof document !== 'undefined' && document.documentElement.hasAttribute('data-fellow');
+  const table = fellow ? 'saves' : 'library';   // the Fellowship's library is the one on their page; the Guild's is private
+  const items = useCollection(me, table);
   const [gone, setGone] = useState<Set<string>>(new Set());
   const books = (items ?? []).filter((b) => !gone.has(b.id));
   async function remove(id: string) {
     setGone((g) => new Set(g).add(id));
-    await supabase.from('library').delete().eq('member_id', me).eq('piece_id', id);
+    await supabase.from(table).delete().eq('member_id', me).eq('piece_id', id);
   }
   return (
     <div className="lb">
       <header className="lb-head">
         <span className="eb">Saved for later</span>
         <h1 className="h1">Your library</h1>
-        <p className="it mut d-sub">The artifacts you’ve set aside for later. Only you can see these shelves.</p>
+        <p className="it mut d-sub">{fellow ? 'The artifacts you’ve saved. These shelves also stand on your page, for others to see.' : 'The artifacts you’ve set aside for later. Only you can see these shelves.'}</p>
         {items && books.length > 0 && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} waiting for you</span>}
       </header>
       {!items ? <p className="lab mut">Opening the library…</p> : books.length === 0 ? (

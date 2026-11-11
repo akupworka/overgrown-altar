@@ -23,7 +23,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
         <div className="d-home-hello">
           <span className="eb">The Fellowship</span>
           <h1 className="h1 d-hello">{greeting()}, {first}</h1>
-          <p className="d-tally"><span><b>{items?.length ?? 0}</b> in your vault</span><a className="d-tally-link" href="/guild/members/?view=following"><b>{following}</b> {following === 1 ? 'writer' : 'writers'} followed →</a></p>
+          <p className="d-tally"><span><b>{items?.length ?? 0}</b> in your library</span><a className="d-tally-link" href="/guild/members/?view=following"><b>{following}</b> {following === 1 ? 'writer' : 'writers'} followed →</a></p>
         </div>
         <div className="d-begins">
           <a className="btn d-btn" href="/gallery/">Explore the Gallery</a>
@@ -41,8 +41,8 @@ export function FellowHome({ profile }: { profile: Profile }) {
       <ReadingShelf me={profile.id} freshOnly />
       {/* The collection itself lives on their page; here, one way to it */}
       <a className="fl-coll-link" href={`/guild/members/?m=${profile.id}`}>
-        <span><span className="eb">Your vault</span>
-          <span className="it">{items?.length ? `${items.length} ${items.length === 1 ? 'piece' : 'pieces'} kept, on your page.` : 'Tap “Add to vault” on anything you love; it shows on your page.'}</span></span>
+        <span><span className="eb">Your library</span>
+          <span className="it">{items?.length ? `${items.length} ${items.length === 1 ? 'piece' : 'pieces'} kept, on your page.` : 'Tap “Save for later” on anything you love; it stands on your page.'}</span></span>
         <span className="lab fl-coll-go">Open →</span>
       </a>
     </section>

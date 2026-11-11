@@ -6,7 +6,7 @@ import { uniqueIds as useIds } from '../../lib/svgIds';
 // What anyone can see is enforced by the database's rules; this only presents it.
 import { seenRole, viewAs, isEditorRole, roleLabel, roleClass } from '../../lib/supabase';
 import { FollowButton } from './Reading';
-import { useCollection, CollectionWall } from './Collection';
+import { useCollection } from './Collection';
 import { WayPage, WayBadge, WayTrophies } from './Way';
 import { SideColumn, Loading } from './DeskApp';
 import { useEffect, useState } from 'react';
@@ -345,11 +345,15 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
         {person.id === me && (
           <nav className="m-actions" aria-label="My Desk">
-            {fellow ? <a className="m-act primary" href="/guild/desk/">My collection</a> : <>
+            {fellow ? <a className="m-act primary" href="/guild/desk/">My desk</a> : <>
             <a className="m-act primary" href="/guild/desk/#write">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
               Write a piece
             </a></>}
+            <Link className="m-act" to="/guild/members/?view=library">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10 4h3v16h-3z" /><path d="m15.5 6 2.8-.8 4 14.3-2.8.8z" /></svg>
+              My library
+            </Link>
             <a className="m-act" href="/guild/desk/#my-page">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
               Edit your vault
@@ -424,8 +428,6 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         )}
         </>)}
       </section>
-      {/* What they've saved: the Guild and editors keep a collection too (shown once there is something in it) */}
-      <FellowCollection id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} quiet />
       <div className="m-vault" id="vault"><TrophyCase ctx={{ pieces: work, member: person, forum: tally }} mine={person.id === me} name={person.display_name} /></div>
       </>)}
     </div>
@@ -538,7 +540,8 @@ function FollowingNew({ me }: { me: string }) {
  *  (where the reflections are). Your own piece shows only the way to its page. */
 function ReadTools({ piece }: { piece: Piece }) {
   const [me, setMe] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  // One library each: the Fellowship's stands on their page (`saves`); the Guild's and editors' is private (`library`)
+  const shelf = typeof document !== 'undefined' && document.documentElement.hasAttribute('data-fellow') ? 'saves' : 'library';
   const [later, setLater] = useState(false);
   const [marked, setMarked] = useState(false);
   const [marks, setMarks] = useState(0);
@@ -546,25 +549,20 @@ function ReadTools({ piece }: { piece: Piece }) {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user.id ?? null; setMe(uid);
-      const [{ data: sv }, { data: lt }, { data: mk }] = await Promise.all([
-        uid ? supabase.from('saves').select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
-        uid ? supabase.from('library').select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
+      const [{ data: lt }, { data: mk }] = await Promise.all([
+        uid ? supabase.from(shelf).select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
         supabase.from('piece_marks').select('member_id').eq('piece_id', piece.id),
       ]);
-      setSaved(!!sv?.length); setLater(!!lt?.length);
+      setLater(!!lt?.length);
       setMarks((mk ?? []).length); setMarked(!!uid && (mk ?? []).some((m: any) => m.member_id === uid));
     })();
   }, [piece.id]);
   if (!me) return null;
   const mine = piece.author_id === me;
-  const toggleSave = async () => {
-    const on = !saved; setSaved(on);
-    const { error } = on ? await supabase.from('saves').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', piece.id);
-    if (error) setSaved(!on);
-  };
+
   const toggleLater = async () => {
     const on = !later; setLater(on);
-    const { error } = on ? await supabase.from('library').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('library').delete().eq('member_id', me).eq('piece_id', piece.id);
+    const { error } = on ? await supabase.from(shelf).insert({ member_id: me, piece_id: piece.id }) : await supabase.from(shelf).delete().eq('member_id', me).eq('piece_id', piece.id);
     if (error) setLater(!on);
   };
   const toggleMark = async () => {
@@ -577,13 +575,10 @@ function ReadTools({ piece }: { piece: Piece }) {
       {!mine && <button type="button" className="rt-btn" aria-pressed={marked} onClick={toggleMark}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={marked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
         {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
-      {!mine && <button type="button" className="rt-btn" aria-pressed={saved} onClick={toggleSave}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11z" /><path d="M12 12.5v4" /></svg>
-        {saved ? 'In your vault' : 'Add to vault'}</button>}
       <button type="button" className="rt-btn" aria-pressed={later} onClick={toggleLater}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={later ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
         {later ? 'Saved to library' : 'Save for later'}</button>
-      {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Reflections, on its page →'}</a>}
+      {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Read the reflections on its page →'}</a>}
     </div>
   );
 }
@@ -651,7 +646,7 @@ export default function MembersApp() {
   return route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
 }
 
-// A Fellowship member's page is their shelves: everything they've added to their vault, standing like a library.
+// A Fellowship member's page is their library: everything they've saved, standing on shelves for others to see.
 function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boolean }) {
   const items = useCollection(id);
   const [gone, setGone] = useState<Set<string>>(new Set());
@@ -660,24 +655,11 @@ function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boo
     <section className="m-lib" id="collection">
       <div className="m-lib-head">
         <span className="eb">{mine ? 'Your library' : `${first}’s library`}</span>
-        {items && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} kept{mine ? ' · open for all to see' : ''}</span>}
+        {items && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'}{mine ? ' · open for all to see' : ''}</span>}
       </div>
       {!items ? <p className="lab mut">Opening the library…</p>
         : books.length ? <Shelf books={books} onRemove={mine ? async (pid) => { setGone((g) => new Set(g).add(pid)); await supabase.from('saves').delete().eq('member_id', id).eq('piece_id', pid); } : undefined} />
-        : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Add to vault” on any piece or photograph you love.' : `${first} hasn’t kept anything yet.`}</p>}
-    </section>
-  );
-}
-
-// A Fellowship member's page shows their collection (open to everyone; see /collection/).
-function FellowCollection({ id, first, mine, quiet = false }: { id: string; first: string; mine: boolean; quiet?: boolean }) {
-  const items = useCollection(id);
-  if (quiet && (!items || (!items.length && !mine))) return null;   // on a writer's page: nothing until something is saved
-  return (
-    <section className="m-work m-coll" id="collection">
-      <div className="m-work-head"><span className="eb">{mine ? 'Kept in your vault' : `Kept in ${first}’s vault`}</span>
-        <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
-      <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing here yet. Tap “Add to vault” on any piece or photograph you love.' : `${first} hasn’t added anything yet.`}</p>} />
+        : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Save for later” on any piece or photograph you love, and it stands here.' : `${first} hasn’t kept anything yet.`}</p>}
     </section>
   );
 }
