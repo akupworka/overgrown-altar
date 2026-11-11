@@ -20,12 +20,12 @@ export default function PublicCollection() {
     <div className="pc">
       <header className="pc-head">
         <span className="pc-arch"><img src={portraitUrl(who.portrait_path) || seatFor(who.display_name)} alt="" /></span>
-        <span className="eb">A collection from the Fellowship</span>
+        <span className="eb">A library from the Fellowship</span>
         <h1 className="h1 pc-name">{who.display_name}</h1>
         {who.bio && <p className="it pc-bio">{who.bio}</p>}
       </header>
       <CollectionWall items={items} empty={<p className="it">{first} hasn’t gathered anything yet.</p>} />
-      {!document.documentElement.hasAttribute('data-member') && <p className="lab pc-join">Keep a collection of your own: <a href="/join/#fellowship">join the Fellowship →</a></p>}
+      {!document.documentElement.hasAttribute('data-member') && <p className="lab pc-join">Keep a library of your own: <a href="/join/#fellowship">join the Fellowship →</a></p>}
     </div>
   );
 }
