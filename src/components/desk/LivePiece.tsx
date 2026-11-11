@@ -70,7 +70,7 @@ export default function LivePiece() {
               {a.craft && <span className="lab mut">{a.craft}</span>}
               {a.bio && <p className="body">{a.bio}</p>}
               <span className="gp-links">
-                {a.website && <a className="lab" href={a.website} target="_blank" rel="noopener noreferrer">Website ↗︎</a>}
+                {/^https?:\/\//i.test(a.website ?? '') && <a className="lab" href={a.website} target="_blank" rel="noopener noreferrer">Website ↗︎</a>}
                 {insta && <a className="lab" href={insta} target="_blank" rel="noopener noreferrer">Instagram ↗︎</a>}
               </span>
             </div>
