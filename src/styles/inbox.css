@@ -124,8 +124,9 @@ html.ib-open .desk-in { padding: 0 !important; }
 .ib-reply { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; width: 100% !important; transform: none !important; }
 .ib-reply::before { display: none; }
 /* runs sit together; a little space after each run */
-.ib-m { gap: 2px; }
-.ib-m.run-end { margin-bottom: 10px; }
+.ib-m { gap: 4px; }
+.ib-msgs { gap: 6px !important; }
+.ib-m.run-end { margin-bottom: 16px; }
 .ib-m:not(.run-end) .ib-bubble { border-radius: 18px; }
 .ib-bubble { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 @media (max-width: 700px) {
@@ -171,3 +172,10 @@ html.ib-open .desk-in { padding: 0 !important; }
 
 /* A notice: a writer you follow published something (one line, no reply) */
 .ib-notice-k { font-size: 9px; color: var(--brass); margin-right: 6px; vertical-align: 2px; }
+
+/* Wide screens: the conversation sits beside your column (portrait, rank, trophies), like the Guild's other rooms */
+@media (min-width: 1101px) {
+  html.ib-open .desk-in { padding: 186px 24px 0 !important; }
+  .ss-main .ib-thread { max-width: none; margin: 0;
+    left: calc(max(24px, (100vw - 1240px) / 2) + 240px + 64px); right: max(24px, (100vw - 1240px) / 2); }
+}

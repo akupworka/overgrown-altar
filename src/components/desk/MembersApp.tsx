@@ -623,9 +623,9 @@ export default function MembersApp() {
     : route.p ? <Reading id={route.p} />
     : route.m ? <MemberPage id={route.m} me={me} />
     : <Directory />;
-  // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a conversation, a member's page
+  // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a member’s page
   // or a piece, which have the screen to themselves).
-  return route.dm || route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
+  return route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
 }
 
 // A Fellowship member's page shows their collection (open to everyone; see /collection/).
