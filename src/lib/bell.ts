@@ -60,10 +60,13 @@ export function initBell(supabase: SupabaseClient) {
   });
   // Clearing: one line by its tick, or everything. The panel stays open; the line slips away.
   panel.addEventListener('click', (e) => {
-    const t = e.target as HTMLElement, all = t.closest('[data-bell-all]'), one = t.closest('[data-bell-done]');
-    if (!all && !one) return;
+    const t = e.target as HTMLElement, all = t.closest('[data-bell-all]'), yes = t.closest('[data-bell-yes]'), no = t.closest('[data-bell-no]'), one = t.closest('[data-bell-done]');
+    if (!all && !yes && !no && !one) return;
     e.preventDefault(); e.stopPropagation();
-    if (all) { items = []; count(); cleared = true; draw(); supabase.rpc('bell_clear').then(() => {}); return; }
+    // "Clear all" asks once, in place, before it empties the bell.
+    if (all) { all.outerHTML = `<span class="bell-sure"><span class="lab">Clear all?</span><button type="button" class="lab bell-all bell-yes" data-bell-yes>Yes</button><button type="button" class="lab bell-all bell-no" data-bell-no>No</button></span>`; return; }
+    if (no) { draw(); return; }
+    if (yes) { items = []; count(); cleared = true; draw(); supabase.rpc('bell_clear').then(() => {}); return; }
     const li = one!.closest('li'), key = li?.dataset.key;
     if (!li || key == null) return;
     items = items.filter((i) => keyOf(i) !== key); count();
