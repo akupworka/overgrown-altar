@@ -4,7 +4,7 @@
 import DoorwayFrame from './DoorwayFrame.astro';
 ---
 <!-- Members of the Guild and the Fellowship hear of new work in the Guild itself: the sign-up is for visitors -->
-<div data-guest>
+<div data-guest style="overflow-x:clip">
 <DoorwayFrame kicker="The letter" title="Receive the Dispatches" image="/images/four-lancet-window-1200.jpg"
   lead="New essays from The Watchtower, work from The Hearth, and testimonies from The Perimeter, delivered as a letter.">
   <form id="subscribe" name="dispatches" method="POST" action="/thanks/" data-netlify="true" class="dw-form">

@@ -52,7 +52,7 @@ export const STATIONS: Station[] = [
   { n: 4, name: 'Flamekeeper', at: 5, line: 'Faithful in reading and in encouragement.' },
   { n: 5, name: 'Companion', at: 7, line: 'Known at the table.' },
   { n: 6, name: 'Elder', at: 10, line: 'One the Fellowship leans on.' },
-  { n: 7, name: 'Friend of the Altar', at: 13, line: 'The whole Way walked.' },
+  { n: 7, name: 'Altar Friend', at: 13, line: 'The whole Way walked.' },
 ];
 
 export function wayFor(c: WayCtx) {

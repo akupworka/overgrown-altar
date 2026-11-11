@@ -457,3 +457,10 @@
   color: var(--bone); font-family: var(--serif); font-size: 17px; text-align: left; }
 .fo-at-list button:hover, .fo-at-list button:focus-visible { background: rgba(255, 227, 163, .08); color: var(--ember); }
 .fo-reply { position: relative !important; }   /* in place at the end of the thread; the member picker opens above it */
+
+/* The Forum's front page: your conversations, with what's new, above the rules */
+.fo-mine-card { margin-bottom: 0; }
+.fo-mine-card.fresh { box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.55); }
+.fo-mine-n { margin-left: 10px; position: relative; top: -3px; }
+
+@media (max-width: 700px) { .fo-latest-row .lab, .fo-compose-hint, .fo-reply .lab { font-size: 8.5px; } }

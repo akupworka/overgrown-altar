@@ -1381,7 +1381,7 @@
   .g-card .g-arch { width: 100% !important; max-width: 76px; height: auto !important; aspect-ratio: 76 / 100; margin-bottom: 4px !important;
     box-shadow: 0 0 0 1px rgba(159, 148, 94, .7), 0 0 0 4px #0A0C0A, 0 0 0 5px rgba(159, 148, 94, .3) !important; }
   .g-card .g-name { font-size: 14px !important; line-height: 1.15; width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .g-card .g-role { font-size: 7.5px !important; letter-spacing: .12em; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-card .g-role { font-size: 8.5px !important; letter-spacing: .08em; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .g-card .g-count, .g-card .pr { display: none !important; }
 }
 @media (max-width: 700px) { .g-role-craft { display: none; } }
@@ -1967,3 +1967,28 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .d-section > .d-group-head { margin-top: 34px; padding-top: 22px; border-top: 1px solid rgba(243, 236, 220, .1); }
 
 .d-count-met { color: #5E7A4A !important; }
+
+/* ---- Phone comfort (site review): nothing zooms the screen when tapped, and small links have a finger's room ---- */
+@media (max-width: 700px) {
+  /* iPhone zooms in on any field under 16px: keep fields at 16 */
+  .d-find-pillar { font-size: 16px !important; letter-spacing: .02em !important; text-transform: none !important; }
+  .d-more-item .field { font-size: 16px !important; }
+  /* the writing tools: taller to tap, same look */
+  .d-paper-tools button { min-height: 40px; padding: 10px 2px !important; }
+  .d-write-bar .btn, .d-write-actions .btn, .d-write-actions .ghost { min-height: 36px; }
+  /* small text links: the tap area grows around them without moving anything */
+  .d-forum-link, .g-room-go, .d-standing-link, .wl-hide, .fw-go, .rt-go, .m-follows-link, .d-link, .vault-all, .m-coll-share { position: relative; }
+  .d-forum-link::after, .g-room-go::after, .d-standing-link::after, .wl-hide::after, .fw-go::after, .rt-go::after, .m-follows-link::after, .vault-all::after, .m-coll-share::after {
+    content: ''; position: absolute; left: -8px; right: -8px; top: -14px; bottom: -14px; }
+  /* the smallest labels come up to a readable floor */
+  .d-pz-of, .d-standing-k, .d-standing-link, .g-tile-stats, .tr-mini-name, .tr-tier, .m-date { font-size: 8.5px !important; }
+}
+/* The Way on phones: seven names don't fit one line; name where you stand, and the road's two ends */
+@media (max-width: 700px) {
+  .wy-path li:not(.here):not(:first-child):not(:last-child) .wy-st { visibility: hidden; }
+  .wy-path li.here .wy-st { white-space: nowrap; max-width: none; font-size: 12px; }
+  .wy-path li:first-child .wy-st, .wy-path li:last-child .wy-st { white-space: nowrap; max-width: none; }
+  .wy-path li:first-child:not(.here) .wy-st { align-self: flex-start; }
+  .wy-path li:last-child:not(.here) .wy-st { align-self: flex-end; }
+  .wy-path:has(li:nth-child(2).here) li:first-child .wy-st, .wy-path:has(li:nth-child(6).here) li:last-child .wy-st { visibility: hidden; }   /* neighbours would collide */
+}

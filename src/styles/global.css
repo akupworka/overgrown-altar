@@ -7,13 +7,13 @@
 /* ---------- 1. Fonts ------------------------------------------------------
    The font files live in /public/fonts. @font-face tells the browser
    "when I say 'Cormorant', load this file". */
-@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-300.ttf') format('truetype'); font-weight: 300; font-display: swap; }
-@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-500.ttf') format('truetype'); font-weight: 500; font-display: swap; }
-@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-600.ttf') format('truetype'); font-weight: 600; font-display: swap; }
-@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-italic-400.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Pinyon'; src: url('/fonts/pinyon-script.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Alte Haas'; src: url('/fonts/alte-haas-400.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Alte Haas'; src: url('/fonts/alte-haas-700.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-300.woff2') format('woff2'), url('/fonts/cormorant-300.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-500.woff2') format('woff2'), url('/fonts/cormorant-500.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-600.woff2') format('woff2'), url('/fonts/cormorant-600.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Cormorant'; src: url('/fonts/cormorant-italic-400.woff2') format('woff2'), url('/fonts/cormorant-italic-400.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Pinyon'; src: url('/fonts/pinyon-script.woff2') format('woff2'), url('/fonts/pinyon-script.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Alte Haas'; src: url('/fonts/alte-haas-400.woff2') format('woff2'), url('/fonts/alte-haas-400.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Alte Haas'; src: url('/fonts/alte-haas-700.woff2') format('woff2'), url('/fonts/alte-haas-700.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 
 /* ---------- 2. Brand colors -----------------------------------------------
    Named once here, used everywhere as var(--name). */

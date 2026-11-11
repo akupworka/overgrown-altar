@@ -28,7 +28,7 @@ export const ROOMS: Room[] = [
         lookFor: 'A story that moves; characters with weight; grace that is not sentimental.', length: '500–6,000 words' },
       { value: 'photograph', name: 'Photographs', plural: 'Photographs', pillar: 'hearth',
         what: 'Dark, atmospheric photography: stone in monochrome, color through glass. One photograph, with the details behind the lens (digital or film, camera, lens) and at least 200 words of your own: what you saw, what you felt, why this light.',
-        lookFor: 'A considered eye; light used as meaning; a photograph at least 1600 pixels wide, your own.', length: 'One photograph, with at least 200 words: what you saw and what you felt' },
+        lookFor: 'A considered eye; light used as meaning; a photograph at least 1600 pixels wide, your own.', length: 'One photograph · 200+ words' },
     ],
   },
   {

@@ -113,8 +113,8 @@ function SignIn() {
 
   return mode === 'signin' ? (
     <div key={shake} className={`dw-holder ${msg && !msg.ok ? 'dw-wrong' : ''}`}>
-      <Doorway kicker="Members of the Guild" title="The Guild Desk" lead="Your drafts, your pieces with the editor, and the page readers see when they meet you."
-        foot={<>Not yet at the table? <a href="/guild">Apply to the Guild</a></>}>
+      <Doorway kicker="The Guild & the Fellowship" title="Sign in" lead="Your desk, your collection, and the conversation at the table."
+        foot={<>Not yet at the table? <a href="/join/">Join us</a></>}>
         <form onSubmit={signIn} className={shake ? 'dw-shake-now' : ''}>
           <Line label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <Line label="Password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)}

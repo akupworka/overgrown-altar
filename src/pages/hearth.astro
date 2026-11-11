@@ -215,8 +215,10 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-gallery-go { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
   /* The table */
-  .he-makers { margin-top: 44px; display: flex; flex-wrap: wrap; justify-content: center; gap: 28px 40px; }
-  .he-maker { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 120px; }
+  .he-makers { margin-top: 44px; display: grid; grid-template-columns: repeat(4, minmax(0, 150px)); justify-content: center; justify-items: center; gap: 28px 40px; }
+  @media (min-width: 1300px) { .he-makers:has(> :nth-child(7)) { grid-template-columns: repeat(8, minmax(0, 130px)); gap: 28px 26px; } }
+  @media (max-width: 700px) { .he-makers { grid-template-columns: repeat(2, minmax(0, 150px)); } }
+  .he-maker { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 120px; max-width: 100%; }
   .he-maker-n { font-family: var(--serif); font-size: 19px; line-height: 1.15; text-align: center; transition: color .3s; }
   .he-maker:hover .he-maker-n { color: var(--oxblood); }
   .he-maker-c { font-size: 9px; text-align: center; }

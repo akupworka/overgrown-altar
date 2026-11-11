@@ -99,7 +99,7 @@
   color: #8C8679; display: flex; align-items: center; justify-content: center; transition: color .25s, background-color .25s; }
 .ib-row-del:hover { color: #E8A091; background: rgba(232,160,145,.08); }
 .ib-row:has(.ib-row-dot) { padding-right: 60px; }
-.ib-unsend { margin-left: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #8C8679; }
+.ib-unsend { position: relative; margin-left: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: #8C8679; }
 .ib-unsend:hover { color: #E8A091; }
 .ib .m-back { align-self: flex-start !important; }
 /* The ⋯ menu always sits above the conversation and the reply box */
@@ -179,3 +179,7 @@ html.ib-open .desk-in { padding: 0 !important; }
   .ss-main .ib-thread { max-width: none; margin: 0;
     left: calc(max(24px, (100vw - 1240px) / 2) + 240px + 64px); right: max(24px, (100vw - 1240px) / 2); }
 }
+
+/* Delete under a message: a small word with a full finger's tap area; the time and Delete a touch larger on phones */
+.ib-unsend::after { content: ''; position: absolute; left: -10px; right: -10px; top: -14px; bottom: -14px; }
+@media (max-width: 700px) { .ib-m-when { font-size: 9px; } }

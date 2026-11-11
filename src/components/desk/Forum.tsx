@@ -120,6 +120,10 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
   const [opening, setOpening] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [people, setPeople] = useState<People>({});
+  const [mineIds, setMineIds] = useState<Set<string>>(new Set());   // threads you've started or replied in
+  useEffect(() => {
+    if (me) supabase.from('forum_posts').select('thread_id').eq('author_id', me).then(({ data }) => setMineIds(new Set((data ?? []).map((x: any) => x.thread_id))));
+  }, [me]);
   useEffect(() => {
     (async () => {
       const [{ data: b }, { data: t }] = await Promise.all([
@@ -143,6 +147,17 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
           { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
         </div>}
       </header>
+      {me && mineIds.size > 0 && (() => {
+        const mineT = threads.filter((t) => mineIds.has(t.id)), fresh = mineT.filter((t) => isNew(t, me)).length;
+        return (
+          <Link to="/guild/members/?view=mine" className={`fo-rules-card fo-mine-card${fresh ? ' fresh' : ''}`}>
+            <span className="fo-rules-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h12v9H9l-3 3v-3H4z" /><path d="M16 9h4v9h-2v3l-3-3h-5v-1" /></svg></span>
+            <span className="fo-rules-text"><span className="fo-rules-name">Your conversations{fresh > 0 && <span className="lab fo-new fo-mine-n">{fresh} new</span>}</span>
+              <span className="it fo-rules-line">{fresh ? `New replies in ${fresh === 1 ? 'a thread' : `${fresh} threads`} you’re part of.` : `The ${mineT.length === 1 ? 'thread' : `${mineT.length} threads`} you’ve started or replied in.`}</span></span>
+            <span className="fo-rules-go" aria-hidden="true">→</span>
+          </Link>
+        );
+      })()}
       <Link to="/guild/members/?view=rules" className="fo-rules-card">
         <span className="fo-rules-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg></span>
         <span className="fo-rules-text"><span className="fo-rules-name">The forum rules</span><span className="it fo-rules-line">How we keep the table safe and kind. Read before you post.</span></span>
