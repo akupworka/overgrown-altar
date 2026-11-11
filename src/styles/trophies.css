@@ -1,6 +1,4 @@
 /* The trophy case (lib/trophies.ts). Earned trophies shine; ones still to earn are shown as shadows on your own page. */
-.tc { display: flex; flex-direction: column; gap: 22px; }
-.tc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .tc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 26px 18px; }
 .tr { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .tr-svg { display: block; filter: drop-shadow(0 8px 14px rgba(0,0,0,.35)); transition: transform .5s cubic-bezier(.16,1,.3,1); }
@@ -16,10 +14,7 @@
 .tr-note { font-family: var(--serif); font-style: italic; font-size: 14.5px; line-height: 1.4; opacity: .75; max-width: 170px; }
 .tr.locked .tr-svg { filter: grayscale(1) brightness(.6); opacity: .35; }
 .tr.locked .tr-name, .tr.locked .tr-tier { opacity: .5; }
-.tc-sub { margin-top: 8px; }
 /* On paper pages */
-.tc.paper-tone .tr-name { color: var(--ink); }
-.tc.paper-tone .tr-note { color: var(--muted-paper); opacity: 1; }
 @media (max-width: 700px) {
   .tc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 10px; }
   .tr-svg { width: 62px; height: 62px; }

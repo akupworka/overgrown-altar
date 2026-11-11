@@ -54,8 +54,8 @@ const pieces = [
   { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9', review_opened_at: new Date().toISOString() }, { ...piece('s3', 'm2', 'A Field Guide to Small Mercies', 'submitted', 'prose'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];
 const boards = [
-  { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 40 },
-  { id: 'b2', slug: 'thesis-ideas', name: 'Thesis Ideas', description: 'Ideas in search of an argument.', image: '', position: 2, editor_only: false, keep_threads: 40 },
+  { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 50 },
+  { id: 'b2', slug: 'thesis-ideas', name: 'Thesis Ideas', description: 'Ideas in search of an argument.', image: '', position: 2, editor_only: false, keep_threads: 50 },
 ];
 const threads = [
   { id: 'th1', board_id: 'b1', author_id: ME, title: 'Welcome to the Nave', pinned: true, locked: false, reply_count: 2, created_at: t(1), last_post_at: t(4), last_author_id: 'm2' },
@@ -90,7 +90,7 @@ if (flag('heavy')) {
     for (let k = 0; k < cnt; k++) dm_messages.push({ id: id + '-' + k, thread_id: id, author_id: k % 3 === 0 ? other : ME, body: k % 5 === 0 ? long : ['Amen to that.', 'Sending you the draft tonight.', 'Did you see the new piece in the Watchtower?', 'Praying for you this week.'][k % 4], created_at: `2026-11-0${1 + (k % 8)}T${String(8 + (k % 12)).padStart(2, '0')}:${String(k % 60).padStart(2, '0')}:00Z` });
     dm_threads.push({ id, a, b, last_at: `2026-11-08T${String(10 + (c % 12)).padStart(2, '0')}:00:00Z`, last_body: c % 3 ? long : 'Sending you the draft tonight.', last_from: c % 2 ? other : ME, a_read_at: c % 4 ? t(9) : t(1), b_read_at: c % 4 ? t(9) : t(1), a_cleared_at: '1970-01-01', b_cleared_at: '1970-01-01' });
   }
-  for (let bi = 3; bi <= 6; bi++) boards.push({ id: 'b' + bi, slug: 'forum-' + bi, name: ['', '', '', 'The Common Room', 'The Watchtower Desk', 'Prayer and Petition', 'From the Editor’s Desk'][bi], description: 'A long description of what this forum is for, and what belongs here among the Guild.', image: '', position: bi, editor_only: false, keep_threads: 40 });
+  for (let bi = 3; bi <= 6; bi++) boards.push({ id: 'b' + bi, slug: 'forum-' + bi, name: ['', '', '', 'The Common Room', 'The Watchtower Desk', 'Prayer and Petition', 'From the Editor’s Desk'][bi], description: 'A long description of what this forum is for, and what belongs here among the Guild.', image: '', position: bi, editor_only: false, keep_threads: 50 });
   for (const bd of boards) for (let k = 0; k < 40; k++) {
     const tid = 'ht-' + bd.id + '-' + k, replies = bd.id === 'b1' && k === 0 ? 200 : k % 7;
     threads.push({ id: tid, board_id: bd.id, author_id: k % 3 ? ME : 'm' + (4 + k % 30), title: k % 4 ? `A question about the long road back, part ${k + 1}, and what holds on it when everything else gives way` : `Thread ${k + 1}`, pinned: false, locked: replies >= 200, reply_count: replies, created_at: t(1 + (k % 8)), last_post_at: `2026-11-0${1 + (k % 8)}T${String(8 + (k % 12)).padStart(2, '0')}:00:00Z`, last_author_id: 'm' + (4 + k % 30) });

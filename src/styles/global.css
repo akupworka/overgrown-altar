@@ -135,10 +135,6 @@ p, .body { text-wrap: pretty; }
 
 /* ---------- 9b. Article lists: numbered "matrix" rows, drop caps ---------- */
 .mx { display: grid; grid-template-columns: 90px minmax(0, 1fr) 520px; gap: 40px; align-items: start; padding: 38px 0; }
-.mx3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); font-family: var(--serif); font-weight: 500; font-size: 17px; line-height: 1.3; }
-.mx3 > div { padding: 4px 16px; }
-.mx3 > div:first-child { padding-left: 0; }
-.mx3 > div + div { border-left: 1px solid rgba(243, 236, 220, .25); }
 .drop { float: left; font-family: var(--serif); font-weight: 500; font-size: 104px; line-height: .78; margin: 8px 14px 0 0; color: var(--oxblood); }
 
 /* ---------- 10. Form fields ----------------------------------------------- */
@@ -158,10 +154,6 @@ textarea.field { resize: vertical; }
 /* Inside a glowing card (components/GlassCard.astro): softer, rounded fields and buttons. */
 .glass-card .field { border-radius: 8px; background: rgba(243, 236, 220, .04); border-color: rgba(243, 236, 220, .26); }
 .glass-card .btn, .glass-card .ghost { border-radius: 8px; }
-.card-form { display: flex; flex-direction: column; gap: 16px; padding: 36px; }
-.card-form .btn { align-self: stretch; padding-top: 18px; padding-bottom: 18px; }
-@media (max-width: 700px) { .card-form { padding: 24px 20px; } }
-
 /* ---------- 10b. Filter chips (Archive, Contact) and menu links ---------- */
 .chip {
   font-family: var(--sans); font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
@@ -171,11 +163,6 @@ textarea.field { resize: vertical; }
 .dark .chip, .night .chip { border-color: rgba(243, 236, 220, .35); }
 .chip.on, .chip[aria-pressed='true'] { background: var(--ink); color: var(--bone); border-color: var(--ink); }
 .dark .chip.on, .dark .chip[aria-pressed='true'] { background: var(--bone); color: #12160F; }
-.chip-radio { display: inline-flex; align-items: center; position: relative; }
-.chip-radio input { position: absolute; opacity: 0; pointer-events: none; }
-.chip-radio:has(input:checked) { background: var(--ink); color: var(--bone); border-color: var(--ink); }
-.dark .chip-radio:has(input:checked), .night .chip-radio:has(input:checked) { background: var(--bone); color: #12160F; border-color: var(--bone); }
-.chip-radio:has(input:focus-visible) { outline: 2px solid var(--oxblood); outline-offset: 3px; }
 .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .fl { width: 90px; }
 .mlink { font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 1.15; }
@@ -186,7 +173,7 @@ textarea.field { resize: vertical; }
    take over: smaller type, one column, less padding. */
 @media (max-width: 1100px) {
   .mx { grid-template-columns: 60px minmax(0, 1fr); }
-  .mx .mx3 { grid-column: 1 / -1; }
+  
 }
 /* !important here lets these phone sizes win over sizes written directly on an element. */
 @media (max-width: 700px) {
@@ -201,9 +188,9 @@ textarea.field { resize: vertical; }
   .lab { letter-spacing: .22em; }
   .g2, .g3, .g4, .side { grid-template-columns: minmax(0, 1fr); gap: 44px; }
   .row { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .d-only { display: none !important; }
+  
   .m-only { display: block; }
-  .hide-m { display: none !important; }
+  
   .hero-c { top: 128px; padding: 0 24px; }
   .pill-h { height: 600px; }
   .pill-in { left: 24px; right: 24px; width: auto; bottom: 48px; }
@@ -213,17 +200,14 @@ textarea.field { resize: vertical; }
 
   /* The Editorial Matrix becomes a labelled list instead of three cramped columns. */
   .mx { grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 32px 0; }
-  .mx .mx3 { grid-column: 1 / -1; margin-top: 6px; }
-  .mx3 { grid-template-columns: minmax(0, 1fr); font-size: 17px; }
-  .mx3 > div {
-    display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px; align-items: baseline;
-    padding: 11px 0 !important; border-left: 0 !important; border-top: 1px solid rgba(243, 236, 220, .12);
-  }
-  .paper .mx3 > div { border-top-color: rgba(42, 32, 23, .15); }
-  .mx3 > div::before { font-family: var(--sans); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: #8C8679; }
-  .mx3 > div:nth-child(1)::before { content: 'Thinker' / ''; }
-  .mx3 > div:nth-child(2)::before { content: 'Fracture' / ''; }
-  .mx3 > div:nth-child(3)::before { content: 'Anchor' / ''; }
+  
+  
+  
+  
+  
+  
+  
+  
 
   /* Photos on phones: present, not overwhelming. */
   .arch { max-height: 300px; }
@@ -237,13 +221,9 @@ textarea.field { resize: vertical; }
   .btn, .ghost { padding-left: 24px; padding-right: 24px; text-align: center; }
 }
 
-/* Share / Print buttons inside a line of small capitals. */
-.share-btn { background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; border-bottom: 1px solid transparent; }
-.share-btn:hover { color: var(--oxblood); border-color: currentColor; }
-
 /* Printing an article: just the writing. */
 @media print {
-  .site-header, .nav-shade, .foot, .glass-light, .glow, .skip, form, .more-sec, .sub-card, .dark:not(.hero) { display: none !important; }
+  .site-header, .nav-shade, .foot, .glass-light, .glow, .skip, form, .more-sec, .dark:not(.hero) { display: none !important; }
   .hero { height: auto !important; min-height: 0 !important; background: none !important; color: #000 !important; }
   .hero > img, .veil, .veil-l { display: none !important; }
   .hero-c, .pill-in { position: static !important; color: #000 !important; padding: 0 0 24px !important; }
@@ -257,7 +237,7 @@ textarea.field { resize: vertical; }
 @media (max-width: 700px) {
   .btn, .ghost { font-size: 10px; letter-spacing: .22em; padding: 13px 20px; }
   .ghost { padding: 12px 19px; }
-  .card-form .btn { padding-top: 14px; padding-bottom: 14px; }
+  
   .field { font-size: 17px; padding: 13px 16px; }
   .field.search { font-size: 18px !important; padding: 14px 16px !important; }
 
@@ -268,10 +248,10 @@ textarea.field { resize: vertical; }
   .filters::-webkit-scrollbar { display: none; }
   .filters .fl { width: auto; flex: none; font-size: 9px; margin-right: 4px; }
 
-  /* The boxed Thinker / Fracture / Anchor panel at the top of an essay. */
-  .mx3[style*="border"] { padding: 4px 16px !important; }
-  .mx3[style*="border"] > div { padding-left: 0 !important; }
-  .mx3[style*="border"] > div:first-child { border-top: 0; }
+  
+  
+  
+  
 }
 
 /* Browsers paint auto-filled fields pale blue or yellow. Keep every field in the site's own look:

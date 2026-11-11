@@ -2,7 +2,7 @@
 //   /guild/members/?view=forum       the boards, each a row: its picture, name, what it is for, and its latest thread
 //   /guild/members/?board=<slug>     a board's threads, pinned first, then the most recently active
 //   /guild/members/?t=<thread id>    a thread: the opening post and every reply, and a reply box
-// Each board keeps its most recently active threads (40 by default); quieter ones are cleared away
+// Each board keeps its most recently active threads (50; `forum_boards.keep_threads`); quieter ones are cleared away
 // by the database when new ones arrive. Pinned threads always stay.
 import { WayBadge } from './Way';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -199,12 +199,12 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
           })}
         </ol>
       )}
-      <p className="it mut fo-note">Each forum keeps its 40 most recently active threads; when it grows full, its quietest threads are cleared away to make room (pinned threads always stay). A thread closes once it reaches 200 replies.</p>
+      <p className="it mut fo-note">Each forum keeps its 50 most recently active threads; when it grows full, its quietest threads are cleared away to make room (pinned threads always stay). A thread closes once it reaches 200 replies.</p>
     </div>
   );
 }
 
-// Ten threads to a page in a forum (each keeps its 40 most active); twenty replies to a page in a thread,
+// Ten threads to a page in a forum (each keeps its 50 most active); twenty replies to a page in a thread,
 // which closes itself at 200 replies.
 const FORUM_PER = 20;
 const THREADS_PER = 10;
@@ -750,7 +750,7 @@ const RULES: { h: string; p: string[] }[] = [
   { h: 'Using the forums', p: [
     'Keep threads to the forum they belong in, and search before starting a new one.',
     'Any member may start a thread in a forum and reply to others. The Editor in Chief opens new forums, and only the editor starts threads in From the Editor’s Desk. Have an idea for a forum? Ask in Questions for the Editor.',
-    'Each forum keeps its 40 most active threads; the quietest are cleared to make room. Pinned threads always stay. A thread closes once it reaches 200 replies: start a new one to carry the conversation on.' ] },
+    'Each forum keeps its 50 most active threads; the quietest are cleared to make room. Pinned threads always stay. A thread closes once it reaches 200 replies: start a new one to carry the conversation on.' ] },
   { h: 'When rules are broken', p: [
     'Tell the Editor in Chief through Questions for the Editor or the Contact page. You will be taken seriously, and your name kept private.',
     'The editor may edit or remove posts, close threads, and pause or end a membership. Serious harm is reported to the proper authorities.' ] },

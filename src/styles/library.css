@@ -14,8 +14,6 @@
 .lb-book:nth-child(4n + 3) { height: calc(var(--bh) - 6px); }
 .lb-book > a { position: absolute; inset: 0; display: block; overflow: hidden; border-radius: 2px 5px 5px 2px; color: var(--bone); background: #1B2A22;
   box-shadow: inset 9px 0 10px -6px rgba(0, 0, 0, .75), inset -3px 0 0 rgba(233, 226, 214, .32), inset -4px 0 0 rgba(0, 0, 0, .35), 0 -1px 0 rgba(255, 255, 255, .06), 8px 0 14px -8px rgba(0, 0, 0, .9); }
-.lb-watchtower > a { background: #1C2433; }
-.lb-perimeter > a { background: #3A1A1E; }
 .lb-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; }
 .lb-book > a::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;   /* the hinge, and a darkening so the title reads */
   background: linear-gradient(90deg, rgba(0, 0, 0, .45) 0, rgba(0, 0, 0, .1) 9px, rgba(255, 255, 255, .1) 10px, transparent 12px), linear-gradient(180deg, rgba(8, 10, 8, .55), rgba(8, 10, 8, .2) 45%, rgba(8, 10, 8, .8)); }

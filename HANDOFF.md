@@ -183,3 +183,26 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   `desk/Fellow.tsx`; the Guild page lists the Fellowship in its own section; on a fellow's page the editor can "Welcome into the Guild"
   (`public.welcome_to_guild`, the editor only; `guard_profile` allows the editor to move people between member and fellow).
 - `scripts/check.cjs --as fellow` previews it.
+
+## Rules the database keeps (added 11 Nov 2026)
+Found by acting as mock members; each was tested by a member trying it and by the ordinary use still working.
+- **Profiles**: name 1 to 80 letters, craft 120, bio 2,000, website must start with http(s). Nobody takes an editor's
+  name (`public.name_taken(text)` lets the forms say "Taken"; `private.name_not_an_editors`).
+- **Pieces**: a waiting piece needs a title and its words or picture (`private.submission_complete`), is frozen for
+  its writer while waiting (`private.frozen_with_editor`; withdraw to edit), and a writer keeps at most 20 unfinished
+  pieces. Drafts are private: editors read a piece only once it is sent (`pieces` policies; `private.editor_reads_file`).
+- **Published pieces** change only when an editor asks: `public.ask_for_changes(piece, note)` writes
+  `piece_change_requests`; then `propose_revision` works; the editor approves in the review and the request is cleared.
+- **The rotation** (`private.next_editor`): fewest waiting first; editors on sabbath (`editor_sabbath`) come last.
+  A piece sent back and resent returns to the same editor (`private.assign_piece`). `public.pass_piece(piece, editor)`
+  hands a waiting piece on; `take_over('piece')` only works before its editor has opened it
+  (`pieces.review_opened_at`, set by `public.piece_opened`, lapses after 7 days).
+- **Pace limits** (not for editors): forum posts 6/min 60/h, threads 3/10 min 12/day, messages 12/min 80/h, Workshop
+  notes 10/min 100/h, eight tags a post. Each forum keeps its 50 most active threads; an opening post is not deleted alone.
+- **Reports**: a conversation (`dm_reports`, one open each; read by the chief and the assigned editor only,
+  `private.reads_report`) and a forum post (`forum_reports`, shown on the Desk under Arrivals and ringed in red on the thread).
+- **Reflections**: not on your own piece. `public.piece_stats(piece)` gives marks / reflections / saves to the writer
+  and editors. `public.bell()` carries the post id for mentions and replies, so a bell line opens on the comment.
+- **Crossing over**: when a Fellowship reader becomes a member their `saves` are copied into `library`.
+- Sample members (`@sample.overgrownaltar.com`) are never emailed (`notify-writer`, `daily-letter`).
+- The site's speculation rules never prerender `?dm=`, `?t=` or `?p=` links (opening those marks things read).

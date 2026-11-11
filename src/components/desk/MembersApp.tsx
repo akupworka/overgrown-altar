@@ -707,7 +707,8 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <Loading />;
-  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following', 'library'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
+  // (The Way is the Fellowship's road; editors may look in. A Guild member who lands on its address gets the Guild.)
+  if (session && ((route.view === 'way' && (isFellow || isEditor)) || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following', 'library'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">

@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "seed": "node scripts/seed.mjs"
+    "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

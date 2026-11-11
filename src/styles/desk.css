@@ -9,19 +9,9 @@
 .d-loading { margin-top: 120px; }
 
 /* ---- Signed out: the glass card ---- */
-.d-narrow { width: 100%; max-width: 480px; margin-top: 20px; }
-.d-card { padding: 48px 44px 40px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .d-title { margin-top: 14px; font-size: 50px; }
-.d-lead { margin: 16px 0 0; font-size: 19px; line-height: 1.45; max-width: 360px; }
-.d-form { width: 100%; margin-top: 30px; display: flex; flex-direction: column; text-align: left; }
-.d-form .lab { color: var(--muted-dark); margin-bottom: 8px; }
-.d-form .field { width: 100%; font-size: 19px; padding: 15px 18px; margin-bottom: 18px; }
-.d-form .btn { width: 100%; padding: 18px; margin-top: 4px; }
 .d-notice { min-height: 1.4em; margin: 12px 0 0; font-size: 18px; line-height: 1.4; color: var(--ember); text-align: center; }
 .d-notice:empty { min-height: 0; margin: 0; }
-.d-links { width: 100%; margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.d-links .it { font-size: 18px; }
-.d-rule { width: 48px; height: 1px; background: rgba(159, 148, 94, .6); margin: 6px 0 0; }
 .d-textbtn { background: none; border: 0; padding: 6px 0; color: var(--muted-dark); cursor: pointer; border-bottom: 1px solid rgba(207, 200, 184, .35); min-height: 32px; }
 .d-textbtn:hover { color: var(--ember); border-color: var(--ember); }
 .d-link { background: none; border: 0; padding: 8px 0; cursor: pointer; color: var(--bone);
@@ -59,10 +49,6 @@
 .d-page-head { display: flex; flex-direction: column; gap: 12px; padding-bottom: 8px; }
 .d-hello { font-size: 56px; }
 .d-sub { margin: 0; font-size: 20px; line-height: 1.45; max-width: 560px; }
-.d-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(243, 236, 220, .12); border-bottom: 1px solid rgba(243, 236, 220, .12); }
-.d-stats > div { padding: 22px 0 20px; display: flex; flex-direction: column; gap: 8px; }
-.d-stats > div + div { padding-left: 28px; border-left: 1px solid rgba(243, 236, 220, .1); }
-.d-stats b { font-family: var(--serif); font-weight: 300; font-size: 52px; line-height: .9; color: var(--bone); font-variant-numeric: lining-nums; }
 .d-row-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
 .d-row-head .eb { margin: 0; }
 .d-btn { border-radius: 2px; }
@@ -134,8 +120,6 @@
 .d-reader .h2 { font-size: 46px; }
 .d-reader .d-link { color: var(--ink); border-color: rgba(42, 32, 23, .35); align-self: flex-start; }
 .d-reader .d-notice { color: var(--oxblood); text-align: left; }
-.d-reading { display: flex; flex-direction: column; gap: 16px; white-space: pre-wrap; }
-
 @media (max-width: 1100px) {
   .d-room { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .d-side { position: static; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
@@ -150,12 +134,12 @@
 }
 @media (max-width: 700px) {
   .desk-in { padding: 146px 16px 64px; }
-  .d-card { padding: 36px 22px 30px; }
+  
   .d-title { font-size: 38px !important; }
   .d-hello { font-size: 38px !important; }
   .d-sub { font-size: 18px; }
-  .d-stats b { font-size: 38px; }
-  .d-stats > div + div { padding-left: 16px; }
+  
+  
   .d-item { flex-direction: column; align-items: stretch; gap: 14px; }
   .d-item-title { font-size: 23px !important; }
   .d-write-bar { top: 68px; flex-wrap: wrap; }
@@ -255,7 +239,7 @@
 .d-paper .mut, .d-paper .lab { color: var(--muted-paper); }
 
 /* ---- Phone pieces (hidden on desktop) ---- */
-.d-tabbar, .d-back, .d-short, .d-account, .d-details-sum { display: none; }
+.d-tabbar, .d-back, .d-short, .d-account { display: none; }
 .d-details > summary { list-style: none; cursor: default; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .d-details > summary::-webkit-details-marker { display: none; }
 .d-details[open] > summary { margin-bottom: 4px; }
@@ -287,8 +271,7 @@
   .d-tabbar button.on, .d-tabbar > .on { color: var(--ember); }
   .m-page:has(.d-tabbar) { padding-bottom: 96px; }
   .d-tabbar-icon { position: relative; display: inline-flex; }
-  .d-tabbar-dot { position: absolute; top: -4px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
-    background: var(--ember); color: #12160F; font-size: 9px; letter-spacing: 0; display: inline-flex; align-items: center; justify-content: center; }
+  
 
   /* Writing: full screen, paper edge to edge, a slim bar for Save and Send. */
   .d-room.writing .d-tabbar, .d-room.writing .d-side { display: none !important; }
@@ -319,11 +302,11 @@
   .d-details > summary { cursor: pointer; padding: 6px 0 12px; }
   .d-details > summary::after { content: '+'; font-family: var(--sans); color: var(--muted-dark); font-size: 18px; margin-left: auto; }
   .d-details[open] > summary::after { content: '–'; }
-  .d-details-sum { display: inline; font-size: 9px; }
+  
 
   /* My page: account links at the bottom. */
   .d-account { display: flex; flex-wrap: wrap; gap: 14px 24px; padding-top: 22px; margin-top: 8px; border-top: 1px solid rgba(243, 236, 220, .1); }
-  .d-stats { gap: 0; }
+  
 }
 
 /* ---- Desktop writing: quiet bar, a reading-width sheet, an understated details column ---- */
@@ -432,12 +415,6 @@
 .d-home .d-hello { font-size: 48px; }
 .d-tally { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-dark); }
 .d-tally b { font-variant-numeric: lining-nums; font-family: var(--serif); font-weight: 400; font-size: 20px; letter-spacing: 0; color: var(--bone); margin-right: 6px; vertical-align: -2px; }
-.d-waiting { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; cursor: pointer; padding: 16px 20px; border: 0; border-radius: 12px;
-  background: rgba(255, 227, 163, .06); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .22); color: var(--bone);
-  font-family: var(--serif); font-size: 19px; transition: background-color .3s; }
-.d-waiting:hover { background: rgba(255, 227, 163, .1); }
-.d-waiting .lab { margin-left: auto; color: var(--ember); }
-.d-waiting-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); flex: none; }
 .d-first { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: 100%; text-align: left; cursor: pointer;
   padding: 44px 40px; border: 1px dashed rgba(243, 236, 220, .18); border-radius: 4px; background: none; color: var(--bone); transition: border-color .3s; }
 .d-first:hover { border-color: rgba(255, 227, 163, .5); }
@@ -447,17 +424,15 @@
   .d-home { gap: 22px; }
   .d-home-head { padding-bottom: 22px; }
   .d-home .d-hello { font-size: 34px !important; }
-  .d-begin { width: 100%; text-align: center; }
+  
   .d-first { padding: 30px 22px; }
   .d-first .it { font-size: 22px; }
-  .d-waiting { font-size: 17px; padding: 14px 16px; }
+  
 }
 .d-decide .d-link { color: var(--bone); border-color: rgba(243, 236, 220, .35); align-self: center; }
 .d-decide .d-link:hover { color: var(--ember); border-color: var(--ember); }
 .d-decide .d-danger:hover { color: #E6A99A; border-color: #E6A99A; }
 .d-decide .d-notice:empty { display: none; }
-.d-waiting .lab { white-space: nowrap; }
-
 /* Phones, while writing: the site header and the members' bar stay in place (every page still one tap away);
    the writing bar sits just beneath them, and the formatting tools beneath that. --hdr is the header's height. */
 @media (max-width: 700px) {
@@ -529,7 +504,7 @@
   .d-edit { align-self: flex-start; font-size: 10px; padding: 8px 0; }
   .d-step-note { margin: 16px 0 0; font-size: 16px; color: #8C8679; }
   .d-step .d-step-go + .d-later { align-self: center; margin-top: 6px; font-size: 10px; }
-  .d-step-0 .d-paper-tools, .step-0 .d-paper-tools { top: calc(var(--hdr, 0px) + 52px); }
+  .step-0 .d-paper-tools { top: calc(var(--hdr, 0px) + 52px); }
 }
 @media (max-width: 700px) { .d-step .d-textbtn { font-family: var(--sans); letter-spacing: .2em; text-transform: uppercase; } }
 
@@ -632,66 +607,14 @@
 @media (max-width: 700px) { .d-email-field { margin-left: 0; } }
 
 /* Prestige on the Desk */
-.d-prestige { margin-top: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.d-prestige-next { font-size: 17px; color: var(--muted-dark); }
-.d-prestige-next b { font-weight: 500; color: var(--bone); font-style: normal; }
-.d-prestige-all summary { cursor: pointer; color: var(--muted-dark); list-style: none; border-bottom: 1px solid rgba(243,236,220,.2); padding-bottom: 3px; display: inline-block; }
-.d-prestige-all summary::-webkit-details-marker { display: none; }
-.d-prestige-all summary:hover { color: var(--ember); }
-.d-prestige-all ol { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.d-prestige-all li { display: grid; grid-template-columns: 220px minmax(0, 1fr) auto; gap: 14px; align-items: center; opacity: .55; }
-.d-prestige-all li.won { opacity: 1; }
-.d-prestige-all li .it { font-size: 16px; color: var(--muted-dark); }
-.d-prestige-all li .lab { font-size: 9px; }
 .m-hero .pr { margin-top: 4px; }
 .g-card .pr { margin-top: 4px; }
-@media (max-width: 700px) {
-  .d-prestige-all li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
-  .d-prestige-all li .it { grid-column: 1 / -1; font-size: 15px; }
-  .d-prestige-all li .lab { grid-row: 1; grid-column: 2; }
-}
-.d-prestige-all li .pr { justify-self: start; }
-
 /* ---- The ten prestiges (members area) ---- */
 .g-prestige-link { margin-top: 14px; display: inline-block; color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 3px; }
-.d-prestige-page { color: var(--ember); border-bottom: 1px solid rgba(255,227,163,.35); padding-bottom: 3px; }
-.pz { width: 100%; max-width: 860px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.pz-head { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.pz-lead { margin: 4px 0 0; max-width: 600px; font-size: 21px; line-height: 1.5; color: var(--muted-dark); }
-.pz-you { margin-top: 44px; width: 100%; max-width: 520px; padding: 30px 28px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 12px;
-  background: rgba(243,236,220,.03); box-shadow: inset 0 0 0 1px rgba(243,236,220,.12); }
-.pz-none { font-size: 18px; color: var(--bone); }
-.pz-count { font-family: var(--serif); font-size: 18px; color: var(--muted-dark); }
-.pz-bar { width: 100%; max-width: 320px; height: 3px; border-radius: 3px; background: rgba(243,236,220,.1); overflow: hidden; }
-.pz-bar i { display: block; height: 100%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
-.pz-next { font-size: 17px; color: var(--muted-dark); }
-.pz-next b { font-style: normal; font-weight: 500; color: var(--bone); }
-.pz-write { margin-top: 8px; }
-.pz-ladder { list-style: none; margin: 52px 0 0; padding: 0; width: 100%; border-top: 1px solid rgba(243,236,220,.1); text-align: left; }
-.pz-rung { display: grid; grid-template-columns: 250px minmax(0, 1fr) auto; gap: 22px; align-items: center; padding: 18px 8px; border-bottom: 1px solid rgba(243,236,220,.08); opacity: .5; transition: opacity .3s; }
-.pz-rung.reached { opacity: 1; }
-.pz-rung.here { background: rgba(255,227,163,.04); box-shadow: inset 2px 0 0 var(--ember); opacity: 1; }
-.pz-rung-text { display: flex; flex-direction: column; gap: 4px; }
-.pz-note { font-size: 17px; color: var(--bone); }
-.pz-rung-text .lab { font-size: 9px; }
-.pz-who { display: flex; align-items: center; justify-content: flex-end; }
-.pz-face + .pz-face { margin-left: -8px; }
-.pz-face { border-radius: 50%; box-shadow: 0 0 0 2px #0A0C0A; transition: transform .25s; }
-.pz-face:hover { transform: translateY(-2px); }
-@media (max-width: 700px) {
-  .pz-lead { font-size: 17px; }
-  .pz-you { margin-top: 30px; padding: 24px 18px; }
-  .pz-rung { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 16px 4px; }
-  .pz-rung-badge { grid-column: 1; }
-  .pz-who { grid-column: 2; grid-row: 1; }
-  .pz-rung-text { grid-column: 1 / -1; }
-  .pz-note { font-size: 15px; }
-}
 .m-trophies:not(:empty) { margin-bottom: 60px; }
-.pz-trophies { margin-top: 80px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .pz-cat { margin-top: 30px; width: 100%; }
 .pz-cat .tr-name { color: var(--bone); }
-@media (max-width: 700px) { .m-trophies:not(:empty) { margin-bottom: 44px; } .pz-trophies { margin-top: 56px; } }
+@media (max-width: 700px) { .m-trophies:not(:empty) { margin-bottom: 44px; }  }
 .m-vault { width: 100vw; margin: 0 calc(50% - 50vw); }
 .m-vault:empty { display: none; }
 
@@ -702,11 +625,6 @@
 .d-standing-vault { border-left: 1px solid rgba(243,236,220,.1); background: radial-gradient(ellipse 80% 70% at 70% 0%, rgba(255,214,140,.06), transparent 70%); }
 .d-standing-k { color: var(--ember); font-size: 9.5px; }
 .d-standing-none { font-size: 17px; color: var(--muted-dark); }
-.d-standing-prog { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
-.d-standing-bar { height: 3px; border-radius: 3px; background: rgba(243,236,220,.1); overflow: hidden; }
-.d-standing-bar i { display: block; height: 100%; background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); }
-.d-standing-prog .it { font-size: 16px; color: var(--muted-dark); }
-.d-standing-prog b { font-style: normal; font-weight: 500; color: var(--bone); }
 .d-standing-link { margin-top: auto; color: var(--muted-dark); border-bottom: 1px solid rgba(243,236,220,.2); padding-bottom: 3px; transition: color .3s, border-color .3s; }
 .d-standing-link:hover { color: var(--ember); border-color: var(--ember); }
 .d-standing-medals { display: flex; align-items: flex-end; gap: 10px; }
@@ -837,8 +755,6 @@
 .m-work { scroll-margin-top: 100px; }
 
 /* ---- A photograph's own form in the Desk */
-.d-begins { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.d-begin-photo { display: inline-flex; align-items: center; gap: 8px; }
 .d-ph-kicker { color: var(--oxblood); }
 .d-ph-sec { display: flex; flex-direction: column; gap: 14px; padding-top: 26px; margin-top: 8px; border-top: 1px solid rgba(42, 32, 23, .14); }
 .d-ph-h { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 24px; color: var(--ink); display: flex; align-items: baseline; gap: 10px; }
@@ -955,9 +871,9 @@
   .m-piece:active { background: rgba(98, 55, 45, .07); }
   .m-thumb { border-radius: 10px; overflow: hidden; }
 
-  /* The prestige ladder: each rank a card */
-  .pz-ladder { display: flex; flex-direction: column; gap: 10px; border: 0 !important; }
-  .pz-ladder > li { border: 0 !important; border-radius: 14px; background: rgba(243, 236, 220, .03); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); padding: 14px 16px !important; }
+  
+  
+  
 }
 
 /* Phones, writing: the sheet fits the screen it's on. Empty, it fills exactly the space below the bars
@@ -1054,8 +970,6 @@
   background: linear-gradient(90deg, rgba(243,236,220,0), rgba(62,123,255,.5) 16%, rgba(176,91,255,.45) 34%, rgba(255,59,78,.4) 52%, rgba(255,196,77,.45) 70%, rgba(61,224,160,.4) 86%, rgba(243,236,220,0)); }
 
 /* The review notice: a lit pane, its dot breathing slowly. */
-.d-home .d-waiting { border-radius: 10px; background: linear-gradient(160deg, rgba(255,227,163,.09), rgba(255,227,163,.03)); box-shadow: inset 0 1px 0 rgba(255,227,163,.18), inset 0 0 0 1px rgba(255,227,163,.24); }
-.d-home .d-waiting-dot { animation: d-breathe 3.2s ease-in-out infinite; }
 @keyframes d-breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
 
 /* Hairlines that fade at their ends, and a quiet answer to the pointer on each piece. */
@@ -1079,7 +993,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(243,236,220,.09), 0 24px 50px -30px rgba(0,0,0,.9) !important; }
   .d-home .d-list { background: none; }
 }
-@media (prefers-reduced-motion: reduce) { .d-home .d-waiting-dot { animation: none; } .d-home .d-item, .d-home .d-kind-mark { transition: none; } }
+@media (prefers-reduced-motion: reduce) {  .d-home .d-item, .d-home .d-kind-mark { transition: none; } }
 /* Invite a writer: name and email share the row; the button drops beneath whenever there isn't room (it never spills). */
 .d-invite-row { display: flex !important; flex-wrap: wrap; }
 .d-invite-row .field { flex: 1 1 170px; min-width: 0; }
@@ -1256,7 +1170,6 @@
 .d-form-field { margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--bone); white-space: pre-wrap; overflow-wrap: anywhere; }
 .d-form-field .lab { font-size: 9px; color: var(--ember); white-space: normal; }
 .d-form-field a { color: var(--bone); border-bottom: 1px solid rgba(243,236,220,.3); align-self: flex-start; }
-.d-form-reply { align-self: flex-start; margin-top: 4px; }
 @media (max-width: 700px) {
   .d-forms { padding-bottom: 96px; }
   .d-form-item > summary { padding: 14px 16px; }
@@ -1264,7 +1177,7 @@
   .d-form-peek { font-size: 15px; }
   .d-form-body { padding: 14px 16px 18px; }
   .d-form-field { font-size: 16px; }
-  .d-form-reply { align-self: stretch; text-align: center; }
+  
 }
 
 /* The Forms room's examples (shown until Netlify's key is set) */
@@ -1460,7 +1373,7 @@
 .d-pl-name { font-size: 26px; }
 /* Phones: the Write disc covers Begin and Submit, so those step aside; the rooms come right under the greeting */
 @media (max-width: 700px) {
-  .d-home .d-begins { display: none !important; }
+  
   .d-home > .d-pillars-row { grid-template-columns: 1fr 1fr !important; }
   .d-pl { height: 96px; }
   .d-pl-name { font-size: 19px; }
@@ -1496,7 +1409,6 @@
   .d-standing-tally { margin-top: 6px; }
 }
 /* Computers too: the rooms right under the greeting; Begin and Submit step aside (the Guild bar has Write and Photograph) */
-.d-home .d-begins { display: none !important; }
 @media (min-width: 701px) { .d-pl { height: 150px; } }
 
 /* ---- The Guild's rooms, with your own Guild in them ---- */
@@ -1610,9 +1522,8 @@ li.done .wl-note { display: none; }
 .cl-filters { margin-top: 14px; }
 .cl-empty { padding: 30px 24px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1); }
 .cl-empty .it { margin: 0; font-size: 20px; }
-.cl-empty-go, .fl-share, .m-coll-share { color: var(--ember); background: none; border: 0; cursor: pointer; padding: 0; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; font-size: 9.5px; }
+.m-coll-share { color: var(--ember); background: none; border: 0; cursor: pointer; padding: 0; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 3px; font-size: 9.5px; }
 .cl-pager { margin-top: 26px; }
-.fl-coll-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .m-coll .m-work-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .pc-page { padding: 150px 24px 110px; min-height: 80vh; }
 .pc-in { max-width: 1000px; margin: 0 auto; }
@@ -1653,18 +1564,9 @@ li.done .wl-note { display: none; }
 .wy-path li.here .wy-st { color: #F2F0EA; }
 .wy-group { display: flex; flex-direction: column; gap: 16px; }
 .wy-gh { margin: 0; color: #C9C7C0; border-bottom: 1px solid rgba(201, 199, 192, .14); padding-bottom: 12px; }
-.wy-badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 14px; }
-.wy-b { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 8px 14px; border: 0; border-radius: 16px; cursor: pointer; background: rgba(243, 236, 220, .025);
-  box-shadow: inset 0 0 0 1px rgba(201, 199, 192, .1); color: inherit; transition: background .3s, box-shadow .3s; }
-.wy-b:hover, .wy-b[aria-expanded='true'] { background: rgba(233, 231, 224, .05); box-shadow: inset 0 0 0 1px rgba(201, 199, 192, .3); }
-.wy-badges li:not(.lit) .wy-token { opacity: .7; }
 .wy-token { display: inline-flex; filter: none; }
-.wy-badges li.lit .wy-token { transform: translateZ(0); }
-.wy-bn { font-family: var(--serif); font-size: 17px; line-height: 1.2; color: #8C8A84; text-align: center; }
-.wy-badges li.lit .wy-bn { color: #F2F0EA; }
 .wy-bar { width: 60%; height: 2px; border-radius: 2px; background: rgba(201, 199, 192, .12); overflow: hidden; }
 .wy-bar i { display: block; height: 100%; background: #C9C7C0; transform-origin: left; }
-.wy-note { margin: 8px 4px 0; text-align: center; font-size: 15px; line-height: 1.45; color: #CFCDC6; }
 /* the small card (Desk, and a Fellowship member's page) */
 .wy-card { display: flex; flex-direction: column; gap: 16px; padding: 22px 24px; border-radius: 18px; color: var(--bone);
   background: linear-gradient(180deg, rgba(233, 231, 224, .06), rgba(233, 231, 224, .015)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(201, 199, 192, .22); }
@@ -1687,10 +1589,10 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   .wy-line { font-size: 18px; }
   .wy-st { font-size: 10.5px; max-width: 54px; }
   .wy-path li.here .wy-st { font-weight: 500; }
-  .wy-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; }
-  .wy-b { padding: 12px 4px 10px; }
-  .wy-b svg { width: 52px; height: 52px; }
-  .wy-bn { font-size: 14.5px; }
+  
+  
+  
+  
   .wy-card { padding: 18px 16px; }
   .wy-card-st { font-size: 25px; }
   .wy-card .wy-st { display: none; }
@@ -1748,7 +1650,7 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   .ss-medals > span { display: inline-flex; }
   .ss-none { font-size: 15px; }
   .ss-link { align-self: flex-start; color: var(--ember); font-size: 9px; border-bottom: 1px solid rgba(255,227,163,.3); padding-bottom: 2px; }
-  .ss-way { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  
   .d-room:not(.writing) .d-signout { margin-top: 6px; }
 }
 @media (min-width: 1101px) { .d-room:not(.writing) .fl-home > .wy-card { display: none; } }
@@ -1760,26 +1662,14 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .wy-path li.past .wy-dot { background: radial-gradient(circle at 35% 30%, #FFF6DE, #D9B56A 60%, #7A5A1E); }
 .wy-path li.here .wy-dot { background: radial-gradient(circle at 35% 30%, #FFFFFF, #FFE3A3 55%, #B07A12); box-shadow: 0 0 0 4px rgba(255, 227, 163, .14), 0 0 22px rgba(255, 214, 140, .6); }
 .wy-path li.here .wy-st { color: var(--ember); }
-.wy-badges { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-.wy-badges li.lit .wy-b { background: radial-gradient(ellipse 80% 70% at 50% 28%, color-mix(in srgb, var(--en) 22%, transparent), transparent 72%), rgba(243, 236, 220, .03);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--en) 45%, transparent), 0 14px 34px -22px color-mix(in srgb, var(--en) 80%, transparent); }
-.wy-badges li.lit .wy-bn { color: color-mix(in srgb, var(--en) 45%, #fff); }
-.wy-badges li.lit .wy-token svg { filter: none; }
-.wy-b { transition: transform .35s var(--ease, ease), background .3s, box-shadow .3s; }
-.wy-badges li.lit .wy-b:hover { transform: translateY(-3px); }
-.wy-badges li:not(.lit) .wy-token { opacity: .55; }
 .wy-bar i { background: var(--en, #C9C7C0); }
 .wy-gh { display: flex; align-items: center; gap: 10px; }
 .wy-card-badges { gap: 8px; }
-@media (max-width: 700px) {
-  .wy-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .wy-b svg { width: 58px !important; height: 58px !important; }
-}
 @media (min-width: 701px) {
   .wy { max-width: 1080px; }
   .wy-group { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 24px; align-items: start; }
   .wy-gh { border-bottom: 0 !important; padding: 18px 0 0 !important; }
-  .wy-badges { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  
 }
 
 /* Your column beside every Guild page on wide screens (MembersApp's SideLayout) */
@@ -1872,10 +1762,6 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 @media (hover: hover) { .d-home .d-openable:hover .d-item-title { color: var(--ember); } }
 /* Deletion requests */
 .d-del-tag { color: #FF9AA8 !important; }
-.d-del-ask { width: 100%; padding: 14px 16px; border-radius: 12px; background: rgba(255, 59, 78, .07); box-shadow: inset 0 0 0 1px rgba(255, 59, 78, .25); }
-.d-del-ask .lab { color: #FF9AA8; font-size: 9px; }
-.d-del-ask p { margin: 6px 0 0; font-size: 18px; color: var(--bone); }
-.d-danger-btn { background: #8A1C33 !important; color: #FFF6F4 !important; }
 .dl-why { display: flex; flex-direction: column; gap: 8px; }
 .dl-why .lab { font-size: 9px; color: #CFC8B8; }
 .dl-why textarea { resize: vertical; padding: 12px 14px; border: 0; border-radius: 12px; background: rgba(243, 236, 220, .04); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .18); color: var(--bone); font-family: var(--serif); font-size: 17px; }
@@ -2039,8 +1925,7 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .ws-send:disabled { opacity: .45; cursor: default; }
 @media (max-width: 700px) { .ws { padding: 20px 16px; border-radius: 14px; } .ws-note-body { font-size: 17px; } }
 
-/* The identity column: Write and Photograph, under your name, on every Guild page that shows the column.
-   Where the column shows, the bar's own Write / Photograph buttons step aside (one place for each thing). */
+/* The identity column: Write and Photograph, under your name, on every Guild page that shows the column. */
 .ss-make { display: flex; flex-direction: column; gap: 8px; }
 .ss-write, .ss-photo { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border-radius: 999px;
   font-family: var(--sans); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; transition: background-color .25s, color .25s, box-shadow .25s; }
@@ -2048,14 +1933,6 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .ss-write:hover { background: var(--ember); }
 .ss-photo { min-height: 42px; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .22); font-size: 9.5px; }
 .ss-photo:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
-@media (min-width: 1101px) {
-  body:has(.guild-side:not([hidden]) :is(.ss-aside, .d-room:not(.writing) .d-side) .ss-make) :is(.inner-write, .inner-photo) { display: none !important; }
-}
-/* On the Desk and the Guild's own pages (computers) the top bar never carries Write or Photograph: they live in the
-   column under your name, and My Desk is one click away from the pages that have no column. */
-@media (min-width: 1101px) {
-  [data-inner][data-inside] :is(.inner-write, .inner-photo) { display: none !important; }
-}
 
 /* The Guild page's two panels hold their place while they load (no jump when the lists arrive) */
 @media (min-width: 861px) { .g-rooms > .g-room { min-height: 400px; } }

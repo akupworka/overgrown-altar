@@ -63,7 +63,7 @@
 .gbar-n[hidden] { display: none; }
 
 /* The Fellowship: no writing tools anywhere. (The phone bar's centre button explores, for everyone.) */
-html[data-fellow] :is(.inner-write, .inner-photo, [data-writer]) { display: none !important; }
+html[data-fellow] [data-writer] { display: none !important; }
 /* The Fellowship has The Way instead of the Guild's rooms (Members, Prestiges); the Guild doesn't see The Way */
 html[data-fellow] .for-guild { display: none !important; }
 html:not([data-fellow]) .for-fellow { display: none !important; }
@@ -82,6 +82,3 @@ html:not([data-fellow]) .for-fellow { display: none !important; }
 .gbar .d-tabbar-icon .gbar-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gbar > a.t-me { gap: 1px; }   /* the picture is a little taller than the line icons: keep its label level with theirs */
 .gbar > a.t-me.on .gbar-av { box-shadow: 0 0 0 1.5px var(--ember); }
-/* Write and Photograph are not in the top bar anywhere, at any width: they live under your name on the Desk and the Guild's
-   pages (and beside it on a phone), and My Desk is one click away from everywhere else. */
-[data-inner] :is(.inner-write, .inner-photo) { display: none !important; }
