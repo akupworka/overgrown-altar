@@ -158,7 +158,7 @@ const leans = [...leanRows('dl1', [['undecided', 'for'], ['for', 'for'], ['again
 const marks = [...['dc1-s3', 'dc1-s3', 'dc1-s3', 'dc1-s4', 'dc1-s6', 'dc1-s3', 'dc1-s4'].map((speech_id, i) => ({ dispute_id: 'dc1', member_id: 'g' + i, speech_id })), { dispute_id: 'dl2', member_id: ME, speech_id: 'dl2-s2' }];
 Object.assign(tables, { disputes, dispute_speeches: speeches, dispute_leans: leans, dispute_marks: marks });
 const chamberHours = () => ({ open: chamberOpen, special: false, closes: chamberOpen ? iso(nowMs + 7.2 * 3600000) : null, opens: iso(nowMs + (chamberOpen ? 7 * 86400000 : (3 * 24 + 14) * 3600000 + 22 * 60000)),
-  now: iso(Date.now()), sitting: sittingToday, writer: who !== 'fellow', chair: who === 'editor' || who === 'staff', sat_out: false });
+  now: iso(Date.now()), sitting: sittingToday, writer: true, chair: who === 'editor' || who === 'staff', sat_out: false });
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
 const test = (row, key, expr) => {

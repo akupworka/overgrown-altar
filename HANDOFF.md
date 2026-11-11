@@ -185,7 +185,8 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   `chamber_sat_out`. They can only be read (members); every write goes through security-definer functions:
   `chamber()` (hours, and sweeps what the shut doors ended), `dispute_open`, `dispute_take`, `dispute_speak`, `dispute_claim`,
   `dispute_leave`, `dispute_grant`, `dispute_lean`, `dispute_chair` (strike, close), `chamber_sit_out`, `chamber_sitting`.
-  Only writers (member, staff, editor) take chairs; the Fellowship watches and leans. One chair at a time; three motions a
+  Anyone with an account takes chairs, the Fellowship included (the owner's word, 11 Nov 2026: "fellowship can also be
+  included in debates"; at first only writers could). One chair at a time; three motions a
   sitting. A disputation under way when the doors shut may run on for two hours from when the chair was taken. No cron:
   everything is worked out from the clock when someone asks. The three tables are in the realtime publication.
 - Front end: `components/desk/Chamber.tsx` (`Chamber` at `?view=chamber`, `Disputation` at `?d=<id>`, `ChamberDoor` band on

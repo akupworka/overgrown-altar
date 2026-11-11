@@ -1,4 +1,4 @@
-// The Disputation Chamber: friendly, one-on-one debate between members of the Guild, watched live from the gallery.
+// The Disputation Chamber: friendly, one-on-one debate between members (the Guild and the Fellowship alike), watched live from the gallery.
 //   /guild/members/?view=chamber     the door: shut with a countdown and the last sitting's record, or open with the floor
 //   /guild/members/?d=<id>           one disputation: the motion, two chairs, the exchange in turn, the clock, the gallery
 // The doors are open all Saturday by New York time (the editor may call a special sitting on another day).
@@ -59,7 +59,7 @@ function guessHours(): Hours {
   const midnight = now.getTime() - since, open = dow === 6;
   let me: any = {}; try { me = JSON.parse(localStorage.getItem('oa_member') || '{}'); } catch {}
   return { open, special: false, closes: open ? new Date(midnight + 864e5).toISOString() : null, opens: new Date(midnight + (open ? 7 : 6 - dow) * 864e5).toISOString(),
-    now: now.toISOString(), sitting: `${p.year}-${p.month}-${p.day}`, writer: !me.fellow, chair: !!me.editor, sat_out: false };
+    now: now.toISOString(), sitting: `${p.year}-${p.month}-${p.day}`, writer: true, chair: !!me.editor, sat_out: false };
 }
 /** The Chamber's hours, from the server (which also clears away what the shut doors ended), and the server's clock. */
 export function useHours() {

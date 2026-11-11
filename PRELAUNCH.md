@@ -109,7 +109,7 @@ use still working:
 - [ ] On a real iPhone: writing a speech with the keyboard up, the clock counting down, a new speech arriving while you watch.
 - [ ] Not built yet: a bell notice when someone takes the chair across from your motion (today you see it only if you stay
   in the room); trophies for disputation; a place for members to suggest motions.
-- [ ] Decide whether the Fellowship may watch (they can today, from the gallery, and may stand For / Against; they cannot take a chair).
+- [x] The Fellowship is included in debates (decided 11 Nov 2026): they lay down motions and take chairs like the Guild.
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
