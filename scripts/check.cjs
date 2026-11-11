@@ -50,7 +50,7 @@ const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
   ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, ['Published piece', 'The Watchman’s Burden.', 'Echos of Eden', 'My Aching Hands', 'A Small Hymn for Tired Men', 'Oil in the Jar'][i % 6] + (i % 6 ? '' : ` ${i + 1}`), 'approved', i % 3 === 2 ? 'photograph' : i % 3 === 1 ? (i % 2 ? 'poetry' : 'prose') : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
   piece('d1', ME, 'A draft in progress', 'draft'), piece('wd1', 'm2', 'What the Bell Remembers', 'draft', 'poetry'), piece('r1', ME, 'Returned with a note', 'returned'),
-  { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
+  { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9', review_opened_at: new Date().toISOString() }, { ...piece('s3', 'm2', 'A Field Guide to Small Mercies', 'submitted', 'prose'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];
 const boards = [
   { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 40 },

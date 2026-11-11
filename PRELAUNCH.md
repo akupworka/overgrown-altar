@@ -46,6 +46,8 @@ use still working:
       - No reflection on your own piece. A thread's opening post cannot be deleted on its own.
       - Members can report a forum post (one open report each a post); the queue is on the Desk under Arrivals.
       - An editor can pass a waiting piece to another editor from the review panel.
+      - "Take it" works only on a piece its editor has not opened yet (the hold lapses after a week, so nothing
+        gets stuck; the editor who has it can always pass it on).
       - The bell's number is what has not been cleared yet.
       - Kept: the online count in the phone header; every member's vault visible to members.
       - Removed: the "My library" button on the vault (the Library tab stays); the menu links to the Dispatches

@@ -1467,16 +1467,18 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
   const per = usePer();
   const pages = Math.max(1, Math.ceil(mine.length / per));
   const cur = Math.min(page, pages);
+  // Opened by the editor it is with (within the week): it is theirs now, and "Take it" steps aside.
+  const opened = (p: Piece) => !!p.review_opened_at && Date.now() - Date.parse(p.review_opened_at) < 7 * 864e5;
   const row = (p: Piece & { profiles?: { display_name: string } }, theirs = false) => (
     <li key={p.id} className="d-item">
       <div className="d-item-main">
-        <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}{theirs && <> · <span className="d-with">with {editors.get((p as any).assigned_to) ?? 'another editor'}</span></>}</span>
+        <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}{theirs && <> · <span className="d-with">with {editors.get((p as any).assigned_to) ?? 'another editor'}{opened(p) ? ' · opened' : ''}</span></>}</span>
         <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
         {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
       </div>
       <div className="d-item-actions">
         <button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button>
-        {theirs && <button type="button" className="d-link" onClick={async () => { const { error } = await supabase.rpc('take_over', { kind: 'piece', item: p.id }); if (error) alert(error.message); else onChanged(); }}>Take it</button>}
+        {theirs && !opened(p) && <button type="button" className="d-link" onClick={async () => { const { error } = await supabase.rpc('take_over', { kind: 'piece', item: p.id }); if (error) alert(error.message); else onChanged(); }}>Take it</button>}
       </div>
     </li>
   );
@@ -1489,7 +1491,7 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
       <DeskPages cur={cur} pages={pages} onGo={setPage} />
       {others.length > 0 && (
         <>
-          <div className="d-group-head"><span className="eb">With the other editors · {others.length}</span><p className="it mut d-sub" style={{ margin: 0 }}>Take one to cover for someone away.</p></div>
+          <div className="d-group-head"><span className="eb">With the other editors · {others.length}</span><p className="it mut d-sub" style={{ margin: 0 }}>Take one to cover for someone away. Once its editor has opened a piece, it stays with them.</p></div>
           <ul className="d-list">{others.map((p) => row(p, true))}</ul>
         </>
       )}
@@ -1504,6 +1506,8 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [msg, setMsg] = useState('');
   const rev = piece.status === 'approved' ? piece.revision ?? null : null;
   const shown = rev ? { ...piece, ...rev } : piece;
+  // Opening a piece that is with you marks it as yours to finish (the other editors can no longer take it).
+  useEffect(() => { supabase.rpc('piece_opened', { p_id: piece.id }).then(() => {}); }, [piece.id]);
   // Listen while you read (the same reader the members have): set up once the piece is drawn.
   const paper = useRef<HTMLElement>(null), listenBtn = useRef<HTMLButtonElement>(null);
   const [listenMin, setListenMin] = useState(0);

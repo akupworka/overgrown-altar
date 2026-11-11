@@ -18,6 +18,7 @@ export interface Piece {
   image_path: string | null; image_alt: string; image_focus?: string; photo_meta?: import('./photo').PhotoMeta; gallery?: import('./photo').GalleryItem[]; status: Status; editor_note: string;
   submitted_at: string | null; published_at: string | null; created_at: string; updated_at: string;
   slug?: string | null;
+  review_opened_at?: string | null;   // when the editor it is with first opened it to read ("Take it" stops working then)
   // A member's changes to a published piece, waiting for the editor (the live piece is unchanged until approved).
   revision?: { title: string; standfirst: string; body: string; image_path: string | null; image_alt: string; image_focus?: string; photo_meta?: import('./photo').PhotoMeta; gallery?: import('./photo').GalleryItem[] } | null;
   revision_at?: string | null;
