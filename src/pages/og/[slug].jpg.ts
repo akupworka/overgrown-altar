@@ -10,7 +10,7 @@ import sharp from 'sharp';
 import { getGuildPieces, MEDIUM_LABEL, PILLAR_LABEL, type GuildPiece } from '../../lib/guild';
 
 const W = 1200, H = 630;
-const FALLBACK: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
+const FALLBACK: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 const pub = (p: string) => path.join(process.cwd(), 'public', p);
 
 export async function getStaticPaths() {

@@ -617,7 +617,7 @@ function FollowingNew({ me }: { me: string }) {
 
 /** Under a piece read inside the Guild: tell the writer it stayed with you, keep it, share it (its public link, or a social post:
  *  a tall picture for Instagram and messages), and a way to its own page (where the reflections are). */
-const ROOM_PHOTO: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
+const ROOM_PHOTO: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 function ReadTools({ piece, author, photo, isEditor = false }: { piece: Piece; author: string; photo: string; isEditor?: boolean }) {
   const [me, setMe] = useState<string | null>(null);
   // Editors: send a published piece back to its writer with a note. Only then can the writer send changes.

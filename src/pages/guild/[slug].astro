@@ -22,7 +22,7 @@ export async function getStaticPaths() {
 const { piece: p } = Astro.props as { piece: GuildPiece };
 const a = p.author;
 const more = (await guildPillar(p.pillar)).filter((x) => x.id !== p.id).slice(0, 3);
-const FALLBACK: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
+const FALLBACK: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 const date = new Date(p.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const first = a.display_name.split(' ')[0];
 const insta = a.instagram ? `https://instagram.com/${a.instagram}` : '';

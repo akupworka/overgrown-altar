@@ -14,7 +14,7 @@ const KINDS = [
   { value: 'poetry', label: 'Poetry', note: 'Lines, stanzas, psalms of our own.' },
   { value: 'fiction', label: 'Fiction', note: 'Stories that tell the truth slant.' },
 ];
-const FALLBACK = ['/images/glass-2-1200.jpg', '/images/window-light-on-wall-1200.jpg', '/images/bay-window-of-stained-glass-1200.jpg', '/images/faded-chapel-wall-with-a-1200.jpg'];
+const FALLBACK = ['/images/four-lancet-window-1200.jpg', '/images/window-light-on-wall-1200.jpg', '/images/bay-window-of-stained-glass-1200.jpg', '/images/faded-chapel-wall-with-a-1200.jpg'];
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const all = (await guildPillar('hearth')).map((g, i) => ({
   href: guildUrl(g), title: g.title, kind: g.medium, kindLabel: MEDIUM_LABEL[g.medium] ?? '', standfirst: g.standfirst,

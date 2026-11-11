@@ -24,7 +24,7 @@ export async function getCatalog(): Promise<CatalogItem[]> {
     href: guildUrl(g), title: g.title, standfirst: g.standfirst, date: g.published_at.slice(0, 10),
     pillar: g.pillar, medium: g.medium, thinkers: [], minutes: readingMinutes(g.body),
     kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`,
-    image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
+    image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
     imagePos: (g.image && g.imagePos) || undefined,
     author: { name: g.author.display_name, portrait: g.author.portrait || undefined, href: authorUrl(g.author), id: g.author.id },
   }));

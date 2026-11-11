@@ -27,7 +27,7 @@ const written = pieces.filter((g) => !(g.medium === 'photograph' && g.image));
 const items: DispatchItem[] = written.map((g) => ({
   href: guildUrl(g), title: g.title, kicker: `${PILLAR_LABEL[g.pillar]} · ${MEDIUM_LABEL[g.medium] ?? ''}`, standfirst: g.standfirst,
   date: g.published_at.slice(0, 10), minutes: readingMinutes(g.body), author: { name: a.display_name, portrait: a.portrait || undefined, id: a.id },
-  image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
+  image: g.image || { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' }[g.pillar],
   imagePos: (g.image && g.imagePos) || undefined, tag: g.medium,
 }));
 // The kinds this writer has published, in the Guild's own order, for the filter.
