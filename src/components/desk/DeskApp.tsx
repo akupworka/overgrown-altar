@@ -463,7 +463,8 @@ function GoLiveField({ value, onChange }: { value: string; onChange: (v: string)
 const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(the|a|an)$/i.test(w[0] ?? '') ? n.trim() : (w[0] ?? ''); };
 
 // Six to a page, with numbered pages below (the same row as the writer pages and the forum).
-const DESK_PER = 6;
+const DESK_PER = 6;   // pieces to a page on computers; phones show five (usePer)
+const usePer = () => (useMedia('(max-width: 700px)') ? 5 : DESK_PER);
 function DeskPages({ cur, pages, onGo }: { cur: number; pages: number; onGo: (n: number) => void }) {
   if (pages < 2) return null;
   const go = (n: number) => { onGo(n); toListTop('.d-row-head, .d-page-head'); };
@@ -568,9 +569,10 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   const finding = !!needle || !!pillar;
   const inShow = (p: Piece) => show === 'all' ? true : show === 'drafts' ? (p.status === 'draft' || p.status === 'returned') : show === 'with' ? p.status === 'submitted' : p.status === 'approved';
   const listed = pieces.filter((p) => inShow(p) && inFind(p));
-  const pages = Math.max(1, Math.ceil(listed.length / DESK_PER));
+  const per = usePer();
+  const pages = Math.max(1, Math.ceil(listed.length / per));
   const cur = Math.min(page, pages);
-  const onPage = listed.slice((cur - 1) * DESK_PER, cur * DESK_PER);   // their part in the forum, for its trophies
+  const onPage = listed.slice((cur - 1) * per, cur * per);   // their part in the forum, for its trophies
   const counts = useMemo(() => ({
     published: pieces.filter((p) => p.status === 'approved').length,
     waiting: pieces.filter((p) => p.status === 'submitted').length,
@@ -1434,7 +1436,8 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
   // The rotation hands each piece to one editor in turn; yours first, then what the others are reading (take one to cover).
   const mine = queue.filter((p: any) => p.revision || !p.assigned_to || p.assigned_to === me);
   const others = queue.filter((p: any) => !p.revision && p.assigned_to && p.assigned_to !== me);
-  const pages = Math.max(1, Math.ceil(mine.length / DESK_PER));
+  const per = usePer();
+  const pages = Math.max(1, Math.ceil(mine.length / per));
   const cur = Math.min(page, pages);
   const row = (p: Piece & { profiles?: { display_name: string } }, theirs = false) => (
     <li key={p.id} className="d-item">
@@ -1453,7 +1456,7 @@ function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: 
     <section className="d-section">
       <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces handed to you in turn, oldest first. Each new piece goes to the editor with the least waiting.</p></header>
       {mine.length === 0 ? <p className="it mut d-empty">Nothing is waiting for you. The table is quiet.</p> : (
-        <ul className="d-list">{mine.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => row(p))}</ul>
+        <ul className="d-list">{mine.slice((cur - 1) * per, cur * per).map((p) => row(p))}</ul>
       )}
       <DeskPages cur={cur} pages={pages} onGo={setPage} />
       {others.length > 0 && (
