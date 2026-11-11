@@ -1589,10 +1589,11 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     e.preventDefault();
     const shown = showEmail ? email.trim() : '';
     if (shown && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(shown)) { setEmailMsg('That email address doesn’t look complete. Please check it.'); return; }
-    const clean = { ...f, instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim(), public_email: shown || null };
+    const clean = { ...f, display_name: f.display_name.trim(), craft: f.craft.trim(), instagram: f.instagram.replace(/^@/, '').trim(), website: f.website.trim(), public_email: shown || null };
+    if (!clean.display_name) { setMsg('Your page needs a name before it can be saved.'); return; }
     if (clean.website && !/^https?:\/\//.test(clean.website)) clean.website = 'https://' + clean.website;
     const { error } = await supabase.from('profiles').update(clean).eq('id', profile.id);
-    setMsg(error ? error.message : 'Saved. Members now see this on your page.'); if (!error) onSaved();
+    setMsg(error ? 'Your page couldn’t be saved. Please check your name and web address, then try again.' : 'Saved. Members now see this on your page.'); if (!error) onSaved();
   }
   return (
     <form className="d-section d-form-page" onSubmit={save}>
@@ -1610,12 +1611,12 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
         <span className="d-hint">A photograph of you, or of your work. Square works best. Any photo works; it’s resized automatically.</span>
       </div>
       {portraitMsg && <p className="d-photo-msg" role="status">{portraitMsg}</p>}
-      <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
-      <label className="d-lbl"><span className="lab">{profile.role === 'fellow' ? 'What you love · e.g. Poetry, old churches' : 'Your craft · e.g. Essayist, Photographer'}</span><input className="field" value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
-      <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" required maxLength={80} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">{profile.role === 'fellow' ? 'What you love · e.g. Poetry, old churches' : 'Your craft · e.g. Essayist, Photographer'}</span><input className="field" maxLength={120} value={f.craft} onChange={(e) => setF({ ...f, craft: e.target.value })} /></label>
+      <label className="d-lbl"><span className="lab">About the author · a few lines in your own words</span><textarea className="field" style={{ height: 170 }} maxLength={2000} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></label>
       <div className="d-two">
-        <label className="d-lbl"><span className="lab">Website</span><input className="field" inputMode="url" placeholder="yoursite.com" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></label>
-        <label className="d-lbl"><span className="lab">Instagram</span><input className="field" placeholder="@yourname" value={f.instagram} onChange={(e) => setF({ ...f, instagram: e.target.value })} /></label>
+        <label className="d-lbl"><span className="lab">Website</span><input className="field" inputMode="url" maxLength={300} placeholder="yoursite.com" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></label>
+        <label className="d-lbl"><span className="lab">Instagram</span><input className="field" maxLength={60} placeholder="@yourname" value={f.instagram} onChange={(e) => setF({ ...f, instagram: e.target.value })} /></label>
       </div>
       <div className="d-email">
         <label className="d-check"><input type="checkbox" checked={showEmail} onChange={(e) => toggleEmail(e.target.checked)} /><span>Show an email address on my work and pages</span></label>

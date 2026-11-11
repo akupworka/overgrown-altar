@@ -17,6 +17,8 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
 - [ ] **Decide about the two extra Watchman profiles** ("Watchman (Guild)", "Watchman (Fellow)"): keep for testing or remove.
 - [ ] **Open the lock.** Set `SITE_PUBLIC=true` in Netlify's environment variables and redeploy. Then check the site is
       no longer hidden from search engines, and that the "Opening soon" door is no longer what visitors meet.
+- [ ] **Let search engines in.** `public/robots.txt` still says `Disallow: /`; change it to `Allow: /` on opening day.
+      There is also no sitemap and no RSS feed yet (both are small jobs and help the site get found and followed).
 
 ## Found by the mock members (11 Nov 2026): rules the database should enforce, not only the forms
 The site's own forms prevent each of these; someone writing straight to the database with their own sign-in could do them.
@@ -30,7 +32,19 @@ The site's own forms prevent each of these; someone writing straight to the data
 - [ ] Decide: editors (staff included) can read every member's unsent drafts in the database, though the Desk never
       shows them. Keep, or close it so drafts are private until sent or shared.
 - [ ] Decide: a writer can keep rewriting a piece while it is with the editor. Keep, or freeze it until it comes back.
-- [ ] The 5-photographs-a-month limit was not tested (it needs approved photographs to count).
+- [x] The 5-photographs-a-month limit: tested on the second round, and it holds (the sixth is refused, kept as a draft).
+- [ ] One forum post can tag every member at once (60 bells rung by one reply). Cap it at about eight names a post.
+- [ ] A member can rename themselves "Watchman" (or any editor's name). Refuse a name an editor already carries.
+- [ ] Nothing limits how many drafts one member keeps (300 long drafts, about 30 MB, went in at once; the whole
+      database allowance is 500 MB). Cap unsent pieces at about 100 a member.
+- [ ] The same conversation can be reported 30 times over, and a Workshop reader can leave 300 notes in a second.
+      One open report a conversation; a gentle pace on notes.
+- [ ] Decide: a writer can change the room of a piece while it is with the editor, and can pull it back (pulling back
+      is on purpose). A writer can also delete the first post of their own thread by going around the forum's buttons,
+      leaving the replies with no opening; harmless, but the database could refuse it.
+- [ ] **The rule batch itself is still waiting** (`rules_the_forms_already_kept`, 11 Nov 2026: name, bio and web-address
+      limits, complete pieces only, the gentle pace limits). Its approval prompt went unanswered twice, so none of the
+      rules above is in the database yet. The "About the author" form now carries the limits itself.
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
