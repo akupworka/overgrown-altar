@@ -269,14 +269,19 @@ const imageUrl = new URL(image, site).toString();
       const load = (): string[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
       const norm = (p: string) => (p.endsWith('/') ? p : p + '/');
       let read = new Set(load());
-      const markRead = () => {
-        const here = norm(location.pathname);
+      const markRead = (el?: Element) => {
+        const here = norm((el as HTMLElement | undefined)?.dataset.readEnd || location.pathname);   // (a piece read inside the Guild names its own page)
         if (read.has(here)) return;
         read.add(here);
         try { localStorage.setItem(KEY, JSON.stringify([...read].slice(-1500))); } catch {}
       };
       const watched = new WeakSet<Element>();
-      const end = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { markRead(); end.disconnect(); } }));
+      const end = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { markRead(e.target); end.unobserve(e.target); } }));
+      // Belt and braces (some phones never report the marker): the foot of the page counts as the end too.
+      addEventListener('scroll', () => {
+        const m = document.querySelector('[data-read-end]');
+        if (m && innerHeight + scrollY >= document.documentElement.scrollHeight - 300) markRead(m);
+      }, { passive: true });
       const tick = () => {
         document.querySelectorAll('[data-read-end]').forEach((el) => { if (!watched.has(el)) { watched.add(el); end.observe(el); } });
         if (!read.size) return;

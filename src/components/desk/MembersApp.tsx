@@ -461,6 +461,7 @@ function Reading({ id }: { id: string }) {
             <span className="lab">{author.display_name}{piece.published_at ? ` · ${fmt(piece.published_at)}` : ''}</span>
           </div>
         )}
+        {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
         {piece.status === 'approved' && <ReadTools piece={piece} />}
       </article>
     </div>

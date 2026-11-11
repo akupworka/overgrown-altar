@@ -377,11 +377,11 @@ html[data-member] [data-guest] { display: none !important; }
 .see-as-opts button { border: 0; background: none; cursor: pointer; padding: 7px 14px; border-radius: 999px; color: var(--bone); font-family: var(--sans); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; }
 .see-as-opts button[aria-pressed='true'] { background: var(--ember); color: #12160F; }
 .see-as-note { flex-basis: 100%; font-size: 15px; color: var(--muted-dark, #CFC8B8); }
-.see-as-pill { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); top: calc(var(--hdr, 84px) + 10px); display: inline-flex; gap: 10px; align-items: center;
+.see-as-pill { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: 24px; display: inline-flex; gap: 10px; align-items: center;
   padding: 8px 8px 8px 16px; border: 0; border-radius: 999px; cursor: pointer; background: #12160F; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6), 0 10px 30px rgba(0,0,0,.45);
   font-family: var(--sans); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
 .see-as-pill b { font-weight: 400; padding: 6px 12px; border-radius: 999px; background: var(--ember); color: #12160F; }
-@media (max-width: 700px) { .see-as-pill { top: 70px; font-size: 8.5px; } .see-as-opts button { padding: 7px 10px; font-size: 8.5px; } }
+@media (max-width: 700px) { .see-as-pill { bottom: calc(104px + env(safe-area-inset-bottom)); font-size: 8.5px; } .see-as-opts button { padding: 7px 10px; font-size: 8.5px; } }
 body:has(.see-as) .see-as-pill { display: none; }
 
 /* Read ticks: a small check beside a piece you've read to the end (kept on this device) */
@@ -393,3 +393,8 @@ a.has-read-tile { position: relative; }
 a.has-read-tile > .read-tick { position: absolute; top: 10px; right: 10px; z-index: 3; margin: 0; width: 24px; height: 24px; opacity: 1; -webkit-mask: none; mask: none;
   background: rgba(10, 12, 9, .62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23F3ECDC' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M6.5 12.5l3.6 3.6 7.4-7.6'/%3E%3C/svg%3E") center / 15px no-repeat;
   box-shadow: 0 0 0 1px rgba(243, 236, 220, .5); }
+
+.read-end { display: block; width: 100%; height: 2px; }
+
+/* Card descriptions anywhere: fill the width rather than balance into short lines */
+.he-card-sf, .dispatches .summary, .ex .it { text-wrap: pretty; }

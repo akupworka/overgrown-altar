@@ -229,6 +229,10 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .also-card:hover .also-t { color: var(--oxblood); }
   .also-sf { font-size: 18px; line-height: 1.45; color: var(--muted-paper); }
   .also-by { font-size: 10px; }
+  /* Cards read cleanly: descriptions fill the card's width (not balanced into short lines), two lines each, so every byline sits level */
+  .also-sf, .nw-sf { text-wrap: pretty; min-height: calc(2 * 1.45em); }
+  .also-card .also-by { margin-top: auto; padding-top: 4px; }
+  .also-k { font-size: 9px; letter-spacing: .2em; }
 
   /* The method */
   .method { display: flex; flex-direction: column; align-items: center; text-align: center; }
