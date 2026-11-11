@@ -23,7 +23,7 @@ const HOUSE = [ROOM_PHOTO, '/images/tall-windows-dark-vault-1200.jpg', '/images/
   '/images/cathedral-facade-and-rose-window-1200.jpg', '/images/format-guild-1200.jpg', '/images/manifesto-photo-1200.jpg', '/images/duomo-pigeons-1200.jpg'];
 [...newestFirst].reverse().filter((d) => d.image === ROOM_PHOTO).forEach((d, i) => { d.image = HOUSE[i % HOUSE.length]; });
 const newest = newestFirst.slice(0, 3);           // the three newest, under arched windows
-const alsoNew = newestFirst.slice(3, 9);           // six more, as an index in words: the day, the title, its line, the writer
+const alsoNew = newestFirst.slice(3, 9);           // six more, as picture cards like the Hearth's: the words on the picture, the writer beneath
 const rest = newestFirst.slice(9);                 // everything earlier, as a searchable list
 
 // The writers of The Watchtower.
@@ -33,8 +33,6 @@ const writers = [...new Map(guildPieces.map((g) => [g.author.id, g.author] as [s
 // (It is not lifted from a piece: whatever happens to be newest should not get to speak for the whole room.)
 const pull = { text: 'The same truth holds again, whole, in the resurrection of Christ.', from: 'The Anchor', href: '/manifesto' };
 
-const day = (d: string) => String(new Date(d).getUTCDate()).padStart(2, '0');
-const mon = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
 <BaseLayout title="The Watchtower" description="Long-form dispatches and cultural essays from Overgrown Altar.">
@@ -84,13 +82,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
           <div class="also-grid">
             {alsoNew.map((d) => (
               <a class="also-card" href={d.href}>
-                <time class="also-date" datetime={d.date}><b>{day(d.date)}</b><span class="lab">{mon(d.date)}</span></time>
-                <span class="also-text">
+                <span class="also-img"><img src={d.image} alt="" loading="lazy" style={d.imagePos ? `object-position:${d.imagePos}` : undefined} /></span>
+                <span class="also-cap">
                   <span class="lab also-k">{d.kicker.replace(/^The Watchtower · /, '')}{d.minutes ? ` · ${d.minutes} min` : ''}</span>
                   <span class="also-t">{d.title}</span>
                   {d.standfirst && <span class="it also-sf">{d.standfirst}</span>}
-                  <span class="lab mut also-by">{d.author.name}</span>
                 </span>
+                <span class="lab mut also-by">{d.author.name} · {fmt(d.date)}</span>
               </a>
             ))}
           </div>
@@ -224,22 +222,25 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .nw-by { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 2px; }
   .nw-by .lab { font-size: 9.5px; white-space: nowrap; }
 
-  /* Also new: an index in words under the three arches. The day stands in the margin; the title leads; two to a row on a computer. */
+  /* Also new: picture cards, the same as the Hearth's. The picture fades to night at its foot with the kind, the title and its
+     line set on it; the writer and the day sit beneath. Three to a row; every card the same height. */
   .also { padding-top: 8px; border-top: 1px solid rgba(42, 32, 23, .25); }
-  .also-h { margin: 26px 0 8px; }
-  .also-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 80px; }
-  .also-card { display: grid; grid-template-columns: 62px minmax(0, 1fr); column-gap: 22px; align-items: start; padding: 30px 0 32px; border-top: 1px solid rgba(42, 32, 23, .14); }
-  .also-card:nth-child(-n+2) { border-top: 0; }
-  .also-date { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-top: 2px; color: var(--oxblood); }
-  .also-date b { font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: .86; letter-spacing: -.01em; }
-  .also-date .lab { font-size: 9px; letter-spacing: .26em; color: var(--muted-paper); }
-  .also-text { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
-  .also-k { color: var(--oxblood); font-size: 9px; letter-spacing: .22em; }
-  .also-t { font-family: var(--serif); font-style: italic; font-size: 31px; line-height: 1.1; transition: color .3s; text-wrap: balance;
+  .also-h { margin: 26px 0 24px; }
+  .also-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 30px; }
+  .also-card { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; }
+  .also-img { grid-area: 1 / 1; position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: #1A1C17; }
+  .also-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s var(--ease, ease); }
+  .also-card:hover .also-img img { transform: scale(1.04); }
+  .also-img::after { content: ''; position: absolute; inset: 22% 0 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8, 10, 8, 0), rgba(8, 10, 8, .55) 40%, rgba(8, 10, 8, .94) 78%); }
+  .also-cap { grid-area: 1 / 1; align-self: end; z-index: 1; display: flex; flex-direction: column; gap: 9px; padding: 0 20px 20px; }
+  .also-k { color: #F3ECDC; font-size: 9.5px; letter-spacing: .2em; }
+  .also-t { font-family: var(--serif); font-style: italic; font-size: 25px; line-height: 1.14; color: #F6F0E2; transition: color .3s; text-shadow: 0 1px 14px rgba(0, 0, 0, .55);
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .also-card:hover .also-t { color: var(--oxblood); }
-  .also-sf { font-size: 18px; line-height: 1.45; color: var(--muted-paper); text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .also-by { font-size: 9.5px; margin-top: 3px; }
+  .also-card:hover .also-t { color: var(--ember); }
+  .also-sf { margin-top: -2px; font-size: 16px; line-height: 1.4; color: #D6CFBF; text-shadow: 0 1px 12px rgba(0, 0, 0, .6);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .also-by { margin-top: 12px; font-size: 10px; }
   .nw-sf { text-wrap: pretty; min-height: calc(2 * 1.45em); }
 
   /* The method */
@@ -298,7 +299,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .latest-by .lab { white-space: nowrap; }
   a.latest-who:hover .lab { color: var(--oxblood); }
 
-  @media (max-width: 900px) and (min-width: 701px) { .newest-grid { gap: 26px 20px; } .nw-t { font-size: 24px; } .also-grid { column-gap: 44px; } .also-t { font-size: 26px; } }
+  @media (max-width: 900px) and (min-width: 701px) { .newest-grid { gap: 26px 20px; } .nw-t { font-size: 24px; } .also-grid { gap: 30px 18px; } .also-t { font-size: 20px; } .also-sf { font-size: 14.5px; } .also-cap { padding: 0 14px 14px; } }
   /* Phones: the newest full width, the next two side by side; Also new two to a row */
   @media (max-width: 700px) {
     /* the three newest, all the same: a small arch beside each title */
@@ -348,12 +349,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
      and the writers in one row you swipe. */
   @media (max-width: 700px) {
     .also-grid > .also-card:nth-child(n+5) { display: none; }
-    .also-grid { grid-template-columns: 1fr; }
-    .also-card { grid-template-columns: 46px minmax(0, 1fr); column-gap: 16px; padding: 22px 0 24px; }
-    .also-card:nth-child(2) { border-top: 1px solid rgba(42, 32, 23, .14); }
-    .also-date b { font-size: 34px; }
-    .also-t { font-size: 24px; }
-    .also-sf { font-size: 16px; }
+    .also-grid { grid-template-columns: 1fr 1fr; gap: 26px 14px; }
+    .also-img { aspect-ratio: 2 / 3; }
+    .also-cap { padding: 0 12px 13px; gap: 6px; }
+    .also-k { font-size: 8px; }
+    .also-t { font-size: 17px; }
+    .also-sf { margin-top: 0; font-size: 13.5px; line-height: 1.35; }
+    .also-by { font-size: 8.5px; margin-top: 9px; }
     .method-steps { margin-top: 22px !important; }
     .method-steps li { display: grid !important; grid-template-columns: 46px minmax(0, 1fr); column-gap: 14px; row-gap: 3px; align-items: start; text-align: left; padding: 16px 0 !important; }
     .method-steps li + li::before { display: none; }
