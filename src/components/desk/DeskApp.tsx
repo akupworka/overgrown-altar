@@ -30,6 +30,7 @@ import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
 import { ShareDraft, useMyShares } from './Workshop';
+import { WayBadge } from './Way';
 import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, roleClass, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -1722,6 +1723,8 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
         <span className="ss-name">{profile.display_name}</span>
         <span className={`lab ss-role ${roleClass(fellow && !isEditorRole(profile.role) ? 'fellow' : profile.role)}`}>{fellow && !isEditorRole(profile.role) ? 'Of the Fellowship' : roleLabel(profile.role)}</span>
       </a>
+      {/* the badge worn beside their name in the Forum */}
+      <span className="ss-badge">{fellow ? <WayBadge member={profile.id} /> : <PrestigeBadge published={live.length} />}</span>
       {!fellow && (
         <div className="ss-make">
           <a className="ss-write" href="/guild/desk/#write">

@@ -101,7 +101,7 @@ export function ShareDraft({ piece, me, onClose }: { piece: Piece; me: string; o
 
 /** On the Guild page: drafts other members have shared with you, marked New while unread. Nothing shows until there is one. */
 export function SharedWithYou({ me }: { me: string }) {
-  const [rows, setRows] = useState<{ id: string; title: string; medium: string; who: string; fresh: boolean }[] | null>(null);
+  const [rows, setRows] = useState<{ id: string; title: string; medium: string; who: string; fresh: boolean; person?: Person }[] | null>(null);
   useEffect(() => {
     (async () => {
       const { data: sh } = await supabase.from('draft_shares').select('piece_id').eq('reader_id', me);
@@ -112,19 +112,29 @@ export function SharedWithYou({ me }: { me: string }) {
       // New: a draft just shared, or a note you haven't read yet (the same unread notices the Inbox shows)
       const { data: nt } = await supabase.from('inbox_notices').select('piece_id').eq('member_id', me).in('kind', ['draft', 'note']).is('read_at', null);
       const fresh = new Set((nt ?? []).map((n: any) => n.piece_id));
-      setRows((pc ?? []).map((p: any) => ({ id: p.id, title: p.title || 'Untitled', medium: p.medium, who: ppl.get(p.author_id)?.display_name ?? 'A member', fresh: fresh.has(p.id) })));
+      setRows((pc ?? []).map((p: any) => ({ id: p.id, title: p.title || 'Untitled', medium: p.medium, who: ppl.get(p.author_id)?.display_name ?? 'A member', person: ppl.get(p.author_id), fresh: fresh.has(p.id) })));
     })();
   }, [me]);
   if (!rows?.length) return null;
+  const fresh = rows.filter((r) => r.fresh).length;
   return (
-    <section className="d-forum-panel ws-panel">
-      <div className="d-forum-head"><span className="eb">The Workshop</span><span className="lab mut">Drafts shared with you</span></div>
-      <ol className="rd-list">
+    <section className="ws-panel" aria-label="The Workshop">
+      <div className="ws-panel-head">
+        <span className="ws-panel-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /><path d="M13 20h7" /></svg></span>
+        <span className="ws-panel-t"><span className="eb">The Workshop</span>
+          <span className="it ws-panel-line">{rows.length === 1 ? 'A writer has asked for your eye on a draft.' : `${rows.length} writers have asked for your eye on a draft.`}</span></span>
+        {fresh > 0 && <span className="lab fo-new ws-panel-n">{fresh} new</span>}
+      </div>
+      <ol className="ws-drafts">
         {rows.map((r) => (
-          <li key={r.id} className="rd-row">
-            <a className="rd-link" href={`/guild/members/?p=${r.id}`}>
-              <span className="rd-t">{r.fresh && <span className="lab fo-new ws-new">New</span>}{r.title}</span>
-              <span className="lab mut rd-m">{r.medium === 'photograph' ? 'A photograph' : 'A draft'} by {r.who} · read it and leave your notes</span>
+          <li key={r.id}>
+            <a className={`ws-draft${r.fresh ? ' fresh' : ''}`} href={`/guild/members/?p=${r.id}`}>
+              <Face p={r.person} size={44} />
+              <span className="ws-draft-t">
+                <span className="ws-draft-title">{r.title}</span>
+                <span className="lab mut">{r.medium === 'photograph' ? 'A photograph' : 'A draft'} by {r.who}{r.fresh ? ' · new for you' : ''}</span>
+              </span>
+              <span className="lab ws-draft-go">Read &amp; leave notes<span aria-hidden="true"> →</span></span>
             </a>
           </li>
         ))}

@@ -105,6 +105,26 @@ export function WayCard({ member, mine }: { member: string; mine: boolean }) {
   );
 }
 
+/** On a Fellowship member's page: their station on the Way, and every badge they've earned, by name. */
+export function WayTrophies({ member, first, mine }: { member: string; first: string; mine: boolean }) {
+  const w = useWay(member);
+  if (!w) return null;
+  return (
+    <section className="m-fw-badges" id="vault">
+      <div className="m-fw-head">
+        <span className="eb">{mine ? 'Your badges' : `${first}’s badges`}</span>
+        <h2 className="h2 m-fw-st">{w.current.name}</h2>
+        <span className="lab mut">Station {w.current.n} of 7 on the Way · {w.count} of {BADGES.length} badges</span>
+      </div>
+      <Path at={w.current.n} />
+      {w.earned.length > 0
+        ? <ul className="m-fw-list">{w.earned.map((b) => <li key={b.id} className={b.rare ? 'rare' : ''} title={b.note}><Token b={b} lit size={72} /><span className="m-fw-n">{b.name}</span></li>)}</ul>
+        : <p className="it mut m-fw-none">{mine ? 'Your first badge comes with the first piece you add to your vault.' : 'Just setting out.'}</p>}
+      {mine && <a className="lab m-fw-go" href="/guild/members/?view=way">Walk the Way →</a>}
+    </section>
+  );
+}
+
 /** A small pewter pill with a Fellowship member's station, worn under their name (their page, the Forum):
  *  the Fellowship's counterpart to the Guild's prestige badge. */
 export function WayBadge({ member, size = 'sm', tone = 'dark' }: { member: string; size?: 'sm' | 'lg'; tone?: 'dark' | 'paper' }) {

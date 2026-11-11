@@ -8,6 +8,28 @@ import { useCollection } from './Collection';
 const ROOM: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
 
+type Book = NonNullable<ReturnType<typeof useCollection>>[number];
+/** Pieces standing on shelves, each wearing its cover. `onRemove` adds the small × that takes one down. */
+export function Shelf({ books, onRemove }: { books: Book[]; onRemove?: (id: string) => void }) {
+  return (
+    <ol className="lb-shelf">
+      {books.map((b) => (
+        <li key={b.id} className={`lb-book${b.img ? '' : ' lb-plain'}`}>
+          <a href={`/guild/members/?p=${b.id}`} aria-label={`${b.title}, by ${b.who}`}>
+            <img src={b.img || ROOM[(b as any).pillar] || ROOM.hearth} alt="" loading="lazy" style={b.img && b.image_focus ? { objectPosition: b.image_focus } : undefined} />
+            <span className="lb-cover">
+              <span className="lab lb-k">{MEDIUM[b.medium] ?? ''}</span>
+              <span className="lb-t">{b.title}</span>
+              <span className="lab lb-w">{b.who}</span>
+            </span>
+          </a>
+          {onRemove && <button type="button" className="lb-x" aria-label={`Take ${b.title} off the shelf`} title="Take off the shelf" onClick={() => onRemove(b.id)}>×</button>}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function Library({ me }: { me: string }) {
   const items = useCollection(me, 'library');
   const [gone, setGone] = useState<Set<string>>(new Set());
@@ -32,21 +54,7 @@ export function Library({ me }: { me: string }) {
           <a className="lab lb-go" href="/search/">Explore the altar →</a>
         </div>
       ) : (
-        <ol className="lb-shelf">
-          {books.map((b) => (
-            <li key={b.id} className={`lb-book${b.img ? '' : ' lb-plain'}`}>
-              <a href={`/guild/members/?p=${b.id}`} aria-label={`${b.title}, by ${b.who}`}>
-                <img src={b.img || ROOM[(b as any).pillar] || ROOM.hearth} alt="" loading="lazy" style={b.img && b.image_focus ? { objectPosition: b.image_focus } : undefined} />
-                <span className="lb-cover">
-                  <span className="lab lb-k">{MEDIUM[b.medium] ?? ''}</span>
-                  <span className="lb-t">{b.title}</span>
-                  <span className="lab lb-w">{b.who}</span>
-                </span>
-              </a>
-              <button type="button" className="lb-x" aria-label={`Take ${b.title} off the shelf`} title="Take off the shelf" onClick={() => remove(b.id)}>×</button>
-            </li>
-          ))}
-        </ol>
+        <Shelf books={books} onRemove={remove} />
       )}
     </div>
   );

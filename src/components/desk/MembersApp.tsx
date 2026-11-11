@@ -7,7 +7,7 @@ import { uniqueIds as useIds } from '../../lib/svgIds';
 import { seenRole, viewAs, isEditorRole, roleLabel, roleClass } from '../../lib/supabase';
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
-import { WayPage, WayBadge } from './Way';
+import { WayPage, WayBadge, WayTrophies } from './Way';
 import { SideColumn, Loading } from './DeskApp';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
@@ -27,7 +27,7 @@ import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
 import { WorkshopNotes, SharedWithYou } from './Workshop';
-import { Library } from './Library';
+import { Library, Shelf } from './Library';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -360,7 +360,10 @@ function MemberPage({ id, me }: { id: string; me: string }) {
           </nav>
         )}
       </header>
-      {fellow ? <FellowCollection id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} /> : (<>
+      {fellow ? (<>
+        <FellowShelf id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
+        <WayTrophies member={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
+      </>) : (<>
       <section className="m-work">
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
         {/* Writing and photographs, each in its own place */}
@@ -452,7 +455,9 @@ function Reading({ id }: { id: string }) {
   if (piece === null) return <div className="m-gate"><p className="it mut d-empty">This piece is not available.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   return (
     <div className="m-reading">
-      <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>
+      {piece.status !== 'approved'
+        ? <Link className="m-back lab" to="/guild/members/">The Guild</Link>   /* a shared draft: back to where it was waiting */
+        : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
       {piece.status !== 'approved' && <p className="lab ws-banner">A draft · not published · private to the Workshop</p>}
       <article className="d-paper">
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
@@ -644,6 +649,24 @@ export default function MembersApp() {
   // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a member’s page
   // or a piece, which have the screen to themselves).
   return route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
+}
+
+// A Fellowship member's page is their shelves: everything they've added to their vault, standing like a library.
+function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boolean }) {
+  const items = useCollection(id);
+  const [gone, setGone] = useState<Set<string>>(new Set());
+  const books = (items ?? []).filter((b) => !gone.has(b.id));
+  return (
+    <section className="m-lib" id="collection">
+      <div className="m-lib-head">
+        <span className="eb">{mine ? 'Your library' : `${first}’s library`}</span>
+        {items && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} kept{mine ? ' · open for all to see' : ''}</span>}
+      </div>
+      {!items ? <p className="lab mut">Opening the library…</p>
+        : books.length ? <Shelf books={books} onRemove={mine ? async (pid) => { setGone((g) => new Set(g).add(pid)); await supabase.from('saves').delete().eq('member_id', id).eq('piece_id', pid); } : undefined} />
+        : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Add to vault” on any piece or photograph you love.' : `${first} hasn’t kept anything yet.`}</p>}
+    </section>
+  );
 }
 
 // A Fellowship member's page shows their collection (open to everyone; see /collection/).
