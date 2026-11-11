@@ -9,12 +9,12 @@ const ROOM: Record<string, string> = { watchtower: '/images/watchtower-photo-120
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
 
 type Book = NonNullable<ReturnType<typeof useCollection>>[number];
-/** Pieces standing on shelves, each wearing its cover. `onRemove` adds the small × that takes one down. */
+/** Pieces standing on shelves, each wearing its cover; a photograph stands as a polaroid. `onRemove` adds the small × that takes one down. */
 export function Shelf({ books, onRemove }: { books: Book[]; onRemove?: (id: string) => void }) {
   return (
     <ol className="lb-shelf">
       {books.map((b) => (
-        <li key={b.id} className={`lb-book${b.img ? '' : ' lb-plain'}`}>
+        <li key={b.id} className={`lb-book${b.img ? '' : ' lb-plain'}${b.medium === 'photograph' ? ' lb-photo' : ''}`}>
           <a href={`/guild/members/?p=${b.id}`} aria-label={`${b.title}, by ${b.who}`}>
             <img src={b.img || ROOM[(b as any).pillar] || ROOM.hearth} alt="" loading="lazy" style={b.img && b.image_focus ? { objectPosition: b.image_focus } : undefined} />
             <span className="lb-cover">
