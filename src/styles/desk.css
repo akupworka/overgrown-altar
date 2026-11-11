@@ -2268,3 +2268,14 @@ html[data-night] .m-reading .d-paper .rt-btn[aria-pressed='true'] { background: 
 html[data-night] .m-reading .d-paper .m-listen[aria-pressed='true'] { background: var(--oxblood); color: #12160F; }
 html[data-night] .m-reading .d-paper :is(.rt, .m-byline) { border-top-color: rgba(243, 236, 220, .14); }
 html[data-night] .m-reading .d-paper .rt-n { background: rgba(243, 236, 220, .12); }
+/* A vault's Library tab stands in the dark, like the Library page: the work section turns from paper to night while it is open */
+.m-work { transition: background-color .4s, color .4s; }
+.m-work.m-work-night { background: #0B0D0A; color: var(--bone); }
+.m-work-night .m-work-head .eb { color: var(--ember); }
+.m-work-night .m-work-head .lab { color: #A9A293; }
+.m-work-night .m-tabs { background: rgba(243, 236, 220, .05); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); }
+.m-work-night .m-tabs button { color: #A9A293 !important; }
+.m-work-night .m-tabs button.on { background: var(--bone); color: #12160F !important; }
+.m-work-night .m-tabs button:not(.on):hover { color: var(--ember) !important; }
+.m-work-night .m-tabs .m-tab-n { background: rgba(243, 236, 220, .1); }
+.m-work-night .m-tabs button.on .m-tab-n { background: rgba(18, 22, 15, .12); }

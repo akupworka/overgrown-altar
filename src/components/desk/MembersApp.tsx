@@ -375,7 +375,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
         <FellowShelf id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
         <WayTrophies member={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
       </>) : (<>
-      <section className="m-work">
+      <section className={`m-work${view === 'library' ? ' m-work-night' : ''}`}>   {/* the library's shelves stand in the dark, like the Library page */}
         <div className="m-work-head"><span className="eb">The work</span><span className="lab">{view === 'library' ? `${books.length} ${books.length === 1 ? 'artifact' : 'artifacts'}` : view === 'photos' ? `${photos.length} ${photos.length === 1 ? 'photograph' : 'photographs'}` : `${shown.length} ${shown.length === 1 ? 'piece' : 'pieces'}`} · newest first</span></div>
         {/* Writing and photographs, each in its own place */}
         {((writing.length > 0 && photos.length > 0) || showLib) && (

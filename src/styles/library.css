@@ -129,13 +129,7 @@
 .lb-vis-btn:hover, .lb-vis-btn:focus-visible { background: var(--ember); }
 .lb-vis-btn:disabled { opacity: .5; cursor: default; }
 @media (max-width: 700px) { .lb-vis { width: 100%; box-sizing: border-box; border-radius: 16px; } .lb-vis-t { flex: 1; font-size: 15px; } }
-/* The shelves on paper (a vault's Library tab): the switch in ink, and cream sheets given an edge */
+/* A vault's Library tab: the switch sits in the middle above the shelves (the section itself goes dark: desk.css) */
 .m-lib-tab { display: flex; flex-direction: column; gap: 26px; }
-.m-lib-tab .lb-vis { box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .22); color: var(--ink); margin: 0 auto; }
-.m-lib-tab .lb-vis.open { box-shadow: inset 0 0 0 1px var(--oxblood); }
-.m-lib-tab :is(.lb-vis-ic, .lb-vis-t b) { color: var(--oxblood); }
-.m-lib-tab .lb-vis-btn { background: var(--ink); color: var(--bone); }
-.m-lib-tab .lb-vis-btn:hover { background: var(--oxblood); }
-.m-lib-tab .lb-book.lb-page > a { background: linear-gradient(180deg, #FDFAF1, #F6F0E2); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .2); }
-.m-lib-tab .lb-book.lb-photo > a { background: #FBF7EC; box-shadow: 0 10px 20px rgba(42, 32, 23, .3), inset 0 0 0 1px rgba(42, 32, 23, .14); }
-.m-lib-none { margin: 0; text-align: center; font-size: 19px; color: var(--muted-paper, #6E6457); }
+.m-lib-tab .lb-vis { margin: 0 auto; }
+.m-lib-none { margin: 0; text-align: center; font-size: 19px; color: #CFC8B8; }
