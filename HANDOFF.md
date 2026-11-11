@@ -206,3 +206,11 @@ Found by acting as mock members; each was tested by a member trying it and by th
 - **Crossing over**: when a Fellowship reader becomes a member their `saves` are copied into `library`.
 - Sample members (`@sample.overgrownaltar.com`) are never emailed (`notify-writer`, `daily-letter`).
 - The site's speculation rules never prerender `?dm=`, `?t=` or `?p=` links (opening those marks things read).
+- **Hands and rest**: `pieces.assigned_at` (stamped whenever a piece changes hands) feeds the bell's `handed` line;
+  `public.editors_resting()` tells writers when every editor is on sabbath.
+- **Visitor count**: `public.count_view(path)` (called once a page from `BaseLayout.astro`, never for the members' rooms
+  or readers with Do Not Track) adds to `page_views(day, path, views)`; `public.visit_stats()` gives editors today, the
+  week and the most opened pages.
+- **Threads**: `thread_watch(member, thread, follow|mute)`; `bell()` adds followed threads and drops muted ones.
+- **Reflections**: `piece_reflections.reply` is set only through `public.answer_reflection(id, text)`, once, by the
+  piece's writer; the bell's `answer` line tells the reader.

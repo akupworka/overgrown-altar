@@ -186,3 +186,6 @@ html.ib-open .desk-in { padding: 0 !important; }
 
 .ib-clear { align-self: flex-start; position: relative; padding: 0; border: 0; background: none; cursor: pointer; color: var(--ember); font-size: 9px; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 2px; }
 .ib-clear::after { content: ''; position: absolute; inset: -12px -8px; }
+
+/* Tidying the inbox: mark everything read, or clear the notices */
+.ib-tidy { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; }

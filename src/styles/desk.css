@@ -2255,3 +2255,12 @@ html[data-night] .d-reader .d-paper .d-paper-standfirst { color: var(--muted-pap
 .m-stats span { display: inline-flex; align-items: baseline; gap: 7px; white-space: nowrap; }
 .m-stats b { font-family: var(--serif); font-size: 20px; font-weight: 500; letter-spacing: 0; color: var(--oxblood); }
 @media (max-width: 700px) { .m-stats { padding-left: 0; gap: 6px 18px; } }
+
+/* The editors' private count of visits (pages and days, never people): one quiet line under the two tiles */
+.d-visits { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin: 0; padding: 14px 20px; border-radius: 14px;
+  background: rgba(243, 236, 220, .025); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .08); }
+.d-visits .eb { margin: 0; }
+.d-visits-n { font-family: var(--sans); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: #A9A293; }
+.d-visits-n b { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: 0; color: var(--bone); margin-right: 6px; }
+.d-visits-top { flex: 1 1 100%; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d-rest { margin: 0; }

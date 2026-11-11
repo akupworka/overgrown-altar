@@ -108,7 +108,17 @@ export function InboxList({ me }: { me: string }) {
           {threads && <span className="lab mut">{threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}{notices.length ? ` · ${notices.length} ${notices.length === 1 ? 'notice' : 'notices'}` : ''}{fresh ? ` · ${fresh} new` : ''}</span>}
         </div>
         <Gauge u={usage} />
-        {notices.length > 2 && <button type="button" className="lab ib-clear" onClick={async () => { if (!confirm(`Clear all ${notices.length} notices? Your conversations stay.`)) return; setNotices([]); await supabase.from('inbox_notices').delete().eq('member_id', me); load(); }}>Clear {notices.length} notices</button>}
+        {(fresh > 0 || notices.length > 2) && (
+          <div className="ib-tidy">
+            {/* Everything new at once: each unread conversation and notice is marked read (nothing is deleted), and the count on Inbox clears. */}
+            {fresh > 0 && <button type="button" className="lab ib-clear" onClick={async () => {
+              const ts = (threads ?? []).filter((t) => unread(t, me)), ns = notices.filter((n) => !n.read_at);
+              await Promise.all([...ts.map((t) => supabase.rpc('dm_read', { t: t.id })), ...ns.map((n) => supabase.rpc('notice_read', { n: n.id }))]);
+              await load(); refreshInboxDot();
+            }}>Mark all {fresh} as read</button>}
+            {notices.length > 2 && <button type="button" className="lab ib-clear" onClick={async () => { if (!confirm(`Clear all ${notices.length} notices? Your conversations stay.`)) return; setNotices([]); await supabase.from('inbox_notices').delete().eq('member_id', me); await load(); refreshInboxDot(); }}>Clear {notices.length} notices</button>}
+          </div>
+        )}
       </header>
       {full && <p className="ib-full">Your inbox is full. Delete a conversation (or messages you’ve sent) to make room; until then, new messages can’t reach you.</p>}
       {picking && (

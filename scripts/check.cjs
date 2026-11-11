@@ -13,6 +13,7 @@
 //   --sabbath         the signed-in editor is on sabbath (otherwise the other editor is)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
+//   --scroll "<css>"  bring this into view before the screenshot (things that fade in as you reach them)
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
 //   --width N         the computer's width (default 1280; the row of rooms in the header shows from 1321)
 //   --out <dir>       where screenshots go (default: a temporary folder; never inside the repo)
@@ -26,7 +27,7 @@ const os = require('os'), path = require('path'), fs = require('fs');
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
 const flag = (name) => args.includes('--' + name);
-const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type'];
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll'];
 const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
 if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
 const who = opt('as', 'editor');
@@ -51,7 +52,7 @@ const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
   ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, ['Published piece', 'The Watchman’s Burden.', 'Echos of Eden', 'My Aching Hands', 'A Small Hymn for Tired Men', 'Oil in the Jar'][i % 6] + (i % 6 ? '' : ` ${i + 1}`), 'approved', i % 3 === 2 ? 'photograph' : i % 3 === 1 ? (i % 2 ? 'poetry' : 'prose') : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
   piece('d1', ME, 'A draft in progress', 'draft'), piece('wd1', 'm2', 'What the Bell Remembers', 'draft', 'poetry'), piece('r1', ME, 'Returned with a note', 'returned'),
-  { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9', review_opened_at: new Date().toISOString() }, { ...piece('s3', 'm2', 'A Field Guide to Small Mercies', 'submitted', 'prose'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
+  { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, ...(who === 'member' ? [{ ...piece('w1', ME, 'A Psalm in Waiting', 'submitted', 'poetry'), assigned_to: 'e9', review_opened_at: new Date().toISOString() }] : []), { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9', review_opened_at: new Date().toISOString() }, { ...piece('s3', 'm2', 'A Field Guide to Small Mercies', 'submitted', 'prose'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];
 const boards = [
   { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 50 },
@@ -99,7 +100,9 @@ if (flag('heavy')) {
 }
 ['/images/duomo-spires-1200.jpg', '/images/four-lancet-window-1200.jpg', null, '/images/labyrinth-stained-light-1200.jpg', '/images/window-light-on-wall-1200.jpg', null, '/images/ascension-window-wide-1200.jpg'].forEach((img, i) => { if (pieces[i] && img) pieces[i].image_path = img; });
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
-  dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
+  dm_threads, dm_messages, dm_blocks: [], dm_reports: [], thread_watch: [],
+  piece_reflections: [{ id: 'rf1', piece_id: 'p1', author_id: 'm2', body: 'The fourth paragraph has been following me around the house all week.', created_at: t(4), reply: 'Thank you. It followed me around for a year before I wrote it down.' },
+    { id: 'rf2', piece_id: 'p1', author_id: 'm3', body: 'Read aloud over breakfast. We both went quiet.', created_at: t(5), reply: null }],
   editor_sabbath: flag('sabbath') ? [{ editor_id: ME }] : [{ editor_id: 'e9' }],
   piece_change_requests: [{ piece_id: 'mine1', note: 'The middle section repeats the opening. Could you cut one of them, and look again at the last line?', asked_at: t(5) }],
   forum_reports: [{ id: 'fr1', post_id: 'p3', 'post.thread_id': 'th2', reason: 'This reads as an advertisement.', created_at: t(3), resolved: false, assigned_to: ME, post: { id: 'p1', thread_id: 't1', body: 'Have you tried my new course on writing? Link in my vault. It will change everything about how you work.' } }],
@@ -162,6 +165,8 @@ const up = () => fetch(BASE).then(() => true, () => false);
       if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
       if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: flag('heavy') ? 296 : 240, cap: 300 } });
       if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
+      if (url.pathname.endsWith('/rpc/visit_stats')) return route.fulfill({ json: { today: 42, week: 318, top: [{ path: '/', views: 120 }, { path: '/guild/the-original-freemason/', views: 64 }, { path: '/hearth/', views: 41 }] } });
+      if (url.pathname.endsWith('/rpc/editors_resting')) return route.fulfill({ json: flag('resting') });
       if (url.pathname.endsWith('/rpc/piece_stats')) return route.fulfill({ json: who === 'fellow' ? null : { marks: 17, reflections: 5, saves: 8 } });
       if (url.pathname.endsWith('/rpc/piece_counts')) { const m = {}; pieces.filter((p) => p.status === 'approved').forEach((p) => { m[p.author_id] = (m[p.author_id] || 0) + 1; }); return route.fulfill({ json: Object.entries(m).map(([author_id, n]) => ({ author_id, n })) }); }
       if (url.pathname.endsWith('/rpc/bell')) return route.fulfill({ json: { seen: t(5), items: [
@@ -187,6 +192,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
     await page.goto(BASE + target, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     if (opt('click')) for (const css of opt('click').split(';;')) { await page.click(css.trim()); await page.waitForTimeout(600); }
+    if (opt('scroll')) { await page.locator(opt('scroll')).first().scrollIntoViewIfNeeded(); await page.evaluate((css) => document.querySelector(css)?.scrollIntoView({ block: 'start' }), opt('scroll')); await page.waitForTimeout(1500); }
     if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     const file = path.join(out, `${name}.png`);

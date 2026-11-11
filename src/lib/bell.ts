@@ -25,6 +25,8 @@ function line(r: { first: Item; names: string[]; n: number }): { html: string; h
     case 'follow': return { html: `${who} now ${r.n > 1 ? 'follow' : 'follows'} you`, href: `/guild/members/?m=${i.who}` };
     case 'published': return { html: `${piece} is published`, href: pieceUrl };
     case 'returned': return { html: `${piece} came back with a note from the editor`, href: '/guild/desk/' };
+    case 'handed': return { html: `${who} now has ${piece} to read`, href: '/guild/desk/' };
+    case 'answer': return { html: `${who} answered your reflection on ${piece}`, href: pieceUrl };
     default: return { html: 'Something new', href: '/guild/desk/' };
   }
 }
@@ -34,6 +36,7 @@ const ICON: Record<string, string> = {
   mention: 'M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z', reply: 'M4 5h16v11H9l-5 4z',
   reflection: 'M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4', mark: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z', save: 'M6 3.5h12v17l-6-4.2-6 4.2z',
   follow: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20c1-3.5 4-5 8-5s7 1.5 8 5', published: 'M5 12.5l4.5 4.5L19 7.5', returned: 'M9 14l-5-5 5-5M4 9h10a6 6 0 0 1 0 12h-3',
+  handed: 'M4 12h13M12 6l6 6-6 6', answer: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
 };
 
 export function initBell(supabase: SupabaseClient) {

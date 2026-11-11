@@ -62,10 +62,17 @@ use still working:
 - [ ] Turn on "leaked password protection" in Supabase's sign-in settings when moving to the paid plan (ask first).
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
 
-## Asked for by the owner, not built yet (11 Nov 2026)
-- A private, privacy-friendly visitor count.
-- Mute or follow a forum thread (which threads ring your bell).
-- The writer answers a reader's reflection, once.
+## Built on 11 Nov 2026 after the full walk-through (check each once on a real phone)
+- The old Sanity Studio is gone (`/studio`, its packages); builds are about three times faster. Its two environment
+  variables in Netlify, if any were set, can be deleted.
+- The writer sees who has a waiting piece ("with Honor · opened") and gets a bell line when it changes hands.
+- When every editor is on sabbath, writers see a quiet note on their Desk.
+- Drafts already saved themselves a couple of seconds after typing stops (this was wrongly reported as missing). What was
+  fixed: the editor's note now stays on a returned piece after it is saved, and it stays under "Returned with a note".
+- A private visitor count for editors on the Desk (pages and days only; readers who ask not to be tracked are left out).
+- Mute or follow a forum thread (a pill under the thread's title; tags always reach you).
+- The writer answers a reader's reflection, once; the reader gets a bell line.
+- Inbox: "Mark all as read", and clearing notices now updates the count beside Inbox.
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against

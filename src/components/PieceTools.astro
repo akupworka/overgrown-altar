@@ -149,8 +149,8 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     const cnt = form.querySelector<HTMLElement>('.pt-count')!, msg = form.querySelector<HTMLElement>('.pt-msg')!, send = form.querySelector<HTMLButtonElement>('.pt-send')!;
     let mineId: string | null = null;
     const draw = async () => {
-      const { data } = await supabase.from('piece_reflections').select('id, author_id, body, created_at').eq('piece_id', piece).order('created_at');
-      const rows = (data ?? []) as { id: string; author_id: string; body: string; created_at: string }[];
+      const { data } = await supabase.from('piece_reflections').select('id, author_id, body, created_at, reply').eq('piece_id', piece).order('created_at');
+      const rows = (data ?? []) as { id: string; author_id: string; body: string; created_at: string; reply?: string | null }[];
       const ids = [...new Set(rows.map((r) => r.author_id))];
       const { data: ppl } = ids.length ? await supabase.from('profiles').select('id, display_name, portrait_path').in('id', ids) : { data: [] as any[] };
       const who = new Map((ppl ?? []).map((p: any) => [p.id, p]));
@@ -170,6 +170,22 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
         h.append(n, d);
         const b = document.createElement('p'); b.className = 'pt-item-b'; b.textContent = r.body;
         t.append(h, b);
+        // The writer's answer (one each), or, for the writer, the way to give it
+        if (r.reply) {
+          const a = document.createElement('p'); a.className = 'pt-reply';
+          const k = document.createElement('span'); k.className = 'lab'; k.textContent = 'The writer answers';
+          const w = document.createElement('span'); w.textContent = r.reply;
+          a.append(k, w); t.append(a);
+        } else if (mine && r.author_id !== me) {
+          const ans = document.createElement('button'); ans.type = 'button'; ans.className = 'lab pt-rm pt-answer'; ans.textContent = 'Answer';
+          ans.addEventListener('click', async () => {
+            const words = prompt(`Your answer to ${p.display_name || 'this reader'} (one answer each; it cannot be changed afterwards):`);
+            if (!words || !words.trim()) return;
+            const { error } = await supabase.rpc('answer_reflection', { r_id: r.id, p_body: words.trim().slice(0, 600) });
+            if (error) alert(error.message); else draw();
+          });
+          t.append(ans);
+        }
         if (r.author_id === me) {
           const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'lab pt-rm'; rm.textContent = 'Remove';
           rm.addEventListener('click', async () => { if (!confirm('Remove your reflection?')) return; await supabase.from('piece_reflections').delete().eq('id', r.id); box.value = ''; draw(); });
@@ -241,6 +257,9 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
   .pt-item-n { font-family: var(--serif); font-size: 19px; color: var(--ink); }
   .pt-item-d { font-size: 9px; color: var(--muted-paper); }
   .pt-item-b { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #3A2F25; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pt-reply { margin: 2px 0 0; padding: 10px 14px; border-left: 2px solid var(--oxblood); display: flex; flex-direction: column; gap: 4px; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: #3A2F25; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pt-reply .lab { font-size: 8.5px; color: var(--oxblood); }
+  .pt-answer { color: var(--oxblood); }
   .pt-rm { align-self: flex-start; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--muted-paper); font-size: 9px; }
   .pt-none { margin: 0; font-size: 18px; color: var(--muted-paper); }
   .pt-form { display: flex; flex-direction: column; gap: 10px; }

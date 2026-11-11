@@ -449,6 +449,8 @@ function KindNote({ value }: { value: string }) {
   );
 }
 
+/** Sent back with a note, and still the writer's to finish. (Saving it turns it into a draft; the note stays with it.) */
+const cameBack = (p: { status: string; editor_note?: string | null }) => p.status === 'returned' || (p.status === 'draft' && !!p.editor_note);
 function StatusChip({ status, at }: { status: Piece['status']; at?: string | null }) {
   // A piece the editor scheduled is approved, but not on the site until its time comes.
   if (status === 'approved' && at && new Date(at) > new Date())
@@ -602,6 +604,17 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   const [deleting, setDeleting] = useState<{ piece: Piece; mode: 'take' | 'delete' } | null>(null);
   const [sharing, setSharing] = useState<Piece | null>(null);   // the Workshop: a draft being shared for notes
   const shares = useMyShares(profile?.id ?? '', sharing);
+  // Who has each waiting piece (so the writer sees it change hands), whether every editor is resting, and, for editors,
+  // how many times the public pages were opened (a private count: pages and days, never people).
+  const [edNames, setEdNames] = useState<Map<string, string>>(new Map());
+  const [resting, setResting] = useState(false);
+  const [visits, setVisits] = useState<{ today: number; week: number; top: { path: string; views: number }[] } | null>(null);
+  useEffect(() => {
+    supabase.from('profiles').select('id, display_name').in('role', ['editor', 'staff']).then(({ data }) => setEdNames(new Map((Array.isArray(data) ? data : []).map((e: any) => [e.id, e.display_name]))));
+    if (isEditor) supabase.rpc('visit_stats').then(({ data }) => setVisits(data && typeof (data as any).week === 'number' ? (data as any) : null));
+    else supabase.rpc('editors_resting').then(({ data }) => setResting(data === true));
+  }, [isEditor]);
+  const pageName = (path: string) => path === '/' ? 'Home' : path.replace(/^\/guild\//, '').replace(/^\/|\/$/g, '').replace(/[-/]+/g, ' ');
   // Published pieces an editor has sent back for a change: the note, and the way in to make it.
   const [asks, setAsks] = useState<Map<string, string>>(new Map());
   useEffect(() => { supabase.from('piece_change_requests').select('piece_id, note').then(({ data }) => setAsks(new Map((Array.isArray(data) ? data : []).map((r: any) => [r.piece_id, r.note])))); }, [pieces.length]);
@@ -623,8 +636,8 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
   }
   // The groups My pieces is organized into (newest first in each).
   const GROUPS: { key: string; label: string; note?: string; has: (p: Piece) => boolean; filter?: 'drafts' | 'with' | 'live' }[] = [
-    { key: 'returned', label: 'Returned with a note', note: 'The editor has read these and asked for a little more.', has: (p) => p.status === 'returned', filter: 'drafts' },
-    { key: 'drafts', label: 'Drafts', has: (p) => p.status === 'draft', filter: 'drafts' },
+    { key: 'returned', label: 'Returned with a note', note: 'The editor has read these and asked for a little more.', has: (p) => cameBack(p), filter: 'drafts' },
+    { key: 'drafts', label: 'Drafts', has: (p) => p.status === 'draft' && !cameBack(p), filter: 'drafts' },
     { key: 'with', label: 'With the editor', note: 'Being read. You’ll hear by email.', has: (p) => p.status === 'submitted', filter: 'with' },
     { key: 'live', label: 'Published', has: (p) => p.status === 'approved', filter: 'live' },
     { key: 'declined', label: 'Declined', has: (p) => p.status === 'declined' },
@@ -644,8 +657,8 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
               {!openable && live && <a className="d-item-open" href={`/guild/members/?p=${p.id}`} aria-label={`Read: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}{editable && shares.get(p.id) ? <span className="lab d-rev-tag ws-tag">In the Workshop · {shares.get(p.id)} {shares.get(p.id) === 1 ? 'reader' : 'readers'}</span> : null}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
-                {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
+                <span className="d-meta"><StatusChip status={cameBack(p) ? 'returned' : p.status} at={p.published_at} />{p.status === 'submitted' && p.assigned_to && edNames.get(p.assigned_to) && <span className="lab d-rev-tag d-with-ed">with {edNames.get(p.assigned_to)}{p.review_opened_at ? ' · opened' : ''}</span>}{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}{editable && shares.get(p.id) ? <span className="lab d-rev-tag ws-tag">In the Workshop · {shares.get(p.id)} {shares.get(p.id) === 1 ? 'reader' : 'readers'}</span> : null}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                {cameBack(p) && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
                 {asked && <p className="d-note"><span className="lab">{p.revision ? 'Your changes are with the editor · the note was' : 'The editor asks for a change'}</span>{asked}</p>}
               </div>
               <MoreActions>
@@ -691,6 +704,15 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
           </button>
         </div>
       )}
+      {isEditor && visits && (
+        <p className="d-visits">
+          <span className="eb">Readers</span>
+          <span className="d-visits-n"><b>{visits.today.toLocaleString()}</b> today</span>
+          <span className="d-visits-n"><b>{visits.week.toLocaleString()}</b> this week</span>
+          {visits.top.length > 0 && <span className="lab mut d-visits-top">Most opened: {visits.top.slice(0, 3).map((t) => `${pageName(t.path)} (${t.views})`).join(' · ')}</span>}
+        </p>
+      )}
+      {!isEditor && resting && <p className="d-note d-rest"><span className="lab">The editors are keeping a sabbath</span>Pieces you send still arrive, and will be read when they return.</p>}
       {/* The same order as the Fellowship's Desk: the rooms to read in, then where you stand, then your own work. */}
       <PillarTiles />
       {/* Phones: your standing (wide screens show it in the column beside) */}
@@ -965,7 +987,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   const note = live
     ? <p className="d-note d-note-live"><span className="lab">This piece is live</span>{isEditor ? 'Your changes go live as soon as you update it.' : piece?.revision ? 'Your changes are with the editor. The live piece stays as it is until they approve them. You can keep editing, or withdraw them.' : 'Your changes go to the editor. The live piece stays as it is until they approve them.'}
         {!isEditor && piece?.revision && <button type="button" className="d-link" onClick={async () => { if (!confirm('Withdraw your changes? The live piece stays as it is.')) return; await supabase.rpc('propose_revision', { p_id: piece.id, p_rev: null }); onDone(); }}>Withdraw changes</button>}</p>
-    : piece?.status === 'returned' && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
+    : piece && cameBack(piece) && piece.editor_note ? <p className="d-note"><span className="lab">The editor’s note</span>{piece.editor_note}</p> : null;
   const sendLabel = live ? (isEditor ? 'Update live piece' : 'Send changes') : (isEditor ? (goLive ? 'Schedule' : 'Publish') : 'Send to the editor');
 
   const photo = (

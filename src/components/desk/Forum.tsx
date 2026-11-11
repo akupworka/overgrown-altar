@@ -453,6 +453,15 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     await supabase.from('forum_reports').update({ resolved: true }).in('id', ids);
     loadReported();
   }
+  // Follow a thread you have not posted in, or mute one you have: the bell obeys (a tag always reaches you).
+  const [watch, setWatch] = useState<'follow' | 'mute' | null>(null);
+  useEffect(() => { supabase.from('thread_watch').select('state').eq('thread_id', id).eq('member_id', me).maybeSingle().then(({ data }) => setWatch(((data as any)?.state as 'follow' | 'mute') ?? null)); }, [id, me]);
+  async function setWatching(next: 'follow' | 'mute' | null) {
+    setWatch(next);
+    const { error } = next ? await supabase.from('thread_watch').upsert({ member_id: me, thread_id: id, state: next }, { onConflict: 'member_id,thread_id' })
+      : await supabase.from('thread_watch').delete().eq('member_id', me).eq('thread_id', id);
+    if (error) setMsg(error.message);
+  }
   // @mentions: everyone at the table, and what's being typed after an @
   const [everyone, setEveryone] = useState<{ id: string; display_name: string }[]>([]);
   const [atQ, setAtQ] = useState<string | null>(null);
@@ -576,6 +585,12 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
           {thread.pinned && <span className="fo-tag">Pinned</span>}{thread.locked && <span className="fo-tag fo-tag-dim">Closed</span>}
           <span className="fo-nw">{thread.reply_count} {thread.reply_count === 1 ? 'reply' : 'replies'}{thread.reply_count >= MAX_REPLIES - 20 ? ` of ${MAX_REPLIES}` : ''} ·</span> <span className="fo-nw">started {ago(thread.created_at)}</span>
         </span>
+        {(() => {
+          const partOf = thread.author_id === me || posts.some((p) => p.author_id === me);
+          return partOf
+            ? <button type="button" className="fo-act fo-watch" aria-pressed={watch === 'mute'} onClick={() => setWatching(watch === 'mute' ? null : 'mute')} title="Stop or start bell lines about new replies here">{watch === 'mute' ? 'Muted · unmute' : 'Mute this thread'}</button>
+            : <button type="button" className="fo-act fo-watch" aria-pressed={watch === 'follow'} onClick={() => setWatching(watch === 'follow' ? null : 'follow')} title="Have new replies here ring your bell">{watch === 'follow' ? 'Following · stop' : 'Follow this thread'}</button>;
+        })()}
         {(isEditor || thread.author_id === me) && (
           <details className="fo-mod">
             <summary className="lab"><span aria-hidden="true">⋯</span> Manage this thread</summary>

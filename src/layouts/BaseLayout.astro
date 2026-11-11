@@ -231,6 +231,17 @@ const imageUrl = new URL(image, site).toString();
         document.body.append(box); close.focus();
       });
 
+      // A private visitor count: one small note to the database that this public page was opened today.
+      // The page's address and the day, nothing else: no cookie, no person, no address of theirs. Readers who ask
+      // not to be tracked are left out altogether, and so are the members' rooms.
+      const countView = () => {
+        const p = location.pathname;
+        if (navigator.doNotTrack === '1' || (navigator as any).globalPrivacyControl || location.hostname === 'localhost' || p.startsWith('/guild/desk') || p.startsWith('/guild/members')) return;
+        const base = 'https://zblgggifysohxqtgvgxs.supabase.co', key = 'sb_publishable_84SLMdb_AiDAbaiz1eitbw_DRMx38lH';
+        fetch(`${base}/rest/v1/rpc/count_view`, { method: 'POST', keepalive: true, headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ p }) }).catch(() => {});
+      };
+      if ((document as any).prerendering) document.addEventListener('prerenderingchange', countView, { once: true }); else countView();
+
       // Writers' pictures stay current: pages are built ahead of time, so when a writer changes their portrait,
       // each picture marked data-author-id asks Supabase for the latest one as the page opens (one small request).
       const marked = [...document.querySelectorAll<HTMLElement>('[data-author-id]')].filter((el) => el.dataset.authorId);
