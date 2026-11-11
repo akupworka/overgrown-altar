@@ -113,7 +113,6 @@ export function WayBadge({ member, size = 'sm', tone = 'dark' }: { member: strin
   const s = size === 'lg' ? 26 : 20;
   return (
     <a href="/guild/members/?view=way" className={`wy-pill${size === 'lg' ? ' wy-pill-lg' : ''}${tone === 'paper' ? ' wy-pill-paper' : ''}`} title={`${w.current.name}: ${w.current.line}`}>
-      <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(pewterBadge('shell', s, true)) }} />
       <span className="wy-pill-n">{['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][w.current.n - 1]}</span>{w.current.name}
     </a>
   );

@@ -46,7 +46,7 @@ const piece = (id, author, title, status, medium = 'essay', pillar = 'hearth') =
 const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
   ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, `Published piece ${i + 1}`, 'approved', i % 3 === 2 ? 'photograph' : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
-  piece('d1', ME, 'A draft in progress', 'draft'), piece('r1', ME, 'Returned with a note', 'returned'),
+  piece('d1', ME, 'A draft in progress', 'draft'), piece('wd1', 'm2', 'What the Bell Remembers', 'draft', 'poetry'), piece('r1', ME, 'Returned with a note', 'returned'),
   { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];
 const boards = [
@@ -95,7 +95,10 @@ if (flag('heavy')) {
 }
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
-  inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null }],
+  inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null, kind: 'published' }, { id: 'nt2', member_id: ME, writer_id: 'm2', piece_id: 'wd1', created_at: t(7), read_at: null, kind: 'draft' }],
+  draft_shares: [{ piece_id: 'd1', reader_id: 'm2', created_at: t(5) }, { piece_id: 'wd1', reader_id: ME, created_at: t(6) }],
+  draft_notes: [{ id: 'dn1', piece_id: 'wd1', author_id: ME, body: 'The opening is strong. The second stanza loses me a little: who is speaking?', created_at: t(6) }, { id: 'dn2', piece_id: 'wd1', author_id: 'm2', body: 'Thank you. It is the bell itself; I will make that plainer.', created_at: t(7) },
+    { id: 'dn3', piece_id: 'd1', author_id: 'm2', body: 'I would cut the first paragraph and begin at the window.', created_at: t(6) }],
   forum_tallies: [{ member_id: ME, posts: flag('heavy') ? 1400 : 14, threads: flag('heavy') ? 160 : 3, best_thread: flag('heavy') ? 200 : 6, prayer: 1, boards: 2 }] };
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
@@ -148,6 +151,15 @@ const up = () => fetch(BASE).then(() => true, () => false);
       if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
       if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: flag('heavy') ? 296 : 240, cap: 300 } });
       if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
+      if (url.pathname.endsWith('/rpc/bell')) return route.fulfill({ json: { seen: t(5), items: [
+        { kind: 'mention', at: t(8), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: 'th2', thread_title: 'What are you reading this week?' },
+        { kind: 'mark', at: t(7), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
+        { kind: 'mark', at: t(7), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
+        { kind: 'reflection', at: t(6), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: 'mine1', piece_title: 'Published piece 2', piece_slug: 'mine1', thread: null, thread_title: null },
+        { kind: 'follow', at: t(4), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: null, thread_title: null },
+        { kind: 'published', at: t(3), who: null, who_name: null, who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
+        { kind: 'save', at: t(2), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
+      ] } });
       if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
       const table = url.pathname.split('/rest/v1/')[1];
       if (req.method() !== 'GET') { const body = JSON.parse(req.postData() || '{}'); const row = Array.isArray(body) ? body[0] : body; return route.fulfill({ json: one ? { id: 'new', ...row } : [{ id: 'new', ...row }] }); }

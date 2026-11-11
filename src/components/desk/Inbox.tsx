@@ -8,7 +8,7 @@ import { ago } from './Forum';
 import '../../styles/inbox.css';
 
 interface Thread { id: string; a: string; b: string; last_at: string; last_body: string; last_from: string | null; a_read_at: string; b_read_at: string; a_cleared_at: string; b_cleared_at: string }
-interface Notice { id: string; writer_id: string; piece_id: string; created_at: string; read_at: string | null; title?: string; medium?: string }
+interface Notice { id: string; writer_id: string; piece_id: string; created_at: string; read_at: string | null; kind?: 'published' | 'draft' | 'note'; title?: string; medium?: string }
 interface Message { id: string; thread_id: string; author_id: string; body: string; created_at: string }
 type People = Record<string, Pick<Profile, 'id' | 'display_name' | 'portrait_path' | 'role'>>;
 
@@ -61,7 +61,7 @@ export function InboxList({ me }: { me: string }) {
     const { data } = await supabase.from('dm_threads').select('*').or(`a.eq.${me},b.eq.${me}`).order('last_at', { ascending: false });
     const rows = (Array.isArray(data) ? data : []) as Thread[];
     // Notices: a writer you follow published something. One line each; they can't be answered.
-    const { data: nt } = await supabase.from('inbox_notices').select('id, writer_id, piece_id, created_at, read_at').eq('member_id', me).order('created_at', { ascending: false });
+    const { data: nt } = await supabase.from('inbox_notices').select('id, writer_id, piece_id, created_at, read_at, kind').eq('member_id', me).order('created_at', { ascending: false });
     const ns = (Array.isArray(nt) ? nt : []) as Notice[];
     if (ns.length) {
       const { data: pc } = await supabase.from('pieces').select('id, title, medium').in('id', ns.map((n) => n.piece_id));
@@ -69,7 +69,7 @@ export function InboxList({ me }: { me: string }) {
       ns.forEach((n) => { const x = by.get(n.piece_id); n.title = x?.title; n.medium = x?.medium; });
     }
     setPeople(await loadPeople([...rows.map((t) => other(t, me)), ...ns.map((n) => n.writer_id)]));
-    setNotices(ns.filter((n) => n.title));
+    setNotices(ns.filter((n) => n.title !== undefined));
     setThreads(rows.filter((t) => t.last_from && t.last_at > cleared(t, me)));   // shows once someone has written, and not since cleared
     refreshInboxDot();
   }, [me]);
@@ -149,7 +149,7 @@ export function InboxList({ me }: { me: string }) {
                     <Initials name={w?.display_name || 'A member'} size={46} src={portraitUrl(w?.portrait_path)} />
                     <span className="ib-row-text">
                       <span className="ib-row-top"><span className="ib-row-name">{w?.display_name || 'A member'}</span><span className="lab mut ib-row-when">{ago(n.created_at)}</span></span>
-                      <span className="ib-row-last"><span className="lab ib-notice-k">{n.medium === 'photograph' ? 'New photograph' : 'New piece'}</span> {n.title}</span>
+                      <span className="ib-row-last"><span className="lab ib-notice-k">{n.kind === 'draft' ? 'A draft, for your notes' : n.kind === 'note' ? 'Notes on a draft' : n.medium === 'photograph' ? 'New photograph' : 'New piece'}</span> {n.title || 'Untitled'}</span>
                     </span>
                     {isNew && <span className="ib-row-dot" aria-label="New" />}
                   </a>

@@ -4,7 +4,7 @@ import { uniqueIds as useIds } from '../../lib/svgIds';
 //   /guild/members/?m=<id>     a member's page: portrait, craft, bio, links, collected work
 //   /guild/members/?p=<id>     reading one of their published pieces
 // What anyone can see is enforced by the database's rules; this only presents it.
-import { seenRole, viewAs, isEditorRole, roleLabel } from '../../lib/supabase';
+import { seenRole, viewAs, isEditorRole, roleLabel, roleClass } from '../../lib/supabase';
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
 import { WayPage, WayBadge } from './Way';
@@ -26,6 +26,7 @@ import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
+import { WorkshopNotes } from './Workshop';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -55,7 +56,7 @@ function Arch({ p, big = false }: { p: Pick<Profile, 'display_name' | 'portrait_
 
 // ---------------------------------------------------------------- the directory
 
-function Directory() {
+function Directory({ me }: { me?: string } = {}) {
   const [members, setMembers] = useState<(Profile & { count: number })[] | null>(null);
   const [q, setQ] = useState('');   // find a member by name or craft
   // Members a page: 25 on a computer (five full rows of five), 24 on a phone (six rows of four)
@@ -121,7 +122,7 @@ function Directory() {
           <p className="it mut g-room-sub">The latest conversations among the Guild.</p>
           <ForumLatest count={5} />
         </section>
-        {meId && <FollowingNew me={meId} />}
+        {(me || meId) && <FollowingNew me={me || meId} />}
       </div>
       {/* The rooms, as a row of windows */}
       <div className="g-room-side g-tiles">
@@ -191,7 +192,7 @@ function Directory() {
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft g-role">{roleLabel(m.role)}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
+                <span className="lab mut g-craft g-role"><span className={roleClass(m.role)}>{roleLabel(m.role)}</span><span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
                 <span className="lab mut g-craft g-count">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
@@ -283,7 +284,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <header className="m-hero">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{roleLabel(person.role)}</span>
+        <span className={`eb ${roleClass(person.role)}`}>{roleLabel(person.role)}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
@@ -349,7 +350,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
             <a className="m-act" href="/guild/desk/">My pieces</a></>}
             <a className="m-act" href="/guild/desk/#my-page">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-              Edit profile
+              Edit your vault
             </a>
             {fellow ? <a className="m-act" href={`/collection/?of=${person.id}`}>Public page</a>
               : work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
@@ -448,6 +449,7 @@ function Reading({ id }: { id: string }) {
   return (
     <div className="m-reading">
       <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>
+      {piece.status !== 'approved' && <p className="lab ws-banner">A draft · not published · private to the Workshop</p>}
       <article className="d-paper">
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
         <span className="eb">{pillarName(piece.pillar)} · {mediumName(piece.medium)}</span>
@@ -464,6 +466,7 @@ function Reading({ id }: { id: string }) {
         {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
         {piece.status === 'approved' && <ReadTools piece={piece} />}
       </article>
+      {piece.status !== 'approved' && <WorkshopNotes piece={piece} />}
     </div>
   );
 }
@@ -490,15 +493,15 @@ function FollowingNew({ me }: { me: string }) {
       setRows(list.map((r) => ({ ...r, who: who.get(r.author_id), img: r.image_path ? (r.image_path.startsWith('/') ? r.image_path : url.get(r.image_path)) : undefined })));
     })();
   }, [me]);
-  if (!rows) return null;
   return (
     <section className="g-room g-room-forum g-follow">
       <div className="g-room-head">
         <span className="eb">Writers you follow</span>
         {following > 0 && <Link className="lab g-room-go" to="/guild/members/?view=following">Following →</Link>}
       </div>
-      <p className="it mut g-room-sub">{following ? 'The newest work from the writers you keep up with.' : 'Their newest work, gathered in one place.'}</p>
-      {!following ? <p className="it g-follow-none">Open any writer’s page and tap Follow. <a href="#members" className="g-room-go">Meet the Guild ↓</a></p>
+      <p className="it mut g-room-sub">{!rows || following ? 'The newest work from the writers you keep up with.' : 'Their newest work, gathered in one place.'}</p>
+      {!rows ? <p className="lab mut fo-latest-wait">Gathering their work…</p>
+        : !following ? <p className="it g-follow-none">Open any writer’s page and tap Follow. <a href="#members" className="g-room-go">Meet the Guild ↓</a></p>
         : !rows.length ? <p className="it g-follow-none">Nothing new from them yet. It will appear here the moment it’s published.</p>
         : (
           <ol className="fo-latest">
@@ -507,7 +510,7 @@ function FollowingNew({ me }: { me: string }) {
               return (
                 <li key={r.id}>
                   <Link to={`/guild/members/?p=${r.id}`} className="fo-latest-row">
-                    <span className="fo-latest-img"><img src={r.img || portraitUrl(r.who?.portrait_path) || seatFor(name)} alt="" loading="lazy" /></span>
+                    <span className="fo-latest-img g-follow-arch"><img src={r.img || portraitUrl(r.who?.portrait_path) || seatFor(name)} alt="" loading="lazy" /></span>
                     <span className="fo-latest-text">
                       <span className="fo-latest-title">{r.title}</span>
                       <span className="lab mut">{mediumName(r.medium).split(' / ')[0]} · {name} · {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
@@ -622,7 +625,7 @@ export default function MembersApp() {
     : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
     : route.p ? <Reading id={route.p} />
     : route.m ? <MemberPage id={route.m} me={me} />
-    : <Directory />;
+    : <Directory me={me} />;
   // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a member’s page
   // or a piece, which have the screen to themselves).
   return route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;

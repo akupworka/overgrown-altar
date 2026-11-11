@@ -29,7 +29,8 @@ import { pageList, toListTop } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
-import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, type ViewAs } from '../../lib/supabase';
+import { ShareDraft, SharedWithYou, useMyShares } from './Workshop';
+import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, roleClass, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -245,7 +246,7 @@ function Desk({ session }: { session: Session }) {
   };
   const go = (t: Tab) => {
     if (tab === 'write' && t !== 'write' && leavingWrite(t)) return;
-    // "Profile" is your own page in the Guild (with Edit profile on it), not the form.
+    // "Vault" is your own page in the Guild (with Edit profile on it), not the form.
     if (t === 'profile') { guildGo(`/guild/members/?m=${uid}`); return; }
     if (t === 'write' && tab !== 'write') { setEditing(null); setNewMedium(null); history.pushState({ desk: 'write' }, '', '#write'); }
     // Keep the address in step with the room, so the members' bar lights the right one.
@@ -278,10 +279,10 @@ function Desk({ session }: { session: Session }) {
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
   const isFellow = seenRole(profile?.role) === 'fellow';   // the Fellowship: a collection, not pieces; no writing
-  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'Profile']] : [
+  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'Vault']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', mineQ.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
-    ['profile', 'Profile'],
+    ['profile', 'Vault'],
   ];
 
   if (!loaded) return <Loading />;
@@ -292,7 +293,7 @@ function Desk({ session }: { session: Session }) {
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? roleLabel(profile?.role) : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
+            <span className={`lab ${roleClass(isEditor ? profile?.role : isFellow ? 'fellow' : 'member')}`}>{isEditor ? roleLabel(profile?.role) : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
           </div>
         </div>
         {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
@@ -578,6 +579,8 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     onChanged(); onOpen(data as Piece);
   }
   const [deleting, setDeleting] = useState<{ piece: Piece; mode: 'take' | 'delete' } | null>(null);
+  const [sharing, setSharing] = useState<Piece | null>(null);   // the Workshop: a draft being shared for notes
+  const shares = useMyShares(profile?.id ?? '', sharing);
   function remove(p: Piece) { setDeleting({ piece: p, mode: 'delete' }); }
   async function restore(p: Piece) {
     const { error } = await supabase.rpc('restore_piece', { p_id: p.id });
@@ -616,11 +619,12 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
               {!openable && live && <a className="d-item-open" href={`/guild/members/?p=${p.id}`} aria-label={`Read: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
-                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
+                <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}{editable && shares.get(p.id) ? <span className="lab d-rev-tag ws-tag">In the Workshop · {shares.get(p.id)} {shares.get(p.id) === 1 ? 'reader' : 'readers'}</span> : null}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
                 {p.status === 'returned' && p.editor_note && <p className="d-note"><span className="lab">The editor’s note</span>{p.editor_note}</p>}
               </div>
               <MoreActions>
                 {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
+                {editable && <button type="button" className="d-act-item" onClick={() => setSharing(p)}>{shares.get(p.id) ? 'The Workshop: readers and notes' : 'Share for notes'}</button>}
                 {!openable && live && <a className="d-act-item" href={`/guild/members/?p=${p.id}`}>Read it</a>}
                 {live && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
@@ -635,6 +639,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
 
   return (
     <section className="d-section d-home">
+      {sharing && profile && <ShareDraft piece={sharing} me={profile.id} onClose={() => setSharing(null)} />}
       {deleting && <DeleteWarning piece={deleting.piece} pieces={pieces} profile={profile} tally={tally} take={deleting.mode === 'take'} onCancel={() => setDeleting(null)} onDelete={(reason) => reallyRemove(deleting.piece, reason)} />}
       <header className="d-home-head">
         <div className="d-home-hello">
@@ -733,6 +738,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
         {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
+      {profile?.id && <SharedWithYou me={profile.id} />}
       {profile?.id && <ReadingShelf me={profile.id} savedOnly />}   {/* new work from writers you follow lives on the Guild page */}
       {/* Phones: your standing (wide screens show it in the column beside) */}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
@@ -1506,6 +1512,7 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
           <button type="button" className="d-link d-danger" disabled={busy} onClick={() => { if (confirm('Discard these changes? The live piece stays as it is.')) applyChanges(false); }}>Discard the changes</button>
         </>)}
         {!rev && mode === 'read' && (<>
+          <span className="lab d-decide-what">{(piece as any).profiles?.display_name ?? 'A member'} · {shown.medium === 'photograph' ? 'photograph' : `${words(shown.body).toLocaleString()} words`}</span>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Publish this piece to the site?')) decide('approved'); }}>Approve &amp; publish</button>
           <button type="button" className="d-link" onClick={() => setMode('schedule')}>Schedule</button>
           <button type="button" className="d-link" onClick={() => setMode('return')}>Send back with a note</button>
@@ -1585,9 +1592,9 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
   return (
     <form className="d-section d-form-page" onSubmit={save}>
       <header className="d-page-head">
-        <span className="eb">Profile</span>
+        <span className="eb">Your vault</span>
         <h1 className="h1 d-hello">About the author</h1>
-        <p className="it mut d-sub">What members see on your page, beside your collected work. <a className="d-inline-link" href={`/guild/members/?m=${profile.id}`}>View my page</a></p>
+        <p className="it mut d-sub">What members see on your page, beside your collected work. <a className="d-inline-link" href={`/guild/members/?m=${profile.id}`}>View my vault</a></p>
       </header>
       <div className="d-portrait-row">
         <label className="d-portrait" title="Choose a portrait">
@@ -1620,7 +1627,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       <p className="it d-notice" role="status">{msg}</p>
       <div className="d-actions"><button className="btn d-btn" type="submit">Save my page</button></div>
       <div className="d-account">
-        <a className="d-link" href={`/guild/members/?m=${profile.id}`}>View my page</a>
+        <a className="d-link" href={`/guild/members/?m=${profile.id}`}>View my vault</a>
         <a className="d-link" href="/guild/members/">The Guild</a>
         <button type="button" className="d-link" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>Sign out</button>
       </div>
@@ -1715,8 +1722,16 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
       <a className="ss-me" href={`/guild/members/?m=${profile.id}`}>
         <span className="ss-arch"><img src={portraitUrl(profile.portrait_path) || seatFor(profile.display_name)} alt="" /></span>
         <span className="ss-name">{profile.display_name}</span>
-        <span className="lab ss-role">{fellow && !isEditorRole(profile.role) ? 'Of the Fellowship' : roleLabel(profile.role)}</span>
+        <span className={`lab ss-role ${roleClass(fellow && !isEditorRole(profile.role) ? 'fellow' : profile.role)}`}>{fellow && !isEditorRole(profile.role) ? 'Of the Fellowship' : roleLabel(profile.role)}</span>
       </a>
+      {!fellow && (
+        <div className="ss-make">
+          <a className="ss-write" href="/guild/desk/#write">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>Write</a>
+          <a className="ss-photo" href="/guild/desk/#photograph">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></svg>Photograph</a>
+        </div>
+      )}
       {fellow ? <WaySide member={profile.id} /> : <>
         <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
           <span className="ss-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(current ? deskCrest(current.level, 74) : '') }} />
@@ -1731,7 +1746,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
           <span className="lab ss-k">Your trophies <em>{earned.length} of {TROPHIES.length}</em></span>
           {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 44, tier)) }} />)}</span>
             : <span className="it mut ss-none">They gather as your work is published.</span>}
-          <a className="lab ss-link" href={`/guild/members/?m=${profile.id}#vault`}>Open your vault →</a>
+          <a className="lab ss-link ss-vault-btn" href={`/guild/members/?m=${profile.id}#vault`}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11z" /><path d="M12 13v4" /><circle cx="12" cy="12" r="1" /></svg>Open your vault</a>
         </div>
       </>}
     </div>

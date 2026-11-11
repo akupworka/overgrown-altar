@@ -45,6 +45,8 @@ export function viewAs(): ViewAs { try { const v = localStorage.getItem(VIEW_KEY
 /** The role the site should behave as: the editor's chosen view, or the real role for everyone else. */
 /** The Editor in Chief ('editor') and the staff editors ('staff') share the editor's tools. */
 export const isEditorRole = (role?: string | null) => role === 'editor' || role === 'staff';
+/** How that label is dressed: editors in gold, the Guild in bold silver, the Fellowship as it was. */
+export const roleClass = (role?: string | null) => (role === 'editor' || role === 'staff' ? 'rl rl-editor' : role === 'fellow' ? 'rl rl-fellow' : 'rl rl-guild');
 /** What a member is called beside their name. */
 export const roleLabel = (role?: string | null) => (role === 'editor' ? 'Editor in Chief' : role === 'staff' ? 'Editor' : role === 'fellow' ? 'Of the Fellowship' : 'Of the Guild');
 export function seenRole(role?: string | null) { const v = viewAs(); return isEditorRole(role) ? (v || 'editor') : role ?? null; }

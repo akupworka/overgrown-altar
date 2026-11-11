@@ -398,3 +398,38 @@ a.has-read-tile > .read-tick { position: absolute; top: 10px; right: 10px; z-ind
 
 /* Card descriptions anywhere: fill the width rather than balance into short lines */
 .he-card-sf, .dispatches .summary, .ex .it { text-wrap: pretty; }
+
+/* Role beside a name: the Guild in bold silver, editors in gold (the Fellowship keeps its quiet label) */
+.rl { font-weight: 700; }
+.rl.rl-guild { color: #D5D8DC !important; font-family: var(--sans); }
+.rl.rl-editor { color: var(--ember) !important; font-family: var(--sans); }
+.rl.rl-fellow { font-weight: 400; }
+.eb.rl { font-size: 11px; letter-spacing: .3em; }
+.pzx-more { display: block; margin-top: 10px; font-size: 9.5px; }
+
+/* The bell: notifications in the header, for everyone signed in */
+.bell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--bone); cursor: pointer; transition: color .25s, background-color .25s; }
+.bell[hidden] { display: none; }
+.bell:hover, .bell[aria-expanded='true'] { color: var(--ember); background: rgba(255, 227, 163, .08); }
+.bell-n { position: absolute; top: 2px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ember); color: #12160F; font-family: var(--sans); font-size: 9.5px; letter-spacing: 0; line-height: 1; }
+.bell-n[hidden] { display: none; }
+.bell-panel { position: absolute; z-index: 80; top: calc(100% + 8px); right: 56px; width: 400px; max-width: calc(100vw - 24px); max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 18px 8px 8px; border-radius: 16px; background: #0E110D; text-align: left; text-transform: none; letter-spacing: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .28), 0 24px 60px rgba(0, 0, 0, .6); }
+.bell-panel[hidden] { display: none; }
+.bell-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 12px 10px; }
+.bell-head .lab { font-size: 8.5px; }
+.bell-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.bell-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--bone); transition: background-color .2s; }
+.bell-row:hover { background: rgba(243, 236, 220, .05); }
+.bell-row.fresh { background: rgba(255, 227, 163, .06); }
+.bell-ic { flex: none; width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; color: var(--ember); background: #1C2018; box-shadow: 0 0 0 1px rgba(159, 148, 94, .5); }
+.bell-ic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bell-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.bell-line { font-family: var(--serif); font-size: 17px; line-height: 1.3; color: #E6DFD0; white-space: normal; text-wrap: pretty; }
+.bell-line b { font-weight: 500; color: var(--bone); }
+.bell-row.fresh .bell-line b { color: var(--ember); }
+.bell-when { font-size: 8.5px; color: #8C8679; }
+.bell-none { margin: 0; padding: 6px 12px 14px; font-size: 17px; color: #CFC8B8; white-space: normal; }
+@media (max-width: 760px) { .bell { width: 36px; height: 36px; } .bell-panel { right: 12px; left: 12px; width: auto; max-width: none; top: calc(100% + 6px); } }

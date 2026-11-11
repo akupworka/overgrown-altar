@@ -249,4 +249,11 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     .pt-stay { font-size: 18px; padding: 12px 20px; }
     .pt-item-b, .pt-item-n { font-size: 17px; }
   }
+  /* the count sits level with the words: same face, in a small roundel */
+  .pt-stay { line-height: 1; }
+  .pt-stay svg { display: block; flex: none; }
+  .pt-stay-n { font-family: var(--sans) !important; font-style: normal !important; font-size: 10px !important; letter-spacing: 0 !important; line-height: 1 !important; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box;
+    border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: rgba(98, 55, 45, .12); color: inherit; opacity: 1 !important; position: static !important; }
+  .pt-stay-n:empty { display: none; }
+  .pt-stay[aria-pressed='true'] .pt-stay-n { background: rgba(243, 236, 220, .18); }
 </style>

@@ -7,7 +7,7 @@
 import { WayBadge } from './Way';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { supabase, portraitUrl, roleLabel, type Profile } from '../../lib/supabase';
+import { supabase, portraitUrl, roleLabel, roleClass, type Profile } from '../../lib/supabase';
 import { pageList } from '../../lib/pager';
 import { Initials } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
@@ -549,7 +549,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
                   <span className="fo-who-name">{who?.display_name || 'A member'}</span>
                 </Link>
-                <span className="lab mut">{roleLabel(who?.role)}</span>
+                <span className={`lab ${roleClass(who?.role)}`}>{roleLabel(who?.role)}</span>
                 {who?.role === 'fellow' ? <WayBadge member={p.author_id} /> : <PrestigeBadge published={pieces[p.author_id] ?? 0} />}
               </div>
               <div className="fo-post-main">

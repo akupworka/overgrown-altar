@@ -12,7 +12,7 @@ const links = [
   { href: '/watchtower', label: 'The Watchtower' },
   { href: '/hearth', label: 'The Hearth' },
   { href: '/perimeter', label: 'The Perimeter' },
-  { href: '/gallery', label: 'The Gallery' },
+  { href: '/search', label: 'Explore' },
   { href: '/folios', label: 'Folios' },
   { href: '/about', label: 'About' },
 ];
@@ -42,14 +42,19 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <a href="/join/" class="join" data-guest aria-current={current.startsWith('/join') ? 'page' : undefined}>Join</a>
       <a href="/guild/desk" class="signin" data-guest aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>Sign in</a>
       <a href="/guild/members/" class="online" data-member data-online hidden aria-label="Members online now"><i aria-hidden="true"></i><b data-online-n>1</b><span class="online-w">online</span></a>
-      <a href="/guild/desk/" class="member" data-member aria-current={current.startsWith('/guild/desk') ? 'page' : undefined}>
-        <span class="member-av" aria-hidden="true"></span><span class="member-label">Profile</span>
+      <button type="button" class="bell" data-member data-bell hidden aria-label="Notifications" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2.2 2.2 0 0 0 4 0" /></svg>
+        <span class="bell-n" data-bell-n hidden></span>
+      </button>
+      <a href="/guild/desk/" class="member" data-member data-vault>
+        <span class="member-av" aria-hidden="true"></span><span class="member-label">Vault</span>
       </a>
       <a href="/menu" class="menu-link" aria-label="Menu">
         <span class="menu-word">Menu</span>
         <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
       </a>
     </div>
+    <div class="bell-panel" data-bell-panel hidden role="dialog" aria-label="Notifications"></div>
   </nav>
   {(
     <!-- The Guild's own rooms: for members, on every page of the site (the html data-member flag shows it). -->
@@ -102,7 +107,10 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     const tok = JSON.parse(localStorage.getItem('sb-zblgggifysohxqtgvgxs-auth-token') || 'null');
     const uid: string | undefined = tok?.user?.id;
     if (tok?.refresh_token && uid) {
+      // "Vault" in the header opens your own page: your portrait, your work, your trophies.
+      document.querySelectorAll<HTMLAnchorElement>('[data-vault]').forEach((a) => { a.href = `/guild/members/?m=${uid}`; });
       import('../lib/supabase').then(({ supabase }) => {
+        import('../lib/bell').then(({ initBell }) => initBell(supabase));
         const pill = document.querySelector<HTMLElement>('[data-online]');
         const n = document.querySelector<HTMLElement>('[data-online-n]');
         const room = supabase.channel('guild-online', { config: { presence: { key: uid } } });
@@ -139,7 +147,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       if (uid0) {
         const pill = document.querySelector<HTMLAnchorElement>('.member');
         const label = pill?.querySelector('.member-label');
-        if (pill && label) { label.textContent = 'Profile'; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', name ? `My profile, signed in as ${name}` : 'My profile'); pill.removeAttribute('aria-current'); }
+        if (pill && label) { label.textContent = 'Vault'; pill.href = `/guild/members/?m=${uid0}`; pill.setAttribute('aria-label', name ? `My vault, signed in as ${name}` : 'My profile'); pill.removeAttribute('aria-current'); }
       }
       // The editor seeing the site as someone else: a small reminder on every page, with the way back.
       const va = localStorage.getItem('oa_view_as');
@@ -375,6 +383,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
     .nav { grid-template-columns: auto 1fr; }
     .nav-links { display: none; }
   }
+  @media (min-width: 1321px) { .nav-right .icon-link { display: none; } }   /* Explore is in the row of rooms */
   /* Phones: monogram, Sign in, and the menu button. */
   @media (max-width: 760px) {
     .nav { height: 60px; padding: 0 14px 0 20px; }

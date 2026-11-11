@@ -1933,7 +1933,10 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   font: 500 10px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); background: none; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .28); transition: background .25s, color .25s; }
 .rt-btn:hover { box-shadow: inset 0 0 0 1px var(--oxblood); color: var(--oxblood); }
 .rt-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper, #E9E2D6); box-shadow: none; }
-.rt-n { font-family: var(--serif); font-size: 14px; letter-spacing: 0; opacity: .7; }
+.rt-n { font-family: var(--sans); font-size: 10px; letter-spacing: 0; line-height: 1; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: rgba(42, 32, 23, .1); }
+.rt-btn[aria-pressed='true'] .rt-n { background: rgba(243, 236, 220, .18); }
+.rt-btn { line-height: 1; }
+.rt-btn svg { display: block; flex: none; }
 .rt-go { margin-left: auto; color: var(--oxblood); font-size: 9.5px; }
 @media (max-width: 700px) { .rt-go { margin-left: 0; width: 100%; } }
 
@@ -1992,3 +1995,99 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
   .wy-path li:last-child:not(.here) .wy-st { align-self: flex-end; }
   .wy-path:has(li:nth-child(2).here) li:first-child .wy-st, .wy-path:has(li:nth-child(6).here) li:last-child .wy-st { visibility: hidden; }   /* neighbours would collide */
 }
+
+/* ---- The Workshop: a draft shared with up to two members for notes ---- */
+.ws-tag { color: var(--ember) !important; }
+.ws-k { color: var(--ember); font-size: 9.5px; }
+.ws-face { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; background: #1C2018; color: var(--ember);
+  font-family: var(--serif); box-shadow: 0 0 0 1px rgba(159, 148, 94, .55); }
+.ws-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ws-readers, .ws-people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ws-readers li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .25); }
+.ws-name { flex: 1; min-width: 0; font-family: var(--serif); font-size: 18px; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+.ws-x { position: relative; margin-left: 10px; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--sans); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: #A9A293; }
+.ws-x::after { content: ''; position: absolute; inset: -12px -8px; }
+.ws-x:hover { color: #E8A091; }
+.ws-find { max-width: none; margin: 0; }
+.ws-find input { font-size: 17px; }
+.ws-person { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 12px; min-height: 48px; border: 0; border-radius: 12px; background: none; cursor: pointer; transition: background-color .2s; }
+.ws-person:hover { background: rgba(243, 236, 220, .05); }
+.ws-invite { font-size: 9px; color: var(--ember); }
+.ws-full { margin: 0; font-size: 16px; }
+.ws-dl .dl-acts { align-items: center; }
+.ws-open { margin-right: auto; color: var(--ember); font-size: 9.5px; }
+.ws-panel { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .3); }
+.ws-banner { align-self: center; margin: 0 0 14px; padding: 8px 16px; border-radius: 999px; font-size: 9px; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .4); text-align: center; }
+.ws { width: 100%; max-width: 780px; margin: 22px auto 0; padding: 26px 28px; border-radius: 16px; text-align: left; display: flex; flex-direction: column; gap: 16px;
+  background: rgba(243, 236, 220, .03); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .28); }
+.ws-head { display: flex; flex-direction: column; gap: 8px; }
+.ws-sub { margin: 0; font-size: 17px; line-height: 1.45; color: #CFC8B8; }
+.ws-none { margin: 0; font-size: 17px; }
+.ws-notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.ws-note { display: flex; gap: 12px; align-items: flex-start; }
+.ws-note-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 12px 14px; border-radius: 4px 14px 14px 14px; background: rgba(243, 236, 220, .05); }
+.ws-note.writer .ws-note-main { background: rgba(255, 227, 163, .07); }
+.ws-note-who { font-size: 8.5px; color: #A9A293; }
+.ws-note-body { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--bone); white-space: pre-wrap; overflow-wrap: anywhere; }
+.ws-form { display: flex; flex-direction: column; gap: 10px; }
+.ws-form textarea { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 0; border-radius: 12px; resize: vertical; background: rgba(8, 10, 8, .55); color: var(--bone);
+  font-family: var(--serif); font-size: 18px; line-height: 1.45; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .16); }
+.ws-form textarea:focus { outline: none; box-shadow: inset 0 0 0 1px var(--ember); }
+.ws-form-row { display: flex; align-items: center; justify-content: flex-end; gap: 18px; }
+.ws-form-row .ws-x { margin: 0 auto 0 0; }
+.ws-send { min-height: 44px; padding: 0 22px; border: 0; border-radius: 999px; cursor: pointer; background: var(--bone); color: #12160F; font-family: var(--sans); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+.ws-send:disabled { opacity: .45; cursor: default; }
+@media (max-width: 700px) { .ws { padding: 20px 16px; border-radius: 14px; } .ws-note-body { font-size: 17px; } }
+
+/* The identity column: Write and Photograph, under your name, on every Guild page that shows the column.
+   Where the column shows, the bar's own Write / Photograph buttons step aside (one place for each thing). */
+.ss-make { display: flex; flex-direction: column; gap: 8px; }
+.ss-write, .ss-photo { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border-radius: 999px;
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; transition: background-color .25s, color .25s, box-shadow .25s; }
+.ss-write { background: var(--bone); color: #12160F; }
+.ss-write:hover { background: var(--ember); }
+.ss-photo { min-height: 42px; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .22); font-size: 9.5px; }
+.ss-photo:hover { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
+@media (min-width: 1101px) {
+  body:has(.guild-side:not([hidden]) :is(.ss-aside, .d-room:not(.writing) .d-side) .ss-make) :is(.inner-write, .inner-photo) { display: none !important; }
+}
+
+/* The Guild page's two panels hold their place while they load (no jump when the lists arrive) */
+@media (min-width: 861px) { .g-rooms > .g-room { min-height: 400px; } }
+
+/* The editor's decision bar: a compact pill at the foot of the piece (who and how long, then the four choices) */
+.d-decide-what { color: #A9A293; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; margin-right: 6px; }
+@media (min-width: 701px) {
+  .d-decide { width: fit-content; max-width: 100%; margin-inline: auto; gap: 8px; padding: 8px 8px 8px 22px; border-radius: 999px;
+    background: rgba(14, 17, 13, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .d-decide .btn { min-height: 42px; padding: 0 22px !important; border-radius: 999px; font-size: 10px; display: inline-flex; align-items: center; }
+  .d-decide .d-link { min-height: 42px; padding: 0 18px; border: 0 !important; border-radius: 999px; font-size: 9.5px; display: inline-flex; align-items: center;
+    box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .2); transition: box-shadow .25s, color .25s, background-color .25s; }
+  .d-decide .d-link:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
+  .d-decide .d-link.d-danger { color: #E6A99A; box-shadow: inset 0 0 0 1px rgba(230, 169, 154, .3); }
+  .d-decide .d-link.d-danger:hover { background: rgba(255, 59, 78, .1); box-shadow: inset 0 0 0 1px rgba(230, 169, 154, .7); }
+  /* writing a note or picking a date: the bar opens into a panel */
+  .d-decide:has(.d-decide-note) { width: 100%; padding: 18px 20px; border-radius: 16px; }
+}
+@media (max-width: 700px) { .d-decide-what { flex: 1 1 100%; text-align: center; margin: 0; } }
+
+/* Members: five to a row on computers */
+@media (min-width: 1101px) {
+  .g-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 44px 18px; }
+  .g-grid .g-arch { width: 132px; height: 172px; }
+  .g-grid .g-name { font-size: 22px; }
+}
+/* "Open your vault": a proper button */
+.ss-vault-btn { align-self: stretch !important; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 42px; border: 0 !important; border-radius: 999px; padding: 0 16px !important; color: var(--ember) !important;
+  font-size: 9.5px !important; letter-spacing: .2em; background: rgba(255, 227, 163, .05); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .4); transition: background-color .25s, box-shadow .25s; }
+.ss-vault-btn:hover { background: rgba(255, 227, 163, .12); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .75); }
+/* Writers you follow: its own look beside the Forum (arched pictures, italic titles, a quieter frame lit from above) */
+.g-follow { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14) !important;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(120, 140, 255, .08), transparent 60%), rgba(243, 236, 220, .03) !important; }
+.g-follow .fo-latest > li + li { border-top: 0; }
+.g-follow .fo-latest-row { padding: 9px 0 !important; gap: 16px; }
+.g-follow .g-follow-arch { width: 46px; height: 60px; border-radius: 999px 999px 0 0; box-shadow: 0 0 0 1px rgba(159, 148, 94, .7), 0 0 0 4px #0A0C0A, 0 0 0 5px rgba(159, 148, 94, .28); margin-left: 5px; }
+.g-follow .fo-latest-title { font-style: italic; font-size: 20px; }
+/* A photograph read inside the Guild (or in review): room between its title and the picture */
+.d-paper .h1 + .pp, .d-paper .d-paper-standfirst + .pp, .d-paper .eb + .pp { margin-top: 22px; }
+@media (max-width: 700px) { .d-paper .h1 + .pp, .d-paper .d-paper-standfirst + .pp { margin-top: 16px; } }

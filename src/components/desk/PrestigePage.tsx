@@ -174,7 +174,8 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
               <div className="pzv-card-badge"><span className="lab mut">The badge beside a name</span><PrestigeBadge published={sel.at} link={false} /></div>
               <div className="pzv-card-who">
                 <span className="lab mut">{who.length ? 'Who holds it' : 'No one holds it yet'}</span>
-                {who.length > 0 && <div>{who.slice(0, 12).map(face)}</div>}
+                {who.length > 0 && <div>{who.slice(0, 6).map(face)}</div>}
+                {who.length > 6 && <span className="lab mut pzx-more">and {who.length - 6} more</span>}
               </div>
             </div>
           </div>, document.body);

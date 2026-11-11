@@ -120,7 +120,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   const none = document.querySelector<HTMLElement>('.he-none');
   const pager = document.querySelector<HTMLElement>('.he-pager');
   let kind = 'all', page = 1;
-  const per = () => (innerWidth > 1000 ? 12 : PER_PAGE);   // two full rows on computers (6 or 4 across), 6 on phones
+  const per = () => (innerWidth > 1000 ? 12 : PER_PAGE);   // three full rows of four on computers, 6 on phones
   const draw = (scroll = false) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.show === kind)));
     const shown = cards.filter((c) => kind === 'all' || c.dataset.tag === kind);
@@ -195,6 +195,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   /* The work, as a gallery */
   .he-filters { margin-bottom: 30px; }
   #work { scroll-margin-top: 90px; }
+  #work > * { max-width: 1400px; margin-left: auto; margin-right: auto; }   /* on very wide screens the cards stay a readable size */
   .he-pager { margin-top: 56px; }
   .he-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px 32px; }
   .he-grid li { display: flex; flex-direction: column; gap: 10px; }
@@ -225,15 +226,11 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-cta { margin-top: 44px; display: flex; justify-content: center; gap: 14px; }
   .he-cta [hidden] { display: none; }
 
-  /* Computers: six across (four on smaller screens), with the type sized to match */
+  /* Computers: four across, three rows to a page */
   @media (min-width: 1001px) {
-    .he-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px 26px; }
-    .he-card-t { font-size: 22px; }
-    .he-card-sf { font-size: 15.5px; }
-  }
-  @media (min-width: 1401px) {
-    .he-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 44px 24px; }
-    .he-card-t { font-size: 20px; }
+    .he-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 48px 30px; }
+    .he-card-t { font-size: 24px; }
+    .he-card-sf { font-size: 16.5px; }
   }
   @media (max-width: 1000px) {
     .he-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
