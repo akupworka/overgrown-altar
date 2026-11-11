@@ -75,6 +75,7 @@ export function TrophyCase({ ctx: own, mine = false, name = '' }: { ctx: TrophyC
   const locked = all.filter((x) => !x.earned);
   const [open, setOpen] = useState<Standing | null>(null);
   const [showLocked, setShowLocked] = useState(false);
+  const [showAll, setShowAll] = useState(false);   // a full vault shows two rows beneath the shelf; the rest opens on "See all" 
   if (!earned.length && !mine) return null;
   const shelf = earned.slice(0, 3), rest = earned.slice(3);
   const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ t, n: earned.filter((x) => x.tier === t).length })).filter((x) => x.n);
@@ -92,7 +93,13 @@ export function TrophyCase({ ctx: own, mine = false, name = '' }: { ctx: TrophyC
         </header>
         {earned.length === 0 && <p className="it vault-empty">Your first published piece opens the vault.</p>}
         {shelf.length > 0 && <div className="vault-shelf">{shelf.map((s) => <Medal key={s.trophy.id} s={s} size={112} big onOpen={setOpen} />)}</div>}
-        {rest.length > 0 && <div className="tc-grid vault-rest">{rest.map((s) => <Medal key={s.trophy.id} s={s} onOpen={setOpen} />)}</div>}
+        {rest.length > 0 && <div className={`tc-grid vault-rest${showAll ? ' open' : ''}`}>{rest.map((s) => <Medal key={s.trophy.id} s={s} onOpen={setOpen} />)}</div>}
+        {rest.length > 10 && (
+          <button type="button" className={`vault-toggle vault-more${rest.length > 12 ? ' wide' : ''}${showAll ? ' open' : ''}`} aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+            <span className="vault-toggle-t">{showAll ? 'Show fewer' : 'See all'}</span>{!showAll && <span className="vault-toggle-n">{earned.length}</span>}
+            <svg className="vault-toggle-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+        )}
         {mine && locked.length > 0 && (
           <div className={`vault-locked${showLocked ? ' open' : ''}`}>
             <button type="button" className="vault-toggle" aria-expanded={showLocked} onClick={() => setShowLocked((v) => !v)}>

@@ -20,7 +20,7 @@ import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, tierLabel, t
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
 import { ForumMineLatest, useForumTally } from './Forum';
-import { COVERS, coverFor } from '../../lib/covers';
+import { COVERS, DEFAULT_COVER, chosenCover } from '../../lib/covers';
 import { ReadingShelf } from './Reading';
 import { Welcome } from './Welcome';
 import { FellowHome } from './Fellow';
@@ -1690,7 +1690,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
   const [f, setF] = useState({
     display_name: profile.display_name, craft: profile.craft, bio: profile.bio,
     website: profile.website ?? '', instagram: profile.instagram ?? '', listed: profile.listed ?? true,
-    portrait_path: profile.portrait_path, cover: coverFor(profile.cover, profile.id).key,
+    portrait_path: profile.portrait_path, cover: chosenCover(profile.cover)?.key ?? DEFAULT_COVER,
   });
   const [msg, setMsg] = useState('');
   // An editor's name can't be taken: say so as it is typed, and hold Save until the name changes (the database refuses it too).
@@ -1759,7 +1759,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
       </div>
       {portraitMsg && <p className="d-photo-msg" role="status">{portraitMsg}</p>}
       <fieldset className="d-covers">
-        <legend className="lab">The cover of your vault · choose one of ten</legend>
+        <legend className="lab">The background of your vault · choose one of ten</legend>
         <div className="d-covers-grid" role="radiogroup" aria-label="Cover">
           {COVERS.map((c) => (
             <button key={c.key} type="button" role="radio" aria-checked={f.cover === c.key} aria-label={c.name} title={c.name} className={`d-cover${f.cover === c.key ? ' on' : ''}`}
@@ -1768,7 +1768,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
             </button>
           ))}
         </div>
-        <span className="d-hint">{COVERS.find((c) => c.key === f.cover)?.name}. It sits across the top of your vault, behind your portrait.</span>
+        <span className="d-hint">{COVERS.find((c) => c.key === f.cover)?.name}. It fills the whole background behind the top of your vault.</span>
       </fieldset>
       <label className="d-lbl"><span className="lab">Your name, as readers will see it</span><input className="field" required maxLength={80} aria-invalid={taken || undefined} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} />
         {taken && <span className="d-taken" role="alert">Taken · that name belongs to one of the editors</span>}</label>

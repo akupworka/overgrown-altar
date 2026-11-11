@@ -25,7 +25,7 @@ import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
 import { initListen } from '../../lib/listen';
 import { ReadComfort } from './ReadComfort';
-import { coverFor } from '../../lib/covers';
+import { chosenCover } from '../../lib/covers';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
@@ -241,6 +241,15 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const [tab, setTab] = useState<'writing' | 'photos' | 'library' | null>(null);   // like a profile's posts and reels: writing, or photographs
   const [photoShown, setPhotoShown] = useState(12);
   const tally = useForumTally(id);   // their part in the forum, for its trophies
+  // The background of the whole page is the member's own choice (one of the house's ten photographs, lib/covers.ts):
+  // it takes the place of the Guild's usual backdrop while their vault is open, and gives it back on leaving.
+  useEffect(() => {
+    const c = chosenCover(person?.cover), wrap = document.querySelector<HTMLElement>('.desk-memory'), img = wrap?.querySelector('img');
+    if (!c || !wrap || !img) return;
+    const was = { src: img.getAttribute('src') ?? '', pos: img.style.objectPosition };
+    img.src = c.src; img.style.objectPosition = c.pos; wrap.classList.add('cover');
+    return () => { img.src = was.src; img.style.objectPosition = was.pos; wrap.classList.remove('cover'); };
+  }, [person?.id, person?.cover]);
   const [page, setPage] = useState(1);
   useEffect(() => {
     (async () => {
@@ -285,15 +294,12 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
   const turn = (n: number) => { setPage(n); toListTop('.m-work'); };
   const arrow = (d: 'l' | 'r') => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d={d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>;
-  // A cover across the top, the arch standing on its lower edge; beside it the name, craft, a few lines and the link pills;
-  // the page's buttons to the right (on a phone it all stacks, centred).
-  const cover = coverFor(person.cover, person.id);
+  // The arch, then beside it the name, craft, a few lines and the link pills; the page's buttons to the right
+  // (on a phone it all stacks, centred). The whole background behind it is the photograph the member chose.
   return (
     <div className="m-page">
       <header className="m-hero m-hero2">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
-        {/* The cover: one of the house's ten photographs, chosen by the member (lib/covers.ts) */}
-        <div className="m-cover" aria-hidden="true" style={{ backgroundImage: `url(${cover.src})`, backgroundPosition: cover.pos }} />
         <div className="m-id">
           <Arch p={person} big />
           <div className="m-id-text">

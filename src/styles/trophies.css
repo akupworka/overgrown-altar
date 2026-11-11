@@ -152,6 +152,15 @@
   background: rgba(255,227,163,.12); color: var(--ember); letter-spacing: 0; font-size: 10px; }
 .vault-toggle-chev { color: var(--ember); transition: transform .4s cubic-bezier(.16,1,.3,1); }
 .vault-locked.open .vault-toggle-chev { transform: rotate(180deg); }
+/* A full vault: two rows beneath the shelf, the rest behind "See all" (twelve on a computer, ten on a phone). */
+.vault-rest:not(.open) > .tr:nth-child(n+13) { display: none !important; }
+.vault-more { display: none; margin-top: 34px; }
+.vault-more.wide { display: inline-flex; }
+.vault-more.open .vault-toggle-chev { transform: rotate(180deg); }
+@media (max-width: 700px) {
+  .vault-rest:not(.open) > .tr:nth-child(n+11) { display: none !important; }
+  .vault-more { display: inline-flex; margin-top: 26px; }
+}
 .vault-locked .tc-grid { width: 100%; animation: trc-in .4s cubic-bezier(.16,1,.3,1); }
 
 /* Every trophy can be opened */

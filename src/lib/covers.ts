@@ -1,6 +1,6 @@
-// The covers a member can set at the head of their vault: ten of the house's own photographs, nothing uploaded.
-// Only the short name is kept on their profile (profiles.cover). Until they choose, each member is given one of the
-// ten by their id, so the Guild's pages do not all open with the same picture.
+// The backgrounds a member can set behind their vault: ten of the house's own photographs, nothing uploaded.
+// Only the short name is kept on their profile (profiles.cover). Until they choose, their vault keeps the house's own
+// dark vault, as every page of the Guild has.
 export interface Cover { key: string; name: string; src: string; pos: string }
 
 export const COVERS: Cover[] = [
@@ -16,6 +16,6 @@ export const COVERS: Cover[] = [
   { key: 'stone-cross', name: 'The stone cross', src: '/images/untangling-mental-strongholds-1200.jpg', pos: 'center 42%' },
 ];
 
-const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
-/** The cover to show: the one they chose, or (until they choose) the one their id falls on. */
-export const coverFor = (key?: string | null, id = ''): Cover => COVERS.find((c) => c.key === key) ?? COVERS[hash(id) % COVERS.length];
+export const DEFAULT_COVER = 'dark-vault';
+/** The background they chose, or null while they have not chosen (the page keeps the house's own). */
+export const chosenCover = (key?: string | null): Cover | null => COVERS.find((c) => c.key === key) ?? null;

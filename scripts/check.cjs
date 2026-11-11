@@ -13,6 +13,7 @@
 //   --sabbath         the signed-in editor is on sabbath (otherwise the other editor is)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
+//   --cover <name>    the pretend member has chosen this background for their vault (lib/covers.ts), e.g. labyrinth
 //   --then "<css>"    click this after --type has typed (e.g. Send, to see what the form answers)
 //   --scroll "<css>"  bring this into view before the screenshot (things that fade in as you reach them)
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
@@ -28,7 +29,7 @@ const os = require('os'), path = require('path'), fs = require('fs');
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
 const flag = (name) => args.includes('--' + name);
-const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll', '--then'];
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll', '--then', '--cover'];
 const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
 if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
 const who = opt('as', 'editor');
@@ -39,7 +40,7 @@ const PORT = 4321, BASE = `http://localhost:${PORT}`;
 const ME = '22222222-2222-2222-2222-222222222222';
 const t = (d) => `2026-11-0${d}T09:00:00Z`;
 const profiles = [
-  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : who === 'staff' ? 'staff' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, cover: opt('cover') || null, role: who === 'editor' ? 'editor' : who === 'staff' ? 'staff' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', library_public: true, website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'e9', display_name: 'Hester Vane', craft: 'Essays', bio: '', portrait_path: null, role: who === 'staff' ? 'editor' : 'staff', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'f1', display_name: 'Miriam Hale', craft: 'Poetry, old churches', bio: 'Reads slowly, keeps what stays.', portrait_path: null, role: 'fellow', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
