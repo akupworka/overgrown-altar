@@ -81,6 +81,8 @@ export default async (req: Request) => {
   ]);
   const to = who?.user?.email;
   if (!to) return new Response('no address', { status: 200 });
+  // Pretend members (the sample accounts) have no real address: mark the decision as told, and send nothing.
+  if (/@sample\.overgrownaltar\.com$/i.test(to)) { await db.from('pieces').update({ writer_notified: p.status }).eq('id', p.id); return new Response('sample member: nothing sent', { status: 200 }); }
   const first = (prof?.display_name ?? '').split(/\s+/)[0] || 'friend';
   const title = p.title || 'your piece';
   // Approved for a later date: the writer hears when it will go live.

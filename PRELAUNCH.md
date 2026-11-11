@@ -9,11 +9,13 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
       with an email service and a change to the sign-in email settings (ask the owner first; it touches auth).
 - [ ] **Backups.** The free Supabase plan keeps none. Move to Pro ($25 a month) before real members store real work.
       Pro also stops the project being paused after a quiet week.
-- [ ] **Take the sample data off.** 56 sample members (46 from before, and the 10 mock members of 11 Nov who wrote,
-      posted, tagged and messaged) and everything they made
+- [ ] **Take the sample data off.** 76 sample members (46 from before; 30 mock members of 11 Nov who wrote, posted,
+      tagged and messaged) and everything they made: about 100 published pieces, 24 forum threads and 170 replies,
+      messages, Workshop drafts, six pieces waiting, one pretend report
       (`delete from auth.users where raw_app_meta_data->>'sample' = 'true'`, after fixing forum threads' last authors as
       was done when half were removed), and the 25 mock pieces on the owner's own account
-      (`pieces.sanity_id like 'mock-desk-%'`). This also clears the test notifications and the sample Workshop draft.
+      (`pieces.sanity_id like 'mock-desk-%'`). This also clears the test notifications and the sample Workshop drafts.
+      Sample members never get email (their daily letters are off, and both email functions skip their addresses).
 - [ ] **Decide about the two extra Watchman profiles** ("Watchman (Guild)", "Watchman (Fellow)"): keep for testing or remove.
 - [ ] **Open the lock.** Set `SITE_PUBLIC=true` in Netlify's environment variables and redeploy. Then check the site is
       no longer hidden from search engines, and that the "Opening soon" door is no longer what visitors meet.
@@ -38,6 +40,14 @@ use still working:
 - [x] Decided: Fellowship readers starting forum threads and messaging Guild writers is intended.
 - [x] An editor's name shows "Taken" as it is typed (About the author, and the Fellowship join form), and Save waits.
 - [ ] Small: a writer can delete the first post of their own thread by going around the forum's buttons.
+- [x] Decided 11 Nov 2026: a writer changes a published piece only when the editor asks. Writers cannot send changes
+      on their own (the database refuses it, and the Desk does not offer it).
+- [ ] Decide: a reported conversation can be read by every editor, staff included, not only the Editor in Chief
+      (the report box tells the member "the Editor in Chief"). Limit it to whoever the report is assigned to, or
+      change the wording.
+- [ ] Small: a writer can leave a reflection on their own piece (they cannot mark it "stayed with me").
+- [ ] Supabase's own checks (11 Nov 2026): turn on "leaked password protection" in the sign-in settings (an auth
+      setting, so ask the owner first; it may need the paid plan). Speed checks found nothing that matters at this size.
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
 
 ## Should be done (capacity and cost)

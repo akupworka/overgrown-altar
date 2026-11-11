@@ -57,7 +57,7 @@ export default async () => {
   for (const p of people ?? []) {
     const me = p.id, pr: any = pref.get(me);
     if (pr && pr.email_digest === false) continue;
-    const to = email.get(me); if (!to) continue;
+    const to = email.get(me); if (!to || /@sample\.overgrownaltar\.com$/i.test(to)) continue;   // pretend members have no real address: never write to them
     const since = pr?.last_digest_at && pr.last_digest_at > floor ? pr.last_digest_at : new Date(now.getTime() - 24 * 3600e3).toISOString();
     const items: string[] = [];
 
