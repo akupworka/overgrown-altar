@@ -1,7 +1,7 @@
 import { uniqueIds as useIds } from '../../lib/svgIds';
 // The Vault for the members' area (same look as components/TrophyCase.astro).
 // On your own page it adds a fold-out of the trophies still to earn.
-import { TROPHIES, TIER_AT, TROPHY_GROUPS, groupOf, trophiesFor, finestFirst, trophySvg, TIER_LABEL, tierLabel, unitFor, num, numShort, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
+import { TROPHIES, TIER_AT, TROPHY_GROUPS, groupOf, trophiesFor, finestFirst, trophySvg, showcaseCtx, TIER_LABEL, tierLabel, unitFor, num, numShort, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import '../../styles/trophies.css';
@@ -60,7 +60,16 @@ export function TrophyCard({ s, onClose }: { s: Standing; onClose: () => void })
     </div>, document.body);
 }
 
-export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; mine?: boolean; name?: string }) {
+/** For the Editor in Chief alone: a switch that shows the trophies as they look with every one of them won. Nothing is saved. */
+export function PreviewSwitch({ on, set }: { on: boolean; set: (v: boolean) => void }) {
+  return <button type="button" className={`tr-preview${on ? ' on' : ''}`} aria-pressed={on} onClick={() => set(!on)}>
+    <i aria-hidden="true" />{on ? 'Showing everything won · back to your own' : 'Preview: everything won'}</button>;
+}
+
+export function TrophyCase({ ctx: own, mine = false, name = '' }: { ctx: TrophyCtx; mine?: boolean; name?: string }) {
+  const chief = mine && own.member.role === 'editor';
+  const [preview, setPreview] = useState(false);
+  const ctx = useMemo(() => (preview ? showcaseCtx(own.member) : own), [preview, own]);
   const all = trophiesFor(ctx);
   const earned = finestFirst(all.filter((x) => x.earned));
   const locked = all.filter((x) => !x.earned);
@@ -79,6 +88,7 @@ export function TrophyCase({ ctx, mine = false, name = '' }: { ctx: TrophyCtx; m
             {tally.map(({ t, n }) => <span key={t} className="vault-chip" data-tier={t}><i />{n} {TIER_LABEL[t].toLowerCase()}</span>)}
             <span className="vault-chip vault-of">{earned.length} of {TROPHIES.length}</span>
           </div>
+          {chief && <PreviewSwitch on={preview} set={setPreview} />}
         </header>
         {earned.length === 0 && <p className="it vault-empty">Your first published piece opens the vault.</p>}
         {shelf.length > 0 && <div className="vault-shelf">{shelf.map((s) => <Medal key={s.trophy.id} s={s} size={112} big onOpen={setOpen} />)}</div>}

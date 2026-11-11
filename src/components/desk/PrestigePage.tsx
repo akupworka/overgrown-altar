@@ -7,11 +7,11 @@ import { uniqueIds as useIds } from '../../lib/svgIds';
 // Used at /guild/members/?view=prestige (MembersApp). Open to visitors as well as members.
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { TROPHIES, trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
+import { TROPHIES, trophiesFor, finestFirst, trophySvg, showcaseCtx, type TrophyCtx } from '../../lib/trophies';
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { PRESTIGES, prestigeFor, type Prestige } from '../../lib/prestige';
 import { Initials } from './DeskApp';
-import { TrophyCatalogue } from './Trophies';
+import { TrophyCatalogue, PreviewSwitch } from './Trophies';
 import { useForumTally } from './Forum';
 import type { Piece } from '../../lib/supabase';
 import { PrestigeBadge } from './Prestige';
@@ -53,7 +53,13 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
       setPeople((Array.isArray(ps) ? (ps as Profile[]) : []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 })));
     })();
   }, []);
-  const mine = people?.find((p) => p.id === me)?.count ?? 0;
+  // The Editor in Chief can look at everything as it would be with every trophy won and the highest rank held. Nothing is saved.
+  const [preview, setPreview] = useState(false);
+  const self = people?.find((p) => p.id === me);
+  const chief = self?.role === 'editor';
+  const show = useMemo(() => (preview ? showcaseCtx(self ?? {}) : null), [preview, self]);
+  const myCtx: TrophyCtx = show ?? { pieces: myWork, member: self ?? {}, forum: tally };
+  const mine = show ? show.pieces.length : self?.count ?? 0;
   const { current, next, toNext } = prestigeFor(mine);
   const from = current?.at ?? 0;
   const pct = next ? Math.max(0.04, (mine - from) / (next.at - from)) : 1;
@@ -79,6 +85,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
           {link('/guild/members/?view=prestige', `pzx-sw-b${section === 'prestige' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</>)}
           {link('/guild/members/?view=trophies', `pzx-sw-b${section === 'trophies' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Trophies</>)}
         </nav>
+        {chief && <PreviewSwitch on={preview} set={setPreview} />}
       </header>
       {section === 'prestige' && <>
       {/* Where you stand: your crest in a window of your rank's own glass */}
@@ -143,7 +150,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
 
       {/* Beside the ranks: your trophies */}
       {me && (() => {
-        const st = trophiesFor({ pieces: myWork, member: people.find((x) => x.id === me) ?? {}, forum: tally });
+        const st = trophiesFor(myCtx);
         const won = finestFirst(st.filter((x) => x.earned));
         return (
           <section className="pzv-tro">
@@ -188,7 +195,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
           <button type="button" role="tab" aria-selected={trophies === 'growing'} onClick={() => setTrophies('growing')}>Trophies that grow</button>
           <button type="button" role="tab" aria-selected={trophies === 'once'} onClick={() => setTrophies('once')}>Won once</button>
         </div>
-        <div className="pz-cat"><TrophyCatalogue only={trophies} ctx={me ? { pieces: myWork, member: people.find((p) => p.id === me) ?? {}, forum: tally } : undefined} /></div>
+        <div className="pz-cat"><TrophyCatalogue only={trophies} ctx={me ? myCtx : undefined} /></div>
       </section>)}
     </div>
   );

@@ -244,10 +244,38 @@ export const TROPHY_GROUPS: { name: string; ids: string[] }[] = [
 ];
 export const groupOf = (t: Trophy) => TROPHY_GROUPS.find((g) => g.ids.includes(t.id))?.name ?? TROPHY_GROUPS[TROPHY_GROUPS.length - 1].name;
 
+/** A member who has won everything, for the Editor in Chief's preview ("everything won"): nothing is saved anywhere,
+ *  it is only a made-up record handed to the same code that works out everyone's trophies. */
+export function showcaseCtx(member: TrophyMember = {}): TrophyCtx {
+  const body = (n: number) => Array(n).fill('word').join(' ');
+  const pieces: TrophyPiece[] = [];
+  const add = (n: number, pillar: string, medium: string, words: number, extra: (i: number) => Partial<TrophyPiece> = () => ({})) => {
+    const b = body(words); for (let i = 0; i < n; i++) pieces.push({ pillar, medium, body: b, published_at: null, ...extra(i) }); };
+  add(150, 'hearth', 'poetry', 80);
+  add(24, 'watchtower', 'essay', 4000);
+  pieces.push({ pillar: 'watchtower', medium: 'essay', published_at: null, body: `## A heading\n> A line set apart\n+ In the beginning was the Word\n*italic* and **bold** ${body(4000)}` });
+  add(20, 'perimeter', 'testimony', 700); add(10, 'perimeter', 'recovery', 700); add(10, 'perimeter', 'personal', 700);
+  add(25, 'hearth', 'fiction', 2500); add(30, 'hearth', 'prose', 300);
+  const notes = { camera: 'Leica M6', lens: '35mm f/2', settings: 'f/2.8', place: 'Ely', taken: '2026' };
+  add(15, 'hearth', 'photograph', 120, (i) => ({ photo_meta: { format: 'film', film: 'HP5', ...notes }, gallery: i === 0 ? [1, 2, 3, 4] : [] }));
+  add(14, 'hearth', 'photograph', 120, () => ({ photo_meta: { format: 'digital', ...notes } }));
+  add(1, 'hearth', 'photograph', 1000, () => ({ photo_meta: { format: 'digital', ...notes } }));
+  // spread over the last thirty months, every month, so the flame is unbroken
+  const now = new Date();
+  pieces.forEach((p, i) => { const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1 - (i % 30), 10)); p.published_at = d.toISOString(); });
+  const joined = new Date(Date.UTC(now.getUTCFullYear() - 6, now.getUTCMonth(), 1)).toISOString();
+  return {
+    pieces,
+    member: { ...member, portrait: member.portrait || 'set', bio: member.bio || 'set', craft: member.craft || 'set', role: 'editor', created_at: joined },
+    forum: { posts: 400, threads: 40, best_thread: 12, prayer: 25, boards: ['a', 'b', 'c', 'd', 'e', 'f'], reflections_out: 150, stayed_out: 400, notes_out: 40, kept: 200, following: 12, reflections_in: 30, stayed_in: 120, answers: 9, shared: 4 },
+  };
+}
+
 const RANK: Record<Tier, number> = { rainbow: 4, gold: 3, silver: 2, bronze: 1 };
-/** Earned trophies, finest first: by metal, then by how far a growing trophy has gone. */
-export function finestFirst<T extends { tier: Tier; n: number }>(list: T[]) {
-  return [...list].sort((a, b) => RANK[b.tier] - RANK[a.tier] || b.n - a.n);
+/** Earned trophies, finest first: by metal, then the one-of-a-kind rarest before the rest, then by how far a growing trophy has gone. */
+export function finestFirst<T extends { tier: Tier; n: number; trophy?: Trophy }>(list: T[]) {
+  const rare = (x: T) => (x.trophy && RARE[x.trophy.id] ? 1 : 0);
+  return [...list].sort((a, b) => RANK[b.tier] - RANK[a.tier] || rare(b) - rare(a) || b.n - a.n);
 }
 /** "1 year at the table", "3 years at the table": the unit, made singular for one. */
 const ONE: Record<string, string> = {

@@ -84,6 +84,13 @@
 .vault-chip[data-tier='gold'] i { background: linear-gradient(135deg, #FFF0B8, #B58718); box-shadow: 0 0 6px rgba(231,195,90,.6); }
 .vault-chip[data-tier='rainbow'] i { background: conic-gradient(#3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0, #3E7BFF); box-shadow: 0 0 6px rgba(176,91,255,.6); }
 .vault-of { color: var(--ember); }
+/* The Editor in Chief's preview switch ("everything won") */
+.tr-preview { margin-top: 6px; display: inline-flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  background: none; border: 1px dashed rgba(255, 227, 163, .4); color: var(--ember); font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; transition: background .3s, border-color .3s; }
+.tr-preview i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 227, 163, .35); }
+.tr-preview:hover { background: rgba(255, 227, 163, .08); }
+.tr-preview.on { border-style: solid; border-color: var(--ember); background: rgba(255, 227, 163, .1); }
+.tr-preview.on i { background: var(--ember); }
 .vault-empty { margin: 40px 0 0; font-size: 19px; color: var(--muted-dark); }
 
 /* The shelf: their three finest, lit from above */
