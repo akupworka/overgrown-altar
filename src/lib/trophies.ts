@@ -189,7 +189,7 @@ export const TROPHIES: Trophy[] = [
   { id: 'workbench', name: 'The Workbench', tier: 'bronze', glyph: G.anvil, unit: 'workshop notes', note: 'For notes left on other members’ drafts in the Workshop.', ...grow('notes_out', 1, 5, 15, 40) },
   { id: 'readers-chair', name: 'The Reader’s Chair', tier: 'bronze', glyph: G.book, unit: 'pieces kept', note: 'For pieces and photographs saved or set on your shelves.', ...grow('kept', 5, 25, 75, 200) },
   // Time: they grow too, by themselves
-  { id: 'years', name: 'Years at the Table', tier: 'bronze', glyph: G.table, unit: 'years at the table', note: 'For each year kept with the Guild since taking a seat.', at: { bronze: 1, silver: 2, gold: 3, rainbow: 5 }, count: yearsAt, earned: (c) => yearsAt(c) >= 1 },
+  { id: 'years', name: 'Years at the Table', tier: 'bronze', glyph: G.table, unit: 'years at the table', note: 'For each year kept with the Guild after the first.', at: { bronze: 2, silver: 3, gold: 4, rainbow: 5 }, count: yearsAt, earned: (c) => yearsAt(c) >= 2 },
   { id: 'unbroken', name: 'The Unbroken Flame', tier: 'bronze', glyph: G.ring, unit: 'months in a row', note: 'For publishing every month without a break: the longest run counts.', at: { bronze: 3, silver: 6, gold: 12, rainbow: 24 }, count: longestStreak, earned: (c) => longestStreak(c) >= 3 },
   // Won once
   { id: 'first-light', name: 'First Light', tier: 'bronze', glyph: G.candle, note: 'Published a first piece.', earned: (c) => c.pieces.length >= 1 },
@@ -220,18 +220,18 @@ export const TROPHIES: Trophy[] = [
   { id: 'iron', name: 'Iron Sharpens Iron', tier: 'bronze', glyph: G.blades, note: 'Brought a draft to the Workshop for another member’s notes.', earned: (c) => gv(c, 'shared') >= 1 },
   { id: 'light-left-on', name: 'A Light Left On', tier: 'gold', glyph: G.lantern, note: 'Twenty-five times, a reader said their work stayed with them.', earned: (c) => gv(c, 'stayed_in') >= 25 },
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s first three months.', earned: isFounder },
-  { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its Editor in Chief.', earned: (c) => c.member.role === 'editor' },
+  { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as one of its editors.', earned: (c) => ['editor', 'staff'].includes(c.member.role ?? '') },
   { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every trophy for a kind of published work raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.craft).every((t) => t.count!(c) >= t.at!.gold) },
   { id: 'encouragement', name: 'Son of Encouragement', tier: 'rainbow', glyph: G.shield, note: 'The Good Word, The Amen and The Workbench all raised to gold.', earned: (c) => ['good-word', 'amen', 'workbench'].every((id) => { const t = TROPHIES.find((x) => x.id === id)!; return t.count!(c) >= t.at!.gold; }) },
   // The rarest: years of work, or all of it
-  { id: 'lion', name: 'Bold as a Lion', tier: 'rainbow', glyph: G.shield, note: 'Forty dispatches published in The Watchtower.', earned: (c) => count(c, isSignal) >= 40 },
+  { id: 'lion', name: 'Bold as a Lion', tier: 'rainbow', glyph: G.shield, note: 'Fifteen dispatches published in The Watchtower.', earned: (c) => count(c, isSignal) >= 15 },
   { id: 'crown', name: 'The Hearth Crown', tier: 'rainbow', glyph: G.flame, note: 'Forty pieces of prose, poetry and fiction published in The Hearth.', earned: (c) => count(c, (p) => p.pillar === 'hearth' && !isPhoto(p)) >= 40 },
   { id: 'serpent', name: 'The Serpent Underfoot', tier: 'rainbow', glyph: G.shield, note: 'Forty pieces published in The Perimeter: the serpent slain.', earned: (c) => count(c, (p) => p.pillar === 'perimeter') >= 40 },
   { id: 'hundredfold', name: 'The Hundredfold', tier: 'rainbow', glyph: G.wheat, note: 'A hundred pieces published: seed that fell on good ground.', earned: (c) => c.pieces.length >= 100 },
   { id: 'psalter', name: 'The Psalter', tier: 'rainbow', glyph: G.psalter, note: 'A hundred and fifty poems published: a psalter of their own.', earned: (c) => count(c, isLyre) >= 150 },
   { id: 'three-windows', name: 'Three Windows', tier: 'rainbow', glyph: G.roses, note: 'Three of the growing trophies raised all the way to rainbow glass.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && t.count(c) >= t.at.rainbow).length >= 3 },
-  { id: 'decade', name: 'A Decade at the Table', tier: 'rainbow', glyph: G.ten, note: 'Ten years kept with the Guild.', earned: (c) => yearsAt(c) >= 10 },
-  { id: 'cathedral', name: 'The Cathedral', tier: 'rainbow', glyph: G.tower, note: 'Every other trophy won, the Founding Stone, the Keys and the Decade aside.', earned: (c) => TROPHIES.filter((t) => !['cathedral', 'founder', 'keys', 'decade'].includes(t.id)).every((t) => t.earned(c)) },
+  { id: 'year', name: 'A Year at the Table', tier: 'rainbow', glyph: G.ten, note: 'Twelve months kept with the Guild.', earned: (c) => yearsAt(c) >= 1 },
+  { id: 'cathedral', name: 'The Cathedral', tier: 'rainbow', glyph: G.tower, note: 'Every other trophy won, the Founding Stone and the Keys aside.', earned: (c) => TROPHIES.filter((t) => !['cathedral', 'founder', 'keys'].includes(t.id)).every((t) => t.earned(c)) },
 ];
 
 /** The catalogue's shelves: every trophy sits on one (anything not named falls to the last). */
@@ -240,7 +240,7 @@ export const TROPHY_GROUPS: { name: string; ids: string[] }[] = [
   { name: 'Photography', ids: ['stained-glass', 'darkroom', 'daylight-lens', 'let-it-speak', 'field-notes', 'contact-sheet', 'thousand-words', 'grain-and-pixel'] },
   { name: 'The company kept', ids: ['common-table', 'open-door', 'good-word', 'amen', 'workbench', 'readers-chair', 'sitter', 'signed', 'first-word', 'company', 'letter', 'writer-answers', 'iron', 'kindled', 'every-room', 'burden-bearer', 'light-left-on'] },
   { name: 'Faithfulness', ids: ['years', 'unbroken'] },
-  { name: 'The rarest', ids: ['founder', 'keys', 'living-stones', 'encouragement', 'lion', 'crown', 'serpent', 'three-windows', 'hundredfold', 'psalter', 'decade', 'cathedral'] },
+  { name: 'The rarest', ids: ['founder', 'keys', 'living-stones', 'encouragement', 'lion', 'crown', 'serpent', 'three-windows', 'hundredfold', 'psalter', 'year', 'cathedral'] },
 ];
 export const groupOf = (t: Trophy) => TROPHY_GROUPS.find((g) => g.ids.includes(t.id))?.name ?? TROPHY_GROUPS[TROPHY_GROUPS.length - 1].name;
 
@@ -345,7 +345,7 @@ function laurel() {   // two sprays of leaves, rising from the base around the e
 //   Three Windows         a triptych: three lancets side by side
 //   The Hundredfold       a mandorla of harvest glass, an ear of wheat standing in it
 //   The Psalter           an open book whose pages are glass
-//   A Decade at the Table a ten-pointed star, a pane for every year, turning round the numeral X
+//   A Year at the Table   a chalice of gold set with glass, twelve lights in an arc over it, one for every month
 //   The Cathedral         the west front itself: two spires, a lit door, the rose window turning
 type RareCtx = { k: string; dk: string; lt: string; md: string; glass: string[]; locked: boolean; still: boolean };
 const LEAD = '#101210', NIGHT = '#0A0C0A';
@@ -539,14 +539,29 @@ const RARE: Record<string, (c: RareCtx) => string> = {
       + `<path d="M38.4 64V76.5l1.6-2.1 1.6 2.1V64Z" fill="${g[5]}" stroke="${c.dk}" stroke-width=".45" stroke-linejoin="round"/>`
       + line(c, 'M24 29.5v10M20.6 33h6.8', 1.3) + line(c, 'M16 46.5h16M16 51h16M49 31.5h15M49 36h15M49 40.5h15M49 46.5h15M49 51h10', 0.75, ' stroke-opacity=".85"');
   },
-  decade: (c) => {
-    const star = pts(20, (i) => (i % 2 ? 24.6 : 38.6)), inner = pts(20, (i) => (i % 2 ? 21.8 : 34.2));
-    const panes = Array.from({ length: 10 }, (_, i) => { const a = i * 36;
-      return poly(c, [polar(12, a - 18), polar(21.4, a - 18), polar(33.4, a), polar(21.4, a + 18), polar(12, a + 18)].map((q) => q.map(f).join(',')).join(' '), c.glass[i % 2 ? 2 : 0]); }).join('');
-    return turning(c, `<polygon points="${star}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/><polygon points="${inner}" fill="${LEAD}"/>${panes}`)
-      + `<polygon points="${star}" fill="none" stroke="url(#s-${c.k})" stroke-width=".8" stroke-linejoin="round"/>`
-      + `<circle cx="40" cy="40" r="12.2" fill="${NIGHT}" stroke="url(#m-${c.k})" stroke-width="1.5"/><circle cx="40" cy="40" r="9.9" fill="none" stroke="${c.md}" stroke-opacity=".6" stroke-width=".4"/>`
-      + line(c, 'M35.6 34.2l8.8 11.6M44.4 34.2l-8.8 11.6M33.6 34.2h4M42.4 34.2h4M33.6 45.8h4M42.4 45.8h4', 1.5, ` filter="url(#glow-${c.k})"`);
+  year: (c) => {
+    const g = c.glass;
+    // Twelve lights in an arc over the cup, one for each month: lozenges of glass in gold settings, the middle ones a little larger.
+    const years = Array.from({ length: 12 }, (_, i) => { const a = -66 + i * 12, r = 29, x = 40 + r * Math.sin((a * Math.PI) / 180), y = 39 - r * Math.cos((a * Math.PI) / 180), k = 1 - Math.abs(i - 5.5) * 0.045, w = 1.9 * k, h = 3.1 * k;
+      const d = `M0 ${f(-h)}L${f(w)} 0L0 ${f(h)}L${f(-w)} 0Z`, set = `M0 ${f(-h - 0.9)}L${f(w + 0.8)} 0L0 ${f(h + 0.9)}L${f(-w - 0.8)} 0Z`;
+      return `<g transform="translate(${f(x)} ${f(y)}) rotate(${a})"><path d="${set}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".35" stroke-linejoin="round"/><path d="${d}" fill="${i % 2 ? g[0] : g[5]}"/><path d="${d}" fill="url(#gl-${c.k})" stroke="${LEAD}" stroke-width=".5" stroke-linejoin="round"/></g>`; }).join('');
+    const arch = (x: number, top: number, col: string) => pane(c, `M${x - 2.1} 44V${top + 2.1}a2.1 2.1 0 0 1 4.2 0V44Z`, col);
+    const gem = (x: number, y: number, r: number, col: string) => `<circle cx="${x}" cy="${y}" r="${f(r + 0.8)}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".35"/><circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#gl-${c.k})"/>`;
+    return years
+      // the cup
+      + gold(c, 'M21.5 30C21.5 44.5 30 51.5 37.4 52.6H42.6C50 51.5 58.5 44.5 58.5 30Z')
+      + shadow('M40 30H58.5C58.5 44.5 50 51.5 42.6 52.6H40Z', 0.14)
+      + arch(34, 35.2, g[0]) + arch(40, 34.4, g[5]) + arch(46, 35.2, g[0]) + gem(28.2, 38.2, 1.5, g[9]) + gem(51.8, 38.2, 1.5, g[9])
+      + engrave(c, 'M22.6 33.2C28 35.4 52 35.4 57.4 33.2M27.4 45.6C32 47.4 48 47.4 52.6 45.6', 0.4, 0.55)
+      + `<ellipse cx="40" cy="30" rx="18.5" ry="3.5" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/>`
+      + `<ellipse cx="40" cy="30.2" rx="16.2" ry="2.5" fill="${g[5]}"/><ellipse cx="40" cy="30.2" rx="16.2" ry="2.5" fill="url(#gl-${c.k})" stroke="${LEAD}" stroke-width=".5"/>`
+      + `<ellipse cx="40" cy="30" rx="18.5" ry="3.5" fill="none" stroke="url(#s-${c.k})" stroke-width=".7"/>`
+      // the stem, its knop, the foot
+      + gold(c, 'M37.6 52.4H42.4L41.5 57.6H38.5Z')
+      + `<ellipse cx="40" cy="60" rx="6.2" ry="3.3" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/>` + gem(40, 60, 1.5, g[5]) + engrave(c, 'M35.4 58.4v3.2M44.6 58.4v3.2', 0.4, 0.5)
+      + gold(c, 'M38.4 62.6H41.6L43 67.6C46.4 70.6 53.2 71.8 56 74.8H24C26.8 71.8 33.6 70.6 37 67.6Z')
+      + engrave(c, 'M40 63V74.4M34 70.4L30.4 74.4M46 70.4L49.6 74.4', 0.4, 0.5)
+      + gold(c, 'M21.5 74.6H58.5V78H21.5Z');
   },
   cathedral: (c) => {
     const g = c.glass, rose = Array.from({ length: 8 }, (_, i) => pane(c, sector(2.8, 8.4, i * 45 + 1.5, (i + 1) * 45 - 1.5), i % 2 ? g[5] : g[0])).join('');
