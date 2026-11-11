@@ -20,8 +20,6 @@ The website for overgrownaltar.com, built with [Astro](https://astro.build).
 
 ## Roadmap
 
-1. Public pages — done: all 17 pages from the design, plus a thank-you page
-2. Sanity Studio at /studio for writing and publishing articles
-3. Guild accounts: invitations, sign-in, the Guild Desk
-4. Comments, saved pieces, member pages
-5. Go live on Netlify
+1. Public pages: done
+2. Guild accounts, the Desk, the forum, the inbox and the Fellowship: done (Supabase; see `HANDOFF.md`)
+3. Go live: walk through `PRELAUNCH.md`

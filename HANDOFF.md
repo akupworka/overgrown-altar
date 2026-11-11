@@ -11,8 +11,8 @@ Start by reading this file, then `README.md`.
 - **The whole site is password-locked** while it is finished: `netlify/edge-functions/site-gate.ts`.
   Password lives in the Netlify env var `PRIVATE_PAGE_PASSWORD`. `SITE_PUBLIC=true` opens the site.
   `public/robots.txt` disallows everything until launch; switch it to `Allow: /` when the site opens.
-- **Sanity**: project `4agnfn5q`, dataset `production`. The **Studio is live at `/studio`**
-  (registered, CORS done; the owner signs in with their Sanity account).
+- **Sanity** is gone (removed 11 Nov 2026): the Studio at `/studio`, its packages and schemas. Everything is in Supabase.
+  (`pieces.sanity_id` remains only as a label on imported and sample rows.)
 - Design system in code: `src/styles/global.css` (tokens, type), `src/styles/motion.css`,
   components `GlassCard`, `GlassLight` (stained light), `Avatar`, `DispatchList`, `SiteNav` (fixed header).
   Brand rules: colour enters only through glass; never glow or colour the marks; quiet, editorial.
@@ -59,7 +59,7 @@ site everywhere but remembered. Nothing was deleted:
 
 NOTE (latest): Guild writing and publishing now live in **Supabase**, not Sanity. The `sanity` branch was
 last merged before Guild Desk part 2 and now conflicts in index/watchtower/hearth/perimeter; it is likely
-obsolete. The Sanity Studio is still live at /studio on `main` (unused for now).
+obsolete. The Sanity Studio was removed from `main` on 11 Nov 2026.
 
 
 - `main`: live. Pages still show the design's sample content (hard-coded); every dispatch link
