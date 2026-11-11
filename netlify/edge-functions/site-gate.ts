@@ -54,7 +54,9 @@ async function shareCardOnly(next: () => Promise<Response>): Promise<Response | 
   const tags = [...(head.match(/<title>[^<]*<\/title>/i) ?? []),
     ...(head.match(/<meta\s+(?:property="og:[^"]+"|name="(?:twitter:[^"]+|description)")\s+content="[^"]*"\s*\/?>/gi) ?? [])];
   if (!tags.some((t) => t.includes('og:image'))) return null;
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8">${tags.join('')}<meta name="robots" content="noindex, nofollow"></head><body></body></html>`,
+  // (with the site's mark, so a share sheet or a preview shows the OA monogram beside the title)
+  const icons = '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="icon" href="/favicon.ico" sizes="any">';
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8">${tags.join('')}${icons}<meta name="robots" content="noindex, nofollow"></head><body></body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
 }
 
@@ -104,5 +106,5 @@ export const config = {
   // The Guild Desk and members' pages stay reachable so invited members can sign in; their contents are protected by
   // their own sign-in and the database's rules, not by the site password.
   // (/og/* holds the pieces' share cards: pictures made to be seen wherever a link is shared.)
-  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/og/*', '/favicon.ico', '/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png', '/robots.txt'],
+  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/og/*', '/favicon.ico', '/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png', '/apple-touch-icon-precomposed.png', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest', '/robots.txt'],
 };
