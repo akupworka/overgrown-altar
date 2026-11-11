@@ -26,7 +26,7 @@ export default async (req: Request) => {
   const { data: me } = await db.auth.getUser(token);
   if (!me?.user) return json({ error: 'Please sign in again.' }, 401);
   const { data: prof } = await db.from('profiles').select('role').eq('id', me.user.id).maybeSingle();
-  if (prof?.role !== 'editor') return json({ error: 'Only the editor can open the forms.' }, 403);
+  if (!['editor', 'staff'].includes(prof?.role ?? '')) return json({ error: 'Only the editor can open the forms.' }, 403);
 
   let body: { action?: string; id?: string } = {};
   try { body = await req.json(); } catch {}

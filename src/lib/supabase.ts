@@ -43,11 +43,15 @@ export const VIEW_KEY = 'oa_view_as';
 export type ViewAs = 'member' | 'fellow' | null;
 export function viewAs(): ViewAs { try { const v = localStorage.getItem(VIEW_KEY); return v === 'member' || v === 'fellow' ? v : null; } catch { return null; } }
 /** The role the site should behave as: the editor's chosen view, or the real role for everyone else. */
-export function seenRole(role?: string | null) { const v = viewAs(); return role === 'editor' && v ? v : role ?? null; }
+/** The Editor in Chief ('editor') and the staff editors ('staff') share the editor's tools. */
+export const isEditorRole = (role?: string | null) => role === 'editor' || role === 'staff';
+/** What a member is called beside their name. */
+export const roleLabel = (role?: string | null) => (role === 'editor' ? 'Editor in Chief' : role === 'staff' ? 'Editor' : role === 'fellow' ? 'Of the Fellowship' : 'Of the Guild');
+export function seenRole(role?: string | null) { const v = viewAs(); return isEditorRole(role) ? (v || 'editor') : role ?? null; }
 export function setViewAs(v: ViewAs) { try { v ? localStorage.setItem(VIEW_KEY, v) : localStorage.removeItem(VIEW_KEY); } catch {} }
 export function rememberMember(p: (Pick<Profile, 'display_name' | 'portrait_path'> & { role?: string | null }) | null) {
   try {
-    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: p.role === 'editor', fellow: seenRole(p.role) === 'fellow' }));
+    if (p) localStorage.setItem(MEMBER_KEY, JSON.stringify({ name: p.display_name, portrait: portraitUrl(p.portrait_path), editor: isEditorRole(p.role), chief: p.role === 'editor', fellow: seenRole(p.role) === 'fellow' }));
     else { localStorage.removeItem(MEMBER_KEY); setViewAs(null); }   // signing out ends any "see as"
   } catch {}
   // Refresh the header (and the menu) on this page too: "Sign in" becomes the portrait and "My Desk", and back on sign-out.

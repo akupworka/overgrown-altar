@@ -19,7 +19,7 @@ export default async (req: Request) => {
   const { data: me } = await db.auth.getUser(token);
   if (!me?.user) return json({ error: 'Please sign in again.' }, 401);
   const { data: prof } = await db.from('profiles').select('role').eq('id', me.user.id).maybeSingle();
-  if (prof?.role !== 'editor') return json({ error: 'Only the editor can invite writers.' }, 403);
+  if (!['editor', 'staff'].includes(prof?.role ?? '')) return json({ error: 'Only the editor can invite writers.' }, 403);
 
   let email = '', name = '';
   try { const b = await req.json(); email = String(b.email ?? '').trim().toLowerCase(); name = String(b.name ?? '').trim().slice(0, 80); } catch { return json({ error: 'Bad request' }, 400); }

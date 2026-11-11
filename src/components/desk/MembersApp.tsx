@@ -4,7 +4,7 @@ import { uniqueIds as useIds } from '../../lib/svgIds';
 //   /guild/members/?m=<id>     a member's page: portrait, craft, bio, links, collected work
 //   /guild/members/?p=<id>     reading one of their published pieces
 // What anyone can see is enforced by the database's rules; this only presents it.
-import { seenRole, viewAs } from '../../lib/supabase';
+import { seenRole, viewAs, isEditorRole, roleLabel } from '../../lib/supabase';
 import { FollowButton } from './Reading';
 import { useCollection, CollectionWall } from './Collection';
 import { WayPage, WayBadge } from './Way';
@@ -191,7 +191,7 @@ function Directory() {
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft g-role">{m.role === 'editor' ? 'Editor in Chief' : 'Of the Guild'}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
+                <span className="lab mut g-craft g-role">{roleLabel(m.role)}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
                 <span className="lab mut g-craft g-count">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
@@ -265,6 +265,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const handle = (person.instagram ?? '').replace(/^@/, '');
   const fellow = person.role === 'fellow';   // the Fellowship: a collection instead of work and prestige
   const iAmEditor = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').editor && !viewAs(); } catch { return false; } })();
+  const iAmChief = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').chief && !viewAs(); } catch { return false; } })();
   // Six pieces to a page, with pages below; the kind filter narrows the list first.
   const photos = work.filter((w) => w.medium === 'photograph' && w.image_path);
   const writing = work.filter((w) => !(w.medium === 'photograph' && w.image_path));
@@ -282,7 +283,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <header className="m-hero">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
+        <span className="eb">{roleLabel(person.role)}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
@@ -321,6 +322,14 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               Message {person.display_name.split(' ')[0]}
             </button>
             {!fellow && <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />}
+            {iAmChief && person.id !== me && person.role !== 'editor' && (
+              <button type="button" className="m-act" onClick={async () => {
+                const on = person.role !== 'staff';
+                if (!confirm(on ? `Make ${person.display_name} an editor? They will share your editor's tools: reading and publishing pieces, Arrivals, reports and the forum's keys. Only you can appoint or remove editors.` : `Remove ${person.display_name} as an editor? They return to being a member of the Guild, and anything waiting with them goes back into the rotation.`)) return;
+                const { error } = await supabase.rpc('set_staff', { member: person.id, on_staff: on });
+                if (error) alert(error.message); else location.reload();
+              }}>{person.role === 'staff' ? 'Remove as editor' : 'Make an editor'}</button>
+            )}
             {fellow && iAmEditor && (
               <button type="button" className="m-act" onClick={async () => {
                 if (!confirm(`Welcome ${person.display_name} into the Guild? They will be able to write and send work to you.`)) return;
@@ -671,7 +680,7 @@ function Following({ me }: { me: string }) {
         <ul className="fw-list">
           {rows.map((p) => (
             <li key={p.id} className="fw-row">
-              <Link to={`/guild/members/?m=${p.id}`} className="fw-who"><Arch p={p} /><span className="fw-t"><span className="fw-n">{p.display_name}</span><span className="lab mut">{p.craft || (p.role === 'editor' ? 'Editor in Chief' : 'Of the Guild')}</span></span></Link>
+              <Link to={`/guild/members/?m=${p.id}`} className="fw-who"><Arch p={p} /><span className="fw-t"><span className="fw-n">{p.display_name}</span><span className="lab mut">{p.craft || (isEditorRole(p.role) ? roleLabel(p.role) : 'Of the Guild')}</span></span></Link>
               {p.newest ? <a className="fw-new" href={p.newest.slug ? `/guild/${p.newest.slug}/` : undefined}><span className="lab">Newest</span><span className="it">{p.newest.title}</span></a> : <span className="it mut fw-new">Nothing published yet</span>}
               <button type="button" className="m-act fw-un" onClick={async () => { if (!confirm(`Stop following ${p.display_name}?`)) return; await supabase.from('follows').delete().eq('follower', me).eq('followed', p.id); load(); }}>Following ✓</button>
             </li>

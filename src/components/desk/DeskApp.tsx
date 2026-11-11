@@ -29,7 +29,7 @@ import { pageList, toListTop } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
-import { seenRole, viewAs, setViewAs, type ViewAs } from '../../lib/supabase';
+import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
 // Read the invitation / password-reset marker before Supabase tidies the address bar.
@@ -194,6 +194,7 @@ function Desk({ session }: { session: Session }) {
   const isEditor = seenRole(profile?.role) === 'editor';   // (the editor may be seeing the site as a member or the Fellowship)
   // The editor: how many arrivals (applications, letters, sign-ups) haven't been read yet.
   const [arrivalsNew, setArrivalsNew] = useState(0);
+  const mineQ = queue.filter((p: any) => p.revision || !p.assigned_to || p.assigned_to === uid);
   useEffect(() => {
     if (!isEditor) return;
     (async () => {
@@ -209,10 +210,10 @@ function Desk({ session }: { session: Session }) {
   // The gold dot on the Desk tab of the Guild bar, here and (remembered) on the Guild's other pages.
   useEffect(() => {
     if (!isEditor) return;
-    const n = queue.length + arrivalsNew;
+    const n = mineQ.length + arrivalsNew;
     try { localStorage.setItem('oa_desk_waiting', String(n)); } catch {}
     document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = n === 0));
-  }, [isEditor, queue.length, arrivalsNew]);
+  }, [isEditor, mineQ.length, arrivalsNew]);
 
   const load = useCallback(async () => {
     const [{ data: p }, { data: mine }] = await Promise.all([
@@ -222,8 +223,8 @@ function Desk({ session }: { session: Session }) {
     setProfile(p as Profile);
     rememberMember(p as Profile);
     setPieces((mine as Piece[]) ?? []);
-    if ((p as Profile)?.role === 'editor') {
-      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null').order('submitted_at', { ascending: true });
+    if (isEditorRole((p as Profile)?.role)) {   // (an editor's own pieces are read by someone else)
+      const { data: q } = await supabase.from('pieces').select('*, profiles!pieces_author_id_fkey(display_name)').or('status.eq.submitted,revision.not.is.null').neq('author_id', uid).order('submitted_at', { ascending: true });
       setQueue((q as any) ?? []);
     }
     setLoaded(true);
@@ -279,7 +280,7 @@ function Desk({ session }: { session: Session }) {
   const isFellow = seenRole(profile?.role) === 'fellow';   // the Fellowship: a collection, not pieces; no writing
   const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'Profile']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
-    ...(isEditor ? [['review', 'Waiting for you', queue.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
+    ...(isEditor ? [['review', 'Waiting for you', mineQ.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'Profile'],
   ];
 
@@ -291,7 +292,7 @@ function Desk({ session }: { session: Session }) {
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
+            <span className="lab mut">{isEditor ? roleLabel(profile?.role) : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
           </div>
         </div>
         {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
@@ -323,15 +324,15 @@ function Desk({ session }: { session: Session }) {
       </aside>
 
       <div className="d-main">
-        {profile?.role === 'editor' && tab !== 'write' && <SeeAs />}
+        {isEditorRole(profile?.role) && tab !== 'write' && <SeeAs />}
         {isFellow && profile && (tab === 'pieces' || tab === 'write') && <FellowHome profile={profile} />}
-        {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? queue.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
+        {!isFellow && tab === 'pieces' && <Pieces name={name} profile={profile} pieces={pieces} waiting={isEditor ? mineQ.length : 0} arrivals={isEditor ? arrivalsNew : 0} isEditor={isEditor} onReview={() => go('review')} onArrivals={() => go('forms')} onOpen={open} onChanged={load} />}
         {!isFellow && tab === 'write' && <Editor key={editing?.id ?? `new-${newMedium ?? ''}`} uid={uid} author={profile} piece={editing} isEditor={isEditor} startMedium={newMedium} onSaved={() => load()} onDone={() => { go('pieces'); load(); }} />}
         {tab === 'review' && isEditor && (reading
           ? <Reader piece={reading} onBack={() => setReading(null)} onDecided={() => { setReading(null); load(); }} />
-          : <Queue queue={queue} onRead={setReading} />)}
+          : <Queue queue={queue} me={uid} onRead={setReading} onChanged={load} />)}
         {tab === 'profile' && profile && <ProfileForm profile={profile} onSaved={load} />}
-        {tab === 'forms' && isEditor && <FormsRoom />}
+        {tab === 'forms' && isEditor && <FormsRoom me={uid} />}
       </div>
 
     </div>
@@ -1263,8 +1264,10 @@ const SAMPLE_FORMS: FormRoom[] = [
     { id: 's7', at: ago(3), name: '', email: 'pilgrim@example.com', fields: [] } ] },
 ];
 const fieldName = (k: string) => k.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
-function FormsRoom() {
+function FormsRoom({ me }: { me: string }) {
   const [rooms, setRooms] = useState<FormRoom[] | null>(null);
+  const [editorNames, setEditorNames] = useState<Map<string, string>>(new Map());
+  useEffect(() => { supabase.from('profiles').select('id, display_name').in('role', ['editor', 'staff']).then(({ data }) => setEditorNames(new Map((data ?? []).map((p: any) => [p.id, p.display_name])))); }, []);
   const [err, setErr] = useState('');
   const [sample, setSample] = useState(false);
   const [why, setWhy] = useState('');   // why the examples are showing, for the editor to pass on
@@ -1362,7 +1365,8 @@ function FormsRoom() {
               <span className="eb">Reported conversations · {reports.length}</span>
               <ul>{reports.map((r) => (
                 <li key={r.id}>
-                  <span className="d-rep-text"><span className="it">{r.reason || 'No reason given.'}</span><span className="lab mut">{fmt(r.created_at)}</span></span>
+                  <span className="d-rep-text"><span className="it">{r.reason || 'No reason given.'}</span><span className="lab mut">{fmt(r.created_at)}{r.assigned_to && <> · {r.assigned_to === me ? <b className="d-with">yours</b> : <span className="d-with">with {editorNames.get(r.assigned_to) ?? 'another editor'}</span>}</>}</span></span>
+                  {r.assigned_to && r.assigned_to !== me && <button type="button" className="d-textbtn" onClick={async () => { const { error } = await supabase.rpc('take_over', { kind: 'report', item: r.id }); if (error) alert(error.message); loadReports(); }}>Take it</button>}
                   <a className="ghost d-btn" href={`/guild/members/?dm=${r.thread_id}`}>Read it</a>
                   <button type="button" className="d-textbtn" onClick={async () => { await supabase.from('dm_reports').update({ resolved: true }).eq('id', r.id); loadReports(); }}>Resolve</button>
                 </li>
@@ -1409,28 +1413,41 @@ function FormsRoom() {
   );
 }
 
-function Queue({ queue, onRead }: { queue: (Piece & { profiles?: { display_name: string } })[]; onRead: (p: Piece) => void }) {
+function Queue({ queue, me, onRead, onChanged }: { queue: (Piece & { profiles?: { display_name: string } })[]; me: string; onRead: (p: Piece) => void; onChanged: () => void }) {
   const [page, setPage] = useState(1);
-  const pages = Math.max(1, Math.ceil(queue.length / DESK_PER));
+  const [editors, setEditors] = useState<Map<string, string>>(new Map());
+  useEffect(() => { supabase.from('profiles').select('id, display_name').in('role', ['editor', 'staff']).then(({ data }) => setEditors(new Map((data ?? []).map((p: any) => [p.id, p.display_name])))); }, []);
+  // The rotation hands each piece to one editor in turn; yours first, then what the others are reading (take one to cover).
+  const mine = queue.filter((p: any) => p.revision || !p.assigned_to || p.assigned_to === me);
+  const others = queue.filter((p: any) => !p.revision && p.assigned_to && p.assigned_to !== me);
+  const pages = Math.max(1, Math.ceil(mine.length / DESK_PER));
   const cur = Math.min(page, pages);
+  const row = (p: Piece & { profiles?: { display_name: string } }, theirs = false) => (
+    <li key={p.id} className="d-item">
+      <div className="d-item-main">
+        <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}{theirs && <> · <span className="d-with">with {editors.get((p as any).assigned_to) ?? 'another editor'}</span></>}</span>
+        <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
+        {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
+      </div>
+      <div className="d-item-actions">
+        <button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button>
+        {theirs && <button type="button" className="d-link" onClick={async () => { const { error } = await supabase.rpc('take_over', { kind: 'piece', item: p.id }); if (error) alert(error.message); else onChanged(); }}>Take it</button>}
+      </div>
+    </li>
+  );
   return (
     <section className="d-section">
-      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces members have sent to your table, and changes to published pieces, oldest first.</p></header>
-      {queue.length === 0 ? <p className="it mut d-empty">Nothing is waiting. The table is quiet.</p> : (
-        <ul className="d-list">
-          {queue.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => (
-            <li key={p.id} className="d-item">
-              <div className="d-item-main">
-                <span className="lab mut">{p.profiles?.display_name ?? 'A member'} · {p.revision ? <span className="d-rev-tag">changes to a published piece · {fmt(p.revision_at ?? null)}</span> : `sent ${fmt(p.submitted_at)}`}</span>
-                <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.revision?.title || p.title || 'Untitled'}</span></span>
-                {(p.revision?.standfirst ?? p.standfirst) && <span className="it mut">{p.revision?.standfirst ?? p.standfirst}</span>}
-              </div>
-              <div className="d-item-actions"><button type="button" className="d-link" onClick={() => onRead(p)}>{p.revision ? 'Read the changes' : 'Read'}</button></div>
-            </li>
-          ))}
-        </ul>
+      <header className="d-page-head"><span className="eb">Editor</span><h1 className="h1 d-hello">Waiting for you</h1><p className="it mut d-sub">Pieces handed to you in turn, oldest first. Each new piece goes to the editor with the least waiting.</p></header>
+      {mine.length === 0 ? <p className="it mut d-empty">Nothing is waiting for you. The table is quiet.</p> : (
+        <ul className="d-list">{mine.slice((cur - 1) * DESK_PER, cur * DESK_PER).map((p) => row(p))}</ul>
       )}
       <DeskPages cur={cur} pages={pages} onGo={setPage} />
+      {others.length > 0 && (
+        <>
+          <div className="d-group-head"><span className="eb">With the other editors · {others.length}</span><p className="it mut d-sub" style={{ margin: 0 }}>Take one to cover for someone away.</p></div>
+          <ul className="d-list">{others.map((p) => row(p, true))}</ul>
+        </>
+      )}
     </section>
   );
 }
@@ -1692,7 +1709,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
       <a className="ss-me" href={`/guild/members/?m=${profile.id}`}>
         <span className="ss-arch"><img src={portraitUrl(profile.portrait_path) || seatFor(profile.display_name)} alt="" /></span>
         <span className="ss-name">{profile.display_name}</span>
-        <span className="lab ss-role">{profile.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
+        <span className="lab ss-role">{fellow && !isEditorRole(profile.role) ? 'Of the Fellowship' : roleLabel(profile.role)}</span>
       </a>
       {fellow ? <WaySide member={profile.id} /> : <>
         <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>

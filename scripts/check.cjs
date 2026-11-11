@@ -6,7 +6,7 @@
 //   node scripts/check.cjs <path> [options]
 //
 //   <path>            e.g. /guild/desk/  /guild/members/?view=prestige  /hearth
-//   --as editor|member|fellow|visitor   who is signed in (default editor; visitor = signed out)
+//   --as editor|staff|member|fellow|visitor   who is signed in (default editor; staff = a staff editor; visitor = signed out)
 //   --pieces N        how many published pieces the signed-in member has (default 12; prestige ranks follow)
 //   --only phone|computer        check one size only
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
@@ -34,8 +34,9 @@ const PORT = 4321, BASE = `http://localhost:${PORT}`;
 const ME = '22222222-2222-2222-2222-222222222222';
 const t = (d) => `2026-11-0${d}T09:00:00Z`;
 const profiles = [
-  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: ME, display_name: 'Eden Albright', craft: 'Essays · Photographs', bio: 'Writes about ruins and the light in them.', portrait_path: null, role: who === 'editor' ? 'editor' : who === 'staff' ? 'staff' : who === 'fellow' ? 'fellow' : 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm2', display_name: 'Jane Writer', craft: 'Fiction', bio: 'Short fiction about villages and bells.', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
+  { id: 'e9', display_name: 'Hester Vane', craft: 'Essays', bio: '', portrait_path: null, role: who === 'staff' ? 'editor' : 'staff', website: '', instagram: '', listed: true, public_email: null, created_at: t(1) },
   { id: 'm3', display_name: 'Thomas Ashgrove', craft: 'Poetry', bio: '', portrait_path: null, role: 'member', website: '', instagram: '', listed: true, public_email: null, created_at: t(2) },
 ];
 const piece = (id, author, title, status, medium = 'essay', pillar = 'hearth') => ({
@@ -46,7 +47,7 @@ const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
   ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, `Published piece ${i + 1}`, 'approved', i % 3 === 2 ? 'photograph' : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
   piece('d1', ME, 'A draft in progress', 'draft'), piece('r1', ME, 'Returned with a note', 'returned'),
-  piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
+  { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];
 const boards = [
   { id: 'b1', slug: 'the-nave', name: 'The Nave', description: 'Talk of anything.', image: '', position: 1, editor_only: false, keep_threads: 40 },
@@ -154,10 +155,10 @@ const up = () => fetch(BASE).then(() => true, () => false);
       return route.fulfill({ json: one ? rows[0] ?? null : rows });
     });
     await page.goto(BASE + '/');
-    await page.evaluate(([s, signedIn, editor, fellowAcct]) => {
+    await page.evaluate(([s, signedIn, editor, fellowAcct, chief]) => {
       localStorage.setItem('oa_arrived', '1');
-      if (signedIn) { localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor, fellow: fellowAcct })); }
-    }, [session, who !== 'visitor', who === 'editor', who === 'fellow']);
+      if (signedIn) { localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor, chief, fellow: fellowAcct })); }
+    }, [session, who !== 'visitor', who === 'editor' || who === 'staff', who === 'fellow', who === 'editor']);
     await page.goto(BASE + target, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
     if (opt('click')) { await page.click(opt('click')); await page.waitForTimeout(600); }

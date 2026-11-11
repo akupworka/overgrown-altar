@@ -2,7 +2,7 @@
 // Reads go through row-level security (the two people in it; the editor only once it's been reported); writes go
 // through the database's own functions (dm_open, dm_send, dm_read). New messages arrive live (Supabase Realtime).
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
+import { supabase, portraitUrl, isEditorRole, roleLabel, type Profile } from '../../lib/supabase';
 import { Initials } from './DeskApp';
 import { ago } from './Forum';
 import '../../styles/inbox.css';
@@ -123,7 +123,7 @@ export function InboxList({ me }: { me: string }) {
                   const { data, error } = await supabase.rpc('dm_open', { other: p.id });
                   if (error) { alert(error.message); return; }
                   go(`/guild/members/?dm=${data}`);
-                }}><Initials name={p.display_name} size={36} src={portraitUrl(p.portrait_path)} /><span>{p.display_name}</span>{p.role === 'editor' && <span className="lab mut">Editor in Chief</span>}</button></li>
+                }}><Initials name={p.display_name} size={36} src={portraitUrl(p.portrait_path)} /><span>{p.display_name}</span>{isEditorRole(p.role) && <span className="lab mut">{roleLabel(p.role)}</span>}</button></li>
               ))}
           </ul>
         </section>

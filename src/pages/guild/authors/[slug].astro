@@ -40,7 +40,7 @@ import { seatFor } from '../../../lib/seats';
     <SiteNav />
     <div class="au-in">
       <span class="au-arch" data-author-id={a.id}><img src={a.portrait || seatFor(a.display_name)} alt={a.portrait ? `Portrait of ${a.display_name}` : ''} /></span>
-      <span class="eb">{a.role === 'editor' ? 'Editor in Chief' : 'Of the Guild'}</span>
+      <span class="eb">{a.role === 'editor' ? 'Editor in Chief' : a.role === 'staff' ? 'Editor' : 'Of the Guild'}</span>
       <h1 class="h1 au-name">{a.display_name}</h1>
       {a.craft && <span class="lab au-craft">{a.craft}</span>}
       <PrestigeBadge published={pieces.length} size="lg" />
