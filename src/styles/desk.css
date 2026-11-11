@@ -2242,3 +2242,29 @@ a.m-byline:hover { color: var(--oxblood); }
 @media (max-width: 700px) { .rt-btn.m-listen { flex: none; width: 100%; justify-content: center; min-height: 44px; } }
 /* A vault's work tabs with the Library beside Writing and Photographs: three fit a phone without their icons */
 @media (max-width: 700px) { .m-tabs.m-tabs-3 { max-width: 100%; } .m-tabs.m-tabs-3 button { padding: 10px 9px !important; gap: 5px; letter-spacing: .1em; font-size: 9px; } .m-tabs.m-tabs-3 button > svg { display: none; } .m-tabs.m-tabs-3 .m-tab-n { min-width: 18px; padding: 0 5px; } }
+/* A piece read inside the Guild: Listen and reading comfort under the title (the public piece page's tools, here too) */
+.m-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.m-comfort { display: inline-flex; gap: 6px; }
+.m-comfort .rt-btn { min-height: 38px; padding: 0 12px; }
+.m-comfort .m-cf { min-width: 42px; justify-content: center; gap: 1px; font-family: var(--serif); font-size: 17px; letter-spacing: 0; text-transform: none; }
+.m-comfort .m-cf sup { font-size: 11px; }
+.m-comfort .m-cf-up { font-size: 20px; }
+.m-comfort .rt-btn:disabled { opacity: .35; cursor: default; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .28); color: var(--ink); }
+@media (max-width: 700px) { .m-comfort .m-cf-w { display: none; } .m-comfort .m-cf-night { padding: 0 12px; } .m-comfort .rt-btn { flex: none; } }
+/* text size */
+html[data-rs='-1'] .m-reading .d-paper p.body { font-size: 19px !important; }
+html[data-rs='1'] .m-reading .d-paper p.body { font-size: 24px !important; }
+html[data-rs='2'] .m-reading .d-paper p.body { font-size: 27px !important; }
+@media (max-width: 700px) {
+  html[data-rs='-1'] .m-reading .d-paper p.body { font-size: 16.5px !important; }
+  html[data-rs='1'] .m-reading .d-paper p.body { font-size: 20px !important; }
+  html[data-rs='2'] .m-reading .d-paper p.body { font-size: 22.5px !important; }
+}
+/* night reading: the paper goes dark, the ink light */
+html[data-night] .m-reading .d-paper { --ink: #E6DFD0; --muted-paper: #A39C8E; --oxblood: #E0AC93; background: #0E110C; color: #E6DFD0;
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .1), 0 30px 80px rgba(0, 0, 0, .45); transition: background-color .4s; }
+html[data-night] .m-reading .d-paper :is(.rt-btn, .rt-btn:disabled) { box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .25); }
+html[data-night] .m-reading .d-paper .rt-btn[aria-pressed='true'] { background: var(--bone); color: #12160F; box-shadow: none; }
+html[data-night] .m-reading .d-paper .m-listen[aria-pressed='true'] { background: var(--oxblood); color: #12160F; }
+html[data-night] .m-reading .d-paper :is(.rt, .m-byline) { border-top-color: rgba(243, 236, 220, .14); }
+html[data-night] .m-reading .d-paper .rt-n { background: rgba(243, 236, 220, .12); }
