@@ -30,6 +30,8 @@ import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
 import { ShareDraft, useMyShares } from './Workshop';
+import { ReadComfort } from './ReadComfort';
+import { initListen } from '../../lib/listen';
 import { WayBadge } from './Way';
 import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, roleClass, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
@@ -1476,6 +1478,18 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   const [msg, setMsg] = useState('');
   const rev = piece.status === 'approved' ? piece.revision ?? null : null;
   const shown = rev ? { ...piece, ...rev } : piece;
+  // Listen while you read (the same reader the members have): set up once the piece is drawn.
+  const paper = useRef<HTMLElement>(null), listenBtn = useRef<HTMLButtonElement>(null);
+  const [listenMin, setListenMin] = useState(0);
+  useEffect(() => {
+    const el = paper.current, btn = listenBtn.current;
+    if (!el || !btn || shown.medium === 'photograph') return;
+    const read = () => [...el.querySelectorAll<HTMLElement>(':scope > .d-paper-standfirst, .gp-body-in-desk > p.body, .gp-body-in-desk > h2.eb, .gp-body-in-desk > blockquote')];
+    const count = read().reduce((n, b) => n + b.innerText.trim().split(/\s+/).length, 0);
+    if (count < 30) return;
+    setListenMin(Math.max(1, Math.round(count / 155)));
+    return initListen({ button: btn, blocks: read, title: shown.title || 'Untitled', by: (piece as any).profiles?.display_name ?? 'a member of the Guild' });
+  }, [piece.id]);
   // The piece's photograph, so the editor sees what readers will see.
   const [photo, setPhoto] = useState('');
   useEffect(() => {
@@ -1501,7 +1515,8 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
   return (
     <section className="d-section d-reader">
       <button type="button" className="d-back-link" onClick={onBack}>Waiting for you</button>
-      <article className="d-paper">
+      <div className="d-review">
+      <article className="d-paper" ref={paper}>
         <span className="eb">{PILLARS.find((x) => x.value === piece.pillar)?.label.split(' · ')[0]} · {MEDIUMS.find((m) => m.value === piece.medium)?.label}</span>
         {rev && <span className="lab d-rev-tag">Proposed changes to a published piece. The live version stays until you approve.</span>}
         <h2 className="h1 d-reader-title">{shown.title}</h2>
@@ -1511,6 +1526,19 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
           : <img className="m-photo" src={photo} alt={shown.image_alt} />)}
         {shown.body.trim() ? <div className="gp-body-in-desk"><Body body={shown.body} /></div> : shown.medium === 'photograph' ? <p className="it mut">No words with this photograph.</p> : null}
       </article>
+      {/* Beside the piece on a computer (it stays in view as you read); on a phone the tools sit above the piece and the
+          decisions in the bar at the foot. */}
+      <aside className="d-rail" aria-label="Reading and deciding">
+      <div className="d-rail-tools">
+        <span className="lab d-rail-k">Reading</span>
+        {shown.medium !== 'photograph' && (
+          <button type="button" className="rt-btn m-listen" ref={listenBtn} hidden aria-pressed="false" title="Have this piece read aloud while you read">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M4 14.5a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2zM20 14.5a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z" /></svg>
+            <span data-listen-word>Listen</span>{listenMin > 0 && <span className="m-listen-m">· {listenMin} min</span>}
+          </button>
+        )}
+        <ReadComfort />
+      </div>
       <div className="d-decide">
         {rev && (<>
           <button type="button" className="btn d-btn" disabled={busy} onClick={() => { if (confirm('Put these changes on the live piece?')) applyChanges(true); }}>Approve the changes</button>
@@ -1544,6 +1572,8 @@ function Reader({ piece, onBack, onDecided }: { piece: Piece; onBack: () => void
           </div>
         )}
         <p className="it d-notice" role="alert">{msg}</p>
+      </div>
+      </aside>
       </div>
     </section>
   );

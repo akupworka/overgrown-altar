@@ -11,7 +11,7 @@
 //   --only phone|computer        check one size only
 //   --full            screenshot the whole page, not just the first screen (bigger images: use sparingly)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
-//   --click "<css>"   click this before the screenshot (e.g. a tab or a rank)
+//   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
 //   --width N         the computer's width (default 1280; the row of rooms in the header shows from 1321)
 //   --out <dir>       where screenshots go (default: a temporary folder; never inside the repo)
@@ -181,7 +181,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
     }, [session, who !== 'visitor', who === 'editor' || who === 'staff', who === 'fellow', who === 'editor']);
     await page.goto(BASE + target, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
-    if (opt('click')) { await page.click(opt('click')); await page.waitForTimeout(600); }
+    if (opt('click')) for (const css of opt('click').split(';;')) { await page.click(css.trim()); await page.waitForTimeout(600); }
     if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     const file = path.join(out, `${name}.png`);
