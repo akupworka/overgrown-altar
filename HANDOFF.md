@@ -171,6 +171,31 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - Every forum keeps its 40 most active threads (10 per page). A thread shows 20 replies per page and closes itself at
   200 replies (`private.after_post`). Rules page: `?view=rules` (Forum.tsx).
 
+## The Disputation Chamber (added 11 Nov 2026)
+- What it is: friendly one-on-one debate between members, live, watched from a gallery. Open all Saturday by New York time
+  (`America/New_York`); the editor may call a special sitting on another day (`chamber_sitting(hours)`, the button at the foot
+  of the Chamber page). The owner chose: one-on-one, any member may open a room and another takes the seat, all day Saturday,
+  New York's clock, the name "The Disputation Chamber".
+- How it runs: a member lays down a motion with their opening and a side; the other chair stands empty until a member takes
+  it; they speak strictly in turn (3, 4 or 5 turns each; 6 minutes a turn, `disputes.turn_seconds`; 1,200 characters); the last
+  turn of each must name the strongest point made against them (`dispute_speeches.conceded`). No winner: the gallery's
+  watchers stand For / Undecided / Against and may move (`dispute_leans.first_side` → `side`). "Point granted" can only be
+  given by the opposing speaker. When the clock runs out the other speaker may claim the floor; twice running adjourns it.
+- Database: tables `disputes`, `dispute_speeches`, `dispute_leans`, `chamber_state` (one row: `special_until`),
+  `chamber_sat_out`. They can only be read (members); every write goes through security-definer functions:
+  `chamber()` (hours, and sweeps what the shut doors ended), `dispute_open`, `dispute_take`, `dispute_speak`, `dispute_claim`,
+  `dispute_leave`, `dispute_grant`, `dispute_lean`, `dispute_chair` (strike, close), `chamber_sit_out`, `chamber_sitting`.
+  Only writers (member, staff, editor) take chairs; the Fellowship watches and leans. One chair at a time; three motions a
+  sitting. A disputation under way when the doors shut may run on for two hours from when the chair was taken. No cron:
+  everything is worked out from the clock when someone asks. The three tables are in the realtime publication.
+- Front end: `components/desk/Chamber.tsx` (`Chamber` at `?view=chamber`, `Disputation` at `?d=<id>`, `ChamberDoor` band on
+  the Guild page and the Forum), `styles/chamber.css` (two colours of glass only: gold For, blue Against). The members' bar
+  has "Chamber", with a gold dot on Saturdays. Live: postgres changes, presence (who is watching), a "writing…" broadcast,
+  and a 20-second poll as a safety net.
+- Preview: `node scripts/check.cjs "/guild/members/?view=chamber" --chamber open [--free]`, and `?d=dl1` (your turn; `--closing`,
+  `--lapsed`), `?d=dl2` (watching), `?d=do1` (empty chair), `?d=dc1` (a concluded record).
+- Not done: the database test as mock members (see PRELAUNCH), a bell notice when your chair is taken, trophies, suggested motions.
+
 ## Readers and members (added Nov 2026)
 - **App install**: `public/manifest.webmanifest`, `icon-192/512.png`, apple meta in `BaseLayout`. iPhone home-screen apps keep their own sign-in.
 - **Pace rules** (trigger `private.submission_limits`): two pieces with the editor at once; five photograph posts a calendar month; the editor is exempt. The Desk checks first and keeps the piece as a draft.

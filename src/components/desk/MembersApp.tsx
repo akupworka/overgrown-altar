@@ -31,11 +31,12 @@ import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
 import { WorkshopNotes, SharedWithYou } from './Workshop';
 import { Library, LibraryVisibility, Shelf } from './Library';
+import { Chamber, Disputation, ChamberDoor } from './Chamber';
 
-type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
+type Route = { m?: string; p?: string; view?: string; board?: string; t?: string; dm?: string; d?: string };
 const readRoute = (): Route => {
   const q = new URLSearchParams(location.search);
-  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined, dm: q.get('dm') ?? undefined };
+  return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined, dm: q.get('dm') ?? undefined, d: q.get('d') ?? undefined };
 };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '');
 const pillarName = (v: string) => PILLARS.find((p) => p.value === v)?.label.split(' · ')[0] ?? '';
@@ -130,6 +131,8 @@ function Directory({ me }: { me?: string } = {}) {
         </section>
         {(me || meId) && <FollowingNew me={me || meId} />}
       </div>
+      {/* The Disputation Chamber's door: shut with its countdown, or open on a Saturday */}
+      <ChamberDoor />
       {/* The rooms, as a row of windows */}
       <div className="g-room-side g-tiles">
           <a className="g-room g-room-small g-tile g-tile-desk" href="/guild/desk/">
@@ -724,7 +727,7 @@ export default function MembersApp() {
   }, []);
   useEffect(() => {
     if (!location.pathname.startsWith('/guild/members')) return;   // the Desk is showing
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'following' ? 'Following' : route.view === 'library' ? 'Your library' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'chamber' || route.d ? 'The Disputation Chamber' : route.view === 'following' ? 'Following' : route.view === 'library' ? 'Your library' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -740,7 +743,7 @@ export default function MembersApp() {
 
   if (!ready) return <Loading />;
   // (The Way is the Fellowship's road; editors may look in. A Guild member who lands on its address gets the Guild.)
-  if (session && ((route.view === 'way' && (isFellow || isEditor)) || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following', 'library'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
+  if (session && ((route.view === 'way' && (isFellow || isEditor)) || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !route.d && !['forum', 'rules', 'mine', 'inbox', 'following', 'library', 'chamber'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
@@ -760,13 +763,15 @@ export default function MembersApp() {
     : route.view === 'inbox' ? <InboxList me={me} />
     : route.view === 'following' ? <Following me={me} />
     : route.view === 'library' ? <Library me={me} />
+    : route.view === 'chamber' ? <Chamber me={me} />
+    : route.d ? <Disputation key={route.d} id={route.d} me={me} />
     : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
     : route.p ? <Reading id={route.p} isEditor={isEditor} />
     : route.m ? <MemberPage id={route.m} me={me} />
     : <Directory me={me} />;
   // Wide screens: you, your rank and trophies, in a column beside the Guild's rooms (not a member’s page
   // or a piece, which have the screen to themselves).
-  return route.m || route.p ? page : <SideLayout me={me}>{page}</SideLayout>;
+  return route.m || route.p || route.d ? page : <SideLayout me={me}>{page}</SideLayout>;
 }
 
 // A Fellowship member's page is their library: everything they've saved, standing on shelves for others to see.

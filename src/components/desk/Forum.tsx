@@ -12,6 +12,7 @@ import { pageList } from '../../lib/pager';
 import { Initials } from './DeskApp';
 import { PrestigeBadge } from './Prestige';
 import '../../styles/forum.css';
+import { ChamberDoor } from './Chamber';
 
 interface Board { id: string; slug: string; name: string; description: string; image: string; position: number; editor_only: boolean; keep_threads: number }
 interface Thread { id: string; board_id: string; author_id: string; title: string; pinned: boolean; locked: boolean; reply_count: number; created_at: string; last_post_at: string; last_author_id: string | null }
@@ -154,6 +155,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
           { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
         </div>}
       </header>
+      <ChamberDoor />
       <div className="fo-pair">
       {me && mineIds.size > 0 && (() => {
         const mineT = threads.filter((t) => mineIds.has(t.id)), fresh = mineT.filter((t) => isNew(t, me)).length;

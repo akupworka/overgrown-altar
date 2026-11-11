@@ -95,6 +95,17 @@ use still working:
 - The Gallery was 8px too wide on phones (the old check could not see it; the check now measures against the phone's
   own width).
 
+## The Disputation Chamber (built 11 Nov 2026; not yet tried by real people)
+- [ ] **The Chamber's rules have not been tested against the real database.** The test that acts as pretend members (Saturday
+  lock, turns, the clock, the closing concession, the chair's powers, the Fellowship kept to the gallery) was written and
+  stopped at a Supabase confirmation that went unanswered. Run it before launch (ask Claude to "run the Chamber test").
+- [ ] Try a whole disputation with two accounts: as Editor in Chief, open the Chamber, press "Open the doors for three
+  hours", lay down a motion; from a second account take the chair; speak in turn to the close. Watch from a third if you can.
+- [ ] On a real iPhone: writing a speech with the keyboard up, the clock counting down, a new speech arriving while you watch.
+- [ ] Not built yet: a bell notice when someone takes the chair across from your motion (today you see it only if you stay
+  in the room); trophies for disputation; a place for members to suggest motions.
+- [ ] Decide whether the Fellowship may watch (they can today, from the gallery, and may stand For / Against; they cannot take a chair).
+
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
       one build per change plus the hourly rebuild when something was published.

@@ -75,6 +75,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <div class="inner-rooms">
         <a href="/guild/desk/" data-match="desk"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg>My Desk<span class="inner-dot" data-gbar-dot hidden></span></a>
         <a href="/guild/members/?view=forum" data-match="forum" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg>The Forum</a>
+        <a href="/guild/members/?view=chamber" data-match="chamber" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V10a7 7 0 0 1 14 0v10M3 20h18M12 3v17" /></svg>Chamber<span class="inner-dot" data-chamber-dot hidden></span></a>
         <a href="/guild/members/" data-match="members" data-spa class="for-guild"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>The Guild</a>
         <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>Inbox<span class="inner-n" data-inbox-dot hidden></span></a>
         <a href="/guild/members/?view=library" data-match="library" class="for-guild" data-spa><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10 4h3v16h-3z" /><path d="m15.5 6 2.8-.8 4 14.3-2.8.8z" /></svg>Library</a>
@@ -175,6 +176,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       if (uid) document.querySelectorAll<HTMLAnchorElement>('[data-my-page]').forEach((a) => (a.href = `/guild/members/?m=${uid}`));
       // The editor's gold dot on Desk: pieces waiting for review, or new arrivals (the Desk keeps this count fresh).
       if (me.editor && Number(localStorage.getItem('oa_desk_waiting') || 0) > 0) document.querySelectorAll<HTMLElement>('[data-gbar-dot]').forEach((d) => (d.hidden = false));
+      // The Disputation Chamber is open all Saturday by New York time: a gold dot on its name that day.
+      if (new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(new Date()) === 'Sat') document.querySelectorAll<HTMLElement>('[data-chamber-dot]').forEach((d) => (d.hidden = false));
     } catch {}
     const here = () => {
       const q = new URLSearchParams(location.search), path = location.pathname, h = location.hash;
@@ -185,6 +188,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         ? (h.startsWith('#write') ? 'write' : h === '#my-page' ? 'me' : 'desk')
         : q.get('view') === 'library' ? 'library'
         : q.get('view') === 'inbox' || q.get('dm') ? 'inbox'
+        : q.get('view') === 'chamber' || q.get('d') ? 'chamber'
         : q.get('view') === 'forum' || q.get('view') === 'rules' || q.get('view') === 'mine' || q.get('board') || q.get('t') ? 'forum'
         : q.get('view') === 'prestige' || q.get('view') === 'trophies' ? 'prestige'
         : q.get('view') === 'way' || (document.documentElement.hasAttribute('data-fellow') && !q.get('m') && !q.get('p')) ? 'way'

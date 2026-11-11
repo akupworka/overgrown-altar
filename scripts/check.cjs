@@ -14,6 +14,10 @@
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
 //   --cover <name>    the pretend member has chosen this background for their vault (lib/covers.ts), e.g. labyrinth
+//   --chamber open    the Disputation Chamber's doors are open (default: shut, with last Saturday's record)
+//                     pretend disputations: ?d=dl1 (you hold a chair, your turn; add --closing for your last turn), ?d=dl2 (you watch),
+//                     ?d=do1 (an empty chair), ?d=dc1 (a concluded record)
+//                     --free: you hold no chair (so you may lay down a motion); --lapsed: the clock has run out in dl1
 //   --then "<css>"    click this after --type has typed (e.g. Send, to see what the form answers)
 //   --scroll "<css>"  bring this into view before the screenshot (things that fade in as you reach them)
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
@@ -29,7 +33,7 @@ const os = require('os'), path = require('path'), fs = require('fs');
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
 const flag = (name) => args.includes('--' + name);
-const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll', '--then', '--cover'];
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll', '--then', '--cover', '--chamber'];
 const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
 if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
 const who = opt('as', 'editor');
@@ -119,6 +123,41 @@ const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads,
     reflections_out: flag('heavy') ? 160 : 4, stayed_out: flag('heavy') ? 420 : 27, notes_out: flag('heavy') ? 44 : 1, kept: flag('heavy') ? 230 : 12, following: flag('heavy') ? 60 : 6,
     reflections_in: flag('heavy') ? 300 : 2, stayed_in: flag('heavy') ? 900 : 9, answers: flag('heavy') ? 12 : 0, shared: flag('heavy') ? 5 : 1 }] };
 
+// The Disputation Chamber: one you sit in (your turn), one you watch, one with an empty chair, one concluded.
+const chamberOpen = opt('chamber') === 'open', nowMs = Date.now(), iso = (ms) => new Date(ms).toISOString();
+const sittingToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+const dispute = (id, motion, opener, side, taker, status, extra = {}) => ({ id, motion, opener_id: opener, opener_side: side, taker_id: taker, turns_each: 3, turn_seconds: 360, status,
+  turn_of: null, turn_started_at: null, sitting: chamberOpen ? sittingToday : '2026-11-07', created_at: iso(nowMs - 50 * 60000), taken_at: taker ? iso(nowMs - 40 * 60000) : null, ended_at: null, ended_by: null, ...extra });
+const speech = (d, n, author, kind, body, extra = {}) => ({ id: `${d}-s${n}`, dispute_id: d, author_id: author, n, kind, body, conceded: null, granted: false, struck: false, created_at: iso(nowMs - (40 - n * 4) * 60000), ...extra });
+const CASE = ['Beauty moves us before we can explain it. A sunset over a ruined abbey asks nothing of us and gives no advantage, yet it stops a man in the road. That pull is not an accident of chemistry: it is a signpost, and signposts are set up by someone.',
+  'I grant the pull. But a signpost you cannot read proves only that you are somewhere. The same ache rises at a storm that drowns a village. If beauty testifies, it testifies to something vast, and vast is not yet good, nor yet a Father.',
+  'Then let us be exact. I do not say beauty names Him. I say it makes the materialist\u2019s account too small. You have just described awe at a storm: tell me what in a closed universe earns the word awe at all.',
+  'Fairly asked. Awe may be what a small creature feels before a large world, and no more. But I will give you this much: the feeling behaves as though it were addressed to someone.',
+  'That is the whole of my case in your own words. A longing that behaves as though it were addressed is best explained by an address. The heavens declare; they do not merely impress.',
+  'And mine is that declaration needs a second witness. Beauty opens the door; it does not tell you whose house it is. For that you need the Word, and I am glad we agree it must be more than a feeling.'];
+const disputes = chamberOpen ? [
+  dispute('dl1', 'This house holds that beauty is evidence of God', flag('free') ? 'e9' : ME, 'for', 'm3', 'live', { turns_each: flag('closing') ? 3 : 4, turn_of: flag('free') ? 'e9' : ME, turn_started_at: iso(nowMs - (flag('lapsed') ? 400000 : 140000)) }),
+  dispute('dl2', 'This house holds that every poem is a small liturgy', 'e9', 'for', 'm2', 'live', { turn_of: 'm2', turn_started_at: iso(nowMs - 75000) }),
+  dispute('do1', 'This house holds that doubt belongs inside faith, not outside it', 'm2', 'against', null, 'open'),
+  dispute('dc1', 'This house holds that the best sermons are short', 'm3', 'for', 'm2', 'concluded', { ended_at: iso(nowMs - 3600000) }),
+] : [dispute('dc1', 'This house holds that the best sermons are short', 'm3', 'for', 'm2', 'concluded', { ended_at: '2026-11-07T22:10:00Z', created_at: '2026-11-07T21:00:00Z' }),
+  dispute('dc2', 'This house holds that beauty is evidence of God', 'e9', 'for', 'm3', 'adjourned', { ended_at: '2026-11-07T23:10:00Z', created_at: '2026-11-07T22:30:00Z', ended_by: 'm3' })];
+const closingSet = (d, a, b) => [0, 1, 2, 3, 4, 5].map((i) => speech(d, i + 1, i % 2 ? b : a, i < 2 ? 'opening' : i > 3 ? 'closing' : 'reply', CASE[i],
+  i > 3 ? { conceded: i === 4 ? 'That beauty alone does not name the God it points to.' : 'That the ache is not explained away by naming its cause.' } : i === 2 ? { granted: true } : {}));
+const speeches = [
+  ...[0, 1, 2, 3].map((i) => speech('dl1', i + 1, i % 2 ? 'm3' : flag('free') ? 'e9' : ME, i < 2 ? 'opening' : 'reply', CASE[i], i === 3 ? { granted: false } : {})),
+  ...[0, 1, 2].map((i) => speech('dl2', i + 1, i % 2 ? 'm2' : 'e9', i < 2 ? 'opening' : 'reply', CASE[i])),
+  speech('do1', 1, 'm2', 'opening', 'Doubt is not a room inside the house of faith; it is the weather outside it. We shelter those caught in it, but we do not hang it on the wall and call it furniture.'),
+  ...closingSet('dc1', 'm3', 'm2'), ...[0, 1, 2].map((i) => speech('dc2', i + 1, i % 2 ? 'm3' : 'e9', i < 2 ? 'opening' : 'reply', CASE[i])), speech('dc2', 4, 'm3', 'lapsed', ''),
+];
+const leanRows = (d, list) => list.map(([first_side, side], i) => ({ dispute_id: d, member_id: 'g' + i, first_side, side, updated_at: iso(nowMs) }));
+const leans = [...leanRows('dl1', [['undecided', 'for'], ['for', 'for'], ['against', 'against'], ['undecided', 'undecided'], ['against', 'for'], ['for', 'for'], ['undecided', 'against']]),
+  ...leanRows('dl2', [['for', 'for'], ['undecided', 'against'], ['against', 'against']]), ...leanRows('do1', [['undecided', 'undecided'], ['for', 'for']]),
+  ...leanRows('dc1', [['undecided', 'for'], ['against', 'for'], ['against', 'against'], ['undecided', 'against'], ['for', 'for'], ['undecided', 'undecided']])];
+Object.assign(tables, { disputes, dispute_speeches: speeches, dispute_leans: leans });
+const chamberHours = () => ({ open: chamberOpen, special: false, closes: chamberOpen ? iso(nowMs + 7.2 * 3600000) : null, opens: iso(nowMs + (chamberOpen ? 7 * 86400000 : (3 * 24 + 14) * 3600000 + 22 * 60000)),
+  now: iso(Date.now()), sitting: sittingToday, writer: who !== 'fellow', chair: who === 'editor' || who === 'staff', sat_out: false });
+
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
 const test = (row, key, expr) => {
   const v = row[key], s = v === null || v === undefined ? 'null' : String(v);
@@ -181,6 +220,7 @@ const up = () => fetch(BASE).then(() => true, () => false);
         { kind: 'published', at: t(3), who: null, who_name: null, who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
         { kind: 'save', at: t(2), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },
       ] } });
+      if (url.pathname.endsWith('/rpc/chamber')) return route.fulfill({ json: chamberHours() });
       if (url.pathname.endsWith('/rpc/name_taken')) return route.fulfill({ json: /^\s*watchman\s*$/i.test((route.request().postDataJSON() || {}).n || '') });
       if (url.pathname.includes('/rpc/')) return route.fulfill({ json: null });
       const table = url.pathname.split('/rest/v1/')[1];
