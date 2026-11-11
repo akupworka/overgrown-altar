@@ -9,7 +9,9 @@ const FMT = { v: [1080, 1920, 'vertical'], s: [1080, 1080, 'square'], h: [1920, 
 const ADS = { thesis: 'the-thesis', call: 'the-call', rooms: 'three-rooms', ranks: 'earn-your-place',
   // the reels (vertical only): node render.cjs video reel1 v
   reel1: 'reel-coming-soon', reel2: 'reel-earn-your-place', reel3: 'reel-the-work', reel4: 'reel-three-rooms', reel5: 'reel-the-fellowship',
-  reel6: 'reel-the-thread', reel7: 'reel-listen', reel8: 'reel-the-desk', reel9: 'reel-one-piece', reel10: 'reel-by-the-numbers' };
+  reel6: 'reel-the-thread', reel7: 'reel-listen', reel8: 'reel-the-desk', reel9: 'reel-one-piece', reel10: 'reel-by-the-numbers',
+  // the second pass, each with its own score (python3 score.py writes audio/<name>.wav from cues.json)
+  reel11: 'reel-zero', reel12: 'reel-the-reply', reel13: 'reel-rank', reel14: 'reel-press-play', reel15: 'reel-write' };
 const mode = process.argv[2] || 'stills', onlyAd = process.argv[3], onlyFmt = process.argv[4], FPS = 30;
 (async () => {
   const browser = await chromium.launch();
@@ -28,8 +30,9 @@ const mode = process.argv[2] || 'stills', onlyAd = process.argv[3], onlyFmt = pr
       console.log('stills', ad, f);
     } else {
       const file = path.join(OUT, `overgrown-altar-${ADS[ad]}-${shape}-${w}x${h}.mp4`);
-      const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100',
-        '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-c:a', 'aac', '-b:a', '96k', '-shortest', '-movflags', '+faststart', file], { stdio: ['pipe', 'inherit', 'inherit'] });
+      const score = path.join(HERE, 'audio', ADS[ad] + '.wav'), sound = fs.existsSync(score) ? ['-i', score] : ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100'];
+      const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', ...sound,
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', file], { stdio: ['pipe', 'inherit', 'inherit'] });
       const frames = Math.round((T / 1000) * FPS);
       for (let i = 0; i < frames; i++) {
         await page.evaluate((t) => window.seek(t), (i * 1000) / FPS);

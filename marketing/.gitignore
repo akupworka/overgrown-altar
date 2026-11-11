@@ -12,3 +12,5 @@ tour.cjs
 *.log
 shots/
 shots.cjs
+audio/
+cues.json

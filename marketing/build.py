@@ -100,6 +100,17 @@ body { font-family:'Cormorant',serif; color:#F3ECDC; -webkit-font-smoothing:anti
 .rare svg { width:100%; height:auto; display:block; }
 .rare .lab { font-size:1.6rem; letter-spacing:.26em; line-height:1.5; color:#E6DFD0; }
 .fmt-h .rare .lab { font-size:1.9rem; }
+/* the second pass: close-ups of the real pages, paper scenes, a lighter veil */
+.cu { position:absolute; border-radius:2.6rem; overflow:hidden; background:#0B0D0A; box-shadow:0 0 0 1px rgba(159,148,94,.8), 0 5rem 12rem rgba(0,0,0,.5); }
+.cu img { position:absolute; left:0; top:0; height:auto; max-width:none; display:block; will-change:transform; }
+.veil.lite { background:radial-gradient(ellipse at 50% 46%, rgba(6,8,6,.36), rgba(6,8,6,.8) 84%); }
+.veil.mid { background:radial-gradient(ellipse at 50% 46%, rgba(6,8,6,.5), rgba(6,8,6,.86) 82%); }
+.in.sh > * { text-shadow:0 .2rem 2.6rem rgba(0,0,0,.9), 0 0 .6rem rgba(0,0,0,.5); }
+.sc.paper .big-it, .sc.paper .big, .sc.paper .caps { color:#2A2017; }
+.sc.paper .lab { color:#62372D; }
+.hd { position:absolute; left:0; right:0; top:25rem; display:flex; flex-direction:column; align-items:center; gap:1.8rem; text-align:center; padding:0 7rem; }
+.hd .q { font-style:italic; font-size:6.4rem; line-height:1.1; }
+.beat { font-weight:500; font-size:17rem; line-height:1; }
 /* the second set of reels: reply cards, sound, read-aloud lines, a paper sheet, a computer's window, numerals */
 .cards { position:absolute; left:6rem; right:6rem; top:30rem; display:flex; flex-direction:column; gap:2.6rem; }
 .topfade { position:absolute; left:0; right:0; top:0; height:40rem; background:linear-gradient(180deg, #060806 0, #060806 21rem, rgba(6,8,6,0) 100%); }
@@ -500,6 +511,94 @@ BODY+=reel('reel5',21000,[
   title(13800,16400,'what-we-believe','54% 50%',EL('14100,16200,700,400','Open to every denomination',**{'class':'eb'})+EL('14400,16200,900,400','One body,<br>many churches.',**{'class':'big-it'})+'<div class="thread" data-draw="15100,16200"></div>',veil='veil deep'),
   soon(16200,21000,'Free, and open to all.','The Fellowship'),
 ])
+
+# ---- the second pass (reels 11 to 15): the hook is on screen at the first frame, cuts fall on a half-second grid, the
+# ---- real pages are shown close enough to read, and each has its own score (score.py reads cues.json) ----
+from PIL import Image as _PIL
+CUES={}
+def hard(tin,tout,inner,cls=""): return sc(tin,tout+100,inner,140,120,cls)
+def cu(tin,tout,shot,cx,cy,box,zoom=1.07,drift=(0,-1.2)):
+    # a close-up of a page: (cx, cy) is the point to centre on, in the page's own pixels (393 wide on a phone, 1440 on a computer)
+    w,h=_PIL.open(HERE+"/shots/"+shot+".jpg").size
+    base=1440.0 if shot.startswith("desk-") else 393.0
+    fx=cx/base; fy=cy/(h*base/w); iw=box[2]*zoom; ih=iw*h/w
+    tx=min(0,max(-(1-box[2]/iw)*100, -(fx-box[2]/(2*iw))*100)); ty=min(0,-(fy-box[3]/(2*ih))*100)
+    return ("<div class=\"cu\" style=\"left:%srem;top:%srem;width:%srem;height:%srem\" data-r=\"%d,%d,260,160\" data-dy=\"4\"><img src=\"%s/%s.jpg\" style=\"width:%s%%\" data-k=\"%d,%d,1,1,%.3f,%.3f,%.3f,%.3f\"></div>"
+            % (box[0],box[1],box[2],box[3],tin,tout,SHOTS,shot,zoom*100,tin,tout,tx,ty,tx+drift[0],ty+drift[1]))
+def end2(tin,T,line,name="Overgrown Altar"):
+    return sc(tin,T,img("window-of-the-ascension-and","","%d,%d,1.16,1.04,0,-2,0,1" % (tin,T),"center 42%")+"<div class=\"veil mid\"></div><div class=\"in sh\">"
+      +EL("%d,%d,500,1" % (tin+150,T+1),MONO("sm"))
+      +EL("%d,%d,600,1" % (tin+300,T+1),name,**{"class":"caps"})
+      +"<div class=\"thread\" data-draw=\"%d,%d,700\"></div>" % (tin+600,T+1)
+      +EL("%d,%d,600,1" % (tin+800,T+1),"Coming soon.",**{"class":"big-it huge","style":"color:#FFE3A3"})
+      +EL("%d,%d,600,1" % (tin+1200,T+1),line,**{"class":"sub","style":"color:#F3ECDC"})
+      +EL("%d,%d,600,1" % (tin+1700,T+1),"Follow to be first through the door",**{"class":"lab","style":"margin-top:1.4rem"})
+      +"</div>",260,1)
+def photo(tin,tout,name,pos,inner,gray=False,k="1.14,1.04,0,1,0,-1"):
+    return hard(tin,tout,img(name,"gray" if gray else "","%d,%d,%s" % (tin,tout+100,k),pos)+"<div class=\"veil lite\"></div><div class=\"in sh\">"+inner+"</div>")
+
+# 11 · ZERO (11s): three noughts, then the turn
+def _zero(tin,word,paper=False):
+    return hard(tin,tin+1000,"<div class=\"in\" style=\"gap:1rem\"><div class=\"numz\" style=\"color:%s\" data-r=\"%d,%d,80,80\" data-pop>0</div><div class=\"numw\" data-r=\"%d,%d,80,80\">%s</div></div>" % ("#62372D" if paper else "#FFE3A3",tin,tin+1050,tin,tin+1050,word),"paper" if paper else "")
+_w11=[("Essays.","duomo-spires","center 30%",True),("Poetry.","window-of-the-ascension-and","center 45%",False),("Fiction.","labyrinth-stained-light","60% 60%",False),("Testimony.","chapel-and-cross-under-a","72% 50%",True)]
+BODY+=reel("reel11",11000,[
+  _zero(0,"likes."), _zero(1000,"followers.",True), _zero(2000,"algorithm."),
+  photo(3000,5500,"window-light-on-wall","center 45%",EL("3000,5550,200,120","Only the work.",**{"class":"big-it huge","data-pop":""}),k="1.18,1.05,-2,0,2,0"),
+  *[photo(5500+i*500,6000+i*500,p,pos,EL("%d,%d,90,80" % (5500+i*500,6050+i*500),w,**{"class":"beat","data-pop":""}),g) for i,(w,p,pos,g) in enumerate(_w11)],
+  end2(7500,11000,"A guild of writers and photographers,<br>anchored in Christ."),
+])
+CUES["reel-zero"]={"ms":11000,"cues":[[0,"thump",0],[1000,"thump",0],[2000,"thump",0],[3000,"bell",2],[5500,"tick",0],[6000,"tick",2],[6500,"tick",3],[7000,"tick",5],[7500,"lift",0]]}
+
+# 12 · THE REPLY (13s): the forum, close enough to read
+_hd=("<div class=\"hd\"><span class=\"lab\" data-r=\"2500,8500,300,150\">A thread in The Nave</span><span class=\"q\" data-r=\"2600,8500,300,150\">“What are you reading this week?”</span></div>")
+BODY+=reel("reel12",13000,[
+  hard(0,2500,"<div class=\"in\">"+EL("0,2550,1,150","The Forum",**{"class":"eb"})+EL("0,2550,1,150","A comment section worth reading.",**{"class":"big-it huge"})+"<div class=\"rule2\" data-draw=\"300,2550,700\"></div></div>","paper"),
+  hard(2500,8500,_hd+cu(2500,4550,"thread",196,446,(6,60,88,57))+cu(4500,6550,"thread",196,661,(6,64,88,42))+cu(6500,8550,"thread",196,1061,(6,64,88,42)),"paper"),
+  hard(8500,9500,"<div class=\"in\" style=\"gap:1.5rem\">"+EL("8500,9550,90,80","No feed.",**{"class":"beat","data-pop":""})+EL("9000,9550,90,80","No noise.",**{"class":"beat","data-pop":"","style":"color:#FFE3A3"})+"</div>"),
+  end2(9500,13000,"A table to talk at."),
+])
+CUES["reel-the-reply"]={"ms":13000,"cues":[[0,"bell",0],[2500,"bell",2],[4500,"bell",3],[6500,"bell",4],[8500,"thump",0],[9000,"thump",0],[9500,"lift",0]]}
+
+# 13 · RANK (13.5s): the ten crests, one to a beat
+_cz=""
+for _i,_m in enumerate(MARKS["crests"]):
+    _t=1500+_i*500
+    _cz+="<div class=\"cz\" data-r=\"%d,%d,70,60\" data-dy=\"0\" data-pop>%s<span class=\"num\">%s</span><span class=\"nm\">%s</span></div>" % (_t,_t+(540 if _i<9 else 600),_uid(_m["svg"]),_m["numeral"],_m["name"])
+_rare13="".join(hard(8500+_k*500,9000+_k*500,"<div class=\"glow\"></div><div class=\"in\"><div class=\"one-t\" style=\"width:58rem\" data-r=\"%d,%d,90,80\" data-pop>%s</div>%s</div>" % (8500+_k*500,9050+_k*500,_uid({t["id"]:t for t in MARKS["trophies"]}[_id]["svg"]),EL("%d,%d,90,80" % (8500+_k*500,9050+_k*500),_nm,**{"class":"caps","style":"font-size:8rem"}))) for _k,(_id,_nm) in enumerate([("lion","Bold as a Lion"),("cathedral","The Cathedral"),("serpent","The Serpent Underfoot")]))
+BODY+=reel("reel13",13500,[
+  hard(0,1500,"<div class=\"glow\"></div><div class=\"in\"><div class=\"one-t\" style=\"width:62rem\" data-r=\"0,1550,1,100\">%s</div>" % _uid(MARKS["crests"][9]["svg"])+EL("0,1550,1,100","This is not<br>a follower count.",**{"class":"big-it huge"})+"</div>"),
+  hard(1500,6500,"<div class=\"glow\"></div><div class=\"topline eb\" data-r=\"1500,6550,200,100\">Ten prestiges · earned by publishing</div><div class=\"stage\">"+_cz+"</div>"),
+  hard(6500,8500,"<div class=\"hd\"><span class=\"lab\" data-r=\"6500,8550,250,120\">Where you stand</span><span class=\"q\" data-r=\"6600,8550,250,120\">Every published piece raises you.</span></div>"+cu(6500,8550,"prestige",196,612,(6,56,88,92)),"paper"),
+  _rare13,
+  end2(10000,13500,"Earn your place."),
+])
+CUES["reel-rank"]={"ms":13500,"cues":[[0,"thump",0]]+[[1500+i*500,"tick",i] for i in range(10)]+[[6500,"bell",3],[8500,"thump",0],[9000,"thump",0],[9500,"thump",0],[10000,"lift",0]]}
+
+# 14 · PRESS PLAY (12.5s): the piece, read to you, in the dark
+BODY+=reel("reel14",12500,[
+  hard(0,3000,"<div class=\"in\"><div class=\"bars\" data-bars=\"-400,3050,30\"></div>"+EL("0,3050,1,150","Every piece can be read to you.",**{"class":"big-it huge","style":"color:#FFE3A3"})+"</div>"),
+  hard(3000,6000,backdrop(3000,6100)+"<div class=\"hd\"><span class=\"lab\" data-r=\"3000,6050,250,120\">Listening · night reading</span><span class=\"q\" data-r=\"3100,6050,250,120\">Close your eyes.</span></div>"
+       +cu(3000,6050,"listen",196,445,(6,56,88,48),drift=(0,0))+cu(3150,6050,"listen",196,796,(6,108,88,17),drift=(0,0))),
+  hard(6000,9000,"<div class=\"glow\"></div><div class=\"in\" style=\"padding-top:34rem;padding-bottom:44rem\"><div class=\"rls\">"
+       +"<div class=\"rl\" data-read=\"6050,7400,9050\">The abbey has had no roof since the reign of a king nobody here could name.</div>"
+       +"<div class=\"rl\" data-read=\"7500,9050,9050,1\">Rain comes straight down into the nave.</div></div></div><div class=\"pips\" style=\"bottom:46rem\"><div class=\"bars sm\" data-bars=\"6000,9050,34\"></div></div>"),
+  end2(9000,12500,"Read it. Or let it be read to you."),
+])
+CUES["reel-press-play"]={"ms":12500,"soft":1,"cues":[[0,"bell",0],[3000,"bell",2],[6000,"bell",3],[7500,"bell",4],[9000,"lift",0]]}
+
+# 15 · WRITE (13s): a person, a page, a piece
+BODY+=reel("reel15",13000,[
+  photo(0,2500,"what-we-believe","56% 50%",EL("0,2550,1,150","Write something<br>that lasts.",**{"class":"big-it huge"}),True),
+  hard(2500,6000,backdrop(2500,6100)+"<div class=\"hd\"><span class=\"lab\" data-r=\"2500,6050,250,120\">At your desk</span></div>"
+       +"<div class=\"sheet\" style=\"top:42rem\" data-r=\"2500,6050,300,150\" data-dy=\"6\"><span class=\"sk\">The Hearth · Essay</span><div class=\"st\" data-type=\"2800,19\">What the Stones Remember</div><div class=\"sr\"></div><div class=\"sl\" data-type=\"4250,46\">The abbey has had no roof since the reign of a king nobody here could name.</div></div>"),
+  hard(6000,6500,"<div class=\"in\">"+EL("6000,6550,80,70","Sent.",**{"class":"beat","data-pop":""})+"</div>"),
+  hard(6500,7000,"<div class=\"in\">"+EL("6500,7050,80,70","Edited.",**{"class":"beat","data-pop":"","style":"color:#2A2017"})+"</div>","paper"),
+  hard(7000,7500,"<div class=\"in\">"+EL("7000,7550,80,70","Published.",**{"class":"beat","data-pop":"","style":"color:#FFE3A3;font-style:italic;font-weight:400"})+"</div>"),
+  hard(7500,9500,"<div class=\"hd\"><span class=\"lab\" data-r=\"7500,9550,250,120\">In The Hearth</span><span class=\"q\" data-r=\"7600,9550,250,120\">And then it is read.</span></div>"+cu(7500,9550,"reading",196,470,(6,58,88,84),drift=(0,-3)),"paper"),
+  end2(9500,13000,"The Guild opens soon. By application."),
+])
+CUES["reel-write"]={"ms":13000,"cues":[[0,"thump",0],[2500,"bell",2],[6000,"thump",0],[6500,"thump",0],[7000,"thump",0],[7500,"bell",4],[9500,"lift",0]]}
+
 JS='''
 const q = new URLSearchParams(location.search), ad = document.getElementById(q.get('ad') || 'thesis'), fmt = q.get('fmt') || 'v';
 document.body.classList.add('fmt-' + fmt);
@@ -515,8 +614,8 @@ ad.querySelectorAll('[data-r]').forEach((el) => {
   const pop = el.dataset.pop !== undefined;
   const hid = { opacity: 0, transform: pop ? 'scale(.86)' : `translateY(${dy}px)` }, shown = { opacity: 1, transform: pop ? 'scale(1)' : 'translateY(0px)' }, gone = { opacity: 0, transform: pop ? 'scale(1.07)' : `translateY(${-dy / 2}px)` };
   const kf = [];
-  if (tin > 0) kf.push({ ...hid, offset: 0 });
-  kf.push({ ...hid, offset: at(tin), easing: EASE }, { ...shown, offset: at(tout < T ? Math.min(tin + fi, tout) : tin + fi) });
+  if (tin > 0) kf.push({ ...hid, offset: 0 }, { ...hid, offset: at(tin), easing: EASE });
+  kf.push({ ...shown, offset: tin > 0 ? at(tout < T ? Math.min(tin + fi, tout) : tin + fi) : 0 });
   if (tout < T) { kf.push({ ...shown, offset: at(Math.min(tout, Math.max(tin + fi, tout - fo))), easing: 'ease-in' }, { ...gone, offset: at(tout) }); if (at(tout) < 1) kf.push({ ...gone, offset: 1 }); }
   else if (at(tin + fi) < 1) kf.push({ ...shown, offset: 1 });
   anims.push(el.animate(kf, { duration: T, fill: 'both' }));
@@ -545,7 +644,7 @@ let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return see
 ad.querySelectorAll('[data-bars]').forEach((el) => {
   const [tin, tout, n = 26] = el.dataset.bars.split(',').map(Number);
   for (let i = 0; i < n; i++) { const b = document.createElement('i'); el.append(b);
-    const kf = [{ transform: 'scaleY(.06)', opacity: 0, offset: 0 }, { transform: 'scaleY(.06)', opacity: 0, offset: at(tin) }];
+    const kf = tin > 0 ? [{ transform: 'scaleY(.06)', opacity: 0, offset: 0 }, { transform: 'scaleY(.06)', opacity: 0, offset: at(tin) }] : [];
     const mid = 1 - Math.abs(i - (n - 1) / 2) / (n / 2) * 0.55;
     for (let t = tin + 300; t < tout - 300; t += 170) kf.push({ transform: `scaleY(${(0.12 + rnd() * 0.88 * mid).toFixed(3)})`, opacity: 1, offset: at(t), easing: 'ease-in-out' });
     kf.push({ transform: 'scaleY(.06)', opacity: 0, offset: at(tout) }); if (at(tout) < 1) kf.push({ transform: 'scaleY(.06)', opacity: 0, offset: 1 });
@@ -580,3 +679,5 @@ body=BODY.replace('MONO_BIG',MONO()).replace('MONO_SM',MONO('sm'))
 body=re.sub(r'IMG\(([^|)]*)\|([^|)]*)\|([^|)]*)\|([^)]*)\)', lambda m: img(m.group(1),m.group(2),m.group(3),m.group(4)), body)
 open(HERE+'/ad.html','w',encoding='utf-8').write('<!doctype html><html><head><meta charset="utf-8"><style>'+CSS+'</style></head><body>'+body+'<script>'+JS+'</script></body></html>')
 print('built', len(body))
+import json as _json
+open(HERE+'/cues.json','w').write(_json.dumps(CUES))
