@@ -21,8 +21,8 @@ export function Library({ me }: { me: string }) {
       <header className="lb-head">
         <span className="eb">Saved for later</span>
         <h1 className="h1">Your library</h1>
-        <p className="it mut d-sub">What you’ve set aside to read. Only you can see these shelves.</p>
-        {items && books.length > 0 && <span className="lab mut">{books.length} {books.length === 1 ? 'piece' : 'pieces'} waiting for you</span>}
+        <p className="it mut d-sub">The artifacts you’ve set aside for later. Only you can see these shelves.</p>
+        {items && books.length > 0 && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} waiting for you</span>}
       </header>
       {!items ? <p className="lab mut">Opening the library…</p> : books.length === 0 ? (
         <div className="lb-empty">
