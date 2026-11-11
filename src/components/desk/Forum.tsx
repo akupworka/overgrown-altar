@@ -495,7 +495,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     setBusy(false);
     if (error) { setPosts((ps) => ps.filter((p) => p.id !== temp.id)); setReply(text); return setMsg('Your reply couldn’t be posted, so it’s back in the box. ' + error.message); }
     // Anyone named with an @ is told (in their daily letter)
-    const named = everyone.filter((p) => p.id !== me && text.includes('@' + p.display_name));
+    const named = everyone.filter((p) => p.id !== me && text.includes('@' + p.display_name)).slice(0, isEditor ? 200 : 8);   // a post calls on eight members at most (the database holds the same line)
     if (made?.id && named.length) await supabase.from('forum_mentions').insert(named.map((p) => ({ post_id: made.id, member_id: p.id, by_id: me })));
     setAtQ(null);
     load();

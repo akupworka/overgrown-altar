@@ -1593,7 +1593,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => vo
     if (!clean.display_name) { setMsg('Your page needs a name before it can be saved.'); return; }
     if (clean.website && !/^https?:\/\//.test(clean.website)) clean.website = 'https://' + clean.website;
     const { error } = await supabase.from('profiles').update(clean).eq('id', profile.id);
-    setMsg(error ? 'Your page couldn’t be saved. Please check your name and web address, then try again.' : 'Saved. Members now see this on your page.'); if (!error) onSaved();
+    setMsg(error ? (/editors/.test(error.message) ? error.message : 'Your page couldn’t be saved. Please check your name and web address, then try again.') : 'Saved. Members now see this on your page.'); if (!error) onSaved();
   }
   return (
     <form className="d-section d-form-page" onSubmit={save}>

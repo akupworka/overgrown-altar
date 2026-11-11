@@ -20,31 +20,23 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
 - [ ] **Let search engines in.** `public/robots.txt` still says `Disallow: /`; change it to `Allow: /` on opening day.
       There is also no sitemap and no RSS feed yet (both are small jobs and help the site get found and followed).
 
-## Found by the mock members (11 Nov 2026): rules the database should enforce, not only the forms
-The site's own forms prevent each of these; someone writing straight to the database with their own sign-in could do them.
-- [ ] A member's name can be saved empty, or hundreds of characters long; a bio has no length limit. Add limits.
-- [ ] A web address can be saved as something other than a web address. (It is no longer shown as a link unless it
-      starts with http, but the database should refuse it too.)
-- [ ] A piece can be sent to the editor with no title and no words; a photograph with no picture. Require them on sending.
-- [ ] Nothing slows a flood: 40 forum replies or 30 new threads in one second, or hundreds of messages to one person
-      (one member could fill the Editor in Chief's inbox, 1,000 messages, so nobody else can write to him). Add a
-      gentle limit per minute.
+## Found by the mock members (11 Nov 2026): rules the database now keeps
+All in as of 11 Nov 2026 (`rules_the_forms_already_kept`), each tested by a mock member trying it and by an ordinary
+use still working:
+- [x] A name must be there and at most 80 letters; craft 120; bio 2,000; a web address must be a web address.
+      Signing up with no name, a huge name or an editor's name still works (the name is made safe).
+- [x] Nobody but an editor can take an editor's name.
+- [x] A piece with the editor must have a title and its words (a photograph: its picture), also if rewritten while there.
+- [x] Pace limits for everyone but editors: 6 forum posts a minute and 60 an hour; 3 new threads in ten minutes and
+      12 a day; 12 messages a minute and 80 an hour; 10 Workshop notes a minute and 100 an hour.
+- [x] One post tags eight members at most. A hundred unfinished pieces a writer. Three open reports a conversation.
+- [x] The 5-photographs-a-month limit: tested, and it holds.
 - [ ] Decide: editors (staff included) can read every member's unsent drafts in the database, though the Desk never
       shows them. Keep, or close it so drafts are private until sent or shared.
-- [ ] Decide: a writer can keep rewriting a piece while it is with the editor. Keep, or freeze it until it comes back.
-- [x] The 5-photographs-a-month limit: tested on the second round, and it holds (the sixth is refused, kept as a draft).
-- [ ] One forum post can tag every member at once (60 bells rung by one reply). Cap it at about eight names a post.
-- [ ] A member can rename themselves "Watchman" (or any editor's name). Refuse a name an editor already carries.
-- [ ] Nothing limits how many drafts one member keeps (300 long drafts, about 30 MB, went in at once; the whole
-      database allowance is 500 MB). Cap unsent pieces at about 100 a member.
-- [ ] The same conversation can be reported 30 times over, and a Workshop reader can leave 300 notes in a second.
-      One open report a conversation; a gentle pace on notes.
-- [ ] Decide: a writer can change the room of a piece while it is with the editor, and can pull it back (pulling back
-      is on purpose). A writer can also delete the first post of their own thread by going around the forum's buttons,
-      leaving the replies with no opening; harmless, but the database could refuse it.
-- [ ] **The rule batch itself is still waiting** (`rules_the_forms_already_kept`, 11 Nov 2026: name, bio and web-address
-      limits, complete pieces only, the gentle pace limits). Its approval prompt went unanswered twice, so none of the
-      rules above is in the database yet. The "About the author" form now carries the limits itself.
+- [ ] Decide: a writer can keep rewriting a piece, and change its room, while it is with the editor. Keep, or freeze it.
+- [ ] Decide: Fellowship readers can start forum threads and message Guild writers. Intended?
+- [ ] Small: a writer can delete the first post of their own thread by going around the forum's buttons.
+- [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against
