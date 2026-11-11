@@ -32,6 +32,7 @@ export interface Profile {
   website: string; instagram: string; listed: boolean; created_at?: string;
   public_email?: string | null;   // shown on their work and pages only when they choose to
   library_public?: boolean;       // their library's shelves: private unless they open them
+  cover?: string | null;          // the cover of their vault: the short name of one of the house's photographs (lib/covers.ts)
 }
 
 /** A member's portrait, from the public "portraits" store. */

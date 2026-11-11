@@ -105,6 +105,8 @@ use still working:
       traffic a month, 500 MB of text (far off). Members themselves are not a limit (50,000 active a month).
 
 ## Check on a real iPhone (built and tested in Chrome only)
+- [ ] Your vault's new header: the cover across the top, the portrait standing on its edge, nothing overlapping the
+      name. On "Edit your vault", tap another of the ten covers, save, and see it change.
 - [ ] The twelve rarest trophies (each its own shape: castle, lion, crown, shield and serpent, cathedral...): on the
       phone they should be crisp, with nothing drawn outside its shape and no boxes.
 - [ ] The trophies (11 Nov 2026: 54 of them, redrawn without CSS filters): no dark boxes around any trophy, in the

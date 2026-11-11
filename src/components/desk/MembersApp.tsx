@@ -25,6 +25,7 @@ import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
 import { initListen } from '../../lib/listen';
 import { ReadComfort } from './ReadComfort';
+import { coverFor } from '../../lib/covers';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
@@ -284,84 +285,96 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
   const turn = (n: number) => { setPage(n); toListTop('.m-work'); };
   const arrow = (d: 'l' | 'r') => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d={d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>;
-  // The same page as the public writer page (/guild/authors/<name>/): an arch, the name, craft, a few lines, two link pills, then the work.
+  // A cover across the top, the arch standing on its lower edge; beside it the name, craft, a few lines and the link pills;
+  // the page's buttons to the right (on a phone it all stacks, centred).
+  const cover = coverFor(person.cover, person.id);
   return (
     <div className="m-page">
-      <header className="m-hero">
+      <header className="m-hero m-hero2">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
-        <Arch p={person} big />
-        <span className={`eb ${roleClass(person.role)}`}>{roleLabel(person.role)}</span>
-        <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
-        {person.craft && <span className="lab m-craft">{person.craft}</span>}
-        {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
-        {person.id === me && <Link to="/guild/members/?view=following" className="lab m-follows-link">Writers you follow →</Link>}
-        {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
-        {(site || handle || person.public_email) && (
-          <span className="m-pills">
-            {site && (
-              <a href={person.website!} target="_blank" rel="noopener noreferrer" aria-label={`Website: ${site} (opens in a new tab)`}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.8 3.8 5.8 3.8 9s-1.2 6.2-3.8 9c-2.6-2.8-3.8-5.8-3.8-9S9.4 5.8 12 3z" /></svg>
-                <span>{site}</span>
-              </a>
+        {/* The cover: one of the house's ten photographs, chosen by the member (lib/covers.ts) */}
+        <div className="m-cover" aria-hidden="true" style={{ backgroundImage: `url(${cover.src})`, backgroundPosition: cover.pos }} />
+        <div className="m-id">
+          <Arch p={person} big />
+          <div className="m-id-text">
+            <span className={`eb ${roleClass(person.role)}`}>{roleLabel(person.role)}</span>
+            <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
+            <div className="m-id-row">
+              {person.craft && <span className="lab m-craft">{person.craft}</span>}
+              {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
+              {person.id === me && <Link to="/guild/members/?view=following" className="lab m-follows-link">Writers you follow →</Link>}
+            </div>
+            {person.bio ? <p className="m-bio">{person.bio}</p> : <p className="m-bio m-bio-empty">No words of introduction yet.</p>}
+            {(site || handle || person.public_email) && (
+              <span className="m-pills">
+                {site && (
+                  <a href={person.website!} target="_blank" rel="noopener noreferrer" aria-label={`Website: ${site} (opens in a new tab)`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.8 3.8 5.8 3.8 9s-1.2 6.2-3.8 9c-2.6-2.8-3.8-5.8-3.8-9S9.4 5.8 12 3z" /></svg>
+                    <span>{site}</span>
+                  </a>
+                )}
+                {handle && (
+                  <a href={`https://instagram.com/${handle}`} target="_blank" rel="noopener noreferrer" aria-label={`Instagram: @${handle} (opens in a new tab)`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none" /></svg>
+                    <span>@{handle}</span>
+                  </a>
+                )}
+                {person.public_email && (
+                  <a href={`mailto:${person.public_email}`} aria-label={`Email ${person.public_email}`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="M3.5 6.5 12 13l8.5-6.5" /></svg>
+                    <span className="m-mail">{person.public_email}</span>
+                  </a>
+                )}
+              </span>
             )}
-            {handle && (
-              <a href={`https://instagram.com/${handle}`} target="_blank" rel="noopener noreferrer" aria-label={`Instagram: @${handle} (opens in a new tab)`}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none" /></svg>
-                <span>@{handle}</span>
-              </a>
+          </div>
+          <div className="m-id-side">
+            {person.id !== me && (
+              <nav className="m-actions" aria-label="Contact">
+                <button type="button" className="m-act primary" onClick={async () => {
+                  const { data, error } = await supabase.rpc('dm_open', { other: person.id });
+                  if (error) { alert(error.message); return; }
+                  go(`/guild/members/?dm=${data}`);
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
+                  Message {person.display_name.split(' ')[0]}
+                </button>
+                {!fellow && <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />}
+                {iAmChief && person.id !== me && person.role !== 'editor' && (
+                  <button type="button" className="m-act" onClick={async () => {
+                    const on = person.role !== 'staff';
+                    if (!confirm(on ? `Make ${person.display_name} an editor? They will share your editor's tools: reading and publishing pieces, Arrivals, reports and the forum's keys. Only you can appoint or remove editors.` : `Remove ${person.display_name} as an editor? They return to being a member of the Guild, and anything waiting with them goes back into the rotation.`)) return;
+                    const { error } = await supabase.rpc('set_staff', { member: person.id, on_staff: on });
+                    if (error) alert(error.message); else location.reload();
+                  }}>{person.role === 'staff' ? 'Remove as editor' : 'Make an editor'}</button>
+                )}
+                {fellow && iAmEditor && (
+                  <button type="button" className="m-act" onClick={async () => {
+                    if (!confirm(`Welcome ${person.display_name} into the Guild? They will be able to write and send work to you.`)) return;
+                    const { error } = await supabase.rpc('welcome_to_guild', { person: person.id });
+                    if (error) alert(error.message); else location.reload();
+                  }}>Welcome into the Guild</button>
+                )}
+              </nav>
             )}
-            {person.public_email && (
-              <a href={`mailto:${person.public_email}`} aria-label={`Email ${person.public_email}`}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="M3.5 6.5 12 13l8.5-6.5" /></svg>
-                <span className="m-mail">{person.public_email}</span>
-              </a>
+            {person.id === me && (
+              <nav className="m-actions" aria-label="My Desk">
+                {fellow ? <a className="m-act primary" href="/guild/desk/">My desk</a> : <>
+                <a className="m-act primary" href="/guild/desk/#write">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
+                  Write a piece
+                </a></>}
+                <a className="m-act" href="/guild/desk/#my-page">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+                  Edit your vault
+                </a>
+                {fellow ? <a className="m-act" href={`/collection/?of=${person.id}`}>Public page</a>
+                  : work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
+                <button type="button" className="m-signout lab" onClick={async () => { rememberMember(null); await supabase.auth.signOut(); location.href = '/guild/desk/'; }}>Sign out</button>
+              </nav>
             )}
-          </span>
-        )}
-        {person.id !== me && (
-          <nav className="m-actions" aria-label="Contact">
-            <button type="button" className="m-act primary" onClick={async () => {
-              const { data, error } = await supabase.rpc('dm_open', { other: person.id });
-              if (error) { alert(error.message); return; }
-              go(`/guild/members/?dm=${data}`);
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg>
-              Message {person.display_name.split(' ')[0]}
-            </button>
-            {!fellow && <FollowButton me={me} them={person.id} first={person.display_name.split(' ')[0]} />}
-            {iAmChief && person.id !== me && person.role !== 'editor' && (
-              <button type="button" className="m-act" onClick={async () => {
-                const on = person.role !== 'staff';
-                if (!confirm(on ? `Make ${person.display_name} an editor? They will share your editor's tools: reading and publishing pieces, Arrivals, reports and the forum's keys. Only you can appoint or remove editors.` : `Remove ${person.display_name} as an editor? They return to being a member of the Guild, and anything waiting with them goes back into the rotation.`)) return;
-                const { error } = await supabase.rpc('set_staff', { member: person.id, on_staff: on });
-                if (error) alert(error.message); else location.reload();
-              }}>{person.role === 'staff' ? 'Remove as editor' : 'Make an editor'}</button>
-            )}
-            {fellow && iAmEditor && (
-              <button type="button" className="m-act" onClick={async () => {
-                if (!confirm(`Welcome ${person.display_name} into the Guild? They will be able to write and send work to you.`)) return;
-                const { error } = await supabase.rpc('welcome_to_guild', { person: person.id });
-                if (error) alert(error.message); else location.reload();
-              }}>Welcome into the Guild</button>
-            )}
-          </nav>
-        )}
-        {person.id === me && (
-          <nav className="m-actions" aria-label="My Desk">
-            {fellow ? <a className="m-act primary" href="/guild/desk/">My desk</a> : <>
-            <a className="m-act primary" href="/guild/desk/#write">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>
-              Write a piece
-            </a></>}
-            <a className="m-act" href="/guild/desk/#my-page">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-              Edit your vault
-            </a>
-            {fellow ? <a className="m-act" href={`/collection/?of=${person.id}`}>Public page</a>
-              : work.length > 0 && <a className="m-act" href={`/guild/authors/${authorSlug(person.display_name)}/`}>Public page</a>}
-            <button type="button" className="m-signout lab" onClick={async () => { rememberMember(null); await supabase.auth.signOut(); location.href = '/guild/desk/'; }}>Sign out</button>
-          </nav>
-        )}
+          </div>
+        </div>
       </header>
       {fellow ? (<>
         <FellowShelf id={person.id} first={person.display_name.split(' ')[0]} mine={person.id === me} />
