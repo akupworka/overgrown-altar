@@ -53,6 +53,14 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <a href="/guild/desk/" class="member" data-member data-vault>
         <span class="member-av" aria-hidden="true"></span><span class="member-label">Vault</span>
       </a>
+      <!-- Phones: your picture (your vault) sits in the bar at the foot of the screen, so this pill is the house instead:
+           the Guild for its members and editors, The Way for the Fellowship. Same shape as the Vault pill. -->
+      <a href="/guild/members/" class="member room-pill for-guild" data-member data-room="members" hidden aria-label="The Guild">
+        <span class="room-av" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span class="member-label">Guild</span>
+      </a>
+      <a href="/guild/members/?view=way" class="member room-pill for-fellow" data-member data-room="way" hidden aria-label="The Way">
+        <span class="room-av" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19c-4.6 0-7.5-4-7.5-8 0 0 2.9-4.6 7.5-4.6s7.5 4.6 7.5 4.6c0 4-2.9 8-7.5 8z" /><path d="M12 19V7M8.6 18l-1.8-9M15.4 18l1.8-9" /></svg></span><span class="member-label">The Way</span>
+      </a>
       <a href="/menu" class="menu-link" aria-label="Menu">
         <span class="menu-word">Menu</span>
         <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -93,8 +101,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       <a href="/guild/members/?view=forum" data-match="forum" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg></span><span>Forum</span></a>
       <a href="/search/" data-match="explore" class="t-write t-explore"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4-4" /></svg></span><span>Explore</span></a>
       <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg><span class="gbar-n" data-inbox-dot hidden></span></span><span>Inbox</span></a>
-      <a href="/guild/members/?view=way" data-match="way" data-spa class="for-fellow"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19c-4.6 0-7.5-4-7.5-8 0 0 2.9-4.6 7.5-4.6s7.5 4.6 7.5 4.6c0 4-2.9 8-7.5 8z" /><path d="M12 19V7M8.6 18l-1.8-9M15.4 18l1.8-9" /></svg></span><span>The Way</span></a>
-      <a href="/guild/members/" data-match="members" data-spa class="for-guild"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span>Guild</span></a>
+      <!-- The last place is you: your picture opens your vault (the Guild, or The Way, is the pill in the header) -->
+      <a href="/guild/members/" data-match="me" data-spa data-vault class="t-me"><span class="d-tabbar-icon"><span class="member-av gbar-av" aria-hidden="true"></span></span><span>Vault</span></a>
       
     </nav>
 )}
@@ -228,6 +236,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       // Writing happens at the Desk, so the Desk stays lit while you write.
       const tab = now === 'prestige' ? 'members' : now === 'write' ? 'desk' : now;
       gbar?.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => { a.classList.toggle('on', a.dataset.match === tab); a.toggleAttribute('aria-current', a.dataset.match === tab); });
+      // The header's house pill (phones) is lit in the Guild's rooms, or on The Way.
+      document.querySelectorAll<HTMLElement>('[data-room]').forEach((a) => { if (a.dataset.room === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     };
     mark();
     addEventListener('popstate', mark); addEventListener('hashchange', mark);
@@ -358,6 +368,12 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   .member-av { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center;
     background: #14180F; box-shadow: 0 0 0 1px rgba(159, 148, 94, .8); color: var(--ember); font-family: var(--serif); font-size: 12px; letter-spacing: .04em; text-transform: none; }
   .member-av img { width: 100%; height: 100%; object-fit: cover; }
+  .room-pill { display: none; }
+  .room-av { width: 28px; height: 28px; border-radius: 50%; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #14180F; box-shadow: 0 0 0 1px rgba(159, 148, 94, .8); color: var(--ember); }
+  @media (max-width: 700px) {
+    .room-pill:not([hidden]) { display: inline-flex; }
+    .member[data-vault] { display: none; }   /* on phones your vault is your picture in the bar below */
+  }
   /* Members online now */
   .online { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; margin-right: 10px; border-radius: 999px; color: var(--muted-dark, #CFC8B8);
     font-size: 10px; letter-spacing: .16em; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(243,236,220,.16); transition: box-shadow .3s, color .3s; }
