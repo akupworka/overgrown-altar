@@ -262,7 +262,8 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const gone = useLibraryGone();
   if (person === undefined) return <p className="lab mut d-loading">Opening the page…</p>;
   if (person === null) return <div className="m-gate"><p className="it mut d-empty">This member’s page could not be found.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
-  const site = (person.website ?? '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+  // Only a real web address becomes a link (the form adds https://; anything else, such as a script, is never shown).
+  const site = /^https?:\/\//i.test(person.website ?? '') ? (person.website ?? '').replace(/^https?:\/\//i, '').replace(/^www\./, '').replace(/\/$/, '') : '';
   const handle = (person.instagram ?? '').replace(/^@/, '');
   const fellow = person.role === 'fellow';   // the Fellowship: a collection instead of work and prestige
   const iAmEditor = (() => { try { return !!JSON.parse(localStorage.getItem('oa_member') || '{}').editor && !viewAs(); } catch { return false; } })();

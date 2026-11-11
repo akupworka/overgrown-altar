@@ -9,13 +9,28 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
       with an email service and a change to the sign-in email settings (ask the owner first; it touches auth).
 - [ ] **Backups.** The free Supabase plan keeps none. Move to Pro ($25 a month) before real members store real work.
       Pro also stops the project being paused after a quiet week.
-- [ ] **Take the sample data off.** 46 sample members and everything they made
+- [ ] **Take the sample data off.** 56 sample members (46 from before, and the 10 mock members of 11 Nov who wrote,
+      posted, tagged and messaged) and everything they made
       (`delete from auth.users where raw_app_meta_data->>'sample' = 'true'`, after fixing forum threads' last authors as
       was done when half were removed), and the 25 mock pieces on the owner's own account
       (`pieces.sanity_id like 'mock-desk-%'`). This also clears the test notifications and the sample Workshop draft.
 - [ ] **Decide about the two extra Watchman profiles** ("Watchman (Guild)", "Watchman (Fellow)"): keep for testing or remove.
 - [ ] **Open the lock.** Set `SITE_PUBLIC=true` in Netlify's environment variables and redeploy. Then check the site is
       no longer hidden from search engines, and that the "Opening soon" door is no longer what visitors meet.
+
+## Found by the mock members (11 Nov 2026): rules the database should enforce, not only the forms
+The site's own forms prevent each of these; someone writing straight to the database with their own sign-in could do them.
+- [ ] A member's name can be saved empty, or hundreds of characters long; a bio has no length limit. Add limits.
+- [ ] A web address can be saved as something other than a web address. (It is no longer shown as a link unless it
+      starts with http, but the database should refuse it too.)
+- [ ] A piece can be sent to the editor with no title and no words; a photograph with no picture. Require them on sending.
+- [ ] Nothing slows a flood: 40 forum replies or 30 new threads in one second, or hundreds of messages to one person
+      (one member could fill the Editor in Chief's inbox, 1,000 messages, so nobody else can write to him). Add a
+      gentle limit per minute.
+- [ ] Decide: editors (staff included) can read every member's unsent drafts in the database, though the Desk never
+      shows them. Keep, or close it so drafts are private until sent or shared.
+- [ ] Decide: a writer can keep rewriting a piece while it is with the editor. Keep, or freeze it until it comes back.
+- [ ] The 5-photographs-a-month limit was not tested (it needs approved photographs to count).
 
 ## Should be done (capacity and cost)
 - [ ] **Netlify builds.** Builds were being capped during development. Check the plan's monthly build allowance against

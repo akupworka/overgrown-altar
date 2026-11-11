@@ -3,7 +3,8 @@
 // (never an emoji, which phones would turn into colored boxes).
 interface Props { website?: string; instagram?: string; email?: string; tone?: 'paper' | 'dark' }
 const { website = '', instagram = '', email = '', tone = 'paper' } = Astro.props;
-const site = website.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+// Only a real web address becomes a link (the form adds https://; anything else, such as a script, is never shown).
+const site = /^https?:\/\//i.test(website) ? website.replace(/^https?:\/\//i, '').replace(/^www\./, '').replace(/\/$/, '') : '';
 const handle = instagram.replace(/^@/, '');
 ---
 {(site || handle || email) && (
