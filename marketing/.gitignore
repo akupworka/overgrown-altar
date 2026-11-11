@@ -1,0 +1,12 @@
+# what the makers produce (films and pictures are not kept in the repo)
+out/
+posts/
+coming-soon/
+frames-*/
+chk/
+marks.json
+ad.html
+posts.html
+soon.html
+tour.cjs
+*.log
