@@ -1,7 +1,8 @@
-// "Share as a card": a line from a piece (or its title), drawn on a tall card for Instagram or messages:
-// the piece's photograph darkened like glass at night, the line in Cormorant, the title, the writer, the wordmark.
+// "Social post": a piece made into a tall picture for Instagram or messages, set like a small advertisement for it:
+// the piece's photograph darkened like glass at night, its title and the line beneath it (or a line the reader chose),
+// the writer, and "Read it on Overgrown Altar".
 // Drawn in the reader's browser; on a phone it opens the share sheet, on a computer it saves the picture.
-export interface CardInput { quote: string; title: string; author: string; kicker: string; image?: string; fallback: string }
+export interface CardInput { quote: string; title: string; author: string; kicker: string; image?: string; fallback: string; standfirst?: string }
 const W = 1080, H = 1350;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -15,6 +16,14 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[
   }
   if (line) lines.push(line);
   return lines;
+}
+/** The same number of lines, evened out, so no line is left with a single word. */
+function balanced(ctx: CanvasRenderingContext2D, text: string, max: number): string[] {
+  const lines = wrap(ctx, text, max);
+  if (lines.length < 2) return lines;
+  let lo = max / 2, hi = max;
+  for (let i = 0; i < 12; i++) { const mid = (lo + hi) / 2; if (wrap(ctx, text, mid).length <= lines.length) hi = mid; else lo = mid; }
+  return wrap(ctx, text, hi);
 }
 function spaced(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, gap: number) {
   // letter-spaced capitals, centred on x (canvas letterSpacing isn't everywhere yet)
@@ -38,23 +47,35 @@ export async function drawCard(c: CardInput): Promise<Blob> {
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     // the cross
     ctx.strokeStyle = '#FFE3A3'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(W / 2, 150); ctx.lineTo(W / 2, 214); ctx.moveTo(W / 2 - 17, 170); ctx.lineTo(W / 2 + 17, 170); ctx.stroke();
-    // the line itself, sized to fit
-    const quote = c.quote.trim().replace(/\s+/g, ' ');
+    // the title (or the chosen line), sized to fit; under a title, the piece's own line beneath it (its sub caption)
+    const quote = c.quote.trim().replace(/\s+/g, ' '), isTitle = c.quote === c.title;
+    const sub = isTitle ? (c.standfirst ?? '').trim().replace(/\s+/g, ' ') : '';
+    ctx.font = 'italic 400 38px Cormorant, serif';
+    let subLines = sub ? wrap(ctx, sub, W - 260) : [];
+    if (subLines.length && subLines.length <= 3) subLines = balanced(ctx, sub, W - 260);
+    if (subLines.length > 3) { subLines = subLines.slice(0, 3); subLines[2] = subLines[2].replace(/[\s,;:.]+\S*$/, '') + '…'; }
+    const subH = subLines.length ? 44 + subLines.length * 50 : 0, room = 640 - subH;
     let size = quote.length > 220 ? 46 : quote.length > 140 ? 54 : quote.length > 70 ? 64 : 78, lines: string[] = [];
-    for (; size >= 34; size -= 4) { ctx.font = `500 ${size}px Cormorant, serif`; lines = wrap(ctx, quote, W - 220); if (lines.length * size * 1.28 <= 660) break; }
-    const lh = size * 1.28, top = 300 + (660 - lines.length * lh) / 2 + size;
-    ctx.fillStyle = '#F3ECDC'; lines.forEach((l, i) => ctx.fillText(l, W / 2, top + i * lh));
+    for (; size >= 34; size -= 4) { ctx.font = `500 ${size}px Cormorant, serif`; lines = balanced(ctx, quote, W - 220); if (lines.length * size * 1.28 <= room) break; }
+    const lh = size * 1.28, top = 300 + (640 - subH - lines.length * lh) / 2 + size;
+    ctx.font = `500 ${size}px Cormorant, serif`; ctx.fillStyle = '#F3ECDC'; lines.forEach((l, i) => ctx.fillText(l, W / 2, top + i * lh));
+    if (subLines.length) {
+      const y0 = top + (lines.length - 1) * lh + 44;
+      ctx.strokeStyle = 'rgba(255,227,163,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(W / 2 - 26, y0); ctx.lineTo(W / 2 + 26, y0); ctx.stroke();
+      ctx.font = 'italic 400 38px Cormorant, serif'; ctx.fillStyle = '#D9D2C2'; subLines.forEach((l, i) => ctx.fillText(l, W / 2, y0 + 58 + i * 50));
+    }
     // whose, and from what
     ctx.font = 'italic 400 40px Cormorant, serif'; ctx.fillStyle = '#E6DFD0';
-    const from = wrap(ctx, c.quote === c.title ? `by ${c.author}` : `${c.author}, “${c.title}”`, W - 240).slice(0, 2);
-    from.forEach((l, i) => ctx.fillText(l, W / 2, 1050 + i * 50));
+    const from = wrap(ctx, isTitle ? `by ${c.author}` : `${c.author}, “${c.title}”`, W - 240).slice(0, 2);
+    from.forEach((l, i) => ctx.fillText(l, W / 2, 1030 + i * 50));
     ctx.font = '400 19px "Alte Haas", sans-serif'; ctx.fillStyle = '#FFE3A3'; spaced(ctx, c.kicker.toUpperCase(), W / 2, 258, 7);
-    // glass line and wordmark
+    // the invitation, like the foot of an advertisement: glass line, "Read it on", the wordmark, the address
     const glass = ctx.createLinearGradient(W / 2 - 110, 0, W / 2 + 110, 0);
     ['#3E7BFF', '#B05BFF', '#FF3B4E', '#FFC44D', '#3DE0A0'].forEach((col, i) => glass.addColorStop(i / 4, col));
-    ctx.fillStyle = glass; ctx.fillRect(W / 2 - 110, 1196, 220, 3);
-    ctx.font = '500 26px Cormorant, serif'; ctx.fillStyle = '#CFC8B8'; spaced(ctx, 'OVERGROWN ALTAR', W / 2, 1250, 11);
-    ctx.font = '400 15px "Alte Haas", sans-serif'; ctx.fillStyle = '#8C8679'; spaced(ctx, 'OVERGROWNALTAR.COM', W / 2, 1286, 5);
+    ctx.fillStyle = glass; ctx.fillRect(W / 2 - 110, 1150, 220, 3);
+    ctx.font = '400 17px "Alte Haas", sans-serif'; ctx.fillStyle = '#FFE3A3'; spaced(ctx, 'READ IT ON', W / 2, 1196, 7);
+    ctx.font = '500 30px Cormorant, serif'; ctx.fillStyle = '#F3ECDC'; spaced(ctx, 'OVERGROWN ALTAR', W / 2, 1244, 12);
+    ctx.font = '400 15px "Alte Haas", sans-serif'; ctx.fillStyle = '#A9A293'; spaced(ctx, 'OVERGROWNALTAR.COM', W / 2, 1282, 5);
   };
   const blob = () => new Promise<Blob>((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('no image'))), 'image/jpeg', 0.9));
   let img: HTMLImageElement | null = null;

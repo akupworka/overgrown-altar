@@ -74,12 +74,12 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>
           <span>Share this {isPhoto ? 'photograph' : 'piece'}</span>
         </button>
-        <button type="button" class="gp-share-btn" data-card data-title={p.title} data-author={a.display_name} data-kicker={`${PILLAR_LABEL[p.pillar]} · ${MEDIUM_LABEL[p.medium] ?? ''}`} data-image={p.image || ''} data-fallback={FALLBACK[p.pillar] ?? FALLBACK.hearth}>
+        <button type="button" class="gp-share-btn" data-card data-title={p.title} data-standfirst={p.standfirst || ''} data-author={a.display_name} data-kicker={`${PILLAR_LABEL[p.pillar]} · ${MEDIUM_LABEL[p.medium] ?? ''}`} data-image={p.image || ''} data-fallback={FALLBACK[p.pillar] ?? FALLBACK.hearth}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5" /><path d="M9 9h6M9 12.5h6M9 16h3.5" /></svg>
-          <span data-card-label>Share as a card</span>
+          <span data-card-label>Make a social post</span>
         </button>
       </div>
-      {!isPhoto && <p class="lab gp-card-hint">Select any line above to put it on the card.</p>}
+      {!isPhoto && <p class="lab gp-card-hint">Select any line above to put it on the post.</p>}
 
       <aside class="gp-author" aria-label="About the author">
         <a class="gp-arch" href={aUrl} aria-hidden="true" tabindex="-1" data-author-id={a.id}><img src={a.portrait || seatFor(a.display_name)} alt="" loading="lazy" /></a>
@@ -129,7 +129,7 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
     }
   }
 
-  // Share as a card: the line you've selected (or, with nothing selected, the title) drawn on a card to share or save.
+  // A social post: the title with its sub caption (or the line you've selected) drawn as a tall picture to share or save.
   import { shareCard } from '../../lib/shareCard';
   const btn = document.querySelector<HTMLButtonElement>('[data-card]');
   const flow = document.querySelector<HTMLElement>('.gp-flow');
@@ -137,25 +137,25 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
     const label = btn.querySelector<HTMLElement>('[data-card-label]')!;
     let picked = '';   // the last line selected inside the piece (kept, because tapping the button clears the selection)
     const pill = document.createElement('button');
-    pill.type = 'button'; pill.className = 'gp-card-pill'; pill.hidden = true; pill.textContent = 'Share this line as a card';
+    pill.type = 'button'; pill.className = 'gp-card-pill'; pill.hidden = true; pill.textContent = 'Post this line';
     document.body.append(pill);
     document.addEventListener('selectionchange', () => {
       const sel = getSelection(); const text = sel && !sel.isCollapsed ? sel.toString().trim().replace(/\s+/g, ' ') : '';
       const inside = !!sel?.anchorNode && flow.contains(sel.anchorNode) && !(sel.anchorNode.parentElement?.closest('.gp-author, .gp-share, .pt, nav'));
-      if (text.length >= 12 && text.length <= 320 && inside) { picked = text; pill.hidden = false; label.textContent = 'Share your line as a card'; }
+      if (text.length >= 12 && text.length <= 320 && inside) { picked = text; pill.hidden = false; label.textContent = 'Post your line'; }
       else if (!text) pill.hidden = true;
     });
     const go = async (quote: string, el: HTMLElement, idle: string) => {
-      const d = btn.dataset; el.textContent = 'Making the card…';
+      const d = btn.dataset; el.textContent = 'Making the post…';
       try {
-        const out = await shareCard({ quote, title: d.title!, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback! });
+        const out = await shareCard({ quote, title: d.title!, standfirst: d.standfirst || undefined, author: d.author!, kicker: d.kicker!, image: d.image || undefined, fallback: d.fallback! });
         el.textContent = out === 'saved' ? 'Saved to your downloads' : idle;
-      } catch { el.textContent = 'The card couldn’t be made'; }
+      } catch { el.textContent = 'The post couldn’t be made'; }
       setTimeout(() => { el.textContent = idle; }, 2600);
     };
     pill.addEventListener('pointerdown', (e) => e.preventDefault());   // keep the selection while tapping
-    pill.addEventListener('click', () => { go(picked, pill, 'Share this line as a card').then(() => { pill.hidden = true; }); });
-    btn.addEventListener('click', () => go(picked || btn.dataset.title!, label, picked ? 'Share your line as a card' : 'Share as a card'));
+    pill.addEventListener('click', () => { go(picked, pill, 'Post this line').then(() => { pill.hidden = true; }); });
+    btn.addEventListener('click', () => go(picked || btn.dataset.title!, label, picked ? 'Post your line' : 'Make a social post'));
   }
 </script>
 

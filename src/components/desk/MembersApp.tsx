@@ -606,8 +606,8 @@ function FollowingNew({ me }: { me: string }) {
   );
 }
 
-/** Under a piece read inside the Guild: tell the writer it stayed with you, keep it, share it (its public link, or a card
- *  for Instagram and messages), and a way to its own page (where the reflections are). */
+/** Under a piece read inside the Guild: tell the writer it stayed with you, keep it, share it (its public link, or a social post:
+ *  a tall picture for Instagram and messages), and a way to its own page (where the reflections are). */
 const ROOM_PHOTO: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
 function ReadTools({ piece, author, photo }: { piece: Piece; author: string; photo: string }) {
   const [me, setMe] = useState<string | null>(null);
@@ -653,13 +653,13 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
     } catch { /* they closed the share sheet */ }
   };
   const shareAsCard = async () => {
-    setSaid((v) => ({ ...v, card: 'Making the card…' }));
+    setSaid((v) => ({ ...v, card: 'Making the post…' }));
     try {
       const { shareCard } = await import('../../lib/shareCard');
-      const out = await shareCard({ quote: piece.title, title: piece.title, author: author || 'A member', kicker: `${pillarName(piece.pillar)} · ${mediumName(piece.medium)}`,
+      const out = await shareCard({ quote: piece.title, title: piece.title, standfirst: piece.standfirst || undefined, author: author || 'A member', kicker: `${pillarName(piece.pillar)} · ${mediumName(piece.medium)}`,
         image: photo || undefined, fallback: ROOM_PHOTO[piece.pillar] ?? ROOM_PHOTO.hearth });
-      flash('card', out === 'saved' ? 'Card saved' : out === 'shared' ? 'Shared' : 'Share as a card');
-    } catch { flash('card', 'Couldn’t make the card'); }
+      flash('card', out === 'saved' ? 'Post saved' : out === 'shared' ? 'Shared' : 'Social post');
+    } catch { flash('card', 'Couldn’t make the post'); }
   };
   return (
     <div className="rt">
@@ -675,7 +675,7 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
           {said.link ?? `Share this ${kind}`}</button>
         <button type="button" className="rt-btn rt-half" onClick={shareAsCard}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.5" /><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" strokeLinecap="round" /></svg>
-          {said.card ?? 'Share as a card'}</button>
+          {said.card ?? 'Social post'}</button>
       </>}
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Read the reflections on its page →'}</a>}
     </div>
