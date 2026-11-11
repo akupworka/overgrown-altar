@@ -675,6 +675,10 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
           </button>
         </div>
       )}
+      {/* The same order as the Fellowship's Desk: the rooms to read in, then where you stand, then your own work. */}
+      <PillarTiles />
+      {/* Phones: your standing (wide screens show it in the column beside) */}
+      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {profile && !isEditor && (
         <Welcome portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
           sent={pieces.some((p) => p.status !== 'draft')} onWrite={() => onOpen(null)} />
@@ -735,15 +739,11 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
         )
       )}
       {(show !== 'all' || finding) && <DeskPages cur={cur} pages={pages} onGo={setPage} />}
-      {/* Read the Guild's work: the three pillars, one tap each */}
-      <PillarTiles />
       {/* What the Guild is talking about */}
       <section className="d-forum-panel">
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
         {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
-      {/* Phones: your standing (wide screens show it in the column beside) */}
-      <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {isEditor && <EditorTools />}
       {/* Phones: the side column is hidden, so Sign out lives at the foot of the Desk. */}
       <button type="button" className="d-signout-foot" onClick={() => { rememberMember(null); supabase.auth.signOut(); }}>
