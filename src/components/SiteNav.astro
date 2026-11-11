@@ -85,23 +85,18 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
   )}
 </header>
 {(
-    <!-- Phones: one bar at the foot of every page for members, the same for every member. Write sits in the middle.
+    <!-- Phones: one bar at the foot of every page for members, the same for every member. Explore sits in the middle;
+         writing and photographs begin from the top of the Desk.
          (The editor's Desk tab carries a gold dot when pieces or arrivals are waiting.) -->
     <nav class="d-tabbar gbar" aria-label="The Guild" data-gbar data-member>
       <a href="/guild/desk/" data-match="desk"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9" /></svg><span class="gbar-dot" data-gbar-dot hidden></span></span><span>Desk</span></a>
       <a href="/guild/members/?view=forum" data-match="forum" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4zM18 9h2v8h-1v3l-4-3h-5v-2" /></svg></span><span>Forum</span></a>
-      <a href="/guild/desk/#write" data-match="write" class="t-write" aria-haspopup="true" aria-expanded="false"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span><span>Write</span></a>
-      <!-- The Fellowship doesn't write: their centre button explores instead -->
       <a href="/search/" data-match="explore" class="t-write t-explore"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4-4" /></svg></span><span>Explore</span></a>
       <a href="/guild/members/?view=inbox" data-match="inbox" data-spa><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12.5" rx="1.5" /><path d="M4 7l8 6 8-6" /></svg><span class="gbar-n" data-inbox-dot hidden></span></span><span>Inbox</span></a>
       <a href="/guild/members/?view=way" data-match="way" data-spa class="for-fellow"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19c-4.6 0-7.5-4-7.5-8 0 0 2.9-4.6 7.5-4.6s7.5 4.6 7.5 4.6c0 4-2.9 8-7.5 8z" /><path d="M12 19V7M8.6 18l-1.8-9M15.4 18l1.8-9" /></svg></span><span>The Way</span></a>
       <a href="/guild/members/" data-match="members" data-spa class="for-guild"><span class="d-tabbar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg></span><span>Guild</span></a>
       
     </nav>
-    <div class="gbar-choose" data-gbar-choose hidden>
-      <a href="/guild/desk/#write" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg><span><b>Write a piece</b><i>Prose, poetry, essays, testimony</i></span></a>
-      <a href="/guild/desk/#photograph" class="gbar-opt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg><span><b>Submit a photograph</b><i>For the Gallery</i></span></a>
-    </div>
 )}
 <MenuPanel />
 
@@ -194,11 +189,9 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         : q.get('m') && q.get('m') === uid ? 'me' : 'members';
     };
     const gbar = document.querySelector<HTMLElement>('[data-gbar]');
-    // Pinned to the screen: move the bar (and its Write choice) to the page's outermost level, so no section it was
+    // Pinned to the screen: move the bar to the page's outermost level, so no section it was
     // written inside (a header photograph, a moving reveal) can carry it along as you scroll (iPhone Safari does).
     if (gbar && gbar.parentElement !== document.body) document.body.append(gbar);
-    const chooser = document.querySelector<HTMLElement>('[data-gbar-choose]');
-    if (chooser && chooser.parentElement !== document.body) document.body.append(chooser);
     // iPhone fault: after the keyboard has been up, the phone can keep measuring the screen as if it still were, and
     // anything pinned to the bottom floats up by the keyboard's height. Measure the real visible screen and, when the
     // phone has it wrong, pull the bar back down to the true bottom. (It only ever moves down, never above a keyboard.)
@@ -232,7 +225,8 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
       const now = here();
       inner.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => a.toggleAttribute('aria-current', a.dataset.match === now));
       // The phone bar has no Prestiges tab: the prestiges are one of the Guild's rooms.
-      const tab = now === 'prestige' ? 'members' : now;
+      // Writing happens at the Desk, so the Desk stays lit while you write.
+      const tab = now === 'prestige' ? 'members' : now === 'write' ? 'desk' : now;
       gbar?.querySelectorAll<HTMLElement>('[data-match]').forEach((a) => { a.classList.toggle('on', a.dataset.match === tab); a.toggleAttribute('aria-current', a.dataset.match === tab); });
     };
     mark();
@@ -260,16 +254,6 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         dispatchEvent(new PopStateEvent('popstate'));
       }
     };
-    const choose = document.querySelector<HTMLElement>('[data-gbar-choose]');
-    const writeTab = gbar?.querySelector<HTMLAnchorElement>('.t-write:not(.t-explore)');
-    const shut = () => { if (choose) choose.hidden = true; writeTab?.setAttribute('aria-expanded', 'false'); };
-    writeTab?.addEventListener('click', (e) => {
-      e.preventDefault(); e.stopPropagation();
-      const open = !!choose?.hidden; if (choose) choose.hidden = !open; writeTab.setAttribute('aria-expanded', String(open));
-    }, true);
-    choose?.addEventListener('click', (e) => { shut(); onNav(e as MouseEvent); });
-    document.addEventListener('click', (e) => { if (choose && !choose.hidden && !choose.contains(e.target as Node)) shut(); });
-    addEventListener('keydown', (e) => { if (e.key === 'Escape') shut(); });
     inner.addEventListener('click', onNav);
     gbar?.addEventListener('click', onNav);
   }

@@ -650,11 +650,12 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
             <span><b>{counts.published}</b> published</span><span><b>{counts.waiting}</b> with the editor</span><span><b>{counts.drafts}</b> {counts.drafts === 1 ? 'draft' : 'drafts'}</span>
           </p>
         </div>
-        <div className="d-begins">
-          <button type="button" className="btn d-btn d-begin" onClick={() => onOpen(null)}>Begin a new piece</button>
-          <button type="button" className="ghost d-btn d-begin-photo" onClick={() => onOpen(null, 'photograph')}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
-            Submit a photograph</button>
+        {/* Phones: writing and photographs begin here (computers have them in the column and the Guild bar) */}
+        <div className="d-begins ss-make" data-writer>
+          <a className="ss-write" href="/guild/desk/#write">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg>Write</a>
+          <a className="ss-photo" href="/guild/desk/#photograph">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></svg>Photograph</a>
         </div>
       </header>
       {/* The editor: what's waiting, first. Pieces to review, and new arrivals at the gate. */}

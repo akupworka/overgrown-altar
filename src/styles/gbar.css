@@ -18,7 +18,7 @@
   .gbar .d-tabbar-icon { position: relative; display: inline-flex; }
   .gbar-dot { position: absolute; top: -2px; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px #0E110D; }
   .gbar-dot[hidden] { display: none; }
-  /* Write: a dark glass disc, raised, ringed in stained glass that turns slowly */
+  /* The centre button (Explore): a dark glass disc, raised, ringed in stained glass that turns slowly */
   .gbar .t-write { color: var(--ember); }
   .gbar .t-write .d-tabbar-icon { width: 54px; height: 54px; margin-top: -32px; border-radius: 50%; align-items: center; justify-content: center;
     isolation: isolate; overflow: hidden; color: var(--ember); box-shadow: 0 0 0 5px #0E110D, 0 12px 28px rgba(0, 0, 0, .6); transition: transform .35s cubic-bezier(.16,1,.3,1); }
@@ -40,24 +40,12 @@
 @media (min-width: 701px) {
   html[data-member] main > section:first-child:not(.desk) { margin-top: 50px; }
 }
-/* Phones: tapping Write offers the two feeds */
-.gbar-choose { display: none; }
-@media (max-width: 700px) {
-  .gbar-choose:not([hidden]) { display: flex; flex-direction: column; gap: 6px; position: fixed; z-index: 45; left: 24px; right: 24px; bottom: calc(100px + env(safe-area-inset-bottom));
-    padding: 8px; border-radius: 18px; background: #12150F; box-shadow: inset 0 1px 0 rgba(255,236,190,.1), inset 0 0 0 1px rgba(255,227,163,.3), 0 24px 50px rgba(0,0,0,.7);
-    animation: gbar-rise .3s cubic-bezier(.16,1,.3,1); }
-  .gbar-opt { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; color: var(--ember); text-decoration: none; }
-  .gbar-opt:active { background: rgba(255,227,163,.07); }
-  .gbar-opt span { display: flex; flex-direction: column; gap: 2px; }
-  .gbar-opt b { font-family: var(--serif); font-weight: 400; font-size: 19px; color: var(--bone); }
-  .gbar-opt i { font-family: var(--serif); font-size: 14px; color: #A9A293; }
-}
 @keyframes gbar-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 /* Pulled back to the true bottom of the screen when the iPhone mismeasures it (see SiteNav) */
 @media (max-width: 700px) {
-  .gbar.d-tabbar, .gbar-choose:not([hidden]) { transform: translateY(var(--gbar-shift, 0px)); }
+  .gbar.d-tabbar { transform: translateY(var(--gbar-shift, 0px)); }
 }
-/* Phones, signed in: enough room at the foot of every page to clear the bar and the raised Write disc */
+/* Phones, signed in: enough room at the foot of every page to clear the bar and its raised centre disc */
 @media (max-width: 700px) {
   html[data-member] body { padding-bottom: 140px !important; }
   /* Pages that end in the footer: the footer's own dark fills the room for the bar, instead of a blank band below it */
@@ -74,9 +62,8 @@
   background: var(--ember); color: #12160F; font-family: var(--sans); font-size: 9px; letter-spacing: 0; box-shadow: 0 0 0 2px #0E110D; }
 .gbar-n[hidden] { display: none; }
 
-/* The Fellowship: no writing tools anywhere; the phone bar's centre button explores instead */
-html[data-fellow] :is(.gbar .t-write:not(.t-explore), .inner-write, .inner-photo, [data-writer]) { display: none !important; }
-html:not([data-fellow]) .gbar .t-explore { display: none !important; }
+/* The Fellowship: no writing tools anywhere. (The phone bar's centre button explores, for everyone.) */
+html[data-fellow] :is(.inner-write, .inner-photo, [data-writer]) { display: none !important; }
 /* The Fellowship has The Way instead of the Guild's rooms (Members, Prestiges); the Guild doesn't see The Way */
 html[data-fellow] .for-guild { display: none !important; }
 html:not([data-fellow]) .for-fellow { display: none !important; }
@@ -86,7 +73,6 @@ html:not([data-fellow]) .for-fellow { display: none !important; }
   .gbar.d-tabbar { left: 0 !important; right: 0 !important; bottom: 0 !important; height: calc(64px + env(safe-area-inset-bottom)) !important;
     padding: 0 6px env(safe-area-inset-bottom) !important; border-radius: 22px 22px 0 0 !important;
     background: rgba(12, 14, 11, .97) !important; box-shadow: inset 0 1px 0 rgba(243, 236, 220, .1), 0 -10px 30px rgba(0, 0, 0, .25) !important; }
-  .gbar-choose:not([hidden]) { bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
 }
 [data-inner] .inner-me { display: none !important; }   /* Profile (top right) is your page; the bar needn't repeat it */
 /* Explore, in gold beside The Way (the Fellowship's computer bar) */
