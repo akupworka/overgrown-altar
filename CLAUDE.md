@@ -11,6 +11,8 @@ Editor in Chief, a beginner. Phone screenshots are their main way of reporting. 
 - When they ask for something "elite" or "better", aim high and keep it clean: bold, simple shapes over fine detail.
 - Finish with one short plain-words report: what changed, where to see it, anything they must check on their
   iPhone. No code, no jargon. Lead with any decision they need to make.
+- They asked to be reminded before launch: when they mention opening the site or launching, walk them through
+  `PRELAUNCH.md` (and add to it whenever something is parked or left unverified).
 
 ## Visual identity (keep it)
 - Tokens and type in `src/styles/global.css`: `--night --dark --paper --bone --ink --ember --oxblood --brass`;
