@@ -42,6 +42,22 @@ const safeNext = (n: string | null) => (n && n.startsWith('/') && !n.startsWith(
 const go = (url: URL, to: string, headers: Record<string, string> = {}) =>
   new Response(null, { status: 303, headers: { Location: new URL(to, url).toString(), 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', ...headers } });
 
+// Shared links: the apps that draw a link's preview (Messages, WhatsApp, Slack, Instagram and the rest) are shown a
+// piece's share card even while the site is locked: its title, its one-line description and its picture, and nothing
+// else. The piece itself stays behind the door; a person following the link still meets the password screen.
+const PREVIEWERS = /facebookexternalhit|Facebot|Twitterbot|Slackbot|WhatsApp|TelegramBot|Discordbot|LinkedInBot|Pinterest|SkypeUriPreview|redditbot|Snapchat|Applebot|iMessage/i;
+const PIECE = /^\/guild\/(?!desk\/?$|members\/?$|authors(?:\/|$))[^/]+\/?$/;
+async function shareCardOnly(next: () => Promise<Response>): Promise<Response | null> {
+  const page = await next();
+  if (!page.ok || !(page.headers.get('content-type') ?? '').includes('text/html')) return null;
+  const head = (await page.text()).split(/<\/head>/i)[0];
+  const tags = [...(head.match(/<title>[^<]*<\/title>/i) ?? []),
+    ...(head.match(/<meta\s+(?:property="og:[^"]+"|name="(?:twitter:[^"]+|description)")\s+content="[^"]*"\s*\/?>/gi) ?? [])];
+  if (!tags.some((t) => t.includes('og:image'))) return null;
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8">${tags.join('')}<meta name="robots" content="noindex, nofollow"></head><body></body></html>`,
+    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
+}
+
 export default async (req: Request, context: { next: () => Promise<Response> }) => {
   if ((Netlify.env.get('SITE_PUBLIC') ?? '').toLowerCase() === 'true') return context.next();
 
@@ -67,7 +83,13 @@ export default async (req: Request, context: { next: () => Promise<Response> }) 
   }
 
   const unlocked = password && same(readCookie(req, COOKIE), await proof(password));
-  if (!unlocked) return go(url, `/enter/?next=${encodeURIComponent(here)}`);
+  if (!unlocked) {
+    if (req.method === 'GET' && PIECE.test(url.pathname) && PREVIEWERS.test(req.headers.get('user-agent') ?? '')) {
+      const card = await shareCardOnly(context.next);
+      if (card) return card;
+    }
+    return go(url, `/enter/?next=${encodeURIComponent(here)}`);
+  }
 
   const page = await context.next();
   const res = new Response(page.body, page);
@@ -81,5 +103,6 @@ export const config = {
   path: '/*',
   // The Guild Desk and members' pages stay reachable so invited members can sign in; their contents are protected by
   // their own sign-in and the database's rules, not by the site password.
-  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/favicon.ico', '/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png', '/robots.txt'],
+  // (/og/* holds the pieces' share cards: pictures made to be seen wherever a link is shared.)
+  excludedPath: ['/enter', '/enter/', '/guild/desk', '/guild/desk/', '/guild/members', '/guild/members/', '/_astro/*', '/fonts/*', '/images/*', '/og/*', '/favicon.ico', '/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png', '/robots.txt'],
 };
