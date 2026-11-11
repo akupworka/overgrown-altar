@@ -19,7 +19,7 @@ export const ROOMS: Room[] = [
     kinds: [
       { value: 'prose', name: 'Prose', plural: 'Prose', pillar: 'hearth',
         what: 'Short non-fiction from the heart: reflections, meditations, letters, small essays of place and memory.',
-        lookFor: 'One true thing, carefully seen; restraint; an ending that earns its quiet.', length: '400–2,000 words' },
+        lookFor: 'One true thing, carefully seen; restraint; an ending that earns its quiet.', length: '250–2,000 words' },
       { value: 'poetry', name: 'Poetry', plural: 'Poems', pillar: 'hearth',
         what: 'Poems, psalms and songs in any form, from strict meter to free verse.',
         lookFor: 'Every line doing work; images that are seen, not borrowed; sound read aloud before it is sent.', length: 'Any length; most under 60 lines' },
