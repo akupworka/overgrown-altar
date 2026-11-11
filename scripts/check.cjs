@@ -194,6 +194,8 @@ const up = () => fetch(BASE).then(() => true, () => false);
     if (opt('click')) for (const css of opt('click').split(';;')) { await page.click(css.trim()); await page.waitForTimeout(600); }
     if (opt('scroll')) { await page.locator(opt('scroll')).first().scrollIntoViewIfNeeded(); await page.evaluate((css) => document.querySelector(css)?.scrollIntoView({ block: 'start' }), opt('scroll')); await page.waitForTimeout(1500); }
     if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
+    // A whole-page picture: walk down the page first, so everything that fades in as you reach it has arrived.
+    if (flag('full')) { await page.evaluate(async () => { for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 180)); } scrollTo(0, 0); await new Promise((r) => setTimeout(r, 400)); }); }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     const file = path.join(out, `${name}.png`);
     await page.screenshot({ path: file, fullPage: flag('full') });

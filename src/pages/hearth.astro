@@ -40,7 +40,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
 
   <!-- The three kinds of writing, each a filter -->
   <section class="sec dark he-kinds-sec">
-    <span class="eb">What the fellowship makes</span>
+    <span class="eb">What the Guild makes</span>
     <div class="he-kinds">
       {KINDS.map((k) => (
         k.value === 'photograph' ? (
@@ -63,7 +63,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   <!-- The work, as a gallery -->
   <section class="sec paper" id="work">
     <div class="row" style="padding-bottom:22px">
-      <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the fellowship</span><h2 class="h2">The work</h2></div>
+      <div style="display:flex;flex-direction:column;gap:14px"><span class="eb">From the Guild</span><h2 class="h2">The work</h2></div>
       <span class="lab mut he-total">{works.length} {works.length === 1 ? 'piece' : 'pieces'} · newest first</span>
     </div>
     <div class="filters he-filters" role="group" aria-label="Show">
@@ -84,7 +84,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
           </li>
         ))}
       </ol>
-    ) : <p class="it mut" style="font-size:22px;margin:0">The first pieces from the fellowship are being written.</p>}
+    ) : <p class="it mut" style="font-size:22px;margin:0">The first pieces from the Guild are being written.</p>}
     <p class="it mut he-none" hidden>Nothing of this kind yet. The first one may be yours.</p>
     <nav class="pager he-pager" aria-label="Pages of work" hidden></nav>
   </section>
