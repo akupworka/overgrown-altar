@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase, portraitUrl, type Profile } from '../../lib/supabase';
 import { seatFor } from '../../lib/seats';
+import { CHAMBER_ON } from '../../lib/chamber';
 import '../../styles/chamber.css';
 
 type Side = 'for' | 'against';
@@ -151,7 +152,8 @@ function Manner() {
 // ---------------------------------------------------------------- the door, on other pages
 
 /** A band for the Guild page and the Forum: whether the Chamber is open, and the way in. */
-export function ChamberDoor() {
+export function ChamberDoor() { return CHAMBER_ON ? <ChamberDoorBand /> : null; }   // (off the site for now: lib/chamber.ts)
+function ChamberDoorBand() {
   const { hours, now } = useHours();
   const [n, setN] = useState<{ open: number; live: number } | null>(null);
   useTick(30000);

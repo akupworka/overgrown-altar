@@ -95,7 +95,8 @@ use still working:
 - The Gallery was 8px too wide on phones (the old check could not see it; the check now measures against the phone's
   own width).
 
-## The Disputation Chamber (built 11 Nov 2026; not yet tried by real people)
+## The Disputation Chamber (built 11 Nov 2026; taken off the site the same day, to return later)
+- It is hidden, not removed: `CHAMBER_ON` in `src/lib/chamber.ts` brings it back. The items below are for the day it returns.
 - [x] The Chamber's rules were tested against the real database on 11 Nov 2026, acting as pretend members (Saturday lock,
   turns, the clock, the closing concession, three motions a sitting, the chair's powers, the Fellowship kept to the gallery,
   direct writes refused). Every refusal held, and the test undid itself.

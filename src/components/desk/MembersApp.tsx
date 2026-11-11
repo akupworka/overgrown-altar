@@ -32,10 +32,13 @@ import { InboxList, InboxThread } from './Inbox';
 import { WorkshopNotes, SharedWithYou } from './Workshop';
 import { Library, LibraryVisibility, Shelf } from './Library';
 import { Chamber, Disputation, ChamberDoor } from './Chamber';
+import { CHAMBER_ON } from '../../lib/chamber';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string; dm?: string; d?: string };
 const readRoute = (): Route => {
   const q = new URLSearchParams(location.search);
+  // (while the Chamber is off the site, its addresses simply show the Guild: lib/chamber.ts)
+  if (!CHAMBER_ON) { q.delete('d'); if (q.get('view') === 'chamber') q.delete('view'); }
   return { m: q.get('m') ?? undefined, p: q.get('p') ?? undefined, view: q.get('view') ?? undefined, board: q.get('board') ?? undefined, t: q.get('t') ?? undefined, dm: q.get('dm') ?? undefined, d: q.get('d') ?? undefined };
 };
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '');

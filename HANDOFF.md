@@ -172,6 +172,10 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
   200 replies (`private.after_post`). Rules page: `?view=rules` (Forum.tsx).
 
 ## The Disputation Chamber (added 11 Nov 2026)
+- **OFF THE SITE FOR NOW** (the owner, 11 Nov 2026: "take it off the site for now, but we are going to have it in the future
+  and it's built"). One switch: `CHAMBER_ON` in `src/lib/chamber.ts`. While it is false the bar's button, the door on the Guild page
+  and the Forum, and the pages at `?view=chamber` / `?d=` are not shown. The database (tables, functions, sample disputations)
+  is untouched and still answers. To preview while off, set it true locally and use `scripts/check.cjs` as below.
 - What it is: friendly one-on-one debate between members, live, watched from a gallery. Open all Saturday by New York time
   (`America/New_York`); the editor may call a special sitting on another day (`chamber_sitting(hours)`, the button at the foot
   of the Chamber page). The owner chose: one-on-one, any member may open a room and another takes the seat, all day Saturday,

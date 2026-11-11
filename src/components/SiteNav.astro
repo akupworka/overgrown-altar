@@ -6,6 +6,7 @@
 // Desktop shows the sections; smaller screens show Menu. The glowing Sign in is always there.
 import Monogram from './Monogram.astro';
 import MenuPanel from './MenuPanel.astro';
+import { CHAMBER_ON } from '../lib/chamber';
 import '../styles/gbar.css';
 
 const links = [
@@ -83,11 +84,13 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         <a href="/search/" data-match="explore" class="inner-explore"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4-4" /></svg>Explore</a>
         <a href="/guild/members/" data-match="me" data-spa data-my-page class="inner-me" aria-hidden="true" tabindex="-1"><svg class="inner-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" /></svg>My page</a>
       </div>
-      <!-- The Disputation Chamber: its own button at the far end, counting down to Saturday (or lit while the doors are open) -->
+      {/* The Disputation Chamber: its own button at the far end, counting down to Saturday (or lit while the doors are open). Off the site for now: lib/chamber.ts */}
+      {CHAMBER_ON && (
       <a href="/guild/members/?view=chamber" data-match="chamber" data-spa class="inner-chamber" data-chamber>
         <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 45V22C5 12 14 4 14 4s9 8 9 18v23z" fill="#F0C56E" /><path d="M25 45V22c0-10 9-18 9-18s9 8 9 18v23z" fill="#8DB3EA" /></svg>
         <span>Chamber</span><span class="inner-chamber-t" data-chamber-t></span>
       </a>
+      )}
     </nav>
   )}
 </header>
@@ -128,7 +131,7 @@ const inside = current.startsWith('/guild/desk') || current.startsWith('/guild/m
         });
         dot();
         // The Chamber's hours, for its button in the members' bar (asked once per visit to a page; the Chamber's own pages ask too).
-        supabase.rpc('chamber').then(({ data }) => { if (data && typeof data === 'object') dispatchEvent(new CustomEvent('oa-chamber-hours', { detail: data })); });
+        if (document.querySelector('[data-chamber]')) supabase.rpc('chamber').then(({ data }) => { if (data && typeof data === 'object') dispatchEvent(new CustomEvent('oa-chamber-hours', { detail: data })); });
         supabase.channel('inbox-dot').on('postgres_changes', { event: '*', schema: 'public', table: 'dm_threads' }, () => dot()).subscribe();
         room.on('presence', { event: 'sync' }, () => {
           const count = Object.keys(room.presenceState()).length;
