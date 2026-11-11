@@ -467,15 +467,18 @@ function Reading({ id }: { id: string }) {
       setPhoto((img as any)?.data?.signedUrl ?? '');
     })();
   }, [id]);
+  const from = new URLSearchParams(location.search).get('from') ?? '';   // where it was opened from, so Back returns there
   if (piece === undefined) return <p className="lab mut d-loading">Opening the piece…</p>;
   if (piece === null) return <div className="m-gate"><p className="it mut d-empty">This piece is not available.</p><Link className="d-link" to="/guild/members/">The Guild</Link></div>;
   return (
     <div className="m-reading">
       {piece.status !== 'approved'
         ? <Link className="m-back lab" to="/guild/members/">The Guild</Link>   /* a shared draft: back to where it was waiting */
-        : new URLSearchParams(location.search).get('from') === 'library'
+        : from === 'library'
           ? <Link className="m-back lab" to="/guild/members/?view=library">Your library</Link>   /* opened from the shelf: back to the shelf */
-          : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
+          : from.startsWith('shelf-')
+            ? <Link className="m-back lab" to={`/guild/members/?m=${from.slice(6)}`}>The library</Link>   /* a Fellowship member's shelves, on their page */
+            : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
       {piece.status !== 'approved' && <p className="lab ws-banner">A draft · not published · private to the Workshop</p>}
       <article className="d-paper" ref={paper}>
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
@@ -709,7 +712,7 @@ function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boo
         {items && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'}{mine ? ' · open for all to see' : ''}</span>}
       </div>
       {!items ? <p className="lab mut">Opening the library…</p>
-        : books.length ? <Shelf books={books} onRemove={mine ? async (pid) => { setGone((g) => new Set(g).add(pid)); await supabase.from('saves').delete().eq('member_id', id).eq('piece_id', pid); } : undefined} />
+        : books.length ? <Shelf books={books} from={`shelf-${id}`} onRemove={mine ? async (pid) => { setGone((g) => new Set(g).add(pid)); await supabase.from('saves').delete().eq('member_id', id).eq('piece_id', pid); } : undefined} />
         : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Save to library” on any piece or photograph you love, and it stands here.' : `${first} hasn’t kept anything yet.`}</p>}
     </section>
   );
