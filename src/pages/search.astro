@@ -127,6 +127,8 @@ import SiteNav from '../components/SiteNav.astro';
   }
   new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && !ex.hidden && deck.length) more(); }, { rootMargin: '600px 0px' }).observe(document.querySelector('.ex-foot')!);
   document.querySelector('.ex-shuffle')!.addEventListener('click', () => { explore(true); ex.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  // Pulling the page down at the top reshuffles the wall, instead of loading the page again (while searching, it loads afresh as usual).
+  addEventListener('oa:pull', (e) => { if (ex.hidden || !deck.length) return; e.preventDefault(); explore(true); });
 
   let wait = 0;
   input.addEventListener('input', () => { clearTimeout(wait); wait = window.setTimeout(run, 220); });

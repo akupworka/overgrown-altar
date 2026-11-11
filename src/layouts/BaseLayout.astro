@@ -154,9 +154,16 @@ const imageUrl = new URL(image, site).toString();
         }, { passive: true });
         addEventListener('touchend', () => {
           if (!active) return; active = false;
-          if (pull >= FULL) { ring.classList.add('spin'); setTimeout(() => location.reload(), 250); return; }
-          pull = 0; ring.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1), opacity .25s'; draw();
-          setTimeout(() => (ring.style.transition = ''), 400);
+          const settle = () => { pull = 0; ring.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1), opacity .25s'; draw(); setTimeout(() => (ring.style.transition = ''), 400); };
+          if (pull >= FULL) {
+            ring.classList.add('spin');
+            // A page may answer the pull itself (Explore reshuffles); otherwise the page is loaded afresh.
+            const own = !dispatchEvent(new CustomEvent('oa:pull', { cancelable: true }));
+            if (own) setTimeout(() => { ring.classList.remove('spin'); settle(); }, 650);
+            else setTimeout(() => location.reload(), 250);
+            return;
+          }
+          settle();
         });
       }
 
