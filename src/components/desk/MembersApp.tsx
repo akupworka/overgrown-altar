@@ -672,10 +672,10 @@ function ReadTools({ piece, author, photo }: { piece: Piece; author: string; pho
       {piece.slug && <>
         <button type="button" className="rt-btn rt-half" onClick={shareLink}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 15V4M8 7.5L12 4l4 3.5M6 12v7h12v-7" /></svg>
-          {said.link ?? `Share this ${kind}`}</button>
+          {said.link ?? <>Share<span className="rt-long"> this {kind}</span></>}</button>
         <button type="button" className="rt-btn rt-half" onClick={shareAsCard}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.5" /><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" strokeLinecap="round" /></svg>
-          {said.card ?? 'Social post'}</button>
+          {said.card ?? 'Share as a social post'}</button>
       </>}
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Read the reflections on its page →'}</a>}
     </div>

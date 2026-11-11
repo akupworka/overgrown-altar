@@ -68,15 +68,17 @@ export async function drawCard(c: CardInput): Promise<Blob> {
     // whose, and from what
     ctx.font = 'italic 400 40px Cormorant, serif'; ctx.fillStyle = '#E6DFD0';
     const from = wrap(ctx, isTitle ? `by ${c.author}` : `${c.author}, “${c.title}”`, W - 240).slice(0, 2);
-    from.forEach((l, i) => ctx.fillText(l, W / 2, 1030 + i * 50));
+    from.forEach((l, i) => ctx.fillText(l, W / 2, 1016 + i * 50));
     ctx.font = '400 19px "Alte Haas", sans-serif'; ctx.fillStyle = '#FFE3A3'; spaced(ctx, c.kicker.toUpperCase(), W / 2, 258, 7);
-    // the invitation, like the foot of an advertisement: glass line, "Read it on", the wordmark, the address
+    // the invitation, like the foot of an advertisement: the glass line, a "Read now" button, and where
     const glass = ctx.createLinearGradient(W / 2 - 110, 0, W / 2 + 110, 0);
     ['#3E7BFF', '#B05BFF', '#FF3B4E', '#FFC44D', '#3DE0A0'].forEach((col, i) => glass.addColorStop(i / 4, col));
-    ctx.fillStyle = glass; ctx.fillRect(W / 2 - 110, 1150, 220, 3);
-    ctx.font = '400 17px "Alte Haas", sans-serif'; ctx.fillStyle = '#FFE3A3'; spaced(ctx, 'READ IT ON', W / 2, 1196, 7);
-    ctx.font = '500 30px Cormorant, serif'; ctx.fillStyle = '#F3ECDC'; spaced(ctx, 'OVERGROWN ALTAR', W / 2, 1244, 12);
-    ctx.font = '400 15px "Alte Haas", sans-serif'; ctx.fillStyle = '#A9A293'; spaced(ctx, 'OVERGROWNALTAR.COM', W / 2, 1282, 5);
+    ctx.fillStyle = glass; ctx.fillRect(W / 2 - 110, 1128, 220, 3);
+    const bw = 300, bh = 62, bx = W / 2 - bw / 2, by = 1160, r = bh / 2;
+    ctx.beginPath(); ctx.moveTo(bx + r, by); ctx.lineTo(bx + bw - r, by); ctx.arc(bx + bw - r, by + r, r, -Math.PI / 2, Math.PI / 2); ctx.lineTo(bx + r, by + bh); ctx.arc(bx + r, by + r, r, Math.PI / 2, -Math.PI / 2); ctx.closePath();
+    ctx.fillStyle = '#FFE3A3'; ctx.fill();
+    ctx.font = '400 21px "Alte Haas", sans-serif'; ctx.fillStyle = '#12160F'; spaced(ctx, 'READ NOW', W / 2, by + bh / 2 + 8, 8);
+    ctx.font = '400 21px "Alte Haas", sans-serif'; ctx.fillStyle = '#F3ECDC'; spaced(ctx, 'OVERGROWNALTAR.COM', W / 2, 1276, 7);
   };
   const blob = () => new Promise<Blob>((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('no image'))), 'image/jpeg', 0.9));
   let img: HTMLImageElement | null = null;
@@ -93,7 +95,9 @@ export function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled
     const name = `${c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'overgrown-altar'}.jpg`;
     const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
     const touch = matchMedia('(pointer: coarse)').matches;
-    let url = '', file: File | null = null, did: 'shared' | 'saved' | 'cancelled' = 'cancelled';
+    // An iPhone or iPad lets a website reach Photos only through its own sheet (or a press and hold), so Save goes that way there.
+    const apple = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    let url = '', file: File | null = null, canShare = false, did: 'shared' | 'saved' | 'cancelled' = 'cancelled';
     const box = document.createElement('div');
     box.className = 'sp'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Your social post');
     box.innerHTML = `<div class="sp-in">
@@ -101,10 +105,10 @@ export function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled
       <span class="eb sp-k">Your social post</span>
       <div class="sp-frame"><span class="lab sp-wait">Making the post…</span></div>
       <div class="sp-acts" hidden>
-        <button type="button" class="sp-btn sp-share" data-sp-share hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M8 7.5L12 4l4 3.5M6 12v7h12v-7"/></svg>Share</button>
-        <a class="sp-btn sp-save" data-sp-save><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M8 11.5l4 3.5 4-3.5M6 19h12"/></svg>Save picture</a>
+        <a class="sp-btn sp-share" data-sp-save><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M8 11.5l4 3.5 4-3.5M6 19h12"/></svg>Save to images</a>
+        <button type="button" class="sp-btn sp-save" data-sp-share hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M8 7.5L12 4l4 3.5M6 12v7h12v-7"/></svg>Share</button>
       </div>
-      <span class="lab sp-hint" hidden>${touch ? 'Or press and hold the picture to save it to your photos.' : 'Saved pictures go to your downloads.'}</span>
+      <span class="lab sp-hint" hidden>${apple ? 'Choose “Save Image” when the sheet opens, or press and hold the picture.' : touch ? 'Or press and hold the picture to save it.' : 'It is saved with your downloads.'}</span>
     </div>`;
     const close = () => {
       box.remove(); document.documentElement.classList.remove('sp-open'); removeEventListener('keydown', onKey);
@@ -115,8 +119,12 @@ export function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled
     box.addEventListener('click', async (e) => {
       const t = e.target as HTMLElement;
       if (t === box || t.closest('[data-sp-close]')) return close();
-      if (t.closest('[data-sp-save]')) { did = 'saved'; return; }   // (the link itself saves the picture)
-      if (t.closest('[data-sp-share]') && file) { try { await nav.share({ files: [file] }); did = 'shared'; } catch { /* they closed the share sheet */ } }
+      const viaSheet = async (what: 'shared' | 'saved') => { try { await nav.share({ files: [file!] }); did = what; } catch { /* they closed the sheet */ } };
+      if (t.closest('[data-sp-save]')) {
+        if (apple && file && canShare) { e.preventDefault(); await viaSheet('saved'); } else did = 'saved';   // (elsewhere the link itself saves the picture)
+        return;
+      }
+      if (t.closest('[data-sp-share]') && file) await viaSheet('shared');
     });
     addEventListener('keydown', onKey);
     document.body.append(box); document.documentElement.classList.add('sp-open');
@@ -126,7 +134,8 @@ export function shareCard(c: CardInput): Promise<'shared' | 'saved' | 'cancelled
       const img = new Image(); img.src = url; img.alt = `${c.title}, by ${c.author}: a social post`; img.className = 'sp-img';
       box.querySelector('.sp-frame')!.replaceChildren(img);
       const save = box.querySelector<HTMLAnchorElement>('[data-sp-save]')!; save.href = url; save.download = name;
-      box.querySelector<HTMLElement>('[data-sp-share]')!.hidden = !(nav.canShare?.({ files: [file] }) && typeof nav.share === 'function');
+      canShare = !!nav.canShare?.({ files: [file] }) && typeof nav.share === 'function';
+      box.querySelector<HTMLElement>('[data-sp-share]')!.hidden = !canShare;
       box.querySelector<HTMLElement>('.sp-acts')!.hidden = false; box.querySelector<HTMLElement>('.sp-hint')!.hidden = false;
     }).catch(() => { const w = box.querySelector('.sp-wait'); if (w) w.textContent = 'The post couldn’t be made. Close this and try again.'; });
   });

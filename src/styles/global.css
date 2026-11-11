@@ -512,11 +512,11 @@ html.sp-open { overflow: hidden; }
 .sp-wait { color: #A9A293; }
 .sp-acts { display: flex; gap: 10px; width: 100%; justify-content: center; }
 .sp-acts[hidden], .sp-btn[hidden], .sp-hint[hidden] { display: none; }
-.sp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 22px; border: 0; border-radius: 999px; cursor: pointer; text-decoration: none;
-  font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; transition: background-color .25s, color .25s, box-shadow .25s; }
-.sp-share { flex: 1 1 0; max-width: 220px; background: var(--bone); color: #12160F; }
+.sp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; text-decoration: none;
+  background: none; white-space: nowrap; font-family: var(--sans); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; transition: background-color .25s, color .25s, box-shadow .25s; }
+.sp-share { flex: 1.5 1 0; max-width: 240px; background: var(--bone); color: #12160F; }   /* the main button: Save to images */
 .sp-share:hover, .sp-share:focus-visible { background: var(--ember); }
-.sp-save { flex: 1 1 0; max-width: 220px; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3); }
+.sp-save { flex: 1 1 0; max-width: 200px; color: var(--bone); box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3); }   /* beside it: Share */
 .sp-save:hover, .sp-save:focus-visible { color: var(--ember); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .6); }
 .sp-hint { font-size: 8.5px; color: #8C8679; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .sp { animation: none; } }
