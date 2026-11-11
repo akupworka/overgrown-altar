@@ -936,6 +936,8 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
       if (!form.title.trim() || !form.image_path) { setMsg('Give it a title and add the photograph before sending it to the editor.'); return; }
       if (words(form.body) < PHOTO_WORDS) { setMsg(`Write at least ${PHOTO_WORDS} words about your photograph before sending it: what you saw, what you felt, why it matters. (${words(form.body)} so far.)`); return; }
     } else if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
+    // Every written piece carries a subtitle: it is what readers see under the title on every card.
+    else if (!form.standfirst.trim()) { setMsg('Add a subtitle first: the one line under the title that tells a reader what this piece is.'); document.getElementById('d-standfirst')?.focus(); return; }
     if (live) {
       if (!confirm(isEditor ? 'Update the live piece on the site now?' : 'Send these changes to the editor? The live piece stays as it is until they are approved.')) return;
       if (await save()) onDone();
@@ -1042,8 +1044,8 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
       <label className="visually-hidden" htmlFor="d-title">Title</label>
       <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
         onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
-      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
-      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'One sentence: what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+      <label className="visually-hidden" htmlFor="d-standfirst">Subtitle</label>
+      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'Subtitle: one sentence on what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
       <section className="d-ph-sec">
         <h2 className="d-ph-h">The photograph</h2>
         {photo}
@@ -1095,8 +1097,8 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
       <label className="visually-hidden" htmlFor="d-title">Title</label>
       <textarea id="d-title" className="d-paper-title" rows={1} placeholder="Title" maxLength={200} value={form.title}
         onChange={(e) => { set('title', e.target.value); e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }} />
-      <label className="visually-hidden" htmlFor="d-standfirst">Standfirst</label>
-      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'One sentence: what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
+      <label className="visually-hidden" htmlFor="d-standfirst">Subtitle</label>
+      <textarea id="d-standfirst" className="d-paper-standfirst" rows={2} placeholder={isPhoto ? 'One line about the photograph (optional)' : 'Subtitle: one sentence on what this piece is'} maxLength={400} value={form.standfirst} onChange={(e) => set('standfirst', e.target.value)} />
       {toolsBar}
       <RichBody editor={rich} />
       <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>

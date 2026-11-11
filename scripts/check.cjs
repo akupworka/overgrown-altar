@@ -13,6 +13,7 @@
 //   --sabbath         the signed-in editor is on sabbath (otherwise the other editor is)
 //   --heavy           a very busy member: 40 members, 25 conversations (~300 messages), 6 forums × 40 threads, one at 200 replies
 //   --click "<css>"   click this before the screenshot (e.g. a tab or a rank); several in turn with ;; between them
+//   --then "<css>"    click this after --type has typed (e.g. Send, to see what the form answers)
 //   --scroll "<css>"  bring this into view before the screenshot (things that fade in as you reach them)
 //   --type "<css>|text"   type this into a field before the screenshot (the pretend name "Watchman" is taken)
 //   --width N         the computer's width (default 1280; the row of rooms in the header shows from 1321)
@@ -27,7 +28,7 @@ const os = require('os'), path = require('path'), fs = require('fs');
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : args[i + 1]; };
 const flag = (name) => args.includes('--' + name);
-const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll'];
+const VALUED = ['--as', '--pieces', '--only', '--click', '--out', '--width', '--type', '--scroll', '--then'];
 const target = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1]));
 if (!target) { console.log('Usage: node scripts/check.cjs <path> [--as editor|member|visitor] [--pieces N] [--only phone|computer] [--full] [--click "<css>"] [--out <dir>]'); process.exit(1); }
 const who = opt('as', 'editor');
@@ -193,7 +194,8 @@ const up = () => fetch(BASE).then(() => true, () => false);
     await page.waitForTimeout(1200);
     if (opt('click')) for (const css of opt('click').split(';;')) { await page.click(css.trim()); await page.waitForTimeout(600); }
     if (opt('scroll')) { await page.locator(opt('scroll')).first().scrollIntoViewIfNeeded(); await page.evaluate((css) => document.querySelector(css)?.scrollIntoView({ block: 'start' }), opt('scroll')); await page.waitForTimeout(1500); }
-    if (opt('type')) { const at = opt('type').lastIndexOf('|'), css = opt('type').slice(0, at); await page.fill(css, opt('type').slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
+    if (opt('type')) for (const one of opt('type').split(';;')) { const at = one.lastIndexOf('|'), css = one.slice(0, at).trim(); await page.fill(css, one.slice(at + 1)); await page.locator(css).scrollIntoViewIfNeeded(); await page.waitForTimeout(900); }
+    if (opt('then')) for (const css of opt('then').split(';;')) { await page.click(css.trim()); await page.waitForTimeout(700); }
     // A whole-page picture: walk down the page first, so everything that fades in as you reach it has arrived.
     if (flag('full')) { await page.evaluate(async () => { for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 180)); } scrollTo(0, 0); await new Promise((r) => setTimeout(r, 400)); }); }
     // (measured against the screen's own width: a phone quietly zooms out to fit a page that is too wide, which would hide it)

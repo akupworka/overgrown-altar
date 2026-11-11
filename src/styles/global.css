@@ -519,7 +519,7 @@ html.sp-open { overflow: hidden; }
 
 /* The kind of each piece, where a room lists several kinds (the Hearth, the Perimeter): bold, with a small pane of
    its own glass colour beside it. The same pane sits on the filter above, so the colours can be learned. */
-[data-kinds] li[data-tag] :is(.he-card-k, .kicker), [data-kinds] .chip[data-show]:not([data-show='all']) { font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+[data-kinds] li[data-tag] :is(.he-card-k, .kicker), [data-kinds] .chip[data-show]:not([data-show='all']) { display: inline-flex; align-items: center; gap: 8px; }
 [data-kinds] li[data-tag] :is(.he-card-k, .kicker) { color: var(--ink); }
 [data-kinds] li[data-tag] :is(.he-card-k, .kicker)::before, [data-kinds] .chip[data-show]:not([data-show='all'])::before {
   content: ''; flex: none; width: 8px; height: 8px; border-radius: 1.5px; transform: rotate(45deg); background: var(--kind, var(--oxblood)); }

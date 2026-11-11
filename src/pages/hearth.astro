@@ -78,8 +78,8 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
             <span class="he-card-cap">
               <span class="lab he-card-k">{w.kindLabel}</span>
               <a class="he-card-t" href={w.href}>{w.title}</a>
+              {w.standfirst && <span class="it he-card-sf">{w.standfirst}</span>}
             </span>
-            {w.standfirst && <span class="it he-card-sf">{w.standfirst}</span>}
             {w.authorHref
               ? <a class="he-card-by" href={w.authorHref}><Avatar name={w.author.display_name} src={w.author.portrait || undefined} size={24} id={w.author.id} /><span class="lab mut">{w.author.display_name}</span></a>
               : <span class="he-card-by"><Avatar name={w.author.display_name} src={w.author.portrait || undefined} size={24} /><span class="lab mut">{w.author.display_name}</span></span>}
@@ -193,7 +193,8 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .he-feat-go { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .4); padding-bottom: 3px; }
 
   /* Kinds */
-  .he-kinds { margin-top: 34px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(243, 236, 220, .14); }
+  .he-kinds-sec { padding-top: 72px; padding-bottom: 68px; }   /* a short band between the hero and the work, not a full section */
+  .he-kinds { margin-top: 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(243, 236, 220, .14); }
   .he-kind { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 26px 26px 24px; text-align: left; background: none; border: 0; border-bottom: 1px solid rgba(243, 236, 220, .14); color: inherit; cursor: pointer; }
   .he-kind:not(:nth-child(3n + 1)) { border-left: 1px solid rgba(243, 236, 220, .14); }
   .he-k { font-family: var(--serif); font-size: 27px; line-height: 1.1; transition: color .3s; }
@@ -221,14 +222,14 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
      the writer's name sits beneath. (Every card is the same height, whatever the length of its title.) */
   .he-grid li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; }
   .he-card-img { grid-area: 1 / 1; position: relative; margin: 0; }
-  .he-card-img::after { content: ''; position: absolute; inset: 30% 0 0; pointer-events: none;
-    background: linear-gradient(180deg, rgba(8, 10, 8, 0), rgba(8, 10, 8, .5) 42%, rgba(8, 10, 8, .93)); }
+  .he-card-img::after { content: ''; position: absolute; inset: 22% 0 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8, 10, 8, 0), rgba(8, 10, 8, .55) 40%, rgba(8, 10, 8, .94) 78%); }
   .he-card-cap { grid-area: 1 / 1; align-self: end; z-index: 1; display: flex; flex-direction: column; gap: 9px; padding: 0 20px 20px; pointer-events: none; }
   .he-card-cap > * { pointer-events: auto; }
   .he-card-cap .he-card-k { color: #F3ECDC !important; font-size: 9.5px; }
   .he-card-cap .he-card-t { color: #F6F0E2; font-size: 25px; line-height: 1.14; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 14px rgba(0, 0, 0, .55); }
   .he-card-cap .he-card-t:hover, .he-grid li:hover .he-card-cap .he-card-t { color: var(--ember); }
-  .he-grid .he-card-sf { display: none; }
+  .he-card-cap .he-card-sf { margin-top: -2px; color: #D6CFBF; font-size: 16px; line-height: 1.4; text-shadow: 0 1px 12px rgba(0, 0, 0, .6); }
   .he-grid .he-card-by { margin-top: 12px; }
   a.he-card-by:hover .lab { color: var(--oxblood); }
   .he-card-by .lab { font-size: 9px; }
@@ -285,9 +286,10 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     .he-n { display: none; }
         .he-grid { grid-template-columns: 1fr 1fr; gap: 30px 16px; }
     .he-card-t { font-size: 19px; }
-    .he-card-sf { display: none; }
-    .he-card-cap { padding: 0 12px 12px; gap: 6px; }
-    .he-card-cap .he-card-t { font-size: 17px; }
+    .he-card-img { aspect-ratio: 2 / 3; }
+    .he-card-cap { padding: 0 12px 13px; gap: 6px; }
+    .he-card-cap .he-card-t { font-size: 17px; -webkit-line-clamp: 2; }
+    .he-card-cap .he-card-sf { margin-top: 0; font-size: 13.5px; line-height: 1.35; }
     .he-card-cap .he-card-k { font-size: 8px; }
     .he-total { display: none; }
     .he-cta { flex-direction: column; align-items: stretch; width: min(100%, 300px); margin-left: auto; margin-right: auto; }
@@ -296,6 +298,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   .rf-short { display: none; }
   /* Phones: the three kinds as glass cards, even and centered; the craft link on one quiet line */
   @media (max-width: 700px) {
+    .he-kinds-sec { padding-top: 48px; padding-bottom: 46px; }
     .he-kinds-sec .eb { text-align: center; display: block; }
     .he-kinds { border-top: 0 !important; gap: 8px; margin-top: 22px; }
     .he-kind { align-items: center !important; text-align: center !important; padding: 20px 6px 18px !important; border: 0 !important; border-radius: 14px; gap: 8px !important;

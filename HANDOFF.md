@@ -188,7 +188,9 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 Found by acting as mock members; each was tested by a member trying it and by the ordinary use still working.
 - **Profiles**: name 1 to 80 letters, craft 120, bio 2,000, website must start with http(s). Nobody takes an editor's
   name (`public.name_taken(text)` lets the forms say "Taken"; `private.name_not_an_editors`).
-- **Pieces**: a waiting piece needs a title and its words or picture (`private.submission_complete`), is frozen for
+- **Pieces**: every written piece needs a subtitle before it is sent or published, and a subtitle cannot be emptied
+  afterwards (photographs are exempt: their one line stays optional). A waiting piece needs a title and its words or
+  picture (both rules in `private.submission_complete`), is frozen for
   its writer while waiting (`private.frozen_with_editor`; withdraw to edit), and a writer keeps at most 20 unfinished
   pieces. Drafts are private: editors read a piece only once it is sent (`pieces` policies; `private.editor_reads_file`).
 - **Published pieces** change only when an editor asks: `public.ask_for_changes(piece, note)` writes

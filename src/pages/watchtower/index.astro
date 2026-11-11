@@ -12,8 +12,7 @@ import Subscribe from '../../components/Subscribe.astro';
 import Avatar from '../../components/Avatar.astro';
 import DispatchList, { type DispatchItem } from '../../components/DispatchList.astro';
 import { inPillar } from '../../lib/catalog';
-import { authorUrl, guildPillar, guildUrl, type GuildAuthor } from '../../lib/guild';
-import { parseBody } from '../../lib/marks';
+import { authorUrl, guildPillar, type GuildAuthor } from '../../lib/guild';
 
 // Every dispatch: real pieces only (the design's complete essay, plus pieces published at the Guild Desk).
 const newestFirst: DispatchItem[] = await inPillar('watchtower');
@@ -21,13 +20,12 @@ const newest = newestFirst.slice(0, 3);           // the three newest, under arc
 const alsoNew = newestFirst.slice(3, 9);           // six more, three to a row
 const rest = newestFirst.slice(9);                 // everything earlier, as a searchable list
 
-// The writers of The Watchtower, and a line worth pausing on: the first pull quote (a "> " line) in the newest dispatches.
+// The writers of The Watchtower.
 const guildPieces = await guildPillar('watchtower');
 const writers = [...new Map(guildPieces.map((g) => [g.author.id, g.author] as [string, GuildAuthor])).values()].slice(0, 8);
-const quoted = guildPieces.map((g) => ({ g, q: parseBody(g.body).find((b) => b.type === 'quote') })).find((x) => x.q);
-const pull = quoted
-  ? { text: quoted.q!.text.replace(/\*+/g, ''), by: quoted.g.author.display_name, from: quoted.g.title, href: guildUrl(quoted.g) }
-  : { text: 'Broken pieces of a mirror that Christ holds whole.', by: '', from: 'The Core Thesis', href: '/manifesto' };
+// The line set large between the dispatches is the journal's own, and always the same: where every dispatch ends.
+// (It is not lifted from a piece: whatever happens to be newest should not get to speak for the whole room.)
+const pull = { text: 'The same truth holds again, whole, in the resurrection of Christ.', from: 'The Anchor', href: '/manifesto' };
 
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
@@ -105,13 +103,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     </ol>
   </section>
 
-  <!-- A line from the newest dispatches, set large -->
+  <!-- The journal's own line, set large -->
   <section class="hero wt-pull">
     <img src="/images/labyrinth-stained-light-1200.jpg" alt="" loading="lazy" aria-hidden="true" />
     <div class="veil"></div>
     <figure class="wt-pull-in">
-      <blockquote class="big-it">“{pull.text}”</blockquote>
-      <figcaption class="lab">{pull.by && <>{pull.by} · </>}<a href={pull.href}>{pull.from}</a></figcaption>
+      <blockquote class="big-it">{pull.text}</blockquote>
+      <figcaption class="lab"><a href={pull.href}>{pull.from}</a></figcaption>
     </figure>
   </section>
 
@@ -250,10 +248,10 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .method-go { margin-top: 52px; }
 
   /* The pull quote */
-  .wt-pull { min-height: 520px; display: flex; align-items: center; justify-content: center; }
+  .wt-pull { min-height: 440px; display: flex; align-items: center; justify-content: center; }
   .wt-pull > img { filter: brightness(.6); object-position: center 60%; }
   .wt-pull-in { position: relative; z-index: 1; margin: 0; padding: 80px 24px; max-width: 980px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 26px; }
-  .wt-pull-in blockquote { margin: 0; }
+  .wt-pull-in blockquote { margin: 0; font-size: clamp(44px, 4.4vw, 66px); line-height: 1.06; }
   .wt-pull-in figcaption { color: var(--ember); }
   .wt-pull-in figcaption a { border-bottom: 1px solid rgba(255, 227, 163, .4); }
 
