@@ -2289,3 +2289,5 @@ a.m-byline:hover { color: var(--oxblood); }
   .d-me-make .ss-write { min-height: 40px; padding: 0 16px 0 14px; gap: 8px; font-size: 9.5px; letter-spacing: .18em; }
   .d-me-make .ss-photo { min-height: 0; width: 40px; height: 40px; padding: 0; }
 }
+/* Phones: the Desk's page numbers sit close under the list they turn; the room is below them, before what follows */
+@media (max-width: 700px) { .d-home > .d-pager { margin-top: 0 !important; margin-bottom: 24px; } }

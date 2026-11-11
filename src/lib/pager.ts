@@ -1,7 +1,13 @@
 // Pages of a long list: six pieces to a page, with numbered pages that stay short however many there are.
-// pageList(5, 17) -> [1, '…', 4, 5, 6, '…', 17]
+// pageList(5, 17) -> [1, '…', 4, 5, 6, '…', 17] on computers; [3, 4, 5, 6, 7] on phones
 export const PER_PAGE = 6;
+// On phones: five numbers at a time, the current page in the middle where it can be (4 5 [6] 7 8); the arrows do the rest.
+const phone = () => typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches;
 export function pageList(current: number, total: number): (number | '…')[] {
+  if (phone()) {
+    const n = Math.min(5, total), start = Math.max(1, Math.min(current - 2, total - n + 1));
+    return Array.from({ length: n }, (_, i) => start + i);
+  }
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   const keep = new Set([1, total, current - 1, current, current + 1]);
   if (current <= 3) [2, 3, 4].forEach((n) => keep.add(n));
