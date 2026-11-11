@@ -459,7 +459,9 @@ function Reading({ id }: { id: string }) {
     <div className="m-reading">
       {piece.status !== 'approved'
         ? <Link className="m-back lab" to="/guild/members/">The Guild</Link>   /* a shared draft: back to where it was waiting */
-        : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
+        : new URLSearchParams(location.search).get('from') === 'library'
+          ? <Link className="m-back lab" to="/guild/members/?view=library">Your library</Link>   /* opened from the shelf: back to the shelf */
+          : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
       {piece.status !== 'approved' && <p className="lab ws-banner">A draft · not published · private to the Workshop</p>}
       <article className="d-paper">
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
@@ -475,7 +477,7 @@ function Reading({ id }: { id: string }) {
           </Link>
         )}
         {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
-        {piece.status === 'approved' && <ReadTools piece={piece} />}
+        {piece.status === 'approved' && <ReadTools piece={piece} author={author?.display_name ?? ''} photo={photo} />}
       </article>
       {piece.status !== 'approved' && <WorkshopNotes piece={piece} />}
     </div>
@@ -536,15 +538,17 @@ function FollowingNew({ me }: { me: string }) {
   );
 }
 
-/** Under a piece read inside the Guild: keep it, tell the writer it stayed with you, and a way to its own page
- *  (where the reflections are). Your own piece shows only the way to its page. */
-function ReadTools({ piece }: { piece: Piece }) {
+/** Under a piece read inside the Guild: tell the writer it stayed with you, keep it, share it (its public link, or a card
+ *  for Instagram and messages), and a way to its own page (where the reflections are). */
+const ROOM_PHOTO: Record<string, string> = { watchtower: '/images/watchtower-photo-1200.jpg', hearth: '/images/glass-2-1200.jpg', perimeter: '/images/chapel-and-cross-under-a-1200.jpg' };
+function ReadTools({ piece, author, photo }: { piece: Piece; author: string; photo: string }) {
   const [me, setMe] = useState<string | null>(null);
   // One library each: the Fellowship's stands on their page (`saves`); the Guild's and editors' is private (`library`)
   const shelf = typeof document !== 'undefined' && document.documentElement.hasAttribute('data-fellow') ? 'saves' : 'library';
   const [later, setLater] = useState(false);
   const [marked, setMarked] = useState(false);
   const [marks, setMarks] = useState(0);
+  const [said, setSaid] = useState<{ link?: string; card?: string }>({});
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -570,6 +574,25 @@ function ReadTools({ piece }: { piece: Piece }) {
     const { error } = on ? await supabase.from('piece_marks').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('piece_marks').delete().eq('member_id', me).eq('piece_id', piece.id);
     if (error) { setMarked(!on); setMarks((n) => n + (on ? -1 : 1)); }
   };
+  // Sharing gives out the piece's public page (this view is members only): the phone's share sheet, or the link copied.
+  const kind = piece.medium === 'photograph' ? 'photograph' : 'piece';
+  const flash = (k: 'link' | 'card', text: string) => { setSaid((v) => ({ ...v, [k]: text })); setTimeout(() => setSaid((v) => ({ ...v, [k]: undefined })), 2200); };
+  const shareLink = async () => {
+    const url = `${location.origin}/guild/${piece.slug}/`;
+    try {
+      if (navigator.share) await navigator.share({ title: `${piece.title}${author ? `, by ${author}` : ''}`, url });
+      else { await navigator.clipboard.writeText(url); flash('link', 'Link copied'); }
+    } catch { /* they closed the share sheet */ }
+  };
+  const shareAsCard = async () => {
+    setSaid((v) => ({ ...v, card: 'Making the card…' }));
+    try {
+      const { shareCard } = await import('../../lib/shareCard');
+      const out = await shareCard({ quote: piece.title, title: piece.title, author: author || 'A member', kicker: `${pillarName(piece.pillar)} · ${mediumName(piece.medium)}`,
+        image: photo || undefined, fallback: ROOM_PHOTO[piece.pillar] ?? ROOM_PHOTO.hearth });
+      flash('card', out === 'saved' ? 'Card saved' : out === 'shared' ? 'Shared' : 'Share as a card');
+    } catch { flash('card', 'Couldn’t make the card'); }
+  };
   return (
     <div className="rt">
       {!mine && <button type="button" className="rt-btn" aria-pressed={marked} onClick={toggleMark}>
@@ -578,6 +601,14 @@ function ReadTools({ piece }: { piece: Piece }) {
       <button type="button" className="rt-btn" aria-pressed={later} onClick={toggleLater}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={later ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
         {later ? 'Saved to library' : 'Save to library'}</button>
+      {piece.slug && <>
+        <button type="button" className="rt-btn rt-half" onClick={shareLink}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 15V4M8 7.5L12 4l4 3.5M6 12v7h12v-7" /></svg>
+          {said.link ?? `Share this ${kind}`}</button>
+        <button type="button" className="rt-btn rt-half" onClick={shareAsCard}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.5" /><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" strokeLinecap="round" /></svg>
+          {said.card ?? 'Share as a card'}</button>
+      </>}
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Read the reflections on its page →'}</a>}
     </div>
   );

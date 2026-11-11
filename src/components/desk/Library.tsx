@@ -13,13 +13,14 @@ type Book = NonNullable<ReturnType<typeof useCollection>>[number];
 // single page. Everything long-form (essays, fiction, testimony and the like, or prose that runs long) is a book.
 const shapeOf = (b: { medium: string; words?: number }) =>
   b.medium === 'photograph' ? ' lb-photo' : b.medium === 'poetry' || (b.medium === 'prose' && (b.words ?? 0) < 1000) ? ' lb-page' : '';
-/** Pieces standing on shelves: books, single pages and polaroids. `onRemove` adds the small × that takes one down. */
-export function Shelf({ books, onRemove }: { books: Book[]; onRemove?: (id: string) => void }) {
+/** Pieces standing on shelves: books, single pages and polaroids. `onRemove` adds the small × that takes one down;
+ *  `from` is remembered in the link, so the piece's back button returns to these shelves. */
+export function Shelf({ books, onRemove, from }: { books: Book[]; onRemove?: (id: string) => void; from?: string }) {
   return (
     <ol className="lb-shelf">
       {books.map((b) => (
         <li key={b.id} className={`lb-book${b.img ? '' : ' lb-plain'}${shapeOf(b)}`}>
-          <a href={`/guild/members/?p=${b.id}`} aria-label={`${b.title}, by ${b.who}`}>
+          <a href={`/guild/members/?p=${b.id}${from ? `&from=${from}` : ''}`} aria-label={`${b.title}, by ${b.who}`}>
             <img src={b.img || ROOM[(b as any).pillar] || ROOM.hearth} alt="" loading="lazy" style={b.img && b.image_focus ? { objectPosition: b.image_focus } : undefined} />
             <span className="lb-cover">
               <span className="lab lb-k">{MEDIUM[b.medium] ?? ''}</span>
@@ -60,7 +61,7 @@ export function Library({ me }: { me: string }) {
           <a className="lab lb-go" href="/search/">Explore the altar →</a>
         </div>
       ) : (
-        <Shelf books={books} onRemove={remove} />
+        <Shelf books={books} onRemove={remove} from="library" />
       )}
     </div>
   );
