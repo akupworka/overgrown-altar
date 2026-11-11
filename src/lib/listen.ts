@@ -12,16 +12,18 @@ export interface ListenOptions {
 
 const GOOD = ['Daniel', 'Serena', 'Samantha', 'Karen', 'Moira', 'Tessa', 'Google UK English Male', 'Google UK English Female', 'Google US English',
   'Microsoft Ryan', 'Microsoft Sonia', 'Microsoft Guy', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Libby'];
-/** The best English voice the device has: a known natural one first, an "enhanced" one where offered, never a novelty voice. */
-function pickVoice(): SpeechSynthesisVoice | null {
-  const en = speechSynthesis.getVoices().filter((v) => /^en[-_]/i.test(v.lang));
+/** The best English voice the device has: a known natural one first, an "enhanced" one where offered, never a novelty voice.
+ *  Voices that live on the device come before ones fetched over the network: Chrome's "Google" voices on a computer often
+ *  stay silent or cut out, so they are a last resort. `bad` holds voices that have already failed here. */
+function pickVoice(bad: Set<string>): SpeechSynthesisVoice | null {
+  const en = speechSynthesis.getVoices().filter((v) => /^en[-_]/i.test(v.lang) && !bad.has(v.voiceURI || v.name));
   if (!en.length) return null;
   const score = (v: SpeechSynthesisVoice) => {
     const at = GOOD.findIndex((n) => v.name.startsWith(n));
-    return (at >= 0 ? 100 - at : 0) + (/enhanced|premium|natural|neural/i.test(v.name) ? 60 : 0) + (v.default ? 5 : 0) + (v.localService ? 2 : 0);
+    return (at >= 0 ? 100 - at : 0) + (/enhanced|premium|natural|neural/i.test(v.name) ? 60 : 0) + (v.default ? 5 : 0) + (v.localService ? 30 : 0)
+      - (!v.localService && /^Google/i.test(v.name) ? 400 : 0);
   };
-  const best = [...en].sort((a, b) => score(b) - score(a))[0];
-  return score(best) > 5 ? best : (en.find((v) => v.default) ?? en.find((v) => /en[-_]US/i.test(v.lang)) ?? en[0]);
+  return [...en].sort((a, b) => score(b) - score(a))[0];
 }
 
 /** A block's words, a sentence or two at a time (short pieces keep the voice from cutting out on some browsers). Poems go line by line. */
@@ -55,6 +57,7 @@ export function initListen({ button, blocks, title, by }: ListenOptions): () => 
   button.hidden = false;
 
   let els: HTMLElement[] = [], chunks: Chunk[] = [], at = 0, token = 0, playing = false, rate = RATES[0], current: SpeechSynthesisUtterance | null = null;
+  const bad = new Set<string>(); let fails = 0, mute = false;   // voices that stayed silent here, and whether none is left
   let bar: HTMLElement | null = null;
   try { const r = Number(localStorage.getItem('oa_listen_rate')); if (RATES.includes(r)) rate = r; } catch {}
 
@@ -78,24 +81,41 @@ export function initListen({ button, blocks, title, by }: ListenOptions): () => 
     bar.querySelector('[data-ls-play]')!.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     bar.querySelector<HTMLElement>('[data-ls-fill]')!.style.transform = `scaleX(${chunks.length ? at / chunks.length : 0})`;
     bar.querySelector('[data-ls-rate]')!.textContent = `${rate}×`;
-    bar.querySelector('[data-ls-state]')!.textContent = playing ? 'Reading aloud' : at >= chunks.length ? 'The end' : 'Paused';
+    bar.querySelector('[data-ls-state]')!.textContent = mute ? 'No reading voice in this browser' : playing ? 'Reading aloud' : at >= chunks.length ? 'The end' : 'Paused';
     button.setAttribute('aria-pressed', String(!!bar));
     const word = button.querySelector('[data-listen-word]'); if (word) word.textContent = bar ? 'Listening' : 'Listen';
     mark();
   };
   const say = () => {
     if (at >= chunks.length) { playing = false; paint(); setTimeout(() => { if (!playing && at >= chunks.length) close(); }, 2400); return; }
-    const my = ++token, u = new SpeechSynthesisUtterance(chunks[at].text), voice = pickVoice();
+    const my = ++token, u = new SpeechSynthesisUtterance(chunks[at].text), voice = pickVoice(bad);
+    if (!voice && bad.size) { playing = false; mute = true; paint(); return; }   // every voice here has stayed silent
     if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
     u.rate = rate;
-    const next = () => { if (my !== token || !playing) return; at++; paint(); say(); };
+    let started = false, t1 = 0, t2 = 0;
+    const done = () => { clearTimeout(t1); clearTimeout(t2); };
+    const next = () => { if (my !== token || !playing) return; done(); fails = 0; at++; paint(); say(); };
+    // A voice that errors or stays silent (it happens with voices fetched over the network, on computers): set it aside and
+    // read the same words with the next best one. If nothing on this device will speak, say so instead of pretending.
+    const fail = () => {
+      if (my !== token || !playing) return; done();
+      if (voice) bad.add(voice.voiceURI || voice.name);
+      if (!voice || ++fails > 4) { playing = false; mute = true; token++; synth.cancel(); paint(); return; }
+      const mine = ++token; synth.cancel(); setTimeout(() => { if (mine === token && playing) say(); }, 140);
+    };
+    u.onstart = () => { started = true; };
     u.onend = next;
-    u.onerror = (e) => { if (my !== token) return; if ((e as SpeechSynthesisErrorEvent).error === 'interrupted' || (e as SpeechSynthesisErrorEvent).error === 'canceled') return; next(); };
+    u.onerror = (e) => { if (my !== token) return; const why = (e as SpeechSynthesisErrorEvent).error; if (why === 'interrupted' || why === 'canceled') return; fail(); };
+    if (voice && !voice.localService) {   // only network voices are watched; a device's own voice is left to speak in peace
+      t1 = window.setTimeout(() => { if (my === token && playing && !started) fail(); }, 4000);
+      t2 = window.setTimeout(() => { if (my === token && playing) fail(); }, 7000 + (u.text.length * 130) / rate);
+    }
     current = u;   // (kept, or some browsers forget the voice mid-sentence)
+    if (synth.paused) synth.resume();   // (a browser left paused by another page would queue this in silence)
     synth.speak(u);
   };
   const play = (from = at, afterStop = false) => {
-    at = Math.max(0, Math.min(from, chunks.length)); playing = true; paint();
+    at = Math.max(0, Math.min(from, chunks.length)); playing = true; mute = false; fails = 0; paint();
     if (afterStop) setTimeout(() => { if (playing) say(); }, 90); else say();   // a breath after stopping the last sentence, or some browsers drop the next
   };
   const hush = () => { token++; if (synth.speaking || synth.pending) synth.cancel(); };
