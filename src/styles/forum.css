@@ -480,7 +480,10 @@
   .fo-who-name { font-size: 17px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; }
   .fo-who > .pr, .fo-who > .wy-pill { grid-column: 1; grid-row: 2; margin: -4px 0 0 44px !important; padding: 0 !important; background: none !important; box-shadow: none !important; font-size: 8.5px; letter-spacing: .16em; gap: 5px; }
   .fo-who > .pr::before, .fo-who > .pr::after { display: none !important; }
-  .fo-who > .pr .pr-crest { display: none; }
+  /* the little crest stays; the rank's name wears the rank's own colour (no pill around it) */
+  .fo-who > .pr { color: color-mix(in srgb, var(--c) 82%, #fff) !important; font-weight: 700; gap: 6px !important; margin-left: 42px !important; }
+  .fo-who > .pr .pr-crest { display: inline-flex; width: 20px; height: 20px; margin: -4px 0 -4px 0; }
+  .fo-who > .pr[data-level='9'] { color: #C9A7FF !important; }
   .fo-who > .pr[data-level='10'] { color: #E7C35A; }
   .fo-who > .pr .pr-n, .fo-who > .wy-pill .wy-pill-n { font-size: 11px; }
   .fo-who > .rl { grid-column: 2; grid-row: 2; margin-top: -4px; font-size: 7.5px !important; letter-spacing: .16em; opacity: .75; white-space: nowrap; }
