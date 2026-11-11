@@ -16,7 +16,7 @@ import { prestigeFor, PRESTIGES, type Prestige } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
 import { seatFor } from '../../lib/seats';
 import { CROSS_PATH } from '../../lib/crossPath';
-import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, type Tier, type TrophyCtx } from '../../lib/trophies';
+import { TROPHIES, trophiesFor, finestFirst, trophySvg, TIER_LABEL, tierLabel, type Tier, type TrophyCtx } from '../../lib/trophies';
 import { RichBody, useRichBody, TOOL_LABELS, applyTool, isOn, insertPhoto } from './RichBody';
 import { PhotoFocus } from './PhotoFocus';
 import { ForumMineLatest, useForumTally } from './Forum';
@@ -424,7 +424,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
         {earned.length ? (
           <div className="d-standing-medals">
             {earned.slice(0, 3).map(({ trophy: t, tier }) => (
-              <span key={t.id} className="d-standing-medal" title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 60, tier)) }} />
+              <span key={t.id} className="d-standing-medal" title={`${t.name} · ${tierLabel(t, tier)}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 60, tier)) }} />
             ))}
           </div>
         ) : <span className="it d-standing-none">Trophies gather here as your work is published.</span>}
@@ -1899,7 +1899,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
         </a>
         <div className="ss-vault">
           <span className="lab ss-k">Your trophies <em>{earned.length} of {TROPHIES.length}</em></span>
-          {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${TIER_LABEL[tier]}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 44, tier)) }} />)}</span>
+          {earned.length ? <span className="ss-medals">{earned.slice(0, 8).map(({ trophy: t, tier }) => <span key={t.id} title={`${t.name} · ${tierLabel(t, tier)}`} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 44, tier)) }} />)}</span>
             : <span className="it mut ss-none">They gather as your work is published.</span>}
           <a className="lab ss-link ss-vault-btn" href={`/guild/members/?m=${profile.id}#vault`}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11z" /><path d="M12 13v4" /><circle cx="12" cy="12" r="1" /></svg>Open your vault</a>
         </div>
@@ -1952,7 +1952,7 @@ function DeleteWarning({ piece, pieces, profile, tally, take = false, onCancel, 
   const had = trophiesFor({ pieces: live, member: profile ?? {}, forum: tally }).filter((t) => t.earned);
   const keep = trophiesFor({ pieces: after, member: profile ?? {}, forum: tally }).filter((t) => t.earned);
   const lost = had.filter((t) => { const k = keep.find((x) => x.trophy.id === t.trophy.id); return !k || k.tier !== t.tier; })
-    .map((t) => { const k = keep.find((x) => x.trophy.id === t.trophy.id); return k ? `${t.trophy.name} drops from ${TIER_LABEL[t.tier]} to ${TIER_LABEL[k.tier]}` : `${t.trophy.name} (${TIER_LABEL[t.tier]})`; });
+    .map((t) => { const k = keep.find((x) => x.trophy.id === t.trophy.id); return k ? `${t.trophy.name} drops from ${TIER_LABEL[t.tier]} to ${TIER_LABEL[k.tier]}` : t.trophy.count ? `${t.trophy.name} (${TIER_LABEL[t.tier]})` : t.trophy.name; });
   const rankDrops = published && rankNow && rankNow.level !== rankAfter?.level;
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k); }, [onCancel]);
   return (

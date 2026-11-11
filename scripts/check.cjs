@@ -114,7 +114,9 @@ const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads,
   draft_shares: [{ piece_id: 'd1', reader_id: 'm2', created_at: t(5) }, { piece_id: 'wd1', reader_id: ME, created_at: t(6) }],
   draft_notes: [{ id: 'dn1', piece_id: 'wd1', author_id: ME, body: 'The opening is strong. The second stanza loses me a little: who is speaking?', created_at: t(6) }, { id: 'dn2', piece_id: 'wd1', author_id: 'm2', body: 'Thank you. It is the bell itself; I will make that plainer.', created_at: t(7) },
     { id: 'dn3', piece_id: 'd1', author_id: 'm2', body: 'I would cut the first paragraph and begin at the window.', created_at: t(6) }],
-  forum_tallies: [{ member_id: ME, posts: flag('heavy') ? 1400 : 14, threads: flag('heavy') ? 160 : 3, best_thread: flag('heavy') ? 200 : 6, prayer: 1, boards: 2 }] };
+  forum_tallies: [{ member_id: ME, posts: flag('heavy') ? 1400 : 14, threads: flag('heavy') ? 160 : 3, best_thread: flag('heavy') ? 200 : 6, prayer: 1, boards: ['common-room', 'prayer'],
+    reflections_out: flag('heavy') ? 160 : 4, stayed_out: flag('heavy') ? 420 : 27, notes_out: flag('heavy') ? 44 : 1, kept: flag('heavy') ? 230 : 12, following: flag('heavy') ? 60 : 6,
+    reflections_in: flag('heavy') ? 300 : 2, stayed_in: flag('heavy') ? 900 : 9, answers: flag('heavy') ? 12 : 0, shared: flag('heavy') ? 5 : 1 }] };
 
 // A small stand-in for Supabase's query language: eq, neq, in, is, not.is, or=(...), order, limit.
 const test = (row, key, expr) => {

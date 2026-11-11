@@ -1,7 +1,7 @@
 ---
 // The Vault: a writer's trophies, at the foot of their page. A tally by metal, their three finest on a lit shelf,
 // and the rest beneath, finest first. Public pages show earned trophies only.
-import { trophiesFor, finestFirst, trophySvg, TIER_LABEL, unitFor, type Tier, type TrophyCtx } from '../lib/trophies';
+import { trophiesFor, finestFirst, trophySvg, TIER_LABEL, tierLabel, unitFor, num, type Tier, type TrophyCtx } from '../lib/trophies';
 import '../styles/trophies.css';
 interface Props { ctx: TrophyCtx; name?: string }
 const { ctx, name = '' } = Astro.props;
@@ -25,8 +25,8 @@ const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ 
             <span class="tr-light" aria-hidden="true"></span>
             <Fragment set:html={trophySvg(t, 112, tier)} />
             <span class="tr-name">{t.name}</span>
-            <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
-            {t.count && next ? <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
+            <span class="tr-tier">{tierLabel(t, tier)}{t.count ? ` · ${num(n)} ${unitFor(n, t.unit)}` : ''}</span>
+            {t.count && next ? <span class="tr-next">{num(next.at - n)} more to {TIER_LABEL[next.tier]}</span> : <span class="tr-note">{t.note}</span>}
           </figure>
         ))}
       </div>
@@ -36,8 +36,8 @@ const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ 
             <figure class="tr" data-tier={tier} title={t.note}>
               <Fragment set:html={trophySvg(t, 72, tier)} />
               <span class="tr-name">{t.name}</span>
-              <span class="tr-tier">{TIER_LABEL[tier]}{t.count ? ` · ${n} ${unitFor(n, t.unit)}` : ''}</span>
-              {t.count && next && <span class="tr-next">{next.at - n} more to {TIER_LABEL[next.tier]}</span>}
+              <span class="tr-tier">{tierLabel(t, tier)}{t.count ? ` · ${num(n)} ${unitFor(n, t.unit)}` : ''}</span>
+              {t.count && next && <span class="tr-next">{num(next.at - n)} more to {TIER_LABEL[next.tier]}</span>}
             </figure>
           ))}
         </div>

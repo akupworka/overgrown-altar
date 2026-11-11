@@ -59,6 +59,8 @@ use still working:
       - Removed: the "My library" button on the vault (the Library tab stays); the menu links to the Dispatches
         letter (the sign-up box at the foot of the public pages still collects addresses).
 - [ ] Remove the owner's two test accounts ("Watchman (Guild)", "Watchman (Fellow)") with the sample data.
+- [ ] Right after the sample data is removed, reset the trophy tallies so real members' trophies count only real
+      members' reflections and marks (one database call: `select private.retally_everyone();`).
 - [ ] Turn on "leaked password protection" in Supabase's sign-in settings when moving to the paid plan (ask first).
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
 
@@ -100,6 +102,8 @@ use still working:
       traffic a month, 500 MB of text (far off). Members themselves are not a limit (50,000 active a month).
 
 ## Check on a real iPhone (built and tested in Chrome only)
+- [ ] The trophies (11 Nov 2026: 46 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
+      vault or at Prestiges → Trophies; trophies still to earn show in dark iron; gold and rainbow keep a soft halo.
 - [ ] The share sheet shows the OA mark beside a piece's title, not a compass.
 - [ ] A link to the home page, and a link to a piece, each preview with the right card in Messages.
 - [ ] "Share as a social post": the preview opens, swiping shows the second picture, "Save to images" puts both in Photos.

@@ -728,13 +728,16 @@ export function ForumLatest({ count = 3, plain = false }: { count?: number; plai
   );
 }
 
-/** A member's forum tally, for their trophies (null when they haven't posted yet). */
+/** A member's tally, for their trophies: their part in the forum and in the rest of the Guild (null when there is none yet). */
 export function useForumTally(uid?: string | null) {
   const [tally, setTally] = useState<import('../../lib/trophies').ForumTally | null>(null);
   useEffect(() => {
+    setTally(null);   // another member's page: never show the last one's numbers while this one's are fetched
     if (!uid) return;
-    supabase.from('forum_tallies').select('posts, threads, best_thread, prayer, boards').eq('member_id', uid).maybeSingle()
-      .then(({ data }) => setTally((data as any) ?? null));
+    let stale = false;
+    supabase.from('forum_tallies').select('posts, threads, best_thread, prayer, boards, reflections_out, stayed_out, notes_out, kept, following, reflections_in, stayed_in, answers, shared').eq('member_id', uid).maybeSingle()
+      .then(({ data }) => { if (!stale) setTally((data as any) ?? null); });
+    return () => { stale = true; };
   }, [uid]);
   return tally;
 }

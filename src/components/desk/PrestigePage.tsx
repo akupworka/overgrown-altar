@@ -72,7 +72,7 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
         <span className="eb">The Guild</span>
         <h1 className="h1">{section === 'trophies' ? 'The trophies' : 'The ten prestiges'}</h1>
         <p className="it pzx-lead">{section === 'trophies'
-          ? 'Prestiges count everything you publish. Trophies mark the work in each category, raised from bronze to silver, gold and rainbow glass as it grows, and a few things done once and done well. Tap any trophy to see how to earn it.'
+          ? 'Prestiges count everything you publish. Trophies mark the particular things: the work in each craft, the company you keep with the other members, and the years, raised from bronze to silver, gold and rainbow glass as they grow, beside a few things done once and done well. Tap any trophy to see how to earn it.'
           : 'Every published piece raises a member through the ranks of the Guild, from a first inkling to the burning ones. Each rank is a color of glass; badges change the moment the editor publishes.'}</p>
         {/* Two rooms of one page: the ranks, and the trophies */}
         <nav className="pzx-sw" aria-label="Prestiges or trophies">
