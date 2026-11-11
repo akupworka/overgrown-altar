@@ -22,7 +22,7 @@ import { crestSvg } from '../../lib/crests';
 import { trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
 import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
-import { PER_PAGE, pageList } from '../../lib/pager';
+import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
@@ -101,9 +101,9 @@ function Directory() {
   const fellows = matched.filter((m) => m.role === 'fellow').sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
   const [fPage, setFPage] = useState(1);
   const fPages = Math.max(1, Math.ceil(fellows.length / STEP)), fCur = Math.min(fPage, fPages);
-  const turnF = (n: number) => { setFPage(n); document.querySelector('.g-fellow-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const turnF = (n: number) => { setFPage(n); toListTop('.g-fellow-head'); };
   const mPages = Math.max(1, Math.ceil(found.length / STEP)), mCur = Math.min(mPage, mPages);
-  const turnM = (n: number) => { setMPage(n); document.querySelector('.g-people-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const turnM = (n: number) => { setMPage(n); toListTop('.g-people-head'); };
   return (
     <div className="g-wrap">
       <header className="g-head">
@@ -272,7 +272,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
-  const turn = (n: number) => { setPage(n); document.querySelector('.m-work')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const turn = (n: number) => { setPage(n); toListTop('.m-work'); };
   const arrow = (d: 'l' | 'r') => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d={d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>;
   // The same page as the public writer page (/guild/authors/<name>/): an arch, the name, craft, a few lines, two link pills, then the work.
   return (

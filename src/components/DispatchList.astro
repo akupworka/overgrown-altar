@@ -49,7 +49,7 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
 
 <script>
   import { freshSince } from '../lib/live';
-  import { pagerHtml, pageFromUrl, rememberPage } from '../lib/pager';
+  import { pagerHtml, pageFromUrl, rememberPage, toListTop } from '../lib/pager';
   // Pages: rows a filter or search has hidden are skipped; any change to those starts again at page one.
   document.querySelectorAll<HTMLOListElement>('ol.dispatches[data-paged]').forEach((list) => {
     const per = Number(list.dataset.paged), pager = list.nextElementSibling as HTMLElement | null;
@@ -62,7 +62,7 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
       rows.forEach((r, i) => r.classList.toggle('pg-off', i < (page - 1) * per || i >= page * per));
       pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
       rememberPage(page);
-      if (scroll) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (scroll) toListTop(list);
     };
     pager.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-go]');

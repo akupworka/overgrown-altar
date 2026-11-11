@@ -61,7 +61,7 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
 </BaseLayout>
 
 <script>
-  import { pagerHtml } from '../lib/pager';
+  import { pagerHtml, toListTop } from '../lib/pager';
   // Film or digital; thirty to a page. On touch screens, the first tap shows the caption, the second opens it.
   const PER = 30;
   const wall = document.querySelector<HTMLElement>('.gx-wall');
@@ -88,7 +88,7 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
       pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages, 'Newer', 'Older');
       none.hidden = match.length > 0;
       remember();
-      if (scroll) document.querySelector('.gx-head')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (scroll) toListTop('.gx-head');
     };
     chips.forEach((c) => c.addEventListener('click', () => { format = c.dataset.format!; page = 1; draw(); }));
     pager.addEventListener('click', (e) => {

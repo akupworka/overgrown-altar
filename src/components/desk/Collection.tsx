@@ -3,7 +3,7 @@
 // collection page (/collection/?of=<id>), which anyone may open.
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { pageList } from '../../lib/pager';
+import { pageList, toListTop } from '../../lib/pager';
 
 interface Item { id: string; slug: string; title: string; medium: string; image_path: string | null; image_focus: string | null; author_id: string; who?: string; img?: string }
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
@@ -43,7 +43,7 @@ export function CollectionWall({ items, empty }: { items: Item[] | null; empty: 
   const photos = items.filter((i) => i.medium === 'photograph').length, writing = items.length - photos;
   const list = items.filter((i) => show === 'all' || (show === 'photos') === (i.medium === 'photograph'));
   const pages = Math.max(1, Math.ceil(list.length / STEP)), cur = Math.min(page, pages);
-  const turn = (n: number) => { setPage(n); document.querySelector('.cl-wall')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const turn = (n: number) => { setPage(n); toListTop('.cl-wall'); };
   return (
     <>
       {photos > 0 && writing > 0 && (

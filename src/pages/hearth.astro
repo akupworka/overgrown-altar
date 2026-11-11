@@ -112,7 +112,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
 </BaseLayout>
 
 <script>
-  import { PER_PAGE, pagerHtml } from '../lib/pager';
+  import { PER_PAGE, pagerHtml, toListTop } from '../lib/pager';
   import { freshSince } from '../lib/live';
   // Tapping a kind shows only that kind of work; six at a time, with pages below.
   const chips = [...document.querySelectorAll<HTMLButtonElement>('.he-filters .chip')];
@@ -129,7 +129,7 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
     shown.slice((page - 1) * PER_PAGE, page * PER_PAGE).forEach((c) => { c.hidden = false; });
     if (none) none.hidden = shown.length > 0 || cards.length === 0;
     if (pager) { pager.hidden = pages < 2; pager.innerHTML = pagerHtml(page, pages); }
-    if (scroll) document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
+    if (scroll) toListTop(document.getElementById('work'));
   };
   const show = (k: string) => { kind = k; page = 1; draw(); };
   pager?.addEventListener('click', (e) => {

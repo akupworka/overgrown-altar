@@ -600,15 +600,22 @@ export function ForumLatest({ count = 3, plain = false }: { count?: number; plai
   const [rows, setRows] = useState<(Thread & { board: Board | undefined })[] | null>(null);
   const [people, setPeople] = useState<People>({});
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       const [{ data: t }, { data: b }] = await Promise.all([
         supabase.from('forum_threads').select('*').order('last_post_at', { ascending: false }).limit(count),
         supabase.from('forum_boards').select('*'),
       ]);
       const boards = new Map((Array.isArray(b) ? (b as Board[]) : []).map((x) => [x.id, x]));
-      setRows((Array.isArray(t) ? (t as Thread[]) : []).map((x) => ({ ...x, board: boards.get(x.board_id) })));
       setPeople(await loadPeople((Array.isArray(t) ? t : []).map((x: any) => x.last_author_id)));
-    })();
+      setRows((Array.isArray(t) ? (t as Thread[]) : []).map((x) => ({ ...x, board: boards.get(x.board_id) })));
+    };
+    load();
+    // Live: a new thread or a reply anywhere moves the list (and coming back to the page refreshes it too)
+    let wait: ReturnType<typeof setTimeout> | undefined;
+    const soon = () => { clearTimeout(wait); wait = setTimeout(load, 400); };
+    const ch = supabase.channel('forum-latest-' + count).on('postgres_changes', { event: '*', schema: 'public', table: 'forum_threads' }, soon).subscribe();
+    addEventListener('popstate', soon);
+    return () => { clearTimeout(wait); supabase.removeChannel(ch); removeEventListener('popstate', soon); };
   }, [count]);
   const A = ({ to, className, children }: { to: string; className?: string; children: ReactNode }) =>
     plain ? <a href={to} className={className}>{children}</a> : <Link to={to} className={className}>{children}</Link>;

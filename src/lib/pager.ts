@@ -31,3 +31,17 @@ export function rememberPage(page: number) {
   page === 1 ? u.searchParams.delete('page') : u.searchParams.set('page', String(page));
   history.replaceState(history.state, '', u.pathname + u.search + u.hash);
 }
+
+// After turning a page: bring the top of the list (the one on screen, not a hidden copy) back under the header.
+export function toListTop(target: string | Element | null | undefined, from?: Element | null) {
+  const el = typeof target === 'string'
+    ? (from?.closest(target) ?? [...document.querySelectorAll<HTMLElement>(target)].find((e) => e.offsetParent !== null))
+    : target;
+  if (!el) return;
+  // clear whatever is pinned to the top of the screen (the header, and the Guild's bar on computers)
+  const pinned = [...document.querySelectorAll<HTMLElement>('header, .gbar')].map((h) => h.getBoundingClientRect())
+    .filter((r) => r.height && r.top >= 0 && r.bottom < innerHeight / 3).map((r) => r.bottom);
+  const off = Math.max(0, ...pinned) + 24;
+  const top = el.getBoundingClientRect().top + scrollY - off;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}

@@ -29,7 +29,7 @@
 .d-danger:hover { color: #E6A99A; border-color: #E6A99A; }
 
 /* ---- Signed in: side menu + work ---- */
-.d-room { width: 100%; max-width: 1240px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; align-items: start; text-align: left; }
+.d-room { width: 100%; max-width: 1240px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; align-items: start; text-align: left; margin-inline: auto; }
 .d-side { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 32px; }
 .d-me { display: flex; align-items: center; gap: 14px; }
 .d-me-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -1786,6 +1786,8 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 .ss-aside { display: none; }
 /* The Guild's two halves fill the screen, never wider (phones were pushed off the left edge) */
 .guild-side, .ss-layout, .ss-main { width: 100%; min-width: 0; }
+.guild-side { display: flex; flex-direction: column; align-items: center; }   /* pages within stay centred */
+.guild-side[hidden] { display: none; }
 .ss-layout { margin-inline: auto; }
 @media (min-width: 1101px) {
   .ss-layout { width: 100%; max-width: 1240px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; align-items: start; text-align: left; }

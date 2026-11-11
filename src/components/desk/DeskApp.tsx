@@ -25,7 +25,7 @@ import { Welcome } from './Welcome';
 import { FellowHome } from './Fellow';
 import { guildGo } from './GuildApp';
 import { WaySide } from './Way';
-import { pageList } from '../../lib/pager';
+import { pageList, toListTop } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
@@ -454,7 +454,7 @@ const firstName = (n: string) => { const w = n.trim().split(/\s+/); return /^(th
 const DESK_PER = 6;
 function DeskPages({ cur, pages, onGo }: { cur: number; pages: number; onGo: (n: number) => void }) {
   if (pages < 2) return null;
-  const go = (n: number) => { onGo(n); document.querySelector('.d-row-head, .d-page-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const go = (n: number) => { onGo(n); toListTop('.d-row-head, .d-page-head'); };
   return (
     <nav className="pager d-pager" aria-label="Pages">
       <button type="button" className="pg-step" disabled={cur === 1} onClick={() => go(cur - 1)} aria-label="Newer">‹<span className="pg-word">Newer</span></button>
