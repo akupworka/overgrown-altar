@@ -19,7 +19,7 @@ import { PrestigeBadge } from './Prestige';
 import { TrophyCase, TrophyCatalogue } from './Trophies';
 import { PRESTIGES, prestigeFor } from '../../lib/prestige';
 import { crestSvg } from '../../lib/crests';
-import { trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
+import { TROPHIES, trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
 import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
@@ -294,6 +294,9 @@ function MemberPage({ id, me }: { id: string; me: string }) {
   const onPage = shown.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
   const turn = (n: number) => { setPage(n); toListTop('.m-work'); };
   const arrow = (d: 'l' | 'r') => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d={d === 'l' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} /></svg>;
+  const rank = fellow ? null : prestigeFor(work.length).current;
+  const earnedAll = fellow ? [] : finestFirst(trophiesFor({ pieces: work, member: person, forum: tally }).filter((x) => x.earned));
+  const finest = earnedAll.slice(0, 3), won = earnedAll.length;
   // The arch, then beside it the name, craft, a few lines and the link pills; the page's buttons to the right
   // (on a phone it all stacks, centred). The whole background behind it is the photograph the member chose.
   return (
@@ -334,6 +337,16 @@ function MemberPage({ id, me }: { id: string; me: string }) {
               </span>
             )}
           </div>
+          {/* Their standing, at a glance: the crest of their rank, and their three finest trophies (it leads down to the vault) */}
+          {!fellow && (rank || finest.length > 0) && (
+            <a className="m-stand" href="#vault" aria-label={`${rank ? `${rank.name}, rank ${rank.level} of ten. ` : ''}${won} of ${TROPHIES.length} trophies. See the vault.`}>
+              {rank && <span className="m-stand-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(crestSvg(rank.level, 132, { glow: true })) }} />}
+              {rank && <span className="lab m-stand-k">Rank {rank.numeral} of X</span>}
+              {rank && <span className="m-stand-rank">{rank.name}</span>}
+              {finest.length > 0 && <span className="m-stand-medals" aria-hidden="true">{finest.map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 46, tier, false, true)) }} />)}</span>}
+              <span className="lab m-stand-n">{won} of {TROPHIES.length} trophies</span>
+            </a>
+          )}
           <div className="m-id-side">
             {person.id !== me && (
               <nav className="m-actions" aria-label="Contact">
