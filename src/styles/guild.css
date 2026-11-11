@@ -168,3 +168,43 @@
   .ap-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
   .ap-nav .ap-next, .ap-nav .ap-submit { margin-left: auto; }
   .ap-nav [hidden] { display: none !important; }
+
+  /* ---- The application, gathered into one centred column: the heading, the three steps along a line, the sheet beneath.
+     (It was a side panel beside a wide card; the owner asked for cleaner.) ---- */
+  .req { margin-left: 5px; font-style: normal; font-family: var(--serif); font-size: 16px; line-height: 0; color: var(--oxblood); letter-spacing: 0; }
+  .ap-req { margin: 14px 0 0; font-family: var(--sans); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: #8A7B68; }
+  .ap-req .req { margin: 0 4px 0 0; }
+  .ap-label-row > span:first-child { white-space: nowrap; }
+  @media (min-width: 901px) {
+    .apply { padding: 112px 48px 120px; }
+    .apply-in { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 860px; }
+    .apply-side { position: static; align-items: center; text-align: center; gap: 16px; width: 100%; }
+    .apply-title { font-size: 64px; }
+    .apply-lead { max-width: 560px; font-size: 21px; }
+    .apply-steps { position: relative; flex-direction: row; justify-content: space-between; width: 100%; max-width: 700px; margin: 36px 0 0; border: 0; }
+    .apply-steps::before { content: ''; position: absolute; top: 23px; left: 16%; right: 16%; height: 1px; background: rgba(243,236,220,.18); }
+    .apply-steps li { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0; border: 0; opacity: .5 !important; }
+    .apply-steps li.on, .apply-steps li.done { opacity: 1 !important; }
+    .apply-steps .num { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 19px !important; line-height: 1; background: #0B0D0B;
+      box-shadow: inset 0 0 0 1px rgba(243,236,220,.28), 0 0 0 8px #0B0D0B; }
+    .apply-steps li.on .num { box-shadow: inset 0 0 0 1px var(--ember), 0 0 0 8px #0B0D0B; }
+    .apply-steps li.done .num { background: var(--ember); color: #12160F; box-shadow: 0 0 0 8px #0B0D0B; }
+    .apply-steps b { font-size: 19px; }
+    .apply-steps em { display: none; }
+    .apply-steps li.done b::after { content: none; }
+    .apply-bar { display: none; }
+    .apply-promise { order: 3; margin: 0; }
+    .apply-card { order: 2; width: 100%; margin: 44px 0 26px; padding: 54px 64px 44px; border-radius: 6px; }
+    .apply-card::after { content: ''; position: absolute; inset: 12px; border: 1px solid rgba(42,32,23,.1); border-radius: 3px; pointer-events: none; }
+    .apply-card .ap-h { justify-content: center; text-align: center; grid-template-columns: 1fr; margin-bottom: 34px; font-size: 36px; }
+    .apply-card .ap-h .num { display: none; }
+    .apply-card .ap-of { margin-bottom: 10px; }
+    .apply .dw-field { margin-bottom: 28px; }
+    .apply-in { --pad: 0; }
+    .apply-in > .apply-side { display: contents; }
+    .apply-in > .apply-side > .eb, .apply-in > .apply-side > .apply-title, .apply-in > .apply-side > .apply-lead { text-align: center; }
+    .apply-in > .apply-side > .eb { margin-bottom: 16px; }
+    .apply-in > .apply-side > .apply-lead { margin-top: 16px; }
+    .apply-in > .apply-side > .apply-promise { order: 3; text-align: center; max-width: 520px; }
+  }
+

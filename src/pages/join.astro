@@ -57,6 +57,7 @@ import '../styles/guild.css';
           <li><span class="num">III</span><span><b>A daily letter</b>, only when something is waiting: replies, messages, new work from writers you follow.</span></li>
           <li><span class="num">IV</span><span><b>In time, the Guild.</b> If you begin to make work of your own, you can apply for a seat at the table.</span></li>
         </ol>
+        <p class="jn-rule"><b>Open to all denominations.</b> We are one body in Christ: a clean, safe house where every tradition is treated with respect and everyone stays teachable. All who take a place keep <a href="/rule/">the Rule of the House</a>.</p>
         <a class="lab jn-switch" href="#guild" data-door="guild">Here to write? Apply to the Guild instead →</a>
       </div>
       <FellowshipJoin />
@@ -74,7 +75,7 @@ import '../styles/guild.css';
           <a class="lab jn-switch" href="#fellowship" data-door="fellowship">Here to read? Join the Fellowship instead →</a>
         </div>
         <ol class="jn-steps">
-          <li><span class="num">1</span><b>Apply</b><span>About ten minutes: who you are, a sample of your work, your faith, a reference.</span></li>
+          <li><span class="num">1</span><b>Apply</b><span>About ten minutes: who you are, a sample of your work, your faith.</span></li>
           <li><span class="num">2</span><b>We read it</b><span>The Editor in Chief reads every application, and answers within three days.</span></li>
           <li><span class="num">3</span><b>An invitation</b><span>If there is a seat for you, it arrives by email.</span></li>
           <li><span class="num">4</span><b>Take your seat</b><span>Fill in your page, then write your first piece at the Desk.</span></li>
@@ -82,7 +83,8 @@ import '../styles/guild.css';
         <div class="jn-ask">
           <span class="lab">What we ask of members</span>
           <ul>{['Craft over content', 'Truth with charity', 'Your own hand', 'A teachable spirit', 'Faithful presence', 'Discretion'].map((x) => <li>{x}</li>)}</ul>
-          <a href="/guild/#expectations">Read them in full →</a>
+          <p class="jn-open"><b>Open to all denominations.</b> We are one body in Christ; we treat one another with respect, and we stay teachable.</p>
+          <span class="jn-ask-links"><a href="/guild/#expectations">Read them in full →</a><a href="/rule/">The Rule of the House →</a></span>
         </div>
         <a class="jn-down" href="#apply">
           <span class="lab">Begin your application</span>
@@ -175,6 +177,12 @@ import '../styles/guild.css';
   .jn-ask { margin-top: 60px; padding-top: 34px; width: 100%; max-width: 860px; border-top: 1px solid rgba(42, 32, 23, .16); display: flex; flex-direction: column; align-items: center; gap: 18px; }
   .jn-ask ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
   .jn-ask li { padding: 9px 16px; border-radius: 999px; font-family: var(--serif); font-size: 18px; line-height: 1.2; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .22); }
+  .jn-ask-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; }
+  .jn-rule { margin: 6px 0 0; padding: 16px 18px; border-radius: 12px; font-family: var(--serif); font-size: 17.5px; line-height: 1.5; color: #CFC8B8; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); }
+  .jn-rule b { font-weight: 500; color: var(--bone); }
+  .jn-open { margin: 0; max-width: 640px; font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #4A4136; }
+  .jn-open b { font-weight: 600; color: var(--ink); }
+  .jn-rule a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .4); }
   .jn-ask a { font-family: var(--serif); font-size: 18px; color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); }
   /* The way down to the form */
   .jn-down { margin-top: 56px; display: flex; flex-direction: column; align-items: center; gap: 16px; color: var(--oxblood); }

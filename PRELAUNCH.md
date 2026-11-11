@@ -132,6 +132,8 @@ use still working:
 - [ ] A new Fellowship member: sign up, save to library, The Way, the forum.
 
 ## Words and pages to read once more
+- [ ] **The Rule of the House** (`/rule/`, written 11 Nov 2026): the conduct asked of everyone and the standard of the work were drafted for you. Read every line as your own before opening; change anything that is not how you would say it.
+- [ ] Send yourself one test Guild application after the next deploy: the form lost its reference field and gained a tick for the Rule, so check it still arrives in Arrivals with every answer.
 - [ ] Terms, privacy and disclaimer (a line about print folios was removed).
 - [ ] The forum rules and the pinned welcome threads.
 - [ ] About, Manifesto, What We Believe, Start Here.

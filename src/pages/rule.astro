@@ -1,0 +1,138 @@
+---
+// The Rule of the House: what is asked of everyone who takes a place here, reader or writer, and the standard of the work.
+// The page's shared look comes from src/styles/global.css. The words are the owner's to change.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+
+const conduct = [
+  { t: 'Christ at the centre', p: 'We gather under His name, and He is the reason for everything made here. Come in good faith, and honour what the house stands on.', a: { href: '/beliefs', label: 'What We Believe' } },
+  { t: 'Every tradition honoured', p: 'Speak of your own church with love and of another’s with respect. Discuss doctrine honestly and charitably; never mock a denomination, and never question whether a brother or sister belongs to Christ.' },
+  { t: 'A teachable spirit', p: 'None of us has seen the whole. Listen before you answer, take correction without offence, and expect to be shown something by a member who worships differently from you.' },
+  { t: 'Your own name and face', p: 'Be who you are: your name, or the one you write under, and a portrait that is you or your own work. No borrowed identities and no second accounts.' },
+  { t: 'Clean speech', p: 'No profanity, crude talk or innuendo, in the open or in a private message. Write here as you would speak in a church porch with children in earshot.' },
+  { t: 'Honour one another', p: 'Disagree with an idea as sharply as it deserves; never demean the person who holds it. No insults, mockery, slander or contempt for another’s people or story.' },
+  { t: 'Keep it safe', p: 'This is not a place to pursue anyone. No flirtation, no unwanted messages, nothing that sexualises a member or a stranger. If someone asks you to stop writing to them, stop.' },
+  { t: 'Guard what is shared', p: 'Testimony and prayer are holy ground. What is told in trust stays in the house: do not copy it out, repeat it elsewhere, or tell another’s story without their leave.' },
+  { t: 'Modest and truthful images', p: 'Portraits and photographs fit to hang on a church wall. No nudity, gore or shock, and nothing passed off as your own that is not.' },
+  { t: 'Nothing for sale', p: 'No advertising, fundraising, recruiting or campaigning. Your page may point to your own website; the rooms are for the work and the company.' },
+  { t: 'When something is wrong', p: 'Do not settle it in public. Use Report on the message or post, or write to the editors. They may remove what does not belong, and ask a member to step back or to leave.', a: { href: '/contact', label: 'Write to us' } },
+];
+const work = [
+  { t: 'Ambitious', p: 'Take on a real question. A dispatch meets a serious mind honestly, follows the truth it held to where it broke, and shows where it holds whole.' },
+  { t: 'Carefully crafted', p: 'Bring finished work, revised more than once. Every sentence should earn its place; we would rather publish less, and better.' },
+  { t: 'Fair to those it answers', p: 'State the other side so well its own friends would nod. Quote exactly, credit honestly, and name the idol without mocking the person.' },
+  { t: 'Your own hand', p: 'Your words, your images, your experience. Tools may assist you; they may not author for you.' },
+  { t: 'Anchored', p: 'The work should end in Christ, not in cleverness. If a piece is brilliant and leaves the reader no nearer the truth, it is not ready.' },
+  { t: 'Open to the editor', p: 'Every piece is read before it is published, and may be edited, returned with notes, or declined. Receive the notes as gifts.' },
+];
+const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+---
+<BaseLayout title="The Rule of the House" description="A clean, safe and Christ-centred house, open to every denomination: what we ask of everyone who takes a place at Overgrown Altar, reader or writer, and the standard of the work.">
+  <section class="hero rl-hero">
+    <img src="/images/tall-windows-dark-vault-1200.jpg" alt="" class="mono" fetchpriority="high" style="object-position:center 40%" />
+    <div class="veil"></div>
+    <SiteNav />
+    <div class="hero-c rl-hero-c">
+      <span class="eb">For everyone at the table</span>
+      <h1 class="h1">The Rule of the House</h1>
+      <p class="it rl-lead">A clean, safe and Christ-centred house, open to every denomination. These are the few things we ask of everyone who takes a place in it, reader or writer.</p>
+    </div>
+  </section>
+
+  <!-- First of all: open to every denomination -->
+  <section class="sec dark center rl-one">
+    <span class="eb">Open to all denominations</span>
+    <p class="big-it rl-one-line">One body, many churches.</p>
+    <p class="rl-one-p">We are the body of Christ. Every tradition that confesses Him is welcome at this table, and none of them owns it. The Spirit moves where He wills, so we treat one another with respect, and we stay teachable.</p>
+    <span class="it rl-one-ref">For as the body is one, and hath many members. · 1 Corinthians xii · xii</span>
+  </section>
+
+  <section class="sec paper">
+    <div class="rl-in">
+      <header class="rl-head">
+        <span class="eb">The Fellowship &amp; the Guild</span>
+        <h2 class="h2">How we carry ourselves.</h2>
+        <p class="it mut">Asked of every member alike, in the Forum, in messages, in reflections, and on your own page.</p>
+      </header>
+      <ol class="rl-list">
+        {conduct.map((c, i) => (
+          <li class="rv">
+            <span class="num">{numeral[i]}</span>
+            <div><h3>{c.t}</h3><p>{c.p}{c.a && <> <a href={c.a.href}>{c.a.label} →</a></>}</p></div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec dark" id="work">
+    <div class="rl-in">
+      <header class="rl-head">
+        <span class="eb">The Guild</span>
+        <h2 class="h2">The standard of the work.</h2>
+        <p class="it rl-dark-lead">What goes on the altar is high-level, carefully crafted and ambitious. That is asked in every room, and most of all of the dispatches in The Watchtower.</p>
+      </header>
+      <ol class="rl-list rl-list-dark">
+        {work.map((c, i) => (
+          <li class="rv">
+            <span class="num">{numeral[i]}</span>
+            <div><h3>{c.t}</h3><p>{c.p}</p></div>
+          </li>
+        ))}
+      </ol>
+      <p class="rl-more"><a href="/watchtower/">How a dispatch works →</a><a href="/crafts/">The crafts, room by room →</a><a href="/guild/#expectations">What we ask of members →</a></p>
+    </div>
+  </section>
+
+  <section class="sec paper center rl-end">
+    <span class="eb">If this is the house you were looking for</span>
+    <h2 class="h2">Take your place.</h2>
+    <div class="rl-cta"><a class="btn" href="/join/#fellowship">Join the Fellowship</a><a class="ghost rl-ghost" href="/join/#guild">Apply to the Guild</a></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .rl-hero { height: 620px; }
+  .rl-hero > img { filter: brightness(.5); }
+  .rl-hero-c { top: 232px; padding: 0 24px; gap: 22px; }
+  .rl-hero-c .h1 { margin: 0; }
+  .rl-lead { margin: 0; max-width: 680px; font-size: 25px; line-height: 1.4; color: #E6DFD0; }
+  .rl-one { gap: 22px; padding-top: 96px; padding-bottom: 96px; }
+  .rl-one .eb { color: var(--ember); }
+  .rl-one-line { font-size: clamp(44px, 5vw, 72px); line-height: 1.02; margin: 0; }
+  .rl-one-p { margin: 0; max-width: 700px; font-family: var(--serif); font-size: 23px; line-height: 1.55; color: #E6DFD0; }
+  .rl-one-ref { font-size: 18px; color: var(--muted-dark); }
+  .rl-in { max-width: 880px; margin: 0 auto; }
+  .rl-head { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
+  .rl-head .h2 { margin: 0; }
+  .rl-head .it { margin: 0; font-size: 21px; line-height: 1.5; max-width: 640px; }
+  .rl-dark-lead { color: #CFC8B8; }
+  .rl-list { list-style: none; margin: 0; padding: 0; }
+  .rl-list li { display: grid; grid-template-columns: 74px minmax(0, 1fr); column-gap: 20px; padding: 30px 0; border-top: 1px solid rgba(42, 32, 23, .18); }
+  .rl-list .num { font-size: 30px; line-height: 1.15; color: var(--oxblood); }
+  .rl-list h3 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 29px; line-height: 1.15; }
+  .rl-list p { margin: 0; font-family: var(--serif); font-size: 20px; line-height: 1.55; color: #4A4136; max-width: 640px; }
+  .rl-list a { color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); white-space: nowrap; }
+  .rl-list-dark li { border-top-color: rgba(243, 236, 220, .14); }
+  .rl-list-dark .num { color: var(--ember); }
+  .rl-list-dark p { color: #CFC8B8; }
+  .rl-more { margin: 34px 0 0; display: flex; flex-wrap: wrap; gap: 12px 28px; font-family: var(--serif); font-size: 19px; }
+  .rl-more a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .35); }
+  .rl-end { gap: 18px; }
+  .rl-end .h2 { margin: 0; }
+  .rl-cta { margin-top: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .rl-ghost { color: var(--ink); border-color: rgba(42, 32, 23, .5); }
+  @media (max-width: 700px) {
+    .rl-hero { height: 520px; }
+    .rl-hero-c { top: 170px; }
+    .rl-lead { font-size: 20px; }
+    .rl-one { padding-top: 64px; padding-bottom: 64px; gap: 18px; }
+    .rl-one-p { font-size: 18.5px; }
+    .rl-one-ref { font-size: 15.5px; }
+    .rl-list li { grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; padding: 24px 0; }
+    .rl-list .num { font-size: 22px; }
+    .rl-list h3 { font-size: 23px; }
+    .rl-list p { font-size: 17.5px; }
+    .rl-head .it { font-size: 18px; }
+  }
+</style>
