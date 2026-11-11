@@ -513,3 +513,22 @@
 .fo-reported .lab { color: #F0A99A; font-size: 9px; }
 .fo-reported .it { flex: 1 1 200px; font-size: 17px; color: var(--bone); }
 .fo-reported .fo-fine { color: #BFE8CF !important; box-shadow: inset 0 0 0 1px rgba(127, 224, 176, .45) !important; background: rgba(127, 224, 176, .06) !important; min-height: 38px; padding: 6px 14px !important; border-radius: 999px !important; }
+
+/* The opening post stands apart from the replies: a gold frame, a thread of stained glass along its top, larger words */
+.fo-post.first { position: relative; margin-bottom: 10px; }
+.fo-post.first:not(.fo-jump):not(.reported) { background: linear-gradient(180deg, rgba(255, 227, 163, .085), rgba(255, 227, 163, .03));
+  box-shadow: inset 0 0 0 1.5px rgba(255, 227, 163, .6), 0 18px 44px rgba(0, 0, 0, .4); }
+.fo-post.first::before { content: ''; position: absolute; left: 1.5px; right: 1.5px; top: 1.5px; height: 3px; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+  background: linear-gradient(90deg, #3E7BFF, #B05BFF, #FF3B4E, #FFC44D, #3DE0A0); opacity: .9; pointer-events: none; }
+.fo-post.first .fo-body { font-size: 23px; line-height: 1.5; color: #F6F0E2; }
+.fo-post.first .fo-post-when { color: var(--ember); }
+.fo-post.first .fo-who-name { color: #FFF6E2; }
+@media (max-width: 700px) {
+  .fo-post.first { margin-bottom: 6px; }
+  .fo-post.first .fo-body { font-size: 19.5px; }
+}
+
+/* Your conversations and the forum rules, side by side on a computer (one above the other on a phone) */
+.fo-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin: 4px 0 18px; }
+.fo-pair > .fo-rules-card { margin: 0; height: 100%; box-sizing: border-box; }
+@media (max-width: 700px) { .fo-pair { grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 2px 0 12px; } }

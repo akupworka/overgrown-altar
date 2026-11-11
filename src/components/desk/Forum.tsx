@@ -154,6 +154,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
           { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
         </div>}
       </header>
+      <div className="fo-pair">
       {me && mineIds.size > 0 && (() => {
         const mineT = threads.filter((t) => mineIds.has(t.id)), fresh = mineT.filter((t) => isNew(t, me)).length;
         return (
@@ -170,6 +171,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
         <span className="fo-rules-text"><span className="fo-rules-name">The forum rules</span><span className="it fo-rules-line">How we keep the table safe and kind. Read before you post.</span></span>
         <span className="fo-rules-go" aria-hidden="true">→</span>
       </Link>
+      </div>
       {isEditor && opening && <NewForum onDone={(slug) => go(`/guild/members/?board=${slug}`)} onCancel={() => setOpening(false)} />}
       {!boards ? <p className="lab mut">Opening the forum…</p> : (
         <ol className="fo-boards">
