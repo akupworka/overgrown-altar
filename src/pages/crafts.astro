@@ -1,6 +1,8 @@
 ---
-// The Crafts: every kind of work the Guild publishes, room by room: what it is, what the editor looks for,
-// a rough length, how many are published, and a way in to read them. Content lives in src/lib/kinds.ts.
+// The Crafts: a guide for anyone thinking of writing here. First how to choose a room and what every piece needs; then,
+// room by room, every kind of work: what it is, what the editor looks for, what it is most often returned for, a made-up
+// sample idea, a rough length, and a way in to read the published ones. The Watchtower also shows the shape of a dispatch
+// with a worked sample thesis. Last, what happens after a piece is sent. Content for the kinds lives in src/lib/kinds.ts.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import Subscribe from '../components/Subscribe.astro';
@@ -8,17 +10,66 @@ import { ROOMS } from '../lib/kinds';
 import { getCatalog } from '../lib/catalog';
 const catalog = await getCatalog();
 const count = (pillar: string, kind: string) => catalog.filter((p) => p.pillar === pillar && p.medium === kind).length;
+const total = ROOMS.reduce((n, r) => n + r.kinds.length, 0);
+const NUMBER = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+// Which room? Three plain tests.
+const choose = [
+  { id: 'watchtower', name: 'The Watchtower', test: 'It argues.', line: 'You are answering an idea, a thinker or an idol of the age, and showing where the truth it held comes whole in Christ.' },
+  { id: 'hearth', name: 'The Hearth', test: 'It is made.', line: 'A poem, a story, a piece of prose or a photograph: something made for its own sake and offered with reverence.' },
+  { id: 'perimeter', name: 'The Perimeter', test: 'It happened.', line: 'You are telling what you lived: testimony, deliverance, recovery, or an account of the unseen, tested and told plainly.' },
+];
+// The shape of a dispatch, with one worked sample (an illustration written for this page, not a published piece).
+const shape = [
+  { n: 'I', k: 'The Thinker', what: 'Name a serious mind and the real piece of truth they held. State it so well their own readers would nod.',
+    eg: 'Friedrich Nietzsche saw that a Christianity kept only as custom and comfort had already lost its God, and that honesty required someone to say so.' },
+  { n: 'II', k: 'The Fracture', what: 'Show where that truth broke for lack of a keystone, and what it cost those who followed it.',
+    eg: 'He concluded that man must become the author of his own values. But a self that must create all meaning has nothing beneath it, and where strength is the only measure, the weak become a cost.' },
+  { n: 'III', k: 'The Anchor', what: 'Show how the same truth holds whole in the death and resurrection of Christ. Argue it; do not merely announce it.',
+    eg: 'The cross is not weakness praised but strength laid down, and the resurrection is its vindication. The unafraid, unresentful life he wanted is real, and it is received, not seized.' },
+];
+const after = [
+  { k: 'Save it', d: 'Your piece saves itself as you write. Keep up to twenty unfinished pieces at your Desk for as long as you like.' },
+  { k: 'Send it', d: 'When it is ready, send it to the editor. You may have two pieces waiting at a time, and send five photographs a month.' },
+  { k: 'It is read', d: 'An editor reads every piece. It is accepted, returned with notes, or declined. While it waits it cannot be changed; withdraw it if you need to.' },
+  { k: 'It is published', d: 'An accepted piece goes into its room, onto your own page, and into the libraries of the readers who keep it.' },
+];
 const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-1200.jpg', hearth: '/images/window-of-the-ascension-and-1200.jpg', perimeter: '/images/pillar-perimeter-1200.jpg' };
 ---
-<BaseLayout title="The Crafts" description="Every kind of work the Guild publishes: what it is, what the editor looks for, and how long it runs.">
+<BaseLayout title="The Crafts" description="A guide to writing for Overgrown Altar: which room a piece belongs in, every kind of work with a sample, the shape of a dispatch, and what happens after you send it.">
   <section class="hero fm-hero">
     <img src="/images/archive-photo-1200.jpg" alt="" style="object-position:center 50%;filter:brightness(.42)" fetchpriority="high" />
     <div class="veil"></div><SiteNav />
     <div class="hero-c fm-hero-c">
       <span class="eb">A guide for readers and writers</span>
       <h1 class="h1">The Crafts</h1>
-      <p class="it fm-lead">Eleven kinds of work in three rooms. What each one is, what the Editor in Chief looks for, and how long it tends to run.</p>
-      <nav class="fm-jump" aria-label="Rooms">{ROOMS.map((r) => <a class="ghost" href={`#${r.id}`}>{r.name}</a>)}</nav>
+      <p class="it fm-lead">{NUMBER[total]} kinds of work in three rooms. What each one is, what the editor looks for, a sample of each, and what happens after you send it.</p>
+      <nav class="fm-jump" aria-label="On this page"><a class="ghost" href="#choose">Which room?</a>{ROOMS.map((r) => <a class="ghost" href={`#${r.id}`}>{r.name}</a>)}<a class="ghost" href="#after">After you send it</a></nav>
+    </div>
+  </section>
+
+  <!-- Before you write: which room, and what every piece needs -->
+  <section class="sec dark fm-choose" id="choose">
+    <div class="fm-in">
+      <header class="fm-head">
+        <span class="eb">Before you write</span>
+        <h2 class="h2">Which room is it for?</h2>
+        <p class="it fm-head-p">Choose the room by what the piece does, not by its subject. The same grief could be an essay, a poem or a testimony.</p>
+      </header>
+      <div class="fm-tests">
+        {choose.map((c) => (
+          <a class="fm-test" href={`#${c.id}`}>
+            <span class="fm-test-q">{c.test}</span>
+            <span class="eb">{c.name}</span>
+            <span class="fm-test-p">{c.line}</span>
+            <span class="lab fm-test-go">See its crafts ↓</span>
+          </a>
+        ))}
+      </div>
+      <ul class="fm-needs">
+        <li><b>A title and a subtitle.</b> The subtitle is the one line readers see under the title on every card.</li>
+        <li><b>Finished work.</b> Revised more than once, and your own. The lengths below are guides, not gates.</li>
+        <li><b>The Rule of the House.</b> How we carry ourselves, and the standard the work is held to. <a href="/rule/">Read it →</a></li>
+      </ul>
     </div>
   </section>
 
@@ -39,28 +90,71 @@ const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-120
             const n = count(room.id, k.value);
             return (
               <article class="fm-kind" id={k.value}>
-                <div class="fm-kind-top">
-                  <h3 class="fm-kind-name">{k.name}</h3>
-                  <span class="lab fm-len">{k.length}</span>
+                <div class="fm-kind-main">
+                  <div class="fm-kind-top">
+                    <h3 class="fm-kind-name">{k.name}</h3>
+                    <span class="lab fm-len">{k.length}</span>
+                  </div>
+                  <p class="fm-what">{k.what}</p>
+                  <dl class="fm-notes">
+                    <div class="fm-note fm-yes"><dt class="lab">What we look for</dt><dd class="it">{k.lookFor}</dd></div>
+                    <div class="fm-note fm-no"><dt class="lab">Most often returned for</dt><dd class="it">{k.avoid}</dd></div>
+                  </dl>
+                  <a class="lab fm-read" href={`/archive/?pillar=${room.id}&medium=${k.value}`}>{n ? `Read ${n} published →` : 'None published yet: be the first →'}</a>
                 </div>
-                <p class="fm-what">{k.what}</p>
-                <div class="fm-look"><span class="lab">What we look for</span><p class="it">{k.lookFor}</p></div>
-                <a class="lab fm-read" href={`/archive/?pillar=${room.id}&medium=${k.value}`}>{n ? `Read ${n} published →` : 'None published yet: be the first →'}</a>
+                <aside class="fm-sample">
+                  <span class="lab">{k.value === 'essay' ? 'A sample thesis' : k.value === 'photograph' ? 'A sample subject' : 'A sample idea'}</span>
+                  <p>{k.sample}</p>
+                  <span class="it fm-sample-n">An illustration, not a published piece.</span>
+                </aside>
               </article>
             );
           })}
         </div>
+        {room.id === 'watchtower' && (
+          <div class="fm-shape">
+            <header class="fm-head">
+              <span class="eb">The shape of a dispatch</span>
+              <h3 class="h2 fm-shape-h">Thinker. Fracture. Anchor.</h3>
+              <p class="it fm-head-p">Every dispatch moves in three parts. Here is each part, with the sample thesis above worked through it.</p>
+            </header>
+            <ol class="fm-shape-list">
+              {shape.map((x) => (
+                <li>
+                  <span class="num">{x.n}</span>
+                  <div class="fm-shape-what"><h4>{x.k}</h4><p>{x.what}</p></div>
+                  <div class="fm-shape-eg"><span class="lab">In the sample</span><p>{x.eg}</p></div>
+                </li>
+              ))}
+            </ol>
+            <p class="fm-shape-end"><b>The thesis, in a sentence.</b> If you cannot say yours this plainly, the essay is not ready to be written yet.</p>
+          </div>
+        )}
       </div>
     </section>
   ))}
 
+  <!-- After you send it -->
+  <section class="sec dark fm-after" id="after">
+    <div class="fm-in">
+      <header class="fm-head">
+        <span class="eb">After you send it</span>
+        <h2 class="h2">What happens to a piece.</h2>
+      </header>
+      <ol class="fm-after-list">
+        {after.map((a, i) => <li><span class="num">{i + 1}</span><h3>{a.k}</h3><p>{a.d}</p></li>)}
+      </ol>
+      <p class="it fm-after-n">Returned is not refused. Many of the best pieces go round twice, and the editor’s notes come back to your Desk with the piece.</p>
+    </div>
+  </section>
+
   <section class="sec paper center fm-cta">
     <span class="eb">Write for the Guild</span>
     <h2 class="h2" style="margin-top:14px">Found your craft?</h2>
-    <p class="it mut" style="margin:18px auto 0;max-width:560px;font-size:20px">Members write in any of the three rooms. Every piece is read by the Editor in Chief before it is published.</p>
+    <p class="it mut" style="margin:18px auto 0;max-width:560px;font-size:20px">Members write in any of the three rooms. Every piece is read by an editor before it is published.</p>
     <div class="fm-cta-row">
       <a class="btn" href="/guild/desk/#write" data-member hidden>Begin a piece</a>
-      <a class="btn" href="/guild#apply" data-guest>Apply to the Guild</a>
+      <a class="btn" href="/join/#guild" data-guest>Apply to the Guild</a>
       <a class="ghost" href="/rule/">The Rule of the House</a>
     </div>
   </section>
@@ -81,24 +175,72 @@ const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-120
   .fm-room-text .h2 { margin: 0; }
   .fm-room-line { margin: 0; font-size: 21px; line-height: 1.45; max-width: 560px; opacity: .85; }
   .fm-room-link { margin-top: 6px; border-bottom: 1px solid currentColor; padding-bottom: 3px; opacity: .8; }
-  .fm-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; border-top: 1px solid rgba(128,118,100,.35); }
-  .fm-room:has(.fm-kinds > :only-child) .fm-kinds { grid-template-columns: 1fr; max-width: 760px; }
-  .fm-kind { display: flex; flex-direction: column; gap: 12px; padding: 30px 0; border-bottom: 1px solid rgba(128,118,100,.22); scroll-margin-top: 100px; }
+  .fm-head { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+  .fm-head .h2 { margin: 0; }
+  .fm-head-p { margin: 0; font-size: 21px; line-height: 1.5; opacity: .85; }
+  /* Which room? */
+  .fm-tests { margin-top: 44px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .fm-test { display: flex; flex-direction: column; gap: 12px; padding: 30px 28px 26px; border-radius: 14px; background: linear-gradient(180deg, rgba(243, 236, 220, .05), rgba(243, 236, 220, .015));
+    box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); transition: transform .5s cubic-bezier(.16, 1, .3, 1), box-shadow .3s; }
+  .fm-test:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55); }
+  .fm-test-q { font-family: var(--serif); font-style: italic; font-size: 38px; line-height: 1.05; color: var(--bone); }
+  .fm-test .eb { color: var(--ember); }
+  .fm-test-p { font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #CFC8B8; }
+  .fm-test-go { margin-top: auto; padding-top: 10px; font-size: 9.5px; color: var(--ember); }
+  .fm-needs { list-style: none; margin: 34px 0 0; padding: 26px 0 0; border-top: 1px solid rgba(243, 236, 220, .14); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; }
+  .fm-needs li { font-family: var(--serif); font-size: 18.5px; line-height: 1.5; color: #CFC8B8; }
+  .fm-needs b { display: block; font-weight: 500; font-size: 21px; color: var(--bone); margin-bottom: 4px; }
+  .fm-needs a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .4); white-space: nowrap; }
+  /* Each craft: its account on the left, a sample on the right */
+  .fm-kinds { display: flex; flex-direction: column; border-top: 1px solid rgba(128,118,100,.35); }
+  .fm-kind { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 56px; align-items: start; padding: 44px 0; border-bottom: 1px solid rgba(128,118,100,.22); scroll-margin-top: 100px; }
+  .fm-kind-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .fm-kind-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-  .fm-kind-name { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.1; }
+  .fm-kind-name { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 36px; line-height: 1.1; }
   .fm-len { font-size: 9.5px; white-space: nowrap; opacity: .7; }
-  .fm-what { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.55; }
-  .fm-look { display: flex; flex-direction: column; gap: 4px; padding-left: 16px; border-left: 1px solid var(--brass); }
-  .fm-look .lab { font-size: 9px; opacity: .7; }
-  .fm-look p { margin: 0; font-size: 17px; line-height: 1.5; opacity: .85; }
-  .fm-read { align-self: flex-start; margin-top: 4px; padding-bottom: 3px; border-bottom: 1px solid currentColor; font-size: 10px; }
+  .fm-what { margin: 0; font-family: var(--serif); font-size: 21px; line-height: 1.55; }
+  .fm-notes { margin: 4px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 32px; }
+  .fm-note { display: flex; flex-direction: column; gap: 6px; padding-left: 16px; border-left: 1px solid var(--brass); }
+  .fm-no { border-left-color: rgba(98, 55, 45, .55); }
+  .dark .fm-no { border-left-color: rgba(232, 160, 145, .5); }
+  .fm-note dt { font-size: 9px; opacity: .75; }
+  .fm-note dd { margin: 0; font-size: 17.5px; line-height: 1.5; opacity: .88; }
+  .fm-read { align-self: flex-start; margin-top: 6px; padding-bottom: 3px; border-bottom: 1px solid currentColor; font-size: 10px; }
+  .fm-sample { display: flex; flex-direction: column; gap: 14px; padding: 28px 28px 24px; border-radius: 14px; }
+  .paper .fm-sample { background: linear-gradient(180deg, #12150F, #0B0D0A); color: var(--bone); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .3); }
+  .dark .fm-sample { background: linear-gradient(180deg, rgba(255, 227, 163, .09), rgba(255, 227, 163, .03)); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .4); }
+  .fm-sample .lab { font-size: 9.5px; letter-spacing: .26em; color: var(--ember); }
+  .fm-sample p { margin: 0; font-family: var(--serif); font-style: italic; font-size: 24px; line-height: 1.35; color: var(--bone); }
+  .fm-sample-n { font-size: 15px; color: #A9A294; }
   .paper .fm-kind-name, .paper .fm-what { color: var(--ink); }
-  .paper .fm-read, .paper .eb { color: var(--oxblood); }
+  .paper .fm-read, .paper .fm-room .eb, .paper .fm-head .eb { color: var(--oxblood); }
   .dark .fm-kind-name { color: var(--bone); }
   .dark .fm-what { color: #E6DFD0; }
   .dark .fm-read { color: var(--ember); }
+  /* The shape of a dispatch */
+  .fm-shape { margin-top: 64px; }
+  .fm-shape-h { font-size: 44px; }
+  .fm-shape-list { list-style: none; margin: 36px 0 0; padding: 0; }
+  .fm-shape-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; align-items: start; padding: 30px 0; border-top: 1px solid rgba(42, 32, 23, .18); }
+  .fm-shape-list .num { font-size: 34px; line-height: 1.1; color: var(--oxblood); }
+  .fm-shape-what h4 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 29px; line-height: 1.15; }
+  .fm-shape-what p { margin: 0; font-family: var(--serif); font-size: 19.5px; line-height: 1.55; color: #4A4136; }
+  .fm-shape-eg { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px; border-radius: 12px; background: rgba(42, 32, 23, .045); box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .14); }
+  .fm-shape-eg .lab { font-size: 9px; color: var(--oxblood); }
+  .fm-shape-eg p { margin: 0; font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.5; }
+  .fm-shape-end { margin: 8px 0 0; padding-top: 26px; border-top: 1px solid rgba(42, 32, 23, .18); font-family: var(--serif); font-size: 20px; line-height: 1.5; color: #4A4136; }
+  .fm-shape-end b { font-weight: 600; color: var(--ink); }
+  /* After you send it */
+  .fm-after-list { list-style: none; margin: 44px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; border-radius: 14px; overflow: hidden;
+    background: rgba(243, 236, 220, .14); box-shadow: 0 0 0 1px rgba(243, 236, 220, .14); }
+  .fm-after-list li { display: flex; flex-direction: column; gap: 10px; padding: 32px 26px 34px; background: var(--dark); }
+  .fm-after-list .num { font-size: 34px; line-height: 1; color: var(--brass); }
+  .fm-after-list h3 { margin: 6px 0 0; font-family: var(--serif); font-weight: 400; font-size: 27px; line-height: 1.15; }
+  .fm-after-list p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: #B9B2A3; }
+  .fm-after-n { margin: 28px 0 0; font-size: 20px; color: #CFC8B8; }
   .fm-cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
   .fm-cta-row [hidden] { display: none; }
+  @media (max-width: 1050px) { .fm-kind { grid-template-columns: 1fr; gap: 24px; padding: 34px 0; } }
   @media (max-width: 800px) {
     .fm-hero { height: 600px; }
     .fm-hero-c { top: 140px; }
@@ -106,10 +248,29 @@ const ROOM_IMG: Record<string, string> = { watchtower: '/images/duomo-spires-120
     .fm-room-head { grid-template-columns: 1fr; gap: 22px; }
     .fm-arch { height: 200px; width: 160px; max-height: none; }
     .fm-room-line { font-size: 18px; }
-    .fm-kinds { grid-template-columns: 1fr; }
-    .fm-kind-name { font-size: 25px; }
-    .fm-what { font-size: 17px; }
-    .fm-look p { font-size: 16px; }
+    .fm-kind-name { font-size: 27px; }
+    .fm-what { font-size: 18px; }
+    .fm-head-p { font-size: 18px; }
+    .fm-tests { grid-template-columns: 1fr; margin-top: 30px; gap: 10px; }
+    .fm-test { padding: 22px 20px; gap: 8px; }
+    .fm-test-q { font-size: 30px; }
+    .fm-test-p { font-size: 17px; }
+    .fm-needs { grid-template-columns: 1fr; }
+    .fm-notes { grid-template-columns: 1fr; gap: 16px; }
+    .fm-note dd { font-size: 16.5px; }
+    .fm-sample { padding: 22px 20px 20px; }
+    .fm-sample p { font-size: 21px; }
+    .fm-shape { margin-top: 44px; }
+    .fm-shape-h { font-size: 30px; }
+    .fm-shape-list li { grid-template-columns: 40px minmax(0, 1fr); gap: 12px 12px; padding: 24px 0; }
+    .fm-shape-list .num { font-size: 24px; }
+    .fm-shape-eg { grid-column: 2; }
+    .fm-shape-what h4 { font-size: 24px; }
+    .fm-shape-what p, .fm-shape-eg p { font-size: 17.5px; }
+    .fm-after-list { grid-template-columns: 1fr 1fr; margin-top: 30px; }
+    .fm-after-list li { padding: 22px 16px 24px; }
+    .fm-after-list h3 { font-size: 22px; }
+    .fm-after-list p { font-size: 16px; }
     .fm-cta-row { flex-direction: column; align-items: stretch; max-width: 300px; margin-left: auto; margin-right: auto; }
   }
 </style>

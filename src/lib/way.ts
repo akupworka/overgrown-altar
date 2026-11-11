@@ -35,7 +35,7 @@ export const BADGES: Badge[] = [
   { id: 'year', group: 'Faithfulness', name: 'A Year at the Altar', note: 'A full year in the Fellowship.', glyph: 'sun', earned: (c) => days(c) >= 365, progress: (c) => [Math.min(Math.floor(days(c)), 365), 365] },
   { id: 'lamp', group: 'Faithfulness', name: 'The Lamp Kept Lit', note: 'Every other badge on the Way (the rare ones aside).', glyph: 'lamp', earned: (c) => BADGES.filter((b) => b.id !== 'lamp' && !b.rare).every((b) => b.earned(c)) },
   // Rare: hard to earn, gilded and glazed in stained glass.
-  { id: 'every-shrine', group: 'Rare', rare: true, name: 'Every Shrine', note: 'Kept a piece of every craft the altar publishes: all ten.', glyph: 'rooms', earned: (c) => crafts(c) >= 10, progress: (c) => [crafts(c), 10] },
+  { id: 'every-shrine', group: 'Rare', rare: true, name: 'Every Shrine', note: 'Kept a piece of every craft the altar publishes: all nine.', glyph: 'rooms', earned: (c) => crafts(c) >= 9, progress: (c) => [Math.min(crafts(c), 9), 9] },
   { id: 'great-library', group: 'Rare', rare: true, name: 'The Great Library', note: 'Five hundred pieces kept.', glyph: 'shelf', earned: (c) => c.saves.length >= 500, progress: (c) => [Math.min(c.saves.length, 500), 500] },
   { id: 'rose-window', group: 'Rare', rare: true, name: 'The Rose Window', note: 'A hundred photographs kept from the Gallery.', glyph: 'eye', earned: (c) => photos(c) >= 100, progress: (c) => [Math.min(photos(c), 100), 100] },
   { id: 'illuminator', group: 'Rare', rare: true, name: 'The Illuminator', note: 'A hundred reflections left for the Guild’s writers.', glyph: 'quill', earned: (c) => c.reflections >= 100, progress: (c) => [Math.min(c.reflections, 100), 100] },
