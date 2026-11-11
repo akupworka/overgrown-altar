@@ -9,7 +9,7 @@ import { FollowButton } from './Reading';
 import { useCollection } from './Collection';
 import { WayPage, WayBadge, WayTrophies } from './Way';
 import { SideColumn, Loading } from './DeskApp';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, portraitUrl, rememberMember, PILLARS, MEDIUMS, type Piece, type Profile } from '../../lib/supabase';
 import { Body } from '../../lib/marks';
@@ -23,6 +23,7 @@ import { trophiesFor, finestFirst, trophySvg } from '../../lib/trophies';
 import { seatFor } from '../../lib/seats';
 import { KINDS } from '../../lib/kinds';
 import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
+import { initListen } from '../../lib/listen';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
@@ -440,6 +441,19 @@ function Reading({ id }: { id: string }) {
   const [piece, setPiece] = useState<Piece | null | undefined>(undefined);
   const [author, setAuthor] = useState<Profile | null>(null);
   const [photo, setPhoto] = useState('');
+  // Listen: the piece read aloud while you read along (the device's own voice; lib/listen). Set up once the page is drawn.
+  const paper = useRef<HTMLElement>(null), listenBtn = useRef<HTMLButtonElement>(null);
+  const [listenMin, setListenMin] = useState(0);
+  useEffect(() => {
+    const el = paper.current, btn = listenBtn.current;
+    if (!el || !btn || !piece || piece.medium === 'photograph') return;
+    const read = () => [...el.querySelectorAll<HTMLElement>(':scope > .d-paper-standfirst, :scope > p.body, :scope > h2.eb, :scope > blockquote')];
+    const words = read().reduce((n, b) => n + b.innerText.trim().split(/\s+/).length, 0);
+    if (words < 30) return;
+    setListenMin(Math.max(1, Math.round(words / 155)));
+    // (returns its own tidy-up: leaving the piece, or the writer's name arriving, stops the voice and takes the player away)
+    return initListen({ button: btn, blocks: read, title: piece.title || 'Untitled', by: author?.display_name ?? 'a member of the Guild' });
+  }, [piece?.id, author?.id]);
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('pieces').select('*').eq('id', id).maybeSingle();
@@ -463,10 +477,16 @@ function Reading({ id }: { id: string }) {
           ? <Link className="m-back lab" to="/guild/members/?view=library">Your library</Link>   /* opened from the shelf: back to the shelf */
           : <Link className="m-back lab" to={`/guild/members/?m=${piece.author_id}`}>{author?.display_name ?? 'Back'}</Link>}
       {piece.status !== 'approved' && <p className="lab ws-banner">A draft · not published · private to the Workshop</p>}
-      <article className="d-paper">
+      <article className="d-paper" ref={paper}>
         {photo && piece.medium !== 'photograph' && <img className="m-photo" src={photo} alt={piece.image_alt} />}
         <span className="eb">{pillarName(piece.pillar)} · {mediumName(piece.medium)}</span>
         <h1 className="h1">{piece.title}</h1>
+        {piece.medium !== 'photograph' && (
+          <button type="button" className="rt-btn m-listen" ref={listenBtn} hidden aria-pressed="false" title="Have this piece read aloud while you read">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M4 14.5a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2zM20 14.5a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z" /></svg>
+            <span data-listen-word>Listen</span>{listenMin > 0 && <span className="m-listen-m">· {listenMin} min</span>}
+          </button>
+        )}
         {piece.standfirst && <p className="d-paper-standfirst" style={{ margin: 0 }}>{piece.standfirst}</p>}
         {photo && piece.medium === 'photograph' && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} gallery={piece.gallery} />}
         {piece.body.trim() && <Body body={piece.body} />}

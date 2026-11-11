@@ -17,6 +17,12 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
         <span class="pt-night-w">Night</span>
       </button>
     </div>
+    {!isPhoto && (
+      <button type="button" class="pt-btn pt-listen" data-listen hidden aria-pressed="false" title="Have this piece read aloud while you read">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M4 14.5a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2zM20 14.5a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z" /></svg>
+        <span data-listen-word>Listen</span><span class="pt-listen-m" data-listen-min></span>
+      </button>
+    )}
     <a class="pt-btn pt-save-guest" href="/join/#fellowship" title="Join the Fellowship to keep a collection">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
       <span class="pt-save-w">Save</span>
@@ -194,6 +200,13 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
   /* Members' parts stay out of sight for visitors */
   html:not([data-member]) :is(.pt-save, .pt-keep, .pt-end, .pt-follow) { display: none !important; }
   .pt-keep { display: flex; gap: 8px; }
+  .pt-listen[hidden] { display: none; }
+  .pt-listen { margin-right: auto; color: var(--oxblood); box-shadow: inset 0 0 0 1px var(--oxblood); }
+  .pt-btn.pt-listen[aria-pressed='true'] { background: var(--oxblood); color: #F3ECDC; }
+  html[data-night] .pt-btn.pt-listen[aria-pressed='true'] { color: #12160F; }
+  .pt-listen-m { opacity: .7; }
+  .pt-listen-m:empty { display: none; }
+  @media (max-width: 700px) { .pt-listen { order: -1; flex: 1 1 100%; justify-content: center; min-height: 44px !important; margin: 0 0 2px; } }
   .pt-keep[hidden] { display: none; }
 
   html[data-member] .pt-save-guest { display: none !important; }

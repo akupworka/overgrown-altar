@@ -117,6 +117,18 @@ const newer = at > 0 ? photos[at - 1] : null, older = at >= 0 && at < photos.len
 </BaseLayout>
 
 <script>
+  // Listen: the piece read aloud while you read along (the device's own voice; see lib/listen).
+  import { initListen } from '../../lib/listen';
+  {
+    const btn = document.querySelector<HTMLElement>('[data-listen]'), flowEl = document.querySelector<HTMLElement>('.gp-flow');
+    const read = () => [...(flowEl?.querySelectorAll<HTMLElement>(':scope > .gp-standfirst, :scope > p.body, :scope > h2.eb, :scope > blockquote') ?? [])];
+    const words = read().reduce((n, el) => n + (el.innerText.trim().split(/\s+/).length || 0), 0);
+    if (btn && flowEl && words >= 30) {
+      const min = btn.querySelector('[data-listen-min]'); if (min) min.textContent = `· ${Math.max(1, Math.round(words / 155))} min`;
+      initListen({ button: btn, blocks: read, title: document.querySelector('.gp-title')?.textContent?.trim() || document.title, by: document.querySelector('.gp-by-who .lab')?.textContent?.trim() || 'a member of the Guild' });
+    }
+  }
+
   // Share as a card: the line you've selected (or, with nothing selected, the title) drawn on a card to share or save.
   import { shareCard } from '../../lib/shareCard';
   const btn = document.querySelector<HTMLButtonElement>('[data-card]');
