@@ -16,8 +16,14 @@ import { authorUrl, guildPillar, type GuildAuthor } from '../../lib/guild';
 
 // Every dispatch: real pieces only (the design's complete essay, plus pieces published at the Guild Desk).
 const newestFirst: DispatchItem[] = await inPillar('watchtower');
+// A dispatch without a picture of its own wears one of the house's photographs. They take turns (counted from the oldest,
+// so a piece keeps its picture as newer ones arrive) and no two neighbours on the page share one.
+const ROOM_PHOTO = '/images/watchtower-photo-1200.jpg';
+const HOUSE = [ROOM_PHOTO, '/images/tall-windows-dark-vault-1200.jpg', '/images/duomo-spires-1200.jpg', '/images/what-we-believe-1200.jpg', '/images/labyrinth-stained-light-1200.jpg',
+  '/images/cathedral-facade-and-rose-window-1200.jpg', '/images/format-guild-1200.jpg', '/images/manifesto-photo-1200.jpg', '/images/duomo-pigeons-1200.jpg'];
+[...newestFirst].reverse().filter((d) => d.image === ROOM_PHOTO).forEach((d, i) => { d.image = HOUSE[i % HOUSE.length]; });
 const newest = newestFirst.slice(0, 3);           // the three newest, under arched windows
-const alsoNew = newestFirst.slice(3, 9);           // six more, three to a row
+const alsoNew = newestFirst.slice(3, 9);           // six more: a list two to a row on a computer, cards on a phone
 const rest = newestFirst.slice(9);                 // everything earlier, as a searchable list
 
 // The writers of The Watchtower.
@@ -69,7 +75,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
         </div>
       )}
 
-      <!-- Also new: six more, three to a row -->
+      <!-- Also new: six more -->
       {alsoNew.length > 0 && (
         <div class="also">
           <h2 class="eb also-h">Also new</h2>
@@ -233,6 +239,17 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
   .also-sf, .nw-sf { text-wrap: pretty; min-height: calc(2 * 1.45em); }
   .also-card .also-by { margin-top: auto; padding-top: 4px; }
   .also-k { font-size: 9px; letter-spacing: .2em; }
+  /* Also new, on a computer: a quiet list, two to a row. A small picture, the words beside it, a hairline between rows. */
+  @media (min-width: 701px) {
+    .also-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 64px; }
+    .also-card { display: grid; grid-template-columns: 176px minmax(0, 1fr); column-gap: 28px; row-gap: 8px; align-content: center; padding: 28px 0; border-top: 1px solid rgba(42, 32, 23, .14); }
+    .also-card:nth-child(-n+2) { border-top: 0; padding-top: 4px; }
+    .also-card > * { grid-column: 2; }
+    .also-card > .also-img { grid-column: 1; grid-row: 1 / span 4; align-self: center; aspect-ratio: 4 / 3; margin: 0; }
+    .also-t { font-size: 27px !important; }
+    .also-sf { min-height: 0; }
+    .also-card .also-by { margin-top: 2px; padding-top: 0; }
+  }
 
   /* The method */
   .method { display: flex; flex-direction: column; align-items: center; text-align: center; }
