@@ -1,6 +1,7 @@
 ---
 // The Gallery: every photograph the Guild has published, newest first, laid out like an explore page:
-// a tight wall of portrait tiles (3:4, as on Instagram), three across even on a phone, with a larger tile now and then to break the rhythm.
+// a tight wall of portrait tiles (3:4, as on Instagram), three across on a phone and four on a computer, with a larger tile now and then
+// to break the rhythm. On a computer the larger tile is kept to half the wall, so a photograph is never stretched past what it holds.
 // Hovering (or a first tap on a phone) shows the title and who made it; a second tap opens the photograph.
 // Thirty to a page, with numbered pages below; the page is kept in the address, so coming back from a photograph returns to it.
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -18,6 +19,8 @@ const photos = (await guildPillar('hearth'))
 const film = photos.filter((p) => p.format === 'film').length, digital = photos.filter((p) => p.format === 'digital').length;
 // The explore rhythm: in every run of ten tiles, one is twice the size (first on the left, then on the right).
 const big = (i: number) => i % 10 === 2 || i % 10 === 7;
+// Four across (computers): the larger tile opens each run on the left, then sits on the right, so every ten tiles close four full rows.
+const wide = (i: number) => (i % 10 === 0 ? 'gx-wl' : i % 10 === 5 ? 'gx-wr' : '');
 ---
 <BaseLayout title="The Gallery" description="Every photograph from the Guild: dark, atmospheric photography on film and digital, newest first.">
   <section class="night gx-head">
@@ -41,7 +44,7 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
       <>
         <ol class="gx-wall">
           {photos.map((p, i) => (
-            <li class:list={['gx-tile', { 'gx-big': big(i), 'gx-right': i % 10 === 7 }]} data-format={p.format || 'none'}>
+            <li class:list={['gx-tile', wide(i), { 'gx-big': big(i), 'gx-right': i % 10 === 7 }]} data-format={p.format || 'none'}>
               <a href={p.href} aria-label={`${p.title}, by ${p.who}`}>
                 <img src={p.image} alt={p.alt || p.title} loading={i < 9 ? 'eager' : 'lazy'} style={p.pos ? `object-position:${p.pos}` : undefined} />
                 {p.more > 0 && <span class="gx-more" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="7" width="13" height="13" rx="1.5" /><path d="M4 16V5a1 1 0 0 1 1-1h11" /></svg></span>}
@@ -134,6 +137,14 @@ const big = (i: number) => i % 10 === 2 || i % 10 === 7;
   .gx-pager { margin-top: 44px; color: var(--bone); }
   .gx-none, .gx-empty { font-size: 20px; text-align: center; padding: 40px 0; }
   .gx-empty a { color: var(--ember); }
+  /* computers: four across in a narrower wall, the larger tile half its width (it was two thirds of a very wide wall, taller than the screen) */
+  @media (min-width: 900px) {
+    .gx-wall { max-width: 1280px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .gx-in { max-width: 1280px; }
+    .gx-big, .gx-right { grid-column: auto; grid-row: auto; }
+    .gx-wl { grid-column: 1 / span 2; grid-row: span 2; }
+    .gx-wr { grid-column: 3 / span 2; grid-row: span 2; }
+  }
   @media (max-width: 1100px) and (min-width: 701px) { .gx-head { padding-left: 24px; padding-right: 24px; } .gx-body { padding: 0 24px 90px; } .gx-wall { gap: 8px; } }
   @media (max-width: 700px) {
     .gx-head { padding: 112px 16px 22px; }
