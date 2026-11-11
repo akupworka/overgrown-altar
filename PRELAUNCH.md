@@ -76,8 +76,14 @@ use still working:
 
 ## The three rooms, reviewed 11 Nov 2026 (look once on a real phone)
 - Hearth and Perimeter: shorter opening picture; each kind (prose, poetry, fiction; testimony, deliverance, recovery,
-  personal) in bold with its own glass-coloured pane, on the cards and on the filters.
-- Hearth cards: the kind and title sit on the picture, which fades to night at its foot; the writer's name beneath.
+  personal) with its own glass-coloured pane, on the cards and on the filters (the bold was taken off: it read as cheesy).
+- Hearth cards: the kind, title and subtitle sit on the picture, which fades to night at its foot; the writer's name
+  beneath. On phones the cards are taller so the picture still shows: check the words read clearly over the fade.
+- Every written piece now needs a subtitle (form and database); photographs are exempt. Sample pieces without one were
+  given one. Usual lengths were lowered (prose from 250, fiction from 300, Perimeter floors 300 to 500, a photograph
+  needs 100 words, the only hard count).
+- The Watchtower's large line is the journal's own ("The same truth holds again, whole, in the resurrection of
+  Christ."), no longer lifted from the newest piece. The owner may want different words.
   A "Write for The Hearth" card at the foot. The makers swipe in one row on phones.
 - Watchtower on phones: four "Also new", the method as three tight rows, the writers in one swiping row.
 - Undecided by the owner: whether the Hearth and the Perimeter should open with their newest work, as the Watchtower does.
