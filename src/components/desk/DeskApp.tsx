@@ -535,7 +535,7 @@ function EditorTools() {
 
 // A small mark beside each piece: a pen for writing, a camera for a photograph.
 /** Every photograph is sent with at least this many words about it. */
-const PHOTO_WORDS = 200;
+const PHOTO_WORDS = 100;
 
 function KindMark({ medium }: { medium: string }) {
   const photo = medium === 'photograph';
