@@ -2091,3 +2091,8 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 /* A photograph read inside the Guild (or in review): room between its title and the picture */
 .d-paper .h1 + .pp, .d-paper .d-paper-standfirst + .pp, .d-paper .eb + .pp { margin-top: 22px; }
 @media (max-width: 700px) { .d-paper .h1 + .pp, .d-paper .d-paper-standfirst + .pp { margin-top: 16px; } }
+
+/* A member's photographs fill the same width as the heading above them (they sat narrower, off to one side of it) */
+@media (min-width: 701px) { .m-grid { max-width: none !important; gap: 8px; } }
+a.m-byline { color: inherit; transition: color .25s; }
+a.m-byline:hover { color: var(--oxblood); }

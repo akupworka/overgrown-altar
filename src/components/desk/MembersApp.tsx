@@ -458,10 +458,10 @@ function Reading({ id }: { id: string }) {
         {photo && piece.medium === 'photograph' && <PhotoPlate src={photo} alt={piece.image_alt} meta={piece.photo_meta} gallery={piece.gallery} />}
         {piece.body.trim() && <Body body={piece.body} />}
         {author && (
-          <div className="m-byline">
+          <Link className="m-byline" to={`/guild/members/?m=${author.id}`}>
             <Initials name={author.display_name} size={36} src={portraitUrl(author.portrait_path)} />
             <span className="lab">{author.display_name}{piece.published_at ? ` · ${fmt(piece.published_at)}` : ''}</span>
-          </div>
+          </Link>
         )}
         {piece.slug && <div data-read-end={`/guild/${piece.slug}/`} aria-hidden="true" className="read-end" />}
         {piece.status === 'approved' && <ReadTools piece={piece} />}
