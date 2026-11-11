@@ -52,10 +52,20 @@ function seenMap(): Record<string, string> { try { return JSON.parse(localStorag
 function firstVisit(): string {
   try { let f = localStorage.getItem(FIRST); if (!f) { f = new Date(Date.now() - 864e5 * 3).toISOString(); localStorage.setItem(FIRST, f); } return f; } catch { return new Date().toISOString(); }
 }
-/** Has this thread had a post (by someone else) since you last opened it? */
-export function isNew(t: Pick<Thread, 'id' | 'last_post_at' | 'last_author_id'>, me?: string, seen = seenMap()) {
+/** Has this thread had a post (by someone else) since you last opened it? Where `mine` is given (the threads you started or
+ *  replied in), only those count: "new" means someone answered a conversation you are part of, not that the forum moved. */
+export function isNew(t: Pick<Thread, 'id' | 'last_post_at' | 'last_author_id'>, me?: string, seen = seenMap(), mine?: Set<string>) {
   if (me && t.last_author_id === me) return false;
+  if (mine && !mine.has(t.id)) return false;
   return t.last_post_at > (seen[t.id] ?? firstVisit());
+}
+/** The threads you have started or replied in (a thread's opening words are a post too). */
+function useMine(me?: string) {
+  const [mine, setMine] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (me) supabase.from('forum_posts').select('thread_id').eq('author_id', me).then(({ data }) => setMine(new Set((data ?? []).map((x: any) => x.thread_id))));
+  }, [me]);
+  return mine;
 }
 function markSeen(id: string) {
   try { const m = seenMap(); m[id] = new Date().toISOString(); const keep = Object.entries(m).sort((a, b) => b[1].localeCompare(a[1])).slice(0, 400); localStorage.setItem(SEEN, JSON.stringify(Object.fromEntries(keep))); } catch {}
@@ -120,10 +130,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
   const [opening, setOpening] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [people, setPeople] = useState<People>({});
-  const [mineIds, setMineIds] = useState<Set<string>>(new Set());   // threads you've started or replied in
-  useEffect(() => {
-    if (me) supabase.from('forum_posts').select('thread_id').eq('author_id', me).then(({ data }) => setMineIds(new Set((data ?? []).map((x: any) => x.thread_id))));
-  }, [me]);
+  const mineIds = useMine(me);   // threads you've started or replied in
   useEffect(() => {
     (async () => {
       const [{ data: b }, { data: t }] = await Promise.all([
@@ -169,7 +176,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
           {boards.map((b) => {
             const mine = threads.filter((t) => t.board_id === b.id);
             const latest = mine[0];
-            const fresh = mine.filter((t) => isNew(t, me)).length;
+            const fresh = mine.filter((t) => isNew(t, me, undefined, mineIds)).length;   // only your own conversations light a forum
             return (
               <li key={b.id}>
                 <Link to={`/guild/members/?board=${b.slug}`} className="fo-board">
@@ -240,6 +247,7 @@ function NewForum({ onDone, onCancel }: { onDone: (slug: string) => void; onCanc
 // ---------------------------------------------------------------- one forum
 
 export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; isEditor: boolean }) {
+  const mineIds = useMine(me);   // "New" on a thread means someone answered a conversation you're part of
   const [board, setBoard] = useState<Board | null | undefined>(undefined);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [people, setPeople] = useState<People>({});
@@ -309,11 +317,11 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
             <li key={t.id}>
               <Link to={`/guild/members/?t=${t.id}`} className={`fo-thread${t.pinned ? ' pinned' : ''}`}>
                 <span className="fo-thread-main">
-                  {(t.pinned || t.locked || isNew(t, me)) && (
+                  {(t.pinned || t.locked || isNew(t, me, undefined, mineIds)) && (
                     <span className="fo-thread-tags">
                       {t.pinned && <span className="lab fo-tag">Pinned</span>}
                       {t.locked && <span className="lab fo-tag fo-tag-dim">Closed</span>}
-                      {isNew(t, me) && <span className="lab fo-new">New</span>}
+                      {isNew(t, me, undefined, mineIds) && <span className="lab fo-new">New</span>}
                     </span>
                   )}
                   <span className="fo-thread-t">{t.title}</span>
