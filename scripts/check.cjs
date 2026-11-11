@@ -151,10 +151,10 @@ const up = () => fetch(BASE).then(() => true, () => false);
       if (url.pathname.includes('/storage/')) return route.fulfill({ json: [] });
       if (url.pathname.endsWith('/rpc/dm_usage')) return route.fulfill({ json: { used: flag('heavy') ? 296 : 240, cap: 300 } });
       if (url.pathname.endsWith('/rpc/dm_unread')) return route.fulfill({ json: 1 });
+      if (url.pathname.endsWith('/rpc/piece_counts')) { const m = {}; pieces.filter((p) => p.status === 'approved').forEach((p) => { m[p.author_id] = (m[p.author_id] || 0) + 1; }); return route.fulfill({ json: Object.entries(m).map(([author_id, n]) => ({ author_id, n })) }); }
       if (url.pathname.endsWith('/rpc/bell')) return route.fulfill({ json: { seen: t(5), items: [
         { kind: 'mention', at: t(8), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: 'th2', thread_title: 'What are you reading this week?' },
-        { kind: 'mark', at: t(7), who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
-        { kind: 'mark', at: t(7), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
+        { kind: 'mark', at: t(7), n: 14, who: 'm2', who_name: 'Jane Writer', who_portrait: null, piece: 'mine0', piece_title: 'Published piece 1', piece_slug: 'mine0', thread: null, thread_title: null },
         { kind: 'reflection', at: t(6), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: 'mine1', piece_title: 'Published piece 2', piece_slug: 'mine1', thread: null, thread_title: null },
         { kind: 'follow', at: t(4), who: 'm3', who_name: 'Thomas Ashgrove', who_portrait: null, piece: null, piece_title: null, piece_slug: null, thread: null, thread_title: null },
         { kind: 'published', at: t(3), who: null, who_name: null, who_portrait: null, piece: 'mine2', piece_title: 'Published piece 3', piece_slug: 'mine2', thread: null, thread_title: null },

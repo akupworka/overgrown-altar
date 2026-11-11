@@ -183,3 +183,6 @@ html.ib-open .desk-in { padding: 0 !important; }
 /* Delete under a message: a small word with a full finger's tap area; the time and Delete a touch larger on phones */
 .ib-unsend::after { content: ''; position: absolute; left: -10px; right: -10px; top: -14px; bottom: -14px; }
 @media (max-width: 700px) { .ib-m-when { font-size: 9px; } }
+
+.ib-clear { align-self: flex-start; position: relative; padding: 0; border: 0; background: none; cursor: pointer; color: var(--ember); font-size: 9px; border-bottom: 1px solid rgba(255, 227, 163, .35); padding-bottom: 2px; }
+.ib-clear::after { content: ''; position: absolute; inset: -12px -8px; }

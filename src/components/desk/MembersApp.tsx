@@ -73,10 +73,10 @@ function Directory({ me }: { me?: string } = {}) {
     (async () => {
       const [{ data: people }, { data: work }] = await Promise.all([
         supabase.from('profiles').select('*').eq('listed', true).order('display_name'),
-        supabase.from('pieces').select('author_id').eq('status', 'approved'),
+        supabase.rpc('piece_counts'),   // published pieces per writer, counted in the database
       ]);
       const counts = new Map<string, number>();
-      (work ?? []).forEach((w: any) => counts.set(w.author_id, (counts.get(w.author_id) ?? 0) + 1));
+      (Array.isArray(work) ? work : []).forEach((w: any) => counts.set(w.author_id, w.n));
       // Highest rank first (the prestiges climb with published pieces), then by name
       setMembers(((people as Profile[]) ?? []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 }))
         .sort((a, b) => b.count - a.count || (a.display_name || '').localeCompare(b.display_name || '')));

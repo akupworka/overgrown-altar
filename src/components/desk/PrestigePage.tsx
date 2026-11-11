@@ -46,10 +46,10 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
     (async () => {
       const [{ data: ps }, { data: work }] = await Promise.all([
         supabase.from('profiles').select('*'),
-        supabase.from('pieces').select('author_id').eq('status', 'approved'),
+        supabase.rpc('piece_counts'),
       ]);
       const counts = new Map<string, number>();
-      (Array.isArray(work) ? work : []).forEach((w: any) => counts.set(w.author_id, (counts.get(w.author_id) ?? 0) + 1));
+      (Array.isArray(work) ? work : []).forEach((w: any) => counts.set(w.author_id, w.n));
       setPeople((Array.isArray(ps) ? (ps as Profile[]) : []).map((p) => ({ ...p, count: counts.get(p.id) ?? 0 })));
     })();
   }, []);

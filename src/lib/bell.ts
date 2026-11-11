@@ -4,23 +4,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { portraitUrl } from './supabase';
 
-interface Item { kind: string; at: string; who: string | null; who_name: string | null; who_portrait: string | null; piece: string | null; piece_title: string | null; piece_slug: string | null; thread: string | null; thread_title: string | null }
+interface Item { kind: string; at: string; n?: number; who: string | null; who_name: string | null; who_portrait: string | null; piece: string | null; piece_title: string | null; piece_slug: string | null; thread: string | null; thread_title: string | null }
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 const ago = (d: string) => { const m = Math.max(1, Math.round((Date.now() - +new Date(d)) / 6e4)); return m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 60)} h` : m < 43200 ? `${Math.round(m / 1440)} d` : new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
 
-function gather(items: Item[]) {
-  // one line per (kind, piece or thread or person), newest first, remembering everyone in it
-  const rows: { key: string; first: Item; names: string[] }[] = [];
-  for (const i of items) {
-    const key = `${i.kind}|${i.piece ?? i.thread ?? i.who ?? ''}`;
-    const row = rows.find((r) => r.key === key);
-    const name = i.who_name || 'A member';
-    if (row) { if (i.who && !row.names.includes(name)) row.names.push(name); } else rows.push({ key, first: i, names: i.who ? [name] : [] });
-  }
-  return rows;
-}
-function line(r: { first: Item; names: string[] }): { html: string; href: string } {
-  const i = r.first, who = `<b>${esc(r.names[0] ?? 'A member')}</b>${r.names.length > 1 ? ` and ${r.names.length - 1} ${r.names.length === 2 ? 'other' : 'others'}` : ''}`;
+// The database gathers like things into one line each (kind + piece / thread; all new followers together): `n` people, newest named.
+const gather = (items: Item[]) => items.map((i) => ({ first: i, names: i.who ? [i.who_name || 'A member'] : [], n: Math.max(1, i.n ?? 1) }));
+function line(r: { first: Item; names: string[]; n: number }): { html: string; href: string } {
+  const i = r.first, who = `<b>${esc(r.names[0] ?? 'A member')}</b>${r.n > 1 ? ` and ${r.n - 1} ${r.n === 2 ? 'other' : 'others'}` : ''}`;
   const piece = `“${esc(i.piece_title || 'Untitled')}”`, thread = `“${esc(i.thread_title || 'a thread')}”`;
   const pieceUrl = i.piece_slug ? `/guild/${i.piece_slug}/` : `/guild/members/?p=${i.piece}`;
   switch (i.kind) {
@@ -29,7 +20,7 @@ function line(r: { first: Item; names: string[] }): { html: string; href: string
     case 'reflection': return { html: `${who} left a reflection on ${piece}`, href: pieceUrl };
     case 'mark': return { html: `${piece} stayed with ${who}`, href: pieceUrl };
     case 'save': return { html: `${who} saved ${piece}`, href: pieceUrl };
-    case 'follow': return { html: `${who} now ${r.names.length > 1 ? 'follow' : 'follows'} you`, href: `/guild/members/?m=${i.who}` };
+    case 'follow': return { html: `${who} now ${r.n > 1 ? 'follow' : 'follows'} you`, href: `/guild/members/?m=${i.who}` };
     case 'published': return { html: `${piece} is published`, href: pieceUrl };
     case 'returned': return { html: `${piece} came back with a note from the editor`, href: '/guild/desk/' };
     default: return { html: 'Something new', href: '/guild/desk/' };

@@ -439,8 +439,8 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
     const authors = [...new Set((Array.isArray(p) ? p : []).map((x: any) => x.author_id))];
     setPeople(await loadPeople(authors));
     if (authors.length) {
-      const { data: w } = await supabase.from('pieces').select('author_id').eq('status', 'approved').in('author_id', authors);
-      const n: Record<string, number> = {}; (Array.isArray(w) ? w : []).forEach((r: any) => { n[r.author_id] = (n[r.author_id] ?? 0) + 1; });
+      const { data: w } = await supabase.rpc('piece_counts');
+      const n: Record<string, number> = {}; (Array.isArray(w) ? w : []).forEach((r: any) => { n[r.author_id] = r.n; });
       setPieces(n);
     }
     markSeen(id);
@@ -627,7 +627,7 @@ export function ForumLatest({ count = 3, plain = false }: { count?: number; plai
     load();
     // Live: a new thread or a reply anywhere moves the list (and coming back to the page refreshes it too)
     let wait: ReturnType<typeof setTimeout> | undefined;
-    const soon = () => { clearTimeout(wait); wait = setTimeout(load, 400); };
+    const soon = () => { clearTimeout(wait); wait = setTimeout(load, 1500); };   // (a busy forum: at most one refresh every second and a half)
     const ch = supabase.channel('forum-latest-' + count).on('postgres_changes', { event: '*', schema: 'public', table: 'forum_threads' }, soon).subscribe();
     addEventListener('popstate', soon);
     return () => { clearTimeout(wait); supabase.removeChannel(ch); removeEventListener('popstate', soon); };
