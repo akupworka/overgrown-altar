@@ -21,7 +21,7 @@ export function Welcome({ portrait, bio, posted, sent, onWrite, fellow = false }
     { done: posted, label: 'Say hello in the forum', note: 'A line in the Nave is enough.', href: '/guild/members/?view=forum' },
     { done: home, label: 'Add the Guild to your home screen', note: 'It opens full-screen, like an app.', how: true },
     fellow
-      ? { done: sent, label: 'Save your first piece or photograph', note: 'Tap “Save for later” on anything you love; it stands in your library.', href: '/gallery/' }
+      ? { done: sent, label: 'Save your first piece or photograph', note: 'Tap “Save to library” on anything you love; it stands in your library.', href: '/gallery/' }
       : { done: sent, label: 'Send your first piece', note: 'The editor reads every one.', write: true },
   ];
   const done = steps.filter((s) => s.done).length;

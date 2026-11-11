@@ -42,7 +42,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
       {/* The collection itself lives on their page; here, one way to it */}
       <a className="fl-coll-link" href={`/guild/members/?m=${profile.id}`}>
         <span><span className="eb">Your library</span>
-          <span className="it">{items?.length ? `${items.length} ${items.length === 1 ? 'piece' : 'pieces'} kept, on your page.` : 'Tap “Save for later” on anything you love; it stands on your page.'}</span></span>
+          <span className="it">{items?.length ? `${items.length} ${items.length === 1 ? 'piece' : 'pieces'} kept, on your page.` : 'Tap “Save to library” on anything you love; it stands on your page.'}</span></span>
         <span className="lab fl-coll-go">Open →</span>
       </a>
     </section>

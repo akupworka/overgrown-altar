@@ -1,6 +1,6 @@
 ---
 // The reader's tools around a published piece.
-//   part="top"     comfort for everyone (text size, night reading) and, for members, Save for later (into their library)
+//   part="top"     comfort for everyone (text size, night reading) and, for members, Save to library
 //   part="end"     for members: "This stayed with me", and the Guild's reflections (one short reflection each)
 //   part="follow"  for members: follow the writer
 // Members only see and use the Guild's parts; visitors see the reading comfort alone.
@@ -22,9 +22,9 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
       <span class="pt-save-w">Save</span>
     </a>
     <div class="pt-keep" data-member>
-      <button type="button" class="pt-btn pt-save pt-later" aria-pressed="false" data-piece={pieceId} data-table="library" data-off="Save for later" data-on="Saved to library" title="Kept in your library, for your eyes only">
+      <button type="button" class="pt-btn pt-save pt-later" aria-pressed="false" data-piece={pieceId} data-table="library" data-off="Save to library" data-on="Saved to library" title="Kept in your library, for your eyes only">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
-        <span class="pt-save-w">Save for later</span>
+        <span class="pt-save-w">Save to library</span>
       </button>
     </div>
   </div>
@@ -90,8 +90,7 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     if (!piece || !author) return;
     const mine = author === me;
 
-    // Save for later
-    // Save for later: into your library
+    // Save to library
     document.querySelectorAll<HTMLButtonElement>('.pt-save').forEach(async (save) => {
       // One library each. The Fellowship's stands on their page for others to see (`saves`); the Guild's and editors' is private (`library`).
       const table = document.documentElement.hasAttribute('data-fellow') ? 'saves' : 'library';

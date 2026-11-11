@@ -43,7 +43,7 @@ export function Library({ me }: { me: string }) {
   return (
     <div className="lb">
       <header className="lb-head">
-        <span className="eb">Saved for later</span>
+        <span className="eb">The Library</span>
         <h1 className="h1">Your library</h1>
         <p className="it mut d-sub">{fellow ? 'The artifacts you’ve saved. These shelves also stand on your page, for others to see.' : 'The artifacts you’ve set aside for later. Only you can see these shelves.'}</p>
         {items && books.length > 0 && <span className="lab mut">{books.length} {books.length === 1 ? 'artifact' : 'artifacts'} waiting for you</span>}
@@ -52,7 +52,7 @@ export function Library({ me }: { me: string }) {
         <div className="lb-empty">
           <div className="lb-shelf lb-shelf-empty" aria-hidden="true" />
           <p className="it">The shelves are empty.</p>
-          <span className="lab mut">Tap “Save for later” on any piece or photograph, and it waits for you here.</span>
+          <span className="lab mut">Tap “Save to library” on any piece or photograph, and it waits for you here.</span>
           <a className="lab lb-go" href="/search/">Explore the altar →</a>
         </div>
       ) : (

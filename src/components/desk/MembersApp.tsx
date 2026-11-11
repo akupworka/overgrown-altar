@@ -577,7 +577,7 @@ function ReadTools({ piece }: { piece: Piece }) {
         {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
       <button type="button" className="rt-btn" aria-pressed={later} onClick={toggleLater}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill={later ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
-        {later ? 'Saved to library' : 'Save for later'}</button>
+        {later ? 'Saved to library' : 'Save to library'}</button>
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Read the reflections on its page →'}</a>}
     </div>
   );
@@ -659,7 +659,7 @@ function FellowShelf({ id, first, mine }: { id: string; first: string; mine: boo
       </div>
       {!items ? <p className="lab mut">Opening the library…</p>
         : books.length ? <Shelf books={books} onRemove={mine ? async (pid) => { setGone((g) => new Set(g).add(pid)); await supabase.from('saves').delete().eq('member_id', id).eq('piece_id', pid); } : undefined} />
-        : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Save for later” on any piece or photograph you love, and it stands here.' : `${first} hasn’t kept anything yet.`}</p>}
+        : <p className="it m-lib-none">{mine ? 'The shelves are empty. Tap “Save to library” on any piece or photograph you love, and it stands here.' : `${first} hasn’t kept anything yet.`}</p>}
     </section>
   );
 }
