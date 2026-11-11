@@ -43,10 +43,10 @@ const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ 
         </div>
       )}
       {rest.length > 10 && (
-        <button type="button" class={`vault-toggle vault-more${rest.length > 12 ? ' wide' : ''}`} aria-expanded="false" data-all={earned.length}>
+        <div class="vault-toggles"><button type="button" class={`vault-toggle vault-more${rest.length > 12 ? ' wide' : ''}`} aria-expanded="false" data-all={earned.length}>
           <span class="vault-toggle-t">See all</span><span class="vault-toggle-n">{earned.length}</span>
           <svg class="vault-toggle-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
+        </button></div>
       )}
       <a class="vault-all lab" href="/guild/members/?view=trophies">See every trophy →</a>
     </div>
@@ -55,7 +55,7 @@ const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ 
 <script>
   // A full vault shows two rows beneath the shelf; "See all" opens the rest (and closes it again).
   document.querySelectorAll<HTMLButtonElement>('.vault-more[data-all]').forEach((b) => b.addEventListener('click', () => {
-    const grid = b.parentElement?.querySelector('.vault-rest'); if (!grid) return;
+    const grid = b.closest('.vault-in')?.querySelector('.vault-rest'); if (!grid) return;
     const open = grid.classList.toggle('open');
     b.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
     b.querySelector('.vault-toggle-t')!.textContent = open ? 'Show fewer' : 'See all';

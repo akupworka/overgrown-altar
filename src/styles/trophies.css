@@ -109,7 +109,7 @@
 .tr-big:first-child .tr-svg { width: 132px; height: 132px; }
 .vault-rest { margin-top: 48px; width: 100%; }
 .vault .tr-name { color: var(--bone); }
-.vault-locked { margin-top: 44px; width: 100%; }
+.vault-locked { margin-top: 8px; width: 100%; }
 .vault-locked summary { cursor: pointer; list-style: none; display: inline-block; color: var(--muted-dark); border-bottom: 1px solid rgba(243, 236, 220, .2); padding-bottom: 4px; }
 .vault-locked summary::-webkit-details-marker { display: none; }
 .vault-locked summary:hover { color: var(--ember); }
@@ -151,15 +151,19 @@
 .vault-toggle-n { min-width: 24px; height: 22px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
   background: rgba(255,227,163,.12); color: var(--ember); letter-spacing: 0; font-size: 10px; }
 .vault-toggle-chev { color: var(--ember); transition: transform .4s cubic-bezier(.16,1,.3,1); }
-.vault-locked.open .vault-toggle-chev { transform: rotate(180deg); }
+.vault-still.open .vault-toggle-chev { transform: rotate(180deg); }
 /* A full vault: two rows beneath the shelf, the rest behind "See all" (twelve on a computer, ten on a phone). */
 .vault-rest:not(.open) > .tr:nth-child(n+13) { display: none !important; }
-.vault-more { display: none; margin-top: 34px; }
+.vault-toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 36px; }
+.vault-toggles:not(:has(.vault-toggle.wide, .vault-still)) { display: none; }
+.vault-more { display: none; }
 .vault-more.wide { display: inline-flex; }
 .vault-more.open .vault-toggle-chev { transform: rotate(180deg); }
 @media (max-width: 700px) {
   .vault-rest:not(.open) > .tr:nth-child(n+11) { display: none !important; }
-  .vault-more { display: inline-flex; margin-top: 26px; }
+  .vault-more { display: inline-flex; }
+  .vault-toggles, .vault-toggles:not(:has(.vault-toggle.wide, .vault-still)) { display: flex; margin-top: 28px; gap: 8px; }
+  .vault-toggles .vault-toggle { padding: 11px 14px 11px 16px; }
 }
 .vault-locked .tc-grid { width: 100%; animation: trc-in .4s cubic-bezier(.16,1,.3,1); }
 
@@ -208,15 +212,10 @@
 /* Phones, signed in: the Vault is often the end of the page, so it leaves room to scroll clear of the bottom bar */
 @media (max-width: 700px) {
   html[data-member] .vault { padding-bottom: 150px !important; }
-  .vault-locked { margin-top: 40px !important; }
+  .vault-locked { margin-top: 4px !important; }
   .vault-all { margin-top: 34px !important; }
 }
 /* The way on: the ten prestiges, and every trophy */
-.vault-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 40px; }
-.vault-link { display: inline-flex; align-items: center; gap: 9px; padding: 12px 20px; border-radius: 999px; color: var(--ember); text-decoration: none;
-  font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(255,227,163,.35); transition: box-shadow .3s, background-color .3s; }
-.vault-link:hover { background: rgba(255,227,163,.06); box-shadow: inset 0 0 0 1px rgba(255,227,163,.65); }
-@media (max-width: 700px) { .vault-links { margin-top: 30px; } .vault-link { padding: 11px 16px; font-size: 9.5px; letter-spacing: .16em; } }
 
 /* ---- Trophies that grow: what you hold is lit, the next is ringed, the rest wait dim; your progress sits under the medals ---- */
 .tcat-row { grid-template-columns: 1fr !important; gap: 16px !important; padding: 22px 24px !important; border: 0 !important; border-radius: 16px;

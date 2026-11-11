@@ -1,6 +1,6 @@
 import { uniqueIds as useIds } from '../../lib/svgIds';
 // The Vault for the members' area (same look as components/TrophyCase.astro).
-// On your own page it adds a fold-out of the trophies still to earn.
+// Beneath the shelf and two rows: "See all" (the rest of what is won) and "Still to earn", each a fold-out.
 import { TROPHIES, TIER_AT, TROPHY_GROUPS, groupOf, trophiesFor, finestFirst, trophySvg, showcaseCtx, TIER_LABEL, tierLabel, unitFor, num, numShort, type Tier, type Trophy, type TrophyCtx } from '../../lib/trophies';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -78,6 +78,7 @@ export function TrophyCase({ ctx: own, mine = false, name = '' }: { ctx: TrophyC
   const [showAll, setShowAll] = useState(false);   // a full vault shows two rows beneath the shelf; the rest opens on "See all" 
   if (!earned.length && !mine) return null;
   const shelf = earned.slice(0, 3), rest = earned.slice(3);
+  const chev = <svg className="vault-toggle-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>;
   const tally = (['rainbow', 'gold', 'silver', 'bronze'] as Tier[]).map((t) => ({ t, n: earned.filter((x) => x.tier === t).length })).filter((x) => x.n);
   return (
     <section className="vault">
@@ -94,25 +95,24 @@ export function TrophyCase({ ctx: own, mine = false, name = '' }: { ctx: TrophyC
         {earned.length === 0 && <p className="it vault-empty">Your first published piece opens the vault.</p>}
         {shelf.length > 0 && <div className="vault-shelf">{shelf.map((s) => <Medal key={s.trophy.id} s={s} size={112} big onOpen={setOpen} />)}</div>}
         {rest.length > 0 && <div className={`tc-grid vault-rest${showAll ? ' open' : ''}`}>{rest.map((s) => <Medal key={s.trophy.id} s={s} onOpen={setOpen} />)}</div>}
-        {rest.length > 10 && (
-          <button type="button" className={`vault-toggle vault-more${rest.length > 12 ? ' wide' : ''}${showAll ? ' open' : ''}`} aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
-            <span className="vault-toggle-t">{showAll ? 'Show fewer' : 'See all'}</span>{!showAll && <span className="vault-toggle-n">{earned.length}</span>}
-            <svg className="vault-toggle-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-          </button>
-        )}
-        {mine && locked.length > 0 && (
-          <div className={`vault-locked${showLocked ? ' open' : ''}`}>
-            <button type="button" className="vault-toggle" aria-expanded={showLocked} onClick={() => setShowLocked((v) => !v)}>
-              <span className="vault-toggle-t">Still to earn</span><span className="vault-toggle-n">{locked.length}</span>
-              <svg className="vault-toggle-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-            </button>
-            {showLocked && <div className="tc-grid">{locked.map((s) => <Medal key={s.trophy.id} s={s} locked onOpen={setOpen} />)}</div>}
+        {/* Beneath the two rows: "See all" opens the rest of what is won, "Still to earn" opens what is not. */}
+        {(rest.length > 10 || locked.length > 0) && (
+          <div className="vault-toggles">
+            {rest.length > 10 && (
+              <button type="button" className={`vault-toggle vault-more${rest.length > 12 ? ' wide' : ''}${showAll ? ' open' : ''}`} aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+                <span className="vault-toggle-t">{showAll ? 'Show fewer' : 'See all'}</span>{!showAll && <span className="vault-toggle-n">{earned.length}</span>}
+                {chev}
+              </button>
+            )}
+            {locked.length > 0 && (
+              <button type="button" className={`vault-toggle vault-still${showLocked ? ' open' : ''}`} aria-expanded={showLocked} onClick={() => setShowLocked((v) => !v)}>
+                <span className="vault-toggle-t">Still to earn</span><span className="vault-toggle-n">{locked.length}</span>
+                {chev}
+              </button>
+            )}
           </div>
         )}
-        <div className="vault-links">
-          <a className="vault-link" href="/guild/members/?view=prestige"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>The ten prestiges</a>
-          <a className="vault-link" href="/guild/members/?view=trophies"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Every trophy</a>
-        </div>
+        {showLocked && locked.length > 0 && <div className="vault-locked open"><div className="tc-grid">{locked.map((s) => <Medal key={s.trophy.id} s={s} locked onOpen={setOpen} />)}</div></div>}
         {open && <TrophyCard s={open} onClose={() => setOpen(null)} />}
       </div>
     </section>
