@@ -291,7 +291,7 @@ function Desk({ session }: { session: Session }) {
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'The Fellowship' : 'Writer'}</span>
+            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'The Fellowship' : 'Writer of the Guild'}</span>
           </div>
         </div>
         {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
@@ -515,7 +515,7 @@ function KindMark({ medium }: { medium: string }) {
   return (
     <span className={`d-kind-mark${photo ? ' photo' : ''}`} title={photo ? 'Photograph' : 'Writing'} aria-label={photo ? 'Photograph' : 'Writing'} role="img">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        {photo ? <><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></> : <><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></>}
+        {photo ? <><path d="M3 8h4l2-3h6l2 3h4v11H3z" /><circle cx="12" cy="13" r="3.5" /></> : <><path d="M6.5 3.5h8l3 3v14h-11z" /><path d="M9.5 10h5M9.5 13.5h5M9.5 17h3" /></>}
       </svg>
     </span>
   );
@@ -607,8 +607,9 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
     const openable = editable || (live && isEditor);
     const openLabel = editable ? 'Continue writing' : 'Edit';
     return (
-            <li key={p.id} className={`d-item${openable ? ' d-openable' : ''}`}>
+            <li key={p.id} className={`d-item${openable || live ? ' d-openable' : ''}`}>
               {openable && <button type="button" className="d-item-open" onClick={() => onOpen(p)} aria-label={`${openLabel}: ${p.title || 'Untitled'}`} />}
+              {!openable && live && <a className="d-item-open" href={`/guild/members/?p=${p.id}`} aria-label={`Read: ${p.title || 'Untitled'}`} />}
               <div className="d-item-main">
                 <span className="d-item-head"><KindMark medium={p.medium} /><span className="h3 d-item-title">{p.title || 'Untitled'}</span></span>
                 <span className="d-meta"><StatusChip status={p.status} at={p.published_at} />{p.status === 'withdrawn' && p.taken_down_at && <span className="lab d-rev-tag d-del-tag">{Math.max(0, 30 - Math.floor((Date.now() - Date.parse(p.taken_down_at)) / 864e5))} days to restore</span>}<span className="lab mut">{PILLARS.find((x) => x.value === p.pillar)?.label.split(' · ')[0]} · {p.medium === 'photograph' ? 'Photograph' : `${words(p.body)} ${words(p.body) === 1 ? 'word' : 'words'}`} · {fmt(p.updated_at)}</span></span>
@@ -616,6 +617,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
               </div>
               <MoreActions>
                 {openable && <button type="button" className="d-act-item" onClick={() => onOpen(p)}>{openLabel}</button>}
+                {!openable && live && <a className="d-act-item" href={`/guild/members/?p=${p.id}`}>Read it</a>}
                 {live && p.slug && <a className="d-act-item" href={`/guild/${p.slug}/`}>View on the site</a>}
                 {p.status === 'submitted' && <button type="button" className="d-act-item" onClick={() => withdraw(p)}>Withdraw to edit</button>}
                 {isEditor && <button type="button" className="d-act-item" onClick={() => duplicate(p)}>Duplicate</button>}

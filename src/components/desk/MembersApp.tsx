@@ -450,7 +450,52 @@ function Reading({ id }: { id: string }) {
             <span className="lab">{author.display_name}{piece.published_at ? ` · ${fmt(piece.published_at)}` : ''}</span>
           </div>
         )}
+        {piece.status === 'approved' && <ReadTools piece={piece} />}
       </article>
+    </div>
+  );
+}
+
+/** Under a piece read inside the Guild: keep it, tell the writer it stayed with you, and a way to its own page
+ *  (where the reflections are). Your own piece shows only the way to its page. */
+function ReadTools({ piece }: { piece: Piece }) {
+  const [me, setMe] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [marked, setMarked] = useState(false);
+  const [marks, setMarks] = useState(0);
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user.id ?? null; setMe(uid);
+      const [{ data: sv }, { data: mk }] = await Promise.all([
+        uid ? supabase.from('saves').select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
+        supabase.from('piece_marks').select('member_id').eq('piece_id', piece.id),
+      ]);
+      setSaved(!!sv?.length);
+      setMarks((mk ?? []).length); setMarked(!!uid && (mk ?? []).some((m: any) => m.member_id === uid));
+    })();
+  }, [piece.id]);
+  if (!me) return null;
+  const mine = piece.author_id === me;
+  const toggleSave = async () => {
+    const on = !saved; setSaved(on);
+    const { error } = on ? await supabase.from('saves').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', piece.id);
+    if (error) setSaved(!on);
+  };
+  const toggleMark = async () => {
+    const on = !marked; setMarked(on); setMarks((n) => n + (on ? 1 : -1));
+    const { error } = on ? await supabase.from('piece_marks').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('piece_marks').delete().eq('member_id', me).eq('piece_id', piece.id);
+    if (error) { setMarked(!on); setMarks((n) => n + (on ? -1 : 1)); }
+  };
+  return (
+    <div className="rt">
+      {!mine && <button type="button" className="rt-btn" aria-pressed={marked} onClick={toggleMark}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill={marked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
+        {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
+      {!mine && <button type="button" className="rt-btn" aria-pressed={saved} onClick={toggleSave}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
+        {saved ? 'Saved' : 'Save for later'}</button>}
+      {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Reflections, on its page →'}</a>}
     </div>
   );
 }

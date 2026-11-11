@@ -19,6 +19,6 @@ const firsts = [...(await getCatalog())].filter((x) => x.medium !== 'photograph'
 <a href={a.href} class="rule" style="padding-top:28px;display:grid;grid-template-columns:70px minmax(0,1fr);gap:20px"><span class="num" style="color:#62372D">{n + 1}</span><div style="display:flex;flex-direction:column;gap:10px"><span class="lab" style="color:#62372D">{a.pillar === 'watchtower' ? 'The Watchtower' : a.pillar === 'hearth' ? 'The Hearth' : 'The Perimeter'}</span><span class="h3" style="font-size:30px">{a.title}</span><span class="it mut" style="font-size:18px">{a.standfirst}</span></div></a>
 ))}</div></section>
 <section class="sec dark center"><span class="eb">Step three</span><h2 class="h2" style="margin-top:16px">Take a seat at the table</h2><p class="body mut" style="margin-top:18px;max-width:640px">Receive the Dispatches by letter, reserve a Folio, or apply to the Guild.</p>
-<div style="margin-top:36px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center"><a class="btn" href="#subscribe">Receive the Dispatches</a><a class="ghost" href="/folios">See the Folios</a><a class="ghost" href="/guild">Join the Guild</a></div></section>
+<div style="margin-top:36px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center"><a class="btn" href="#subscribe" data-guest>Receive the Dispatches</a><a class="ghost" href="/folios">See the Folios</a><a class="ghost" href="/guild">Join the Guild</a></div></section>
 <Subscribe />
 </BaseLayout>

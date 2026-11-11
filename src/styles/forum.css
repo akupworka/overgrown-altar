@@ -99,7 +99,8 @@
   .fo-thread-last { display: none; }
   .fo-thread-title { font-size: 32px !important; }
   .fo-post { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 18px 16px; }
-  .fo-who { flex-direction: row; justify-content: flex-start; text-align: left; gap: 10px; }
+  .fo-who { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; text-align: left; gap: 6px 10px; }
+  .fo-who-name { white-space: nowrap; }
   .fo-who-link { flex-direction: row; gap: 10px; }
   .fo-who .d-avatar, .fo-who-link > span:first-child { width: 36px !important; height: 36px !important; }
   .fo-body { font-size: 17px; }
