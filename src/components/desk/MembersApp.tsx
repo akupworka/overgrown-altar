@@ -191,7 +191,7 @@ function Directory() {
               <Link key={m.id} to={`/guild/members/?m=${m.id}`} className="g-card">
                 <Arch p={m} />
                 <span className="g-name">{m.display_name || 'A member'}</span>
-                <span className="lab mut g-craft g-role">{m.role === 'editor' ? 'Editor in Chief' : 'Writer'}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
+                <span className="lab mut g-craft g-role">{m.role === 'editor' ? 'Editor in Chief' : 'Of the Guild'}<span className="g-role-craft">{m.craft ? ` · ${m.craft}` : ''}</span></span>
                 <span className="lab mut g-craft g-count">{m.count ? `${m.count} ${m.count === 1 ? 'piece' : 'pieces'}` : ''}</span>
                 <PrestigeBadge published={m.count} link={false} />
               </Link>
@@ -282,7 +282,7 @@ function MemberPage({ id, me }: { id: string; me: string }) {
       <header className="m-hero">
         <Link className="m-back lab" to="/guild/members/">The Guild</Link>
         <Arch p={person} big />
-        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Writer of the Guild'}</span>
+        <span className="eb">{person.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
         <h1 className="h1 m-name">{person.display_name || 'A member'}</h1>
         {person.craft && <span className="lab m-craft">{person.craft}</span>}
         {fellow ? <WayBadge member={person.id} size="lg" /> : <PrestigeBadge published={work.length} size="lg" />}
@@ -671,7 +671,7 @@ function Following({ me }: { me: string }) {
         <ul className="fw-list">
           {rows.map((p) => (
             <li key={p.id} className="fw-row">
-              <Link to={`/guild/members/?m=${p.id}`} className="fw-who"><Arch p={p} /><span className="fw-t"><span className="fw-n">{p.display_name}</span><span className="lab mut">{p.craft || (p.role === 'editor' ? 'Editor in Chief' : 'Writer')}</span></span></Link>
+              <Link to={`/guild/members/?m=${p.id}`} className="fw-who"><Arch p={p} /><span className="fw-t"><span className="fw-n">{p.display_name}</span><span className="lab mut">{p.craft || (p.role === 'editor' ? 'Editor in Chief' : 'Of the Guild')}</span></span></Link>
               {p.newest ? <a className="fw-new" href={p.newest.slug ? `/guild/${p.newest.slug}/` : undefined}><span className="lab">Newest</span><span className="it">{p.newest.title}</span></a> : <span className="it mut fw-new">Nothing published yet</span>}
               <button type="button" className="m-act fw-un" onClick={async () => { if (!confirm(`Stop following ${p.display_name}?`)) return; await supabase.from('follows').delete().eq('follower', me).eq('followed', p.id); load(); }}>Following ✓</button>
             </li>

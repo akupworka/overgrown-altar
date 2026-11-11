@@ -291,7 +291,7 @@ function Desk({ session }: { session: Session }) {
           <Initials name={name} size={44} src={portraitUrl(profile?.portrait_path)} />
           <div className="d-me-text">
             <span className="d-me-name">{name}</span>
-            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'The Fellowship' : 'Writer of the Guild'}</span>
+            <span className="lab mut">{isEditor ? 'Editor in Chief' : isFellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
           </div>
         </div>
         {/* Wide screens: the Guild bar above does the getting-around, so this column is you: your rank and your trophies */}
@@ -1692,7 +1692,7 @@ export function SideStanding({ profile, pieces, fellow }: { profile: Profile; pi
       <a className="ss-me" href={`/guild/members/?m=${profile.id}`}>
         <span className="ss-arch"><img src={portraitUrl(profile.portrait_path) || seatFor(profile.display_name)} alt="" /></span>
         <span className="ss-name">{profile.display_name}</span>
-        <span className="lab ss-role">{profile.role === 'editor' ? 'Editor in Chief' : fellow ? 'The Fellowship' : 'Writer of the Guild'}</span>
+        <span className="lab ss-role">{profile.role === 'editor' ? 'Editor in Chief' : fellow ? 'Of the Fellowship' : 'Of the Guild'}</span>
       </a>
       {fellow ? <WaySide member={profile.id} /> : <>
         <a className="ss-rank" href="/guild/members/?view=prestige" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>

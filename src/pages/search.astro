@@ -81,7 +81,7 @@ import SiteNav from '../components/SiteNav.astro';
         supabase.from('profiles').select('id, display_name, craft, portrait_path').or(`display_name.ilike.${like},craft.ilike.${like}`).limit(12),
         supabase.from('forum_threads').select('id, title, reply_count, last_post_at').ilike('title', like).order('last_post_at', { ascending: false }).limit(12),
       ]);
-      people = (pp ?? []).map((p: any) => ({ href: `/guild/members/?m=${p.id}`, title: p.display_name, meta: p.craft || 'Writer', image: portraitUrl(p.portrait_path), round: true }));
+      people = (pp ?? []).map((p: any) => ({ href: `/guild/members/?m=${p.id}`, title: p.display_name, meta: p.craft || 'Of the Guild', image: portraitUrl(p.portrait_path), round: true }));
       threads = (th ?? []).map((t: any) => ({ href: `/guild/members/?view=forum&t=${t.id}`, title: t.title, meta: `${t.reply_count} ${t.reply_count === 1 ? 'reply' : 'replies'} · ${day(t.last_post_at)}` }));
     }
     if (mine !== turn) return;

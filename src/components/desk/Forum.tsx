@@ -534,7 +534,7 @@ export function ForumThread({ id, me, isEditor }: { id: string; me: string; isEd
                   <Initials name={who?.display_name || 'A member'} size={48} src={portraitUrl(who?.portrait_path)} />
                   <span className="fo-who-name">{who?.display_name || 'A member'}</span>
                 </Link>
-                <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : who?.role === 'fellow' ? 'Fellowship' : 'Writer'}</span>
+                <span className="lab mut">{who?.role === 'editor' ? 'Editor in Chief' : who?.role === 'fellow' ? 'Of the Fellowship' : 'Of the Guild'}</span>
                 {who?.role === 'fellow' ? <WayBadge member={p.author_id} /> : <PrestigeBadge published={pieces[p.author_id] ?? 0} />}
               </div>
               <div className="fo-post-main">
