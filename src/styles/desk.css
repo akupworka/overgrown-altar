@@ -2307,3 +2307,28 @@ a.m-byline:hover { color: var(--oxblood); }
   .lb-book.lb-photo .lb-cover { left: 6px !important; right: 6px !important; top: 72% !important; bottom: 3px !important; }
   .lb-book.lb-photo .lb-t { font-size: 12px; }
 }
+/* A short piece on the shelf (a poem, a page of prose) is a single sheet: cream paper with a turned corner, its picture at the head,
+   the title in ink, a few faint lines of writing, the writer's name at the foot. Long forms stay books. */
+.lb-book.lb-page > a { border-radius: 1px; background: #F3ECDC; color: #2A2017; box-shadow: none;
+  clip-path: polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 0 100%); }
+.lb-book.lb-page > a::before { inset: 0 0 auto auto !important; width: 17px; height: 17px; z-index: 3;
+  background: linear-gradient(225deg, rgba(0, 0, 0, 0) 50%, #D8CDB6 50%) !important; box-shadow: -2px 2px 4px rgba(42, 32, 23, .28); }   /* the turned corner */
+.lb-book.lb-page > a::after { display: none !important; }
+.lb-book.lb-page img { inset: 10px 10px auto 10px; width: calc(100% - 20px); height: 34%; opacity: 1 !important; }
+.lb-book.lb-page.lb-plain img { display: none; }
+.lb-book.lb-page .lb-cover { left: 12px !important; right: 12px !important; top: calc(34% + 20px) !important; bottom: 10px !important; gap: 4px !important; }
+.lb-book.lb-page.lb-plain .lb-cover { top: 22px !important; }
+.lb-book.lb-page .lb-k { margin: 0; padding: 0; background: none; color: #8A3A2E; }
+.lb-book.lb-page .lb-t { font-size: 15px; line-height: 1.12; color: #2A2017; text-shadow: none; -webkit-line-clamp: 3; }
+.lb-book.lb-page .lb-cover::after { content: ''; order: 2; flex: 1 1 0; min-height: 0; width: 100%; margin: 5px 0 4px;
+  background: repeating-linear-gradient(180deg, rgba(42, 32, 23, .17) 0 1px, rgba(42, 32, 23, 0) 1px 7px);
+  -webkit-mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); mask-image: linear-gradient(90deg, #000 62%, rgba(0, 0, 0, .25)); }
+.lb-book.lb-page .lb-w { order: 3; margin-top: 0 !important; color: #7A705F; -webkit-line-clamp: 1; }
+@media (max-width: 700px) {
+  .lb-book.lb-page > a { clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%); }
+  .lb-book.lb-page > a::before { width: 13px; height: 13px; }
+  .lb-book.lb-page img { inset: 7px 7px auto 7px; width: calc(100% - 14px); }
+  .lb-book.lb-page .lb-cover { left: 9px !important; right: 9px !important; top: calc(34% + 14px) !important; bottom: 7px !important; gap: 3px !important; }
+  .lb-book.lb-page.lb-plain .lb-cover { top: 16px !important; }
+  .lb-book.lb-page .lb-t { font-size: 12.5px; }
+}

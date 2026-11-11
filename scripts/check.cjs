@@ -46,7 +46,7 @@ const piece = (id, author, title, status, medium = 'essay', pillar = 'hearth') =
   submitted_at: t(2), published_at: status === 'approved' ? t(3) : null, created_at: t(1), updated_at: t(4), slug: id, revision: null, revision_at: null, writer_notified: true });
 const n = Math.max(0, +opt('pieces', 12));
 const pieces = [
-  ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, `Published piece ${i + 1}`, 'approved', i % 3 === 2 ? 'photograph' : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
+  ...Array.from({ length: n }, (_, i) => piece('mine' + i, ME, `Published piece ${i + 1}`, 'approved', i % 3 === 2 ? 'photograph' : i % 3 === 1 ? (i % 2 ? 'poetry' : 'prose') : 'essay', ['hearth', 'perimeter', 'watchtower'][i % 3])),
   piece('d1', ME, 'A draft in progress', 'draft'), piece('wd1', 'm2', 'What the Bell Remembers', 'draft', 'poetry'), piece('r1', ME, 'Returned with a note', 'returned'),
   { ...piece('s1', 'm2', 'The Bellringer’s Daughter', 'submitted', 'fiction'), assigned_to: ME }, { ...piece('s2', 'm3', 'Psalm for the Night Shift', 'submitted', 'poetry'), assigned_to: 'e9' }, piece('a2', 'm2', 'Vespers in a Roofless Nave', 'approved', 'fiction'),
 ];

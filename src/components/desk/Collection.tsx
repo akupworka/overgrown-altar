@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { pageList, toListTop } from '../../lib/pager';
 
-interface Item { id: string; slug: string; title: string; medium: string; image_path: string | null; image_focus: string | null; author_id: string; who?: string; img?: string }
+interface Item { id: string; slug: string; title: string; medium: string; image_path: string | null; image_focus: string | null; author_id: string; words?: number; who?: string; img?: string }
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
 const STEP = 24;
 
@@ -16,8 +16,12 @@ export function useCollection(member: string, from: 'saves' | 'library' = 'saves
       const { data: sv } = await supabase.from(from).select('piece_id, created_at').eq('member_id', member).order('created_at', { ascending: false });
       const ids = (sv ?? []).map((s: any) => s.piece_id);
       if (!ids.length) { setItems([]); return; }
-      const { data } = await supabase.from('pieces').select('id, slug, title, medium, pillar, image_path, image_focus, author_id').in('id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString());
-      const rows = ((data ?? []) as Item[]);
+      // `words` is counted by the database (a short piece stands as a page, a long one as a book); if it can't be had, carry on without it
+      const ask = (cols: string) => supabase.from('pieces').select(cols).in('id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString());
+      const FIELDS = 'id, slug, title, medium, pillar, image_path, image_focus, author_id';
+      let { data, error } = await ask(FIELDS + ', words');
+      if (error) ({ data } = await ask(FIELDS));
+      const rows = ((data ?? []) as unknown as Item[]);
       const order = new Map(ids.map((id: string, i: number) => [id, i]));
       rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
       const authors = [...new Set(rows.map((r) => r.author_id))];
