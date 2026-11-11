@@ -120,6 +120,11 @@ use still working:
 
 ## Parked by the owner (decide before or after launch)
 - Editor's picks. Phone notifications. The weekly Dispatches letter.
+- **An AI helper that answers only questions about the Guild** (asked for and parked on 11 Nov 2026: "I will add in the
+  future, just not now"). Not built. It is not free: it needs the owner's own Anthropic account and its key in Netlify.
+  Estimate given: on the smallest model about $1 per 1,000 questions (under $1 a month for 100 members). Open choices
+  when it is picked up: who may ask (signed-in only was recommended), where it is pinned (top of the Inbox was
+  recommended), its name, and a daily limit per person.
 - Folios (kept unbuilt; see "Parked: Folios" in HANDOFF.md). "Receive the Dispatches" links are still in the menus.
 - A recorded or studio voice for Listen, in place of the device's own.
 - Whether the "Seeing as…" pill should move in forum threads on phones.
