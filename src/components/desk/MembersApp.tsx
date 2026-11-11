@@ -132,7 +132,7 @@ function Directory({ me }: { me?: string } = {}) {
           <a className="g-room g-room-small g-tile g-tile-desk" href="/guild/desk/">
             <img className="g-tile-photo" src="/images/window-light-on-wall-1200.jpg" alt="" loading="lazy" />
             <span className="g-tile-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /><path d="M14 6l4 4" /></svg></span>
-            <span className="g-tile-text"><span className="g-tile-name">{amFellow ? 'Your collection' : 'Your Desk'}</span><span className="g-room-line">{amFellow ? 'What you’ve saved, and what’s new from writers you follow.' : 'Write, send, and see where your pieces stand.'}</span>
+            <span className="g-tile-text"><span className="g-tile-name">{amFellow ? 'Your desk' : 'Your Desk'}</span><span className="g-room-line">{amFellow ? 'What you’ve saved, and what’s new from writers you follow.' : 'Write, send, and see where your pieces stand.'}</span>
               {meId && !amFellow && <span className="g-tile-stats"><b>{myPieces.filter((p) => p.status === 'approved').length}</b> published<i>·</i><b>{myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length}</b> {myPieces.filter((p) => p.status === 'draft' || p.status === 'returned').length === 1 ? 'draft' : 'drafts'}</span>}</span>
             <span className="g-tile-go" aria-hidden="true">→</span>
           </a>

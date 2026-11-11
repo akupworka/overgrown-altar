@@ -115,7 +115,7 @@ function SignIn() {
 
   return mode === 'signin' ? (
     <div key={shake} className={`dw-holder ${msg && !msg.ok ? 'dw-wrong' : ''}`}>
-      <Doorway kicker="The Guild & the Fellowship" title="Sign in" lead="Your desk, your collection, and the conversation at the table."
+      <Doorway kicker="The Guild & the Fellowship" title="Sign in" lead="Your desk, your library, and the conversation at the table."
         foot={<>Not yet at the table? <a href="/join/">Join us</a></>}>
         <form onSubmit={signIn} className={shake ? 'dw-shake-now' : ''}>
           <Line label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -280,7 +280,7 @@ function Desk({ session }: { session: Session }) {
     addEventListener('popstate', onPop); return () => removeEventListener('popstate', onPop);
   }, [load]);
   const isFellow = seenRole(profile?.role) === 'fellow';   // the Fellowship: a collection, not pieces; no writing
-  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My collection'], ['profile', 'Vault']] : [
+  const items: [Tab, string, number?][] = isFellow ? [['pieces', 'My desk'], ['profile', 'Vault']] : [
     ['pieces', 'My pieces'], ['write', editing ? 'Editing' : 'Write'],
     ...(isEditor ? [['review', 'Waiting for you', mineQ.length] as [Tab, string, number], ['forms', 'Arrivals'] as [Tab, string]] : []),
     ['profile', 'Vault'],

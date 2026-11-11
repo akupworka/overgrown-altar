@@ -13,9 +13,9 @@ export default function PublicCollection() {
   }, [id]);
   const items = useCollection(who ? id : '00000000-0000-0000-0000-000000000000');
   if (who === undefined) return <p className="lab mut pc-wait">Opening the collection…</p>;
-  if (who === null) return <div className="pc-none"><p className="it">This collection isn’t here.</p><a className="lab" href="/gallery/">Visit the Gallery →</a></div>;
+  if (who === null) return <div className="pc-none"><p className="it">This library isn’t here.</p><a className="lab" href="/gallery/">Visit the Gallery →</a></div>;
   const first = who.display_name.split(/\s+/)[0];
-  document.title = `${who.display_name}’s collection · Overgrown Altar`;
+  document.title = `${who.display_name}’s library · Overgrown Altar`;
   return (
     <div className="pc">
       <header className="pc-head">
