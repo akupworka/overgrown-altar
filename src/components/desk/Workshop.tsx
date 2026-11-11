@@ -99,9 +99,9 @@ export function ShareDraft({ piece, me, onClose }: { piece: Piece; me: string; o
   );
 }
 
-/** On the Desk: drafts other members have shared with you. Nothing shows until there is one. */
+/** On the Guild page: drafts other members have shared with you, marked New while unread. Nothing shows until there is one. */
 export function SharedWithYou({ me }: { me: string }) {
-  const [rows, setRows] = useState<{ id: string; title: string; medium: string; who: string }[] | null>(null);
+  const [rows, setRows] = useState<{ id: string; title: string; medium: string; who: string; fresh: boolean }[] | null>(null);
   useEffect(() => {
     (async () => {
       const { data: sh } = await supabase.from('draft_shares').select('piece_id').eq('reader_id', me);
@@ -109,7 +109,10 @@ export function SharedWithYou({ me }: { me: string }) {
       if (!ids.length) { setRows([]); return; }
       const { data: pc } = await supabase.from('pieces').select('id, title, medium, author_id, status, updated_at').in('id', ids).neq('status', 'approved').order('updated_at', { ascending: false });
       const ppl = await loadPeople((pc ?? []).map((p: any) => p.author_id));
-      setRows((pc ?? []).map((p: any) => ({ id: p.id, title: p.title || 'Untitled', medium: p.medium, who: ppl.get(p.author_id)?.display_name ?? 'A member' })));
+      // New: a draft just shared, or a note you haven't read yet (the same unread notices the Inbox shows)
+      const { data: nt } = await supabase.from('inbox_notices').select('piece_id').eq('member_id', me).in('kind', ['draft', 'note']).is('read_at', null);
+      const fresh = new Set((nt ?? []).map((n: any) => n.piece_id));
+      setRows((pc ?? []).map((p: any) => ({ id: p.id, title: p.title || 'Untitled', medium: p.medium, who: ppl.get(p.author_id)?.display_name ?? 'A member', fresh: fresh.has(p.id) })));
     })();
   }, [me]);
   if (!rows?.length) return null;
@@ -120,7 +123,7 @@ export function SharedWithYou({ me }: { me: string }) {
         {rows.map((r) => (
           <li key={r.id} className="rd-row">
             <a className="rd-link" href={`/guild/members/?p=${r.id}`}>
-              <span className="rd-t">{r.title}</span>
+              <span className="rd-t">{r.fresh && <span className="lab fo-new ws-new">New</span>}{r.title}</span>
               <span className="lab mut rd-m">{r.medium === 'photograph' ? 'A photograph' : 'A draft'} by {r.who} · read it and leave your notes</span>
             </a>
           </li>

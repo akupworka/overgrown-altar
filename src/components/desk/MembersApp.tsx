@@ -26,7 +26,8 @@ import { PER_PAGE, pageList, toListTop } from '../../lib/pager';
 import { ForumIndex, ForumBoard, ForumThread, ForumLatest, ForumRules, ForumMine, useForumTally } from './Forum';
 import { PrestigePage } from './PrestigePage';
 import { InboxList, InboxThread } from './Inbox';
-import { WorkshopNotes } from './Workshop';
+import { WorkshopNotes, SharedWithYou } from './Workshop';
+import { Library } from './Library';
 
 type Route = { m?: string; p?: string; view?: string; board?: string; t?: string };
 const readRoute = (): Route => {
@@ -112,6 +113,8 @@ function Directory({ me }: { me?: string } = {}) {
         <h1 className="h1">The Guild</h1>
         <p className="it mut d-sub">The members’ house: talk in the forum, climb the prestiges, and meet everyone who has taken a seat.</p>
       </header>
+      {/* The Workshop: drafts other members have shared with you (shows only when there is one) */}
+      {(me || meId) && <SharedWithYou me={me || meId} />}
       {/* The Guild's rooms, before its people */}
       <div className="g-rooms">
         <section className="g-room g-room-forum">
@@ -531,17 +534,19 @@ function FollowingNew({ me }: { me: string }) {
 function ReadTools({ piece }: { piece: Piece }) {
   const [me, setMe] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [later, setLater] = useState(false);
   const [marked, setMarked] = useState(false);
   const [marks, setMarks] = useState(0);
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user.id ?? null; setMe(uid);
-      const [{ data: sv }, { data: mk }] = await Promise.all([
+      const [{ data: sv }, { data: lt }, { data: mk }] = await Promise.all([
         uid ? supabase.from('saves').select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
+        uid ? supabase.from('library').select('piece_id').eq('member_id', uid).eq('piece_id', piece.id) : Promise.resolve({ data: [] as any[] }),
         supabase.from('piece_marks').select('member_id').eq('piece_id', piece.id),
       ]);
-      setSaved(!!sv?.length);
+      setSaved(!!sv?.length); setLater(!!lt?.length);
       setMarks((mk ?? []).length); setMarked(!!uid && (mk ?? []).some((m: any) => m.member_id === uid));
     })();
   }, [piece.id]);
@@ -551,6 +556,11 @@ function ReadTools({ piece }: { piece: Piece }) {
     const on = !saved; setSaved(on);
     const { error } = on ? await supabase.from('saves').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', piece.id);
     if (error) setSaved(!on);
+  };
+  const toggleLater = async () => {
+    const on = !later; setLater(on);
+    const { error } = on ? await supabase.from('library').insert({ member_id: me, piece_id: piece.id }) : await supabase.from('library').delete().eq('member_id', me).eq('piece_id', piece.id);
+    if (error) setLater(!on);
   };
   const toggleMark = async () => {
     const on = !marked; setMarked(on); setMarks((n) => n + (on ? 1 : -1));
@@ -563,8 +573,11 @@ function ReadTools({ piece }: { piece: Piece }) {
         <svg width="15" height="15" viewBox="0 0 24 24" fill={marked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
         {marked ? 'It stayed with you' : 'This stayed with me'}{marks > 0 && <span className="rt-n">{marks}</span>}</button>}
       {!mine && <button type="button" className="rt-btn" aria-pressed={saved} onClick={toggleSave}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
-        {saved ? 'In your collection' : 'Save to your collection'}</button>}
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11z" /><path d="M12 12.5v4" /></svg>
+        {saved ? 'In your vault' : 'Add to vault'}</button>}
+      <button type="button" className="rt-btn" aria-pressed={later} onClick={toggleLater}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill={later ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" /></svg>
+        {later ? 'Saved to library' : 'Save for later'}</button>
       {piece.slug && <a className="rt-go lab" href={`/guild/${piece.slug}/`}>{mine ? 'View it on the site →' : 'Reflections, on its page →'}</a>}
     </div>
   );
@@ -589,7 +602,7 @@ export default function MembersApp() {
   }, []);
   useEffect(() => {
     if (!location.pathname.startsWith('/guild/members')) return;   // the Desk is showing
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'following' ? 'Following' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'following' ? 'Following' : route.view === 'library' ? 'Your library' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);
@@ -604,7 +617,7 @@ export default function MembersApp() {
   }, [session]);
 
   if (!ready) return <Loading />;
-  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
+  if (session && (route.view === 'way' || (isFellow && !route.m && !route.p && !route.t && !route.board && !route.dm && !['forum', 'rules', 'mine', 'inbox', 'following', 'library'].includes(route.view ?? '')))) return <SideLayout me={session.user.id}><WayPage me={session.user.id} /></SideLayout>;
   if (route.view === 'prestige' || route.view === 'trophies') return <PrestigePage key={route.view} section={route.view === 'trophies' ? 'trophies' : 'prestige'} me={session?.user.id ?? ''} link={(to, cls, children) => <Link to={to} className={cls}>{children}</Link>} />;
   if (!session) return (
     <div className="m-gate">
@@ -623,6 +636,7 @@ export default function MembersApp() {
     : route.view === 'mine' ? <ForumMine me={me} />
     : route.view === 'inbox' ? <InboxList me={me} />
     : route.view === 'following' ? <Following me={me} />
+    : route.view === 'library' ? <Library me={me} />
     : route.dm ? <InboxThread key={route.dm} id={route.dm} me={me} isEditor={isEditor} />
     : route.p ? <Reading id={route.p} />
     : route.m ? <MemberPage id={route.m} me={me} />
@@ -638,9 +652,9 @@ function FellowCollection({ id, first, mine, quiet = false }: { id: string; firs
   if (quiet && (!items || (!items.length && !mine))) return null;   // on a writer's page: nothing until something is saved
   return (
     <section className="m-work m-coll" id="collection">
-      <div className="m-work-head"><span className="eb">{mine ? 'Your collection' : `${first}’s collection`}</span>
+      <div className="m-work-head"><span className="eb">{mine ? 'Kept in your vault' : `Kept in ${first}’s vault`}</span>
         <a className="lab m-coll-share" href={`/collection/?of=${id}`}>Open the public page →</a></div>
-      <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing saved yet. Tap Save on any piece or photograph you love.' : `${first} hasn’t gathered anything yet.`}</p>} />
+      <CollectionWall items={items} empty={<p className="it">{mine ? 'Nothing here yet. Tap “Add to vault” on any piece or photograph you love.' : `${first} hasn’t added anything yet.`}</p>} />
     </section>
   );
 }

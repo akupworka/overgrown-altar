@@ -29,7 +29,7 @@ import { pageList, toListTop } from '../../lib/pager';
 import { PhotoPlate } from '../PhotoPlate';
 import { LENS_FIELDS, MAX_MORE, type PhotoMeta, type GalleryItem } from '../../lib/photo';
 import '../../styles/guild-piece.css';
-import { ShareDraft, SharedWithYou, useMyShares } from './Workshop';
+import { ShareDraft, useMyShares } from './Workshop';
 import { seenRole, viewAs, setViewAs, isEditorRole, roleLabel, roleClass, type ViewAs } from '../../lib/supabase';
 import { supabase, STATUS_LABEL, PILLARS, MEDIUMS, mediumsFor, fitMedium, portraitUrl, rememberMember, type Piece, type Profile } from '../../lib/supabase';
 
@@ -738,8 +738,6 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
         {profile?.id && <ForumMineLatest me={profile.id} />}
       </section>
-      {profile?.id && <SharedWithYou me={profile.id} />}
-      {profile?.id && <ReadingShelf me={profile.id} savedOnly />}   {/* new work from writers you follow lives on the Guild page */}
       {/* Phones: your standing (wide screens show it in the column beside) */}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {isEditor && <EditorTools />}

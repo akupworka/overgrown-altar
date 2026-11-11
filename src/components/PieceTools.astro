@@ -21,10 +21,16 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
       <span class="pt-save-w">Save</span>
     </a>
-    <button type="button" class="pt-btn pt-save" data-member aria-pressed="false" data-piece={pieceId}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
-      <span class="pt-save-w">Save to collection</span>
-    </button>
+    <div class="pt-keep" data-member>
+      <button type="button" class="pt-btn pt-save pt-vault" aria-pressed="false" data-piece={pieceId} data-table="saves" data-off="Add to vault" data-on="In your vault" title="Shown on your vault page">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11z" /><path d="M12 12.5v4" /></svg>
+        <span class="pt-save-w">Add to vault</span>
+      </button>
+      <button type="button" class="pt-btn pt-save pt-later" aria-pressed="false" data-piece={pieceId} data-table="library" data-off="Save for later" data-on="Saved to library" title="Kept in your library, for your eyes only">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" /></svg>
+        <span class="pt-save-w">Save for later</span>
+      </button>
+    </div>
   </div>
 )}
 
@@ -89,18 +95,19 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
     const mine = author === me;
 
     // Save for later
-    const save = document.querySelector<HTMLButtonElement>('.pt-save');
-    if (save) {
-      const { data } = await supabase.from('saves').select('piece_id').eq('member_id', me).eq('piece_id', piece);
+    // Two ways to keep a piece: Add to vault (public, on your vault page) and Save for later (your private library)
+    document.querySelectorAll<HTMLButtonElement>('.pt-save').forEach(async (save) => {
+      const table = save.dataset.table as 'saves' | 'library';
+      const { data } = await supabase.from(table).select('piece_id').eq('member_id', me).eq('piece_id', piece);
       let on = !!(data && data.length);
-      const show = () => { save.setAttribute('aria-pressed', String(on)); save.querySelector('.pt-save-w')!.textContent = on ? 'In your collection' : 'Save to collection'; };
+      const show = () => { save.setAttribute('aria-pressed', String(on)); save.querySelector('.pt-save-w')!.textContent = on ? save.dataset.on! : save.dataset.off!; };
       show();
       save.addEventListener('click', async () => {
         on = !on; show();
-        const { error } = on ? await supabase.from('saves').insert({ member_id: me, piece_id: piece }) : await supabase.from('saves').delete().eq('member_id', me).eq('piece_id', piece);
+        const { error } = on ? await supabase.from(table).insert({ member_id: me, piece_id: piece }) : await supabase.from(table).delete().eq('member_id', me).eq('piece_id', piece);
         if (error) { on = !on; show(); }
       });
-    }
+    });
 
     // Follow the writer
     const follow = document.querySelector<HTMLButtonElement>('.pt-follow');
@@ -189,7 +196,10 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
 
 <style is:global>
   /* Members' parts stay out of sight for visitors */
-  html:not([data-member]) :is(.pt-save, .pt-end, .pt-follow) { display: none !important; }
+  html:not([data-member]) :is(.pt-save, .pt-keep, .pt-end, .pt-follow) { display: none !important; }
+  .pt-keep { display: flex; gap: 8px; }
+  .pt-keep[hidden] { display: none; }
+  @media (max-width: 700px) { .pt-keep { flex: 1 1 100%; } .pt-keep .pt-btn { flex: 1; justify-content: center; } }
   html[data-member] .pt-save-guest { display: none !important; }
   /* top row: reading comfort on the left, Save on the right */
   .pt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 34px; }

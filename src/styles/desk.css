@@ -2121,3 +2121,91 @@ a.m-byline:hover { color: var(--oxblood); }
 .ss-write svg { color: #12160F !important; }
 /* Sign out sits closer under the vault button */
 @media (min-width: 1101px) { .d-room:not(.writing) .ss, .ss-aside .ss { margin-bottom: 12px !important; } }
+
+/* ---- Your library: saved for later, standing on shelves like books ---- */
+.lb { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 30px; text-align: left; }
+.lb-head { display: flex; flex-direction: column; gap: 12px; }
+.lb-head .h1 { margin: 0; font-size: clamp(44px, 6vw, 64px); }
+.lb-shelf { --bw: 136px; --bh: 196px; --pitch: 240px; list-style: none; margin: 0; padding: 0 14px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: calc(var(--pitch) - var(--bh)) 22px;
+  min-height: var(--pitch); padding-bottom: calc(var(--pitch) - var(--bh));
+  /* a plank under every row of books: a lit front edge, the board, and its shadow on the wall */
+  background-image: linear-gradient(180deg, transparent calc(var(--bh) - 1px), rgba(255, 227, 163, .5) calc(var(--bh) - 1px), rgba(255, 227, 163, .5) var(--bh), #2A2118 var(--bh), #17120C calc(var(--bh) + 12px), rgba(0, 0, 0, .55) calc(var(--bh) + 12px), transparent calc(var(--bh) + 30px));
+  background-size: 100% var(--pitch); background-repeat: repeat-y; }
+.lb-book { position: relative; flex: none; width: var(--bw); height: var(--bh); transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.lb-book:nth-child(5n + 2) { height: calc(var(--bh) - 12px); }
+.lb-book:nth-child(7n + 4) { height: calc(var(--bh) - 22px); width: calc(var(--bw) - 10px); }
+.lb-book:nth-child(4n + 3) { height: calc(var(--bh) - 6px); }
+.lb-book > a { position: absolute; inset: 0; display: block; overflow: hidden; border-radius: 2px 5px 5px 2px; color: var(--bone); background: #1B2A22;
+  box-shadow: inset 9px 0 10px -6px rgba(0, 0, 0, .75), inset -3px 0 0 rgba(233, 226, 214, .32), inset -4px 0 0 rgba(0, 0, 0, .35), 0 -1px 0 rgba(255, 255, 255, .06), 8px 0 14px -8px rgba(0, 0, 0, .9); }
+.lb-watchtower > a { background: #1C2433; }
+.lb-perimeter > a { background: #3A1A1E; }
+.lb-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; }
+.lb-book > a::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;   /* the hinge, and a darkening so the title reads */
+  background: linear-gradient(90deg, rgba(0, 0, 0, .45) 0, rgba(0, 0, 0, .1) 9px, rgba(255, 255, 255, .1) 10px, transparent 12px), linear-gradient(180deg, rgba(8, 10, 8, .55), rgba(8, 10, 8, .2) 45%, rgba(8, 10, 8, .8)); }
+.lb-book > a::after { content: ''; position: absolute; z-index: 1; left: 17px; right: 9px; top: 9px; bottom: 9px; border: 1px solid rgba(201, 180, 110, .55); pointer-events: none; }   /* a gilt frame */
+.lb-cover { position: absolute; z-index: 2; left: 24px; right: 15px; top: 18px; bottom: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.lb-k { font-size: 7px; letter-spacing: .2em; color: #E7CF8A; }
+.lb-t { font-family: var(--serif); font-size: 16px; line-height: 1.15; color: #F6F0E2; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; text-wrap: balance; }
+.lb-w { margin-top: auto; font-size: 7px; letter-spacing: .16em; color: #D9D2C2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lb-x { position: absolute; z-index: 3; top: -9px; right: -9px; width: 26px; height: 26px; border: 0; border-radius: 50%; cursor: pointer; background: #12160F; color: #CFC8B8; font-size: 15px; line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .3), 0 4px 10px rgba(0, 0, 0, .5); opacity: 0; transition: opacity .25s, color .25s; }
+.lb-x::after { content: ''; position: absolute; inset: -9px; }
+.lb-x:hover { color: #E8A091; }
+.lb-book:hover .lb-x, .lb-x:focus-visible { opacity: 1; }
+@media (hover: hover) { .lb-book:hover { transform: translateY(-10px) rotate(-1.2deg); } }
+@media (hover: none) { .lb-x { opacity: .85; } }
+.lb-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.lb-shelf-empty { width: 100%; --bh: 90px; --pitch: 124px; min-height: 124px; padding: 0; }
+.lb-empty .it { margin: 0; font-size: 22px; }
+.lb-go { color: var(--ember); margin-top: 6px; }
+@media (max-width: 700px) {
+  .lb { gap: 22px; }
+  .lb-shelf { --bw: 100px; --bh: 148px; --pitch: 184px; padding: 0 6px; gap: calc(var(--pitch) - var(--bh)) 12px; justify-content: flex-start; }
+  .lb-cover { left: 19px; right: 11px; top: 14px; bottom: 12px; gap: 6px; }
+  .lb-book > a::after { left: 14px; right: 7px; top: 7px; bottom: 7px; }
+  .lb-t { font-size: 13px; }
+  .lb-k, .lb-w { font-size: 6.5px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .lb-book { transition: none; } }
+
+.ws-new { margin-right: 10px; position: relative; top: -2px; }
+.g-wrap > .ws-panel { width: 100%; box-sizing: border-box; }
+.lb-x { width: 22px; height: 22px; font-size: 13px; top: -7px; right: -7px; }
+@media (hover: none) { .lb-x { opacity: .7; } }
+/* The identity column never moves: it starts exactly where it stays (no drift as the page scrolls), and it tightens
+   on shorter screens so all of it, down to Sign out, is always in view. */
+@media (min-width: 1101px) {
+  .d-room:not(.writing) .d-side, .ss-aside { position: sticky !important; top: 186px !important; align-self: start; }
+}
+@media (min-width: 1101px) and (max-height: 900px) {
+  .ss-aside .ss, .d-room:not(.writing) .ss { gap: 14px !important; }
+  .ss-arch { width: 84px !important; height: 108px !important; border-radius: 42px 42px 4px 4px !important; margin-bottom: 6px !important; }
+  .ss-name { font-size: 24px !important; }
+  .ss-make > a { min-height: 40px !important; }
+  .ss-medals { gap: 8px 10px !important; padding: 0 !important; }
+  .ss-vault { gap: 10px !important; }
+  .ss-vault-btn { min-height: 38px; margin-top: 2px; }
+}
+@media (min-width: 1101px) and (max-height: 760px) {
+  .ss-medals > span:nth-child(n + 5) { display: none; }   /* one row of trophies on short screens */
+  .ss-arch { width: 68px !important; height: 88px !important; }
+}
+
+/* Library covers: the picture the writer chose, shown whole and bright; the title sits on a dark foot */
+.lb-shelf { --bw: 150px; --bh: 210px; --pitch: 256px; }
+.lb-book img { opacity: 1 !important; }
+.lb-book.lb-plain img { opacity: .55 !important; }   /* a room's photograph standing in: quieter */
+.lb-book > a::before { background: linear-gradient(90deg, rgba(0, 0, 0, .5) 0, rgba(0, 0, 0, .12) 8px, rgba(255, 255, 255, .14) 9px, transparent 11px), linear-gradient(180deg, rgba(8, 10, 8, .5) 0, rgba(8, 10, 8, 0) 22%, rgba(8, 10, 8, 0) 42%, rgba(8, 10, 8, .92) 82%) !important; }
+.lb-book > a::after { display: none; }
+.lb-book.lb-plain > a::after { display: block; }
+.lb-cover { left: 20px !important; right: 12px !important; top: 12px !important; bottom: 12px !important; align-items: flex-start !important; text-align: left !important; gap: 5px !important; }
+.lb-k { margin-bottom: auto; padding: 3px 7px; border-radius: 999px; background: rgba(8, 10, 8, .6); color: #F2DE9E; }
+.lb-t { font-size: 17px; line-height: 1.12; -webkit-line-clamp: 4; text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
+.lb-w { margin-top: 2px !important; color: #E6DFD0; }
+.lb-book.lb-plain .lb-cover { left: 26px !important; right: 18px !important; top: 20px !important; bottom: 18px !important; }
+@media (max-width: 700px) {
+  .lb-shelf { --bw: 106px; --bh: 152px; --pitch: 190px; }
+  .lb-cover { left: 15px !important; right: 9px !important; top: 9px !important; bottom: 9px !important; }
+  .lb-book.lb-plain .lb-cover { left: 20px !important; right: 13px !important; top: 15px !important; bottom: 13px !important; }
+  .lb-t { font-size: 13.5px; }
+}

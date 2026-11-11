@@ -9,14 +9,14 @@ interface Item { id: string; slug: string; title: string; medium: string; image_
 const MEDIUM: Record<string, string> = { prose: 'Prose', poetry: 'Poetry', fiction: 'Fiction', essay: 'Essay', photograph: 'Photograph', protocol: 'Protocol', recovery: 'Recovery', testimony: 'Testimony', deliverance: 'Deliverance', personal: 'Personal' };
 const STEP = 24;
 
-export function useCollection(member: string) {
+export function useCollection(member: string, from: 'saves' | 'library' = 'saves') {   // 'saves' is the vault (public); 'library' is saved for later (private)
   const [items, setItems] = useState<Item[] | null>(null);
   useEffect(() => {
     (async () => {
-      const { data: sv } = await supabase.from('saves').select('piece_id, created_at').eq('member_id', member).order('created_at', { ascending: false });
+      const { data: sv } = await supabase.from(from).select('piece_id, created_at').eq('member_id', member).order('created_at', { ascending: false });
       const ids = (sv ?? []).map((s: any) => s.piece_id);
       if (!ids.length) { setItems([]); return; }
-      const { data } = await supabase.from('pieces').select('id, slug, title, medium, image_path, image_focus, author_id').in('id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString());
+      const { data } = await supabase.from('pieces').select('id, slug, title, medium, pillar, image_path, image_focus, author_id').in('id', ids).eq('status', 'approved').lte('published_at', new Date().toISOString());
       const rows = ((data ?? []) as Item[]);
       const order = new Map(ids.map((id: string, i: number) => [id, i]));
       rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
@@ -31,7 +31,7 @@ export function useCollection(member: string) {
       rows.forEach((r) => { if (r.image_path?.startsWith('/')) url.set(r.image_path, r.image_path); });
       setItems(rows.map((r) => ({ ...r, who: who.get(r.author_id) ?? 'A member', img: r.image_path ? url.get(r.image_path) : undefined })));
     })();
-  }, [member]);
+  }, [member, from]);
   return items;
 }
 

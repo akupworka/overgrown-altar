@@ -19,7 +19,7 @@ function line(r: { first: Item; names: string[]; n: number }): { html: string; h
     case 'reply': return { html: `${who} replied in ${thread}`, href: `/guild/members/?t=${i.thread}` };
     case 'reflection': return { html: `${who} left a reflection on ${piece}`, href: pieceUrl };
     case 'mark': return { html: `${piece} stayed with ${who}`, href: pieceUrl };
-    case 'save': return { html: `${who} saved ${piece}`, href: pieceUrl };
+    case 'save': return { html: `${who} added ${piece} to ${r.n > 1 ? 'their vaults' : 'their vault'}`, href: pieceUrl };
     case 'follow': return { html: `${who} now ${r.n > 1 ? 'follow' : 'follows'} you`, href: `/guild/members/?m=${i.who}` };
     case 'published': return { html: `${piece} is published`, href: pieceUrl };
     case 'returned': return { html: `${piece} came back with a note from the editor`, href: '/guild/desk/' };

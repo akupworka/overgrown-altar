@@ -93,9 +93,11 @@ if (flag('heavy')) {
     for (let r = 0; r <= replies; r++) posts.push({ id: tid + '-p' + r, thread_id: tid, author_id: r % 2 ? ME : 'm' + (4 + r % 30), body: r % 6 === 0 ? long : 'Well said. I keep coming back to this.', created_at: `2026-11-0${1 + (r % 8)}T09:${String(r % 60).padStart(2, '0')}:00Z`, edited_at: null });
   }
 }
+['/images/duomo-spires-1200.jpg', '/images/four-lancet-window-1200.jpg', null, '/images/labyrinth-stained-light-1200.jpg', '/images/window-light-on-wall-1200.jpg', null, '/images/ascension-window-wide-1200.jpg'].forEach((img, i) => { if (pieces[i] && img) pieces[i].image_path = img; });
 const tables = { profiles, pieces, forum_boards: boards, forum_threads: threads, forum_posts: posts,
   dm_threads, dm_messages, dm_blocks: [], dm_reports: [],
   inbox_notices: [{ id: 'nt1', member_id: ME, writer_id: 'm2', piece_id: 'a2', created_at: t(6), read_at: null, kind: 'published' }, { id: 'nt2', member_id: ME, writer_id: 'm2', piece_id: 'wd1', created_at: t(7), read_at: null, kind: 'draft' }],
+  library: [...['a2', 'mine0', 'mine1', 'mine2', 'mine3', 'mine4', 'mine5', 'mine6', 'mine7'].map((piece_id, i) => ({ member_id: ME, piece_id, created_at: t(9 - i) }))],
   draft_shares: [{ piece_id: 'd1', reader_id: 'm2', created_at: t(5) }, { piece_id: 'wd1', reader_id: ME, created_at: t(6) }],
   draft_notes: [{ id: 'dn1', piece_id: 'wd1', author_id: ME, body: 'The opening is strong. The second stanza loses me a little: who is speaking?', created_at: t(6) }, { id: 'dn2', piece_id: 'wd1', author_id: 'm2', body: 'Thank you. It is the bell itself; I will make that plainer.', created_at: t(7) },
     { id: 'dn3', piece_id: 'd1', author_id: 'm2', body: 'I would cut the first paragraph and begin at the window.', created_at: t(6) }],

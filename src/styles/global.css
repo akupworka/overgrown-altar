@@ -452,3 +452,7 @@ a.has-read-tile > .read-tick { position: absolute; top: 10px; right: 10px; z-ind
 .bell-line b, .bell-row.fresh .bell-line b { color: var(--ember); font-weight: 500; }   /* names in gold */
 .bell-when { flex: none; font-size: 8px; color: #8C8679; white-space: nowrap; }
 .bell-none { padding: 16px 20px 14px; font-size: 16px; }
+
+/* The library, in the header on phones (computers have it in the Guild's bar) */
+.lib-link { display: none; }
+@media (max-width: 700px) { .lib-link:not([hidden]) { display: inline-flex; } html[data-member] .online .online-w { display: none; } }

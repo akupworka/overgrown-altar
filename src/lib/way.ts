@@ -21,7 +21,7 @@ const rooms = (c: WayCtx) => new Set(c.saves.filter((s) => s.medium !== 'photogr
 
 export const BADGES: Badge[] = [
   { id: 'first-keep', group: 'Keeping', name: 'First Keep', note: 'Saved your first piece or photograph.', glyph: 'shell', earned: (c) => c.saves.length >= 1, progress: (c) => [Math.min(c.saves.length, 1), 1] },
-  { id: 'shelf', group: 'Keeping', name: 'The Shelf', note: 'Twenty-five pieces kept in your collection.', glyph: 'shelf', earned: (c) => c.saves.length >= 25, progress: (c) => [Math.min(c.saves.length, 25), 25] },
+  { id: 'shelf', group: 'Keeping', name: 'The Shelf', note: 'Twenty-five pieces kept in your vault.', glyph: 'shelf', earned: (c) => c.saves.length >= 25, progress: (c) => [Math.min(c.saves.length, 25), 25] },
   { id: 'curator', group: 'Keeping', name: 'The Curator', note: 'A hundred pieces kept.', glyph: 'key', earned: (c) => c.saves.length >= 100, progress: (c) => [Math.min(c.saves.length, 100), 100] },
   { id: 'eye-for-light', group: 'Keeping', name: 'Eye for Light', note: 'Ten photographs kept from the Gallery.', glyph: 'eye', earned: (c) => photos(c) >= 10, progress: (c) => [Math.min(photos(c), 10), 10] },
   { id: 'three-rooms', group: 'Reading', name: 'Three Rooms', note: 'Kept writing from the Watchtower, the Hearth and the Perimeter.', glyph: 'rooms', earned: (c) => rooms(c) >= 3, progress: (c) => [rooms(c), 3] },
