@@ -6,12 +6,15 @@ const { spawn } = require('child_process');
 const path = require('path'), fs = require('fs');
 const HERE = __dirname, OUT = path.join(HERE, 'out'); fs.mkdirSync(OUT, { recursive: true });
 const FMT = { v: [1080, 1920, 'vertical'], s: [1080, 1080, 'square'], h: [1920, 1080, 'wide'] };
-const ADS = { thesis: 'the-thesis', call: 'the-call', rooms: 'three-rooms', ranks: 'earn-your-place' };
+const ADS = { thesis: 'the-thesis', call: 'the-call', rooms: 'three-rooms', ranks: 'earn-your-place',
+  // the reels (vertical only): node render.cjs video reel1 v
+  reel1: 'reel-coming-soon', reel2: 'reel-earn-your-place', reel3: 'reel-the-work', reel4: 'reel-three-rooms', reel5: 'reel-the-fellowship' };
 const mode = process.argv[2] || 'stills', onlyAd = process.argv[3], onlyFmt = process.argv[4], FPS = 30;
 (async () => {
   const browser = await chromium.launch();
   for (const ad of Object.keys(ADS)) for (const f of Object.keys(FMT)) {
     if ((onlyAd && onlyAd !== ad && onlyAd !== 'all') || (onlyFmt && onlyFmt !== f)) continue;
+    if (ad.startsWith('reel') && f !== 'v') continue;
     const [w, h, shape] = FMT[f];
     const page = await (await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })).newPage();
     page.on('pageerror', (e) => console.log('PAGE ERROR', ad, f, e.message));

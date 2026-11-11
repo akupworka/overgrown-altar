@@ -100,6 +100,18 @@ body { font-family:'Cormorant',serif; color:#F3ECDC; -webkit-font-smoothing:anti
 .rare svg { width:100%; height:auto; display:block; }
 .rare .lab { font-size:1.6rem; letter-spacing:.26em; line-height:1.5; color:#E6DFD0; }
 .fmt-h .rare .lab { font-size:1.9rem; }
+/* the reels: the real interface inside a phone, cut with the film */
+.sc.paper { background:#E9E3D7; color:#2A2017; } .sc.paper .eb { color:#62372D; } .sc.paper .rule2 { height:1px; width:16rem; background:#9F945E; }
+.stage3d { position:absolute; inset:0; perspective:170rem; perspective-origin:50% 40%; }
+.rig { position:absolute; left:50%; top:66rem; width:70rem; height:151rem; margin-left:-35rem; transform-style:preserve-3d; will-change:transform; }
+.phone { position:absolute; inset:0; border-radius:8.4rem; background:#0B0D0A; padding:1.4rem; box-shadow:0 0 0 .35rem #23271F, 0 0 0 .55rem rgba(159,148,94,.75), 0 7rem 16rem rgba(0,0,0,.85), 0 0 22rem rgba(255,227,163,.14); }
+.screen { position:relative; width:100%; height:100%; border-radius:7rem; overflow:hidden; background:#060806; }
+.screen img { position:absolute; left:0; top:0; width:100%; height:auto; display:block; will-change:transform; }
+.screen::after { content:''; position:absolute; inset:0; border-radius:7rem; box-shadow:inset 0 0 0 1px rgba(243,236,220,.1); background:linear-gradient(115deg, rgba(255,255,255,.06), rgba(255,255,255,0) 28%); }
+.cap2 { position:absolute; left:0; right:0; top:28rem; display:flex; flex-direction:column; align-items:center; gap:2rem; text-align:center; padding:0 7rem; }
+.cap2 .big { font-size:10.4rem !important; line-height:1; }
+.cap2 .big-it { font-size:10.4rem !important; }
+.backdrop { opacity:.5; }
 .room-n { font-weight:500; font-size:4.6rem; letter-spacing:.3em; color:#FFE3A3; }
 '''
 BODY='''
@@ -255,7 +267,7 @@ RANKS=r"""
   <div class="sc" data-r="10400,13900,500,600" data-dy="0">
     <div class="glow"></div>
     <div class="topline eb" data-r="10600,13700,600,400">Fifty-four trophies</div>
-    <div class="wall" id="wall">WALL</div>
+    <div class="wall" data-wall="10700,13400">WALL</div>
   </div>
   <div class="sc" data-r="13400,16500,600,600" data-dy="0">
     <div class="glow"></div>
@@ -284,11 +296,98 @@ _by={_t['id']:_t for _t in MARKS['trophies']}
 _pre=lambda svg,p: svg.replace('id="','id="'+p).replace('url(#','url(#'+p).replace('href="#','href="#'+p)
 _rare=''.join('<div data-r="%d,16300,700,500" data-pop>%s<span class="lab">%s</span></div>' % (13500+_k*350,_pre(_by[_i]['svg'],'r_'),_by[_i]['name']) for _k,_i in enumerate(['lion','cathedral','serpent']))
 BODY+=RANKS.replace('CRESTS',_c).replace('PIPS',_p).replace('WALL',_w).replace('RARE',_rare)
+# ---- the reels (vertical): the film cut with the real interface, framed as "coming soon" ----
+SHOTS='file://'+HERE+'/shots'
+_n=[0]
+def _uid(svg):
+    _n[0]+=1; p='q%d_' % _n[0]
+    return svg.replace('id="','id="'+p).replace('url(#','url(#'+p).replace('href="#','href="#'+p)
+def sc(tin,tout,inner,fi=600,fo=500,cls=''): return '<div class="sc %s" data-r="%d,%d,%d,%d" data-dy="0">%s</div>' % (cls,tin,tout,fi,fo,inner)
+def backdrop(tin,tout,photo='tall-windows-dark-vault',pos='center 44%'): return img(photo,'backdrop','%d,%d,1.12,1.03,0,1,0,-1' % (tin,tout),pos)+'<div class="veil deep"></div><div class="glow"></div>'
+def phone(tin,tout,shot,y1,eb,big,y0=0,italic=False):
+    cap='<div class="cap2"><div class="eb" data-r="%d,%d,600,400">%s</div><div class="%s" data-r="%d,%d,800,400">%s</div></div>' % (tin+250,tout-150,eb,'big-it' if italic else 'big',tin+450,tout-150,big)
+    ph='<div class="stage3d"><div class="rig" data-tilt="%d,%d"><div class="phone" data-r="%d,%d,900,450" data-dy="14"><div class="screen"><img src="%s/%s.jpg" data-k="%d,%d,1,1,0,%s,0,%s"></div></div></div></div>' % (tin,tout,tin+150,tout,SHOTS,shot,tin+500,tout,y0,y1)
+    return sc(tin,tout,backdrop(tin,tout)+cap+ph)
+def crests(tin,levels,step=470,hold=1500,eb='Ten prestiges'):
+    out=''; end=tin+len(levels)*step+hold
+    for i,lv in enumerate(levels):
+        m=MARKS['crests'][lv-1]; t=tin+200+i*step; last=i==len(levels)-1
+        r=('%d,%d,200,220' % (t,t+step+170)) if not last else ('%d,%d,400,400' % (t,end-150))
+        out+='<div class="cz" data-r="%s" data-dy="0" data-pop>%s<span class="num">%s</span><span class="nm">%s</span>%s</div>' % (r,_uid(m['svg']),m['numeral'],m['name'],('<span class="note">%s</span>' % m['note']) if last else '')
+    return sc(tin,end,'<div class="glow"></div><div class="topline eb" data-r="%d,%d,500,400">%s</div><div class="stage">%s</div>' % (tin+100,end-150,eb,out),400,400), end
+def wall(tin,tout,eb='Fifty-four trophies'):
+    w=''.join('<div class="tw">%s</div>' % _uid(t['svg']) for t in MARKS['trophies'])
+    return sc(tin,tout,'<div class="glow"></div><div class="topline eb" data-r="%d,%d,600,400">%s</div><div class="wall" data-wall="%d,%d">%s</div>' % (tin+150,tout-200,eb,tin+250,tout-500,w))
+def title(tin,tout,photo,pos,inner,gray=True,veil='veil',k='1.16,1.04,0,2,0,-2'):
+    return sc(tin,tout,img(photo,'gray' if gray else '','%d,%d,%s' % (tin,tout,k),pos)+'<div class="%s"></div><div class="in">%s</div>' % (veil,inner),700,600)
+def soon(tin,T,line='A guild of writers and photographers,<br>anchored in Christ.',name='Overgrown Altar'):
+    return sc(tin,T,img('window-of-the-ascension-and','','%d,%d,1.14,1.03,0,-2,0,1' % (tin,T),'center 42%')+'<div class="veil deep"></div><div class="in">'
+      +'<div data-r="%d,%d,800,1">%s</div>' % (tin+300,T+1,MONO('sm'))
+      +'<div class="caps" data-r="%d,%d,900,1">%s</div>' % (tin+600,T+1,name)
+      +'<div class="thread" data-draw="%d,%d"></div>' % (tin+1200,T+1)
+      +'<div class="big-it" data-r="%d,%d,900,1" style="color:#FFE3A3">Coming soon.</div>' % (tin+1400,T+1)
+      +'<div class="sub" data-r="%d,%d,800,1">%s</div>' % (tin+1900,T+1,line)
+      +'<div class="url" data-r="%d,%d,800,1">overgrownaltar.com</div></div>' % (tin+2300,T+1),800,1)
+def reel(rid,T,scenes): return '\n<section class="ad" id="%s" data-ms="%d">%s</section>\n' % (rid,T,''.join(scenes))
+def EL(t,html,**kw): return '<div %s data-r="%s">%s</div>' % (' '.join('%s="%s"' % (k.replace('_','-'),v) for k,v in kw.items()), t, html)
+
+# 1 · COMING SOON: the whole house in twenty seconds
+_c1,_e1=crests(11000,[2,4,6,8,10],450,1300)
+BODY+=reel('reel1',22000,[
+  sc(0,2700,'<div class="in">'+EL('200,2500,1200,500',MONO())+'<div class="thread" data-draw="1000,2500"></div>'+EL('1300,2500,900,500','Coming soon.',**{'class':'big-it','style':'color:#FFE3A3'})+'</div>',1,500),
+  title(2500,5500,'duomo-spires','center 30%',EL('2900,5300,1000,500','A guild of writers and photographers, anchored in Christ.',**{'class':'big-it'})+'<div class="thread" data-draw="3900,5300"></div>'),
+  phone(5300,8300,'guild','-34','Inside the Guild','A house of your own.'),
+  phone(8100,11200,'hearth','-38','The work','Essays. Poetry. Fiction.'),
+  _c1,
+  wall(_e1-200,_e1+2900),
+  soon(_e1+2700,22000),
+])
+# 2 · EARN YOUR PLACE: the prestiges and the trophies
+_c2,_e2=crests(6300,[1,3,5,7,9,10],430,1500)
+BODY+=reel('reel2',22000,[
+  sc(0,3000,'<div class="in"><div class="stack" style="gap:2.4rem"><div class="no sm" data-r="250,2800,600,400"><i>No follower counts.<span class="strike" data-draw="1200,2800,500" data-origin="left"></span></i></div><div class="big-it huge" data-r="1600,2800,800,400" style="color:#FFE3A3">Here, the work counts.</div></div></div>',1,500),
+  phone(2800,6400,'prestige','-40','Every published piece','raises you.'),
+  _c2,
+  phone(_e2-200,_e2+3200,'trophies','-52','Fifty-four trophies','to earn.',y0='-8'),
+  sc(_e2+3000,_e2+5800,'<div class="glow"></div><div class="in"><div class="eb" data-r="%d,%d,600,400">The rarest are won once</div><div class="rare">%s</div></div>' % (_e2+3150,_e2+5600,''.join('<div data-r="%d,%d,700,500" data-pop>%s<span class="lab">%s</span></div>' % (_e2+3200+k*320,_e2+5600,_uid({t['id']:t for t in MARKS['trophies']}[i]['svg']),{t['id']:t for t in MARKS['trophies']}[i]['name']) for k,i in enumerate(['lion','cathedral','serpent'])))),
+  soon(_e2+5600,22000,'Earn your place.'),
+])
+# 3 · THE WORK: write, be read, keep
+BODY+=reel('reel3',22500,[
+  sc(0,4300,'<div class="in"><div class="stack"><div class="no" data-r="250,4100,600,500"><i>No likes.<span class="strike" data-draw="2700,4100,450" data-origin="left"></span></i></div><div class="no" data-r="1050,4100,600,500"><i>No followers.<span class="strike" data-draw="2900,4100,450" data-origin="left"></span></i></div><div class="no" data-r="1850,4100,600,500"><i>No algorithm.<span class="strike" data-draw="3100,4100,450" data-origin="left"></span></i></div></div></div>',1,500),
+  title(4100,6500,'window-light-on-wall','center 45%',EL('4500,6300,1000,500','Only the work.',**{'class':'big-it huge','style':'color:#FFE3A3'})+'<div class="thread" data-draw="5300,6300"></div>',gray=False,k='1.15,1.03,-2,0,2,0'),
+  phone(6300,9500,'write','-6','At your desk','Write.',italic=True),
+  phone(9300,12700,'reading','-30','By an editor, then by the Guild','Be read.',italic=True,y0='-6'),
+  phone(12500,15700,'library','-10','On your own shelves','Keep what stays.',italic=True),
+  phone(15500,18900,'vault','-34','A vault of your own','Your work, kept.',italic=True,y0='-4'),
+  soon(18700,22500),
+])
+# 4 · THREE ROOMS: the content
+def room(tin,n,name,line,photo,pos,shot,short,gray=True):
+    return [title(tin,tin+2300,photo,pos,EL('%d,%d,700,400' % (tin+250,tin+2100),n,**{'class':'room-n'})+EL('%d,%d,900,400' % (tin+450,tin+2100),name,**{'class':'caps'})+'<div class="thread" data-draw="%d,%d"></div>' % (tin+1100,tin+2100)+EL('%d,%d,800,400' % (tin+1300,tin+2100),line,**{'class':'sub'}),gray=gray,veil='veil'),
+            phone(tin+2100,tin+5000,shot,'-36',n+' · '+name,short,y0='-10')]
+BODY+=reel('reel4',22000,[
+  title(0,2700,'duomo-pigeons','center 40%',EL('200,2500,1000,500',MONO('sm'))+EL('600,2500,1000,500','Three rooms,<br>one altar.',**{'class':'big-it'})+'<div class="thread" data-draw="1400,2500"></div>'),
+  *room(2500,'01','The Watchtower','Essays that weigh the age<br>against the cross.','duomo-spires','center 30%','watchtower','Essays.'),
+  *room(7300,'02','The Hearth','Prose, poetry and fiction,<br>made with reverence.','window-of-the-ascension-and','center 45%','hearth','Prose. Poetry. Fiction.',gray=False),
+  *room(12100,'03','The Perimeter','True accounts from the edge<br>of the unseen.','chapel-and-cross-under-a','72% 50%','perimeter','Testimony.'),
+  soon(16900,22000,'Read in the Fellowship. Write for the Guild.'),
+])
+# 5 · THE FELLOWSHIP: for those who come to read (it opens on paper, not on night)
+BODY+=reel('reel5',21000,[
+  sc(0,4300,'<div class="in">'+EL('300,4100,700,500','For readers',**{'class':'eb'})+EL('700,4100,900,500','Not everyone here writes.',**{'class':'big-it','style':'color:#2A2017'})+'<div class="rule2" data-draw="1700,4100"></div>'+EL('2100,4100,900,500','Some come to read.',**{'class':'big-it huge','style':'color:#62372D'})+'</div>',1,600,'paper'),
+  phone(4100,7600,'reading','-34','Read by an editor first','Read.',italic=True,y0='-4'),
+  phone(7400,10600,'library','-10','Shelves of your own','Collect what stays.',italic=True),
+  phone(10400,14000,'way','-26','Seven stations · twenty-one badges','Walk The Way.',italic=True),
+  title(13800,16400,'what-we-believe','54% 50%',EL('14100,16200,700,400','Open to every denomination',**{'class':'eb'})+EL('14400,16200,900,400','One body,<br>many churches.',**{'class':'big-it'})+'<div class="thread" data-draw="15100,16200"></div>',veil='veil deep'),
+  soon(16200,21000,'Free, and open to all.','The Fellowship'),
+])
 JS='''
 const q = new URLSearchParams(location.search), ad = document.getElementById(q.get('ad') || 'thesis'), fmt = q.get('fmt') || 'v';
 document.body.classList.add('fmt-' + fmt);
 const rem = Math.min(innerWidth, innerHeight) / 100;
 document.documentElement.style.fontSize = rem + 'px';
+document.querySelectorAll('.ad').forEach((x) => { if (x !== ad) x.remove(); });
 ad.classList.add('on');
 const T = +ad.dataset.ms, anims = [], EASE = 'cubic-bezier(.16,1,.3,1)';
 const at = (x) => Math.max(0, Math.min(1, x / T));
@@ -299,20 +398,21 @@ ad.querySelectorAll('[data-r]').forEach((el) => {
   const hid = { opacity: 0, transform: pop ? 'scale(.86)' : `translateY(${dy}px)` }, shown = { opacity: 1, transform: pop ? 'scale(1)' : 'translateY(0px)' }, gone = { opacity: 0, transform: pop ? 'scale(1.07)' : `translateY(${-dy / 2}px)` };
   const kf = [];
   if (tin > 0) kf.push({ ...hid, offset: 0 });
-  kf.push({ ...hid, offset: at(tin), easing: EASE }, { ...shown, offset: at(tin + fi) });
-  if (tout < T) { kf.push({ ...shown, offset: at(Math.max(tin + fi, tout - fo)), easing: 'ease-in' }, { ...gone, offset: at(tout) }); if (at(tout) < 1) kf.push({ ...gone, offset: 1 }); }
+  kf.push({ ...hid, offset: at(tin), easing: EASE }, { ...shown, offset: at(tout < T ? Math.min(tin + fi, tout) : tin + fi) });
+  if (tout < T) { kf.push({ ...shown, offset: at(Math.min(tout, Math.max(tin + fi, tout - fo))), easing: 'ease-in' }, { ...gone, offset: at(tout) }); if (at(tout) < 1) kf.push({ ...gone, offset: 1 }); }
   else if (at(tin + fi) < 1) kf.push({ ...shown, offset: 1 });
   anims.push(el.animate(kf, { duration: T, fill: 'both' }));
 });
-const wall = ad.querySelector('#wall');
-if (wall) { const cols = fmt === 'v' ? 6 : 9; wall.querySelectorAll('.tw').forEach((el, i) => { const tin = 10700 + ((i % cols) + Math.floor(i / cols)) * 95, a = { opacity: 0, transform: 'scale(.6)' }, b = { opacity: 1, transform: 'scale(1)' }, c = { opacity: 0, transform: 'scale(1)' };
-  anims.push(el.animate([{ ...a, offset: 0 }, { ...a, offset: at(tin), easing: EASE }, { ...b, offset: at(tin + 520) }, { ...b, offset: at(13400) }, { ...c, offset: at(13800) }, { ...c, offset: 1 }], { duration: T, fill: 'both' })); }); }
+ad.querySelectorAll('[data-wall]').forEach((wall) => { const [w0, w1] = wall.dataset.wall.split(',').map(Number), cols = fmt === 'v' ? 6 : 9; wall.querySelectorAll('.tw').forEach((el, i) => { const tin = w0 + ((i % cols) + Math.floor(i / cols)) * 95, a = { opacity: 0, transform: 'scale(.6)' }, b = { opacity: 1, transform: 'scale(1)' }, c = { opacity: 0, transform: 'scale(1)' };
+  anims.push(el.animate([{ ...a, offset: 0 }, { ...a, offset: at(tin), easing: EASE }, { ...b, offset: at(tin + 520) }, { ...b, offset: at(w1) }, { ...c, offset: at(w1 + 400) }, { ...c, offset: 1 }], { duration: T, fill: 'both' })); }); });
+ad.querySelectorAll('[data-tilt]').forEach((el) => { const [tin, tout] = el.dataset.tilt.split(',').map(Number), a = 'rotateY(-9deg) rotateX(5deg) translateZ(0)', b = 'rotateY(7deg) rotateX(2deg) translateZ(0)';
+  anims.push(el.animate([{ transform: a, offset: 0 }, { transform: a, offset: at(tin) }, { transform: b, offset: at(tout) }, { transform: b, offset: 1 }], { duration: T, fill: 'both' })); });
 ad.querySelectorAll('[data-draw]').forEach((el) => {
   const [tin, tout, dur = 1100] = el.dataset.draw.split(',').map(Number);
   el.style.transformOrigin = el.dataset.origin === 'left' ? 'left center' : 'center';
   const a = { transform: 'scaleX(0)', opacity: 1 }, b = { transform: 'scaleX(1)', opacity: 1 }, c = { transform: 'scaleX(1)', opacity: 0 };
-  const kf = [{ ...a, offset: 0 }, { ...a, offset: at(tin), easing: EASE }, { ...b, offset: at(tin + dur) }];
-  if (tout < T) kf.push({ ...b, offset: at(Math.max(tin + dur, tout - 500)) }, { ...c, offset: at(tout) }, { ...c, offset: 1 }); else kf.push({ ...b, offset: 1 });
+  const kf = [{ ...a, offset: 0 }, { ...a, offset: at(tin), easing: EASE }, { ...b, offset: at(tout < T ? Math.min(tin + dur, tout) : tin + dur) }];
+  if (tout < T) kf.push({ ...b, offset: at(Math.min(tout, Math.max(tin + dur, tout - 500))) }, { ...c, offset: at(tout) }, { ...c, offset: 1 }); else kf.push({ ...b, offset: 1 });
   anims.push(el.animate(kf, { duration: T, fill: 'both' }));
 });
 ad.querySelectorAll('[data-k]').forEach((el) => {
