@@ -1965,3 +1965,5 @@ a.wy-card[href]:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inse
 /* Staff rotation: whose a piece or report is */
 .d-with { color: var(--ember); }
 .d-section > .d-group-head { margin-top: 34px; padding-top: 22px; border-top: 1px solid rgba(243, 236, 220, .1); }
+
+.d-count-met { color: #5E7A4A !important; }

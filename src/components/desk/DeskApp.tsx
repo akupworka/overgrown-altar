@@ -511,6 +511,9 @@ function EditorTools() {
 }
 
 // A small mark beside each piece: a pen for writing, a camera for a photograph.
+/** Every photograph is sent with at least this many words about it. */
+const PHOTO_WORDS = 200;
+
 function KindMark({ medium }: { medium: string }) {
   const photo = medium === 'photograph';
   return (
@@ -761,7 +764,8 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   const [preview, setPreview] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   // The piece itself, styled as you write (bold, italic, headings, pull quotes, verses).
-  const rich = useRichBody(start?.body ?? '', (marks) => set('body', marks));
+  const photoRef = useRef(false);   // (the words beneath a photograph get their own prompt)
+  const rich = useRichBody(start?.body ?? '', (marks) => set('body', marks), () => photoRef.current ? 'What did you see? What did you feel standing there? Why this light, this moment?' : '');
   const timer = useRef<number | undefined>(undefined);
   const set = (k: keyof typeof form, v: any) => { setForm((f) => ({ ...f, [k]: v })); setState('idle'); };
   // Choosing a pillar narrows the kinds of piece to the ones it takes.
@@ -769,6 +773,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   const kinds = mediumsFor(form.pillar);
   // A photograph has its own form: the photograph, what was behind the lens, and words only if the photographer wants them.
   const isPhoto = form.medium === 'photograph';
+  photoRef.current = isPhoto;
   const setMeta = (k: keyof PhotoMeta, v: string) => set('photo_meta', { ...form.photo_meta, [k]: v });
   // The sheet grows with the writing, like paper, instead of scrolling inside a box.
   useEffect(() => {
@@ -879,6 +884,7 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
   async function submit() {
     if (isPhoto) {
       if (!form.title.trim() || !form.image_path) { setMsg('Give it a title and add the photograph before sending it to the editor.'); return; }
+      if (words(form.body) < PHOTO_WORDS) { setMsg(`Write at least ${PHOTO_WORDS} words about your photograph before sending it: what you saw, what you felt, why it matters. (${words(form.body)} so far.)`); return; }
     } else if (!form.title.trim() || words(form.body) < 20) { setMsg('Give it a title and at least a few lines before sending it to the editor.'); return; }
     if (live) {
       if (!confirm(isEditor ? 'Update the live piece on the site now?' : 'Send these changes to the editor? The live piece stays as it is until they are approved.')) return;
@@ -1027,11 +1033,11 @@ function Editor({ uid, author = null, piece, isEditor = false, startMedium, onSa
         {lensForm}
       </section>
       <section className="d-ph-sec">
-        <h2 className="d-ph-h">Words <span className="d-opt">optional</span></h2>
-        <span className="d-hint">As short or as long as you like: the story behind it, your camera, your process, why this light. Or let it speak for itself.</span>
+        <h2 className="d-ph-h">In your words <span className="d-opt">at least {PHOTO_WORDS} words</span></h2>
+        <span className="d-hint">Every photograph comes with its story. What did you see, and what did you feel? Why this light, this place, this moment? Write it as if the reader were standing beside you.</span>
         {toolsBar}
       <RichBody editor={rich} />
-      <span className="d-paper-count">{words(form.body)} {words(form.body) === 1 ? 'word' : 'words'}</span>
+      <span className={`d-paper-count${words(form.body) >= PHOTO_WORDS ? ' d-count-met' : ''}`}>{words(form.body)} of {PHOTO_WORDS} words{words(form.body) >= PHOTO_WORDS ? ' ✓' : ''}</span>
       </section>
     </article>
   ) : (

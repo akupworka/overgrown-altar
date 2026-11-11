@@ -107,7 +107,7 @@ export function insertPhoto(ed: TipTap | null, src: string, alt: string) {
 }
 export const isOn = (ed: TipTap | null, tool: Tool) => !!ed && (tool === 'heading' ? ed.isActive('heading', { level: 2 }) : ed.isActive(tool));
 
-export function useRichBody(initial: string, onChange: (marks: string) => void) {
+export function useRichBody(initial: string, onChange: (marks: string) => void, placeholder?: () => string) {
   return useEditor({
     immediatelyRender: false,
     extensions: [
@@ -116,7 +116,7 @@ export function useRichBody(initial: string, onChange: (marks: string) => void) 
         code: false, codeBlock: false, horizontalRule: false, strike: false,
       }),
       PullQuote, Verse, Photo,
-      Placeholder.configure({ placeholder: 'Begin here. Enter starts a new line; leave an empty line between paragraphs or stanzas.' }),
+      Placeholder.configure({ placeholder: () => placeholder?.() || 'Begin here. Enter starts a new line; leave an empty line between paragraphs or stanzas.' }),
     ],
     content: marksToHtml(initial),
     editorProps: {
