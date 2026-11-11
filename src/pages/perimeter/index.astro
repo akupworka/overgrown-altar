@@ -17,6 +17,12 @@ const items: DispatchItem[] = (await inPillar('perimeter')).map((p) => ({
   href: p.href, title: p.title, kicker: p.kicker.replace(/^The Perimeter · /, ''), standfirst: p.standfirst, date: p.date,
   minutes: p.minutes, author: p.author, image: p.image, imagePos: p.imagePos, tag: p.medium,
 }));
+// A story without a picture of its own wears one of the house's photographs. They take turns (counted from the oldest,
+// so a story keeps its picture as newer ones arrive), so the list is not one photograph over and over.
+const ROOM_PHOTO = '/images/chapel-and-cross-under-a-1200.jpg';
+const HOUSE = [ROOM_PHOTO, '/images/untangling-mental-strongholds-1200.jpg', '/images/what-we-believe-1200.jpg', '/images/tall-windows-dark-vault-1200.jpg',
+  '/images/faded-chapel-wall-with-a-1200.jpg', '/images/folios-photo-2-1200.jpg', '/images/labyrinth-stained-light-1200.jpg'];
+[...items].sort((a, b) => a.date.localeCompare(b.date)).filter((d) => d.image === ROOM_PHOTO).forEach((d, i) => { d.image = HOUSE[i % HOUSE.length]; });
 const count = (k: string) => items.filter((i) => i.tag === k).length;
 ---
 <BaseLayout title="The Perimeter" description="Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world.">
@@ -56,7 +62,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
       {KINDS.map((k) => <button type="button" class="chip" aria-pressed="false" data-show={k.value}>{k.label}</button>)}
     </div>
     <div class="pe-list">
-      {items.length > 0 ? <DispatchList items={items} live={{ pillar: 'perimeter', kicker: 'kind' }} paged={10} /> : <p class="it mut" style="font-size:20px">The first stories are being written.</p>}
+      {items.length > 0 ? <DispatchList items={items} live={{ pillar: 'perimeter', kicker: 'kind' }} paged={10} two /> : <p class="it mut" style="font-size:20px">The first stories are being written.</p>}
       <p class="it mut pe-none" hidden>Nothing here yet. The first one may be yours.</p>
     </div>
   </section>

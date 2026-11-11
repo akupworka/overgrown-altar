@@ -7,6 +7,15 @@ import FellowshipJoin from '../components/FellowshipJoin.astro';
 import GuildApply from '../components/GuildApply.astro';
 import '../styles/doorway.css';
 import '../styles/guild.css';
+import { crestSvg } from '../lib/crests';
+import { PRESTIGES } from '../lib/prestige';
+import { TROPHIES, trophySvg } from '../lib/trophies';
+import { BADGES, STATIONS, enamelOf, pewterBadge } from '../lib/way';
+import { uniqueIds } from '../lib/svgIds';
+// A glimpse of what is earned inside, on each door: ranks and trophies for the Guild, pilgrim badges for the Fellowship.
+const T = (id: string) => TROPHIES.find((t) => t.id === id)!;
+const guildEarn = [...[1, 4, 7, 10].map((lv) => crestSvg(lv, 46)), ...['signal-fire', 'lion', 'cathedral'].map((id, i) => trophySvg(T(id), 44, i === 0 ? 'gold' : 'rainbow', false, true))].map((x) => uniqueIds(x));
+const fellowEarn = ['first-keep', 'kind-word', 'fellow-traveller', 'season', 'lamp'].map((id) => BADGES.find((b) => b.id === id)!).map((b) => uniqueIds(pewterBadge(b.glyph, 42, true, enamelOf(b))));
 ---
 <BaseLayout title="Join" footer={false} description="Two ways to the table: the Fellowship, for readers, free and open to all; or the Guild, for writers and photographers, by application.">
   <SiteNav />
@@ -23,6 +32,7 @@ import '../styles/guild.css';
           <span><b>Converse</b> with the Guild, by message and in the Forum</span>
           <span><b>Follow</b> the writers whose work stays with you</span>
         </span>
+        <span class="jn-earn" aria-hidden="true"><span class="jn-earn-row">{fellowEarn.map((x) => <span set:html={x} />)}</span><span class="lab">{STATIONS.length} stations on The Way · {BADGES.length} pilgrim badges</span></span>
         <span class="jn-go">Join the Fellowship <i aria-hidden="true">→</i></span>
       </span>
     </a>
@@ -38,6 +48,7 @@ import '../styles/guild.css';
           <span><b>Be read</b> by the Editor in Chief, within three days</span>
           <span><b>Take your seat</b>: write, publish, and climb the prestiges</span>
         </span>
+        <span class="jn-earn" aria-hidden="true"><span class="jn-earn-row">{guildEarn.map((x, i) => <span class:list={{ 'jn-earn-gap': i === 4 }} set:html={x} />)}</span><span class="lab">{PRESTIGES.length} ranks · {TROPHIES.length} trophies</span></span>
         <span class="jn-go">Apply to the Guild <i aria-hidden="true">→</i></span>
       </span>
     </a>
@@ -57,8 +68,11 @@ import '../styles/guild.css';
           <li><span class="num">III</span><span><b>A daily letter</b>, only when something is waiting: replies, messages, new work from writers you follow.</span></li>
           <li><span class="num">IV</span><span><b>In time, the Guild.</b> If you begin to make work of your own, you can apply for a seat at the table.</span></li>
         </ol>
-        <p class="jn-rule"><b>Open to all denominations.</b> We are one body in Christ: a clean, safe house where every tradition is treated with respect and everyone stays teachable. All who take a place keep <a href="/rule/">the Rule of the House</a>.</p>
-        <a class="lab jn-switch" href="#guild" data-door="guild">Here to write? Apply to the Guild instead →</a>
+        <div class="jn-must">
+          <span class="lab jn-must-k"><i aria-hidden="true"></i>Read before you join</span>
+          <p><b>Open to all denominations.</b> We are one body in Christ: a clean, safe house where every tradition is treated with respect and everyone stays teachable.</p>
+          <a class="jn-must-go" href="/rule/" target="_blank" rel="noopener">Read the Rule of the House <span aria-hidden="true">→</span></a>
+        </div>
       </div>
       <FellowshipJoin />
     </div>
@@ -80,11 +94,12 @@ import '../styles/guild.css';
           <li><span class="num">3</span><b>An invitation</b><span>If there is a seat for you, it arrives by email.</span></li>
           <li><span class="num">4</span><b>Take your seat</b><span>Fill in your page, then write your first piece at the Desk.</span></li>
         </ol>
-        <div class="jn-ask">
-          <span class="lab">What we ask of members</span>
-          <ul>{['Craft over content', 'Truth with charity', 'Your own hand', 'A teachable spirit', 'Faithful presence', 'Discretion'].map((x) => <li>{x}</li>)}</ul>
-          <p class="jn-open"><b>Open to all denominations.</b> We are one body in Christ; we treat one another with respect, and we stay teachable.</p>
-          <span class="jn-ask-links"><a href="/guild/#expectations">Read them in full →</a><a href="/rule/">The Rule of the House →</a></span>
+        <div class="jn-must jn-must-paper">
+          <span class="lab jn-must-k"><i aria-hidden="true"></i>Read before you apply</span>
+          <h3 class="jn-must-h">The Rule of the House</h3>
+          <p><b>Open to all denominations.</b> We are one body in Christ: a clean, safe house where every tradition is treated with respect and everyone stays teachable. The Rule is how each member carries themselves here, and the standard the work is held to.</p>
+          <a class="jn-must-go" href="/rule/" target="_blank" rel="noopener">Read the Rule of the House <span aria-hidden="true">→</span></a>
+          <span class="it jn-must-n">You will confirm you have read it on the first page of the application.</span>
         </div>
         <a class="jn-down" href="#apply">
           <span class="lab">Begin your application</span>
@@ -174,16 +189,52 @@ import '../styles/guild.css';
     box-shadow: inset 0 0 0 1px var(--brass), 0 0 0 8px var(--paper); font-size: 26px; line-height: 1; color: var(--oxblood); }
   .jn-steps b { font-family: var(--serif); font-weight: 500; font-size: 25px; }
   .jn-steps span:last-child { max-width: 250px; font-family: var(--serif); font-style: italic; font-size: 17.5px; line-height: 1.45; color: var(--muted-paper); text-wrap: balance; }
-  .jn-ask { margin-top: 60px; padding-top: 34px; width: 100%; max-width: 860px; border-top: 1px solid rgba(42, 32, 23, .16); display: flex; flex-direction: column; align-items: center; gap: 18px; }
-  .jn-ask ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-  .jn-ask li { padding: 9px 16px; border-radius: 999px; font-family: var(--serif); font-size: 18px; line-height: 1.2; box-shadow: inset 0 0 0 1px rgba(42, 32, 23, .22); }
-  .jn-ask-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; }
-  .jn-rule { margin: 6px 0 0; padding: 16px 18px; border-radius: 12px; font-family: var(--serif); font-size: 17.5px; line-height: 1.5; color: #CFC8B8; box-shadow: inset 0 0 0 1px rgba(243, 236, 220, .14); }
-  .jn-rule b { font-weight: 500; color: var(--bone); }
-  .jn-open { margin: 0; max-width: 640px; font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #4A4136; }
-  .jn-open b { font-weight: 600; color: var(--ink); }
-  .jn-rule a { color: var(--ember); border-bottom: 1px solid rgba(255, 227, 163, .4); }
-  .jn-ask a { font-family: var(--serif); font-size: 18px; color: var(--oxblood); border-bottom: 1px solid rgba(98, 55, 45, .35); }
+  /* What must be read first: lit, so nobody passes it by */
+  .jn-must { margin-top: 10px; padding: 20px 22px 22px; border-radius: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; text-align: left;
+    background: linear-gradient(180deg, rgba(255, 227, 163, .1), rgba(255, 227, 163, .04)); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .55), 0 18px 40px -26px rgba(255, 214, 140, .5); }
+  .jn-must-k { display: inline-flex; align-items: center; gap: 10px; color: var(--ember); font-size: 10px; letter-spacing: .26em; }
+  .jn-must-k i { width: 8px; height: 8px; transform: rotate(45deg); border-radius: 1.5px; background: var(--ember); }
+  .jn-must p { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.5; color: #E6DFD0; }
+  .jn-must b { font-weight: 600; color: var(--bone); }
+  .jn-must-go { display: inline-flex; align-items: center; gap: 10px; margin-top: 2px; padding: 12px 20px; border-radius: 999px; background: var(--ember); color: #12160F;
+    font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; transition: background-color .3s, transform .4s var(--ease, ease); }
+  .jn-must-go:hover { background: var(--bone); transform: translateY(-1px); }
+  .jn-must-paper { margin-top: 44px; width: 100%; max-width: 760px; align-items: center; text-align: center; padding: 28px 30px 30px;
+    background: #2A2017; box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .5), 0 26px 50px -30px rgba(42, 32, 23, .8); }
+  .jn-must-paper p { max-width: 600px; font-size: 20px; }
+  .jn-must-paper { margin-top: 64px; gap: 14px; padding: 36px 34px 34px; }
+  .jn-must-h { margin: 2px 0 0; font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: 1.05; color: var(--bone); }
+  .jn-must-n { font-size: 16.5px; color: #A9A294; }
+  /* A short screen (a laptop): the Fellowship's section still fits without scrolling */
+  @media (min-width: 901px) and (max-height: 820px) {
+    #fellowship { padding-top: 22px; padding-bottom: 22px; }
+    #fellowship .jn-path-text { gap: 10px; }
+    #fellowship .h2 { font-size: 40px; }
+    #fellowship .jn-path-text > .it { font-size: 18px; }
+    #fellowship .jn-list { gap: 7px; }
+    #fellowship .jn-list li { font-size: 17px; line-height: 1.35; }
+    #fellowship .jn-must { padding: 14px 18px 16px; gap: 9px; margin-top: 6px; }
+    #fellowship .jn-must p { font-size: 17.5px; line-height: 1.4; }
+    #fellowship .jn-must-go { padding: 10px 16px; }
+    #fellowship :global(.fs-card) { padding: 26px 32px; gap: 10px; }
+    #fellowship :global(.fs-form) { gap: 13px; }
+    #fellowship :global(.fs-h) { font-size: 44px; }
+  }
+  /* The Fellowship's section fits one screen: tighter measures, and it sits in the middle of the height it has */
+  #fellowship { padding-top: clamp(40px, 7vh, 96px); padding-bottom: clamp(36px, 6vh, 88px); min-height: calc(100svh - 70px); display: flex; align-items: center; }
+  #fellowship[hidden] { display: none; }
+  #fellowship .jn-path-in { width: 100%; align-items: center; }
+  #fellowship .jn-path-text { gap: 14px; }
+  #fellowship .h2 { font-size: clamp(38px, 3.6vw, 52px); }
+  #fellowship .jn-path-text > .it { font-size: 19px; }
+  #fellowship .jn-list { margin-top: 4px; gap: 11px; }
+  #fellowship .jn-list li { font-size: 18px; line-height: 1.4; }
+  /* What is earned inside, on each door */
+  .jn-earn { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; padding-top: 16px; border-top: 1px solid rgba(243, 236, 220, .14); }
+  .jn-earn-row { display: flex; align-items: center; gap: 9px; }
+  .jn-earn-row > span { line-height: 0; }
+  .jn-earn-gap { margin-left: 10px; padding-left: 18px; border-left: 1px solid rgba(243, 236, 220, .18); }
+  .jn-earn .lab { font-size: 9px; letter-spacing: .22em; color: #A9A294; }
   /* The way down to the form */
   .jn-down { margin-top: 56px; display: flex; flex-direction: column; align-items: center; gap: 16px; color: var(--oxblood); }
   .jn-down-o { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: #2A2017; color: var(--bone); transition: transform .5s cubic-bezier(.16, 1, .3, 1), background-color .3s; }
@@ -212,8 +263,18 @@ import '../styles/guild.css';
     .jn-steps .num { grid-row: 1 / span 2; width: 46px; height: 46px; font-size: 22px; margin: 0; box-shadow: inset 0 0 0 1px var(--brass), 0 0 0 6px var(--paper); }
     .jn-steps b { font-size: 21px; align-self: end; }
     .jn-steps span:last-child { font-size: 16px; max-width: none; text-wrap: pretty; }
-    .jn-ask { margin-top: 44px; }
-    .jn-ask li { font-size: 16px; padding: 8px 13px; }
+    .jn-must { padding: 18px 18px 20px; }
+    .jn-must p { font-size: 17.5px; }
+    .jn-must-paper { margin-top: 40px; padding: 28px 20px 28px; }
+    .jn-must-h { font-size: 32px; }
+    .jn-must-paper p { font-size: 18px; }
+    #fellowship { display: block; min-height: 0; padding-top: 56px; padding-bottom: 56px; }
+    #fellowship[hidden] { display: none; }
+    .jn-earn { margin-top: 8px; padding-top: 12px; gap: 8px; }
+    .jn-earn-row { gap: 6px; }
+    .jn-earn-row :global(svg) { width: 34px; height: 34px; }
+    .jn-earn-gap { margin-left: 6px; padding-left: 12px; }
+    .jn-earn .lab { font-size: 8px; }
     .jn-down { margin-top: 44px; }
     .jn-list li { font-size: 17px; }
   }

@@ -207,4 +207,15 @@
     .apply-in > .apply-side > .apply-lead { margin-top: 16px; }
     .apply-in > .apply-side > .apply-promise { order: 3; text-align: center; max-width: 520px; }
   }
+  /* The Rule of the House, confirmed on the first page: lit, so it is not passed by */
+  .apply-card .ap-rule { margin-top: 4px; padding: 16px 18px; border-radius: 10px; background: rgba(98,55,45,.07); box-shadow: inset 0 0 0 1px rgba(98,55,45,.45); font-size: 17.5px; }
+  .apply-card .ap-rule b { font-weight: 600; }
+  /* /guild/: the pointer to the Rule of the House */
+  .gd-rule { gap: 20px; }
+  .gd-rule .h2 { margin: 0; }
+  .gd-rule-p { margin: 0; max-width: 720px; font-family: var(--serif); font-size: 22px; line-height: 1.55; color: #4A4136; }
+  .gd-rule-p b { font-weight: 600; color: var(--ink); }
+  .gd-rule .btn { margin-top: 8px; }
+  .gd-rule-n { font-size: 17px; }
+  @media (max-width: 700px) { .gd-rule-p { font-size: 18.5px; } }
 

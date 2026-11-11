@@ -14,14 +14,15 @@ export interface DispatchItem {
 // live: fill in pieces approved since the site was built (see lib/live.ts). pillar narrows it; max keeps the list short.
 // paged: show this many rows a page, with numbered pages below (works alongside a page's own search and filters,
 // which hide rows with the hidden attribute; paging uses its own class so the two never fight).
-interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark'; live?: { pillar?: string; max?: number; kicker?: 'full' | 'kind' }; paged?: number }
+// two: on a wide screen, set the rows two to a row (a long list on a wide page otherwise leaves its right half empty).
+interface Props { items: DispatchItem[]; tone?: 'paper' | 'dark'; live?: { pillar?: string; max?: number; kicker?: 'full' | 'kind' }; paged?: number; two?: boolean }
 const tone = Astro.props.tone ?? 'paper';
 const live = Astro.props.live;
 const BUILT = new Date().toISOString();
 const items = [...Astro.props.items].sort((a, b) => b.date.localeCompare(a.date));
 const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-<ol class:list={['dispatches', { dark: tone === 'dark' }]} data-live={live ? '' : undefined} data-built={live ? BUILT : undefined}
+<ol class:list={['dispatches', { dark: tone === 'dark', two: Astro.props.two }]} data-live={live ? '' : undefined} data-built={live ? BUILT : undefined}
   data-pillar={live?.pillar} data-max={live?.max} data-kicker={live?.kicker ?? 'full'} data-paged={Astro.props.paged || undefined}>
   {items.map((d) => (
     <li data-tag={d.tag}>
@@ -136,6 +137,14 @@ const fmt = (d: string, month: 'long' | 'short' = 'long') => new Date(d).toLocal
   .short { display: none; }
   .dispatches li:hover .title { color: var(--oxblood); }
   .dispatches li:hover .thumb img { transform: scale(1.05); }
+
+  /* Two to a row on a wide screen */
+  @media (min-width: 1000px) {
+    .dispatches.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 64px; }
+    .two .row-link { grid-template-columns: 168px minmax(0, 1fr); gap: 26px; padding: 26px 0; }
+    .two .title { font-size: 27px; }
+    .two .summary { font-size: 18px; }
+  }
 
   /* Dark sections */
   .dispatches.dark { border-top-color: rgba(243, 236, 220, .14); }

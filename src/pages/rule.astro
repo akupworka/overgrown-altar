@@ -1,5 +1,6 @@
 ---
 // The Rule of the House: what is asked of everyone who takes a place here, reader or writer, and the standard of the work.
+// It is the one set of rules: the six things that used to be listed as "What we ask of members" on /guild/ are folded in here.
 // The page's shared look comes from src/styles/global.css. The words are the owner's to change.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -12,18 +13,19 @@ const conduct = [
   { t: 'Clean speech', p: 'No profanity, crude talk or innuendo, in the open or in a private message. Write here as you would speak in a church porch with children in earshot.' },
   { t: 'Honour one another', p: 'Disagree with an idea as sharply as it deserves; never demean the person who holds it. No insults, mockery, slander or contempt for another’s people or story.' },
   { t: 'Keep it safe', p: 'This is not a place to pursue anyone. No flirtation, no unwanted messages, nothing that sexualises a member or a stranger. If someone asks you to stop writing to them, stop.' },
-  { t: 'Guard what is shared', p: 'Testimony and prayer are holy ground. What is told in trust stays in the house: do not copy it out, repeat it elsewhere, or tell another’s story without their leave.' },
+  { t: 'Guard what is shared', p: 'Testimony and prayer are holy ground. What is told in trust stays in the house: do not copy it out, repeat it elsewhere, or tell another’s story without their leave. Protect those who cannot speak for themselves.' },
   { t: 'Modest and truthful images', p: 'Portraits and photographs fit to hang on a church wall. No nudity, gore or shock, and nothing passed off as your own that is not.' },
   { t: 'Nothing for sale', p: 'No advertising, fundraising, recruiting or campaigning. Your page may point to your own website; the rooms are for the work and the company.' },
   { t: 'When something is wrong', p: 'Do not settle it in public. Use Report on the message or post, or write to the editors. They may remove what does not belong, and ask a member to step back or to leave.', a: { href: '/contact', label: 'Write to us' } },
 ];
 const work = [
   { t: 'Ambitious', p: 'Take on a real question. A dispatch meets a serious mind honestly, follows the truth it held to where it broke, and shows where it holds whole.' },
-  { t: 'Carefully crafted', p: 'Bring finished work, revised more than once. Every sentence should earn its place; we would rather publish less, and better.' },
-  { t: 'Fair to those it answers', p: 'State the other side so well its own friends would nod. Quote exactly, credit honestly, and name the idol without mocking the person.' },
+  { t: 'Craft over content', p: 'Bring finished, revised work, not first drafts. Every sentence should earn its place; we publish fewer pieces, and better ones.' },
+  { t: 'Truth with charity', p: 'Name the idol, never mock the person. State the other side so well its own friends would nod, quote exactly, and credit honestly.' },
   { t: 'Your own hand', p: 'Your words, your images, your experience. Tools may assist you; they may not author for you.' },
   { t: 'Anchored', p: 'The work should end in Christ, not in cleverness. If a piece is brilliant and leaves the reader no nearer the truth, it is not ready.' },
-  { t: 'Open to the editor', p: 'Every piece is read before it is published, and may be edited, returned with notes, or declined. Receive the notes as gifts.' },
+  { t: 'Open to the editor', p: 'Every piece is read before it is published, and may be edited, returned with notes, or declined. Receive the notes as gifts; that is what the table is for.' },
+  { t: 'Faithful presence', p: 'Bring work regularly, monthly or each season, and read the work of others. A guild is kept alive by those who show up.' },
 ];
 const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 ---
@@ -80,7 +82,7 @@ const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'X
           </li>
         ))}
       </ol>
-      <p class="rl-more"><a href="/watchtower/">How a dispatch works →</a><a href="/crafts/">The crafts, room by room →</a><a href="/guild/#expectations">What we ask of members →</a></p>
+      <p class="rl-more"><a href="/watchtower/">How a dispatch works →</a><a href="/crafts/">The crafts, room by room →</a></p>
     </div>
   </section>
 
