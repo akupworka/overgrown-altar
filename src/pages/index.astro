@@ -9,16 +9,16 @@ import Subscribe from '../components/Subscribe.astro';
 
 // The content lives in lists like these for now.
 const articles = [
-  { n: 'I', title: 'Built Without Tools of Pride', text: 'We reject the polished, man-made altars of secular cynicism and performative intellect. In the ancient law, if a tool touched the altar stone, it was defiled. We build with unvarnished raw material—high craft, deep reverence, and unarmored truth.' },
+  { n: 'I', title: 'Built Without Tools of Pride', text: 'We reject the polished, man-made altars of secular cynicism and performative intellect. In the ancient law, if a tool touched the altar stone, it was profaned. We build with unvarnished raw material—high craft, deep reverence, and unarmored truth.' },
   { n: 'II', title: 'Beauty Reclaimed', text: 'High-level design, spatial order, and atmospheric visual craft do not belong to the cynic, the narcissist, or the self-serving. They belong entirely to the Living God. We reclaim aesthetic excellence from the posturing of modern art and restore it to sacred ground.' },
   { n: 'III', title: 'The Inklings’ Table', text: 'We do not build digital stages for central gurus or performative influencers. We cultivate a guild—a gathering of sharp minds, soft hearts, and unyielding spirits who gather around the hearth to write, sharpen, and discern together.' },
-  { n: 'IV', title: 'Unmasking the Script', text: 'We name the invisible mechanics. We dismantle the intellectual counterfeits—from Freud to Bukowski—that keep human souls trapped in ironies and strongholds. We light the signal fires on the perimeter.' },
+  { n: 'IV', title: 'Unmasking the Script', text: 'We name the invisible mechanics. We honor what the great secular minds saw, from Freud to Bukowski, and dismantle the counterfeits built on what they missed: the ironies and strongholds that keep human souls trapped. We light the signal fires on the perimeter.' },
 ];
 
 const pillars = [
-  { href: '/watchtower', img: '/images/duomo-spires.jpg', pos: 'center 30%', mono: true, kicker: '01 · Prophetic Audits', name: 'The Watchtower', text: 'Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and Leviathan structures in art and philosophy.' },
+  { href: '/watchtower', img: '/images/duomo-spires.jpg', pos: 'center 30%', mono: true, kicker: '01 · Cultural Audits', name: 'The Watchtower', text: 'Long-form dispatches and cultural essays unmasking psychological scripts, secular idols (from Freud and Bukowski to modern digital posturing), and the structures of pride in art and philosophy.' },
   { href: '/hearth', img: '/images/window-of-the-ascension-and.jpg', pos: 'center 45%', mono: false, kicker: '02 · Creative Guild', name: 'The Hearth', text: 'An Inklings-style fellowship space hosting dark atmospheric monochrome photography, original prose, poetry, and fiction.' },
-  { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Testimony & the Unseen', name: 'The Perimeter', text: 'Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world, told honestly and anchored in Christ.' },
+  { href: '/perimeter', img: '/images/pillar-perimeter.jpg', pos: 'center 55%', mono: true, kicker: '03 · Testimony & the Unseen', name: 'The Perimeter', text: 'Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spiritual realm, told honestly and anchored in Christ.' },
 ];
 
 
@@ -49,7 +49,7 @@ const photos = (await guildPillar('hearth')).filter((g) => g.medium === 'photogr
       <h1 class="visually-hidden">Overgrown Altar</h1>
       <Wordmark width={760} mobileWidth={330} />
       <p class="it hero-tag">Craft, Discernment &amp; The Reclaimed Hearth.</p>
-      <p class="hero-what">An independent journal, creative sanctuary and deliverance guild.</p>
+      <p class="hero-what">An independent journal, creative sanctuary and guild of writers.</p>
       <div class="hero-cta">
         <a class="btn" href="/watchtower">Read the Dispatches</a>
         <a class="ghost" href="/start-here">Start Here</a>

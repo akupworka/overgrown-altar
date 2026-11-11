@@ -147,7 +147,7 @@ function Directory({ me }: { me?: string } = {}) {
               <Link className="g-room g-room-small g-tile g-tile-pz" to="/guild/members/?view=prestige">
                 <span className="g-pz-glow" aria-hidden="true" style={{ '--ink': ink } as any} />
                 <span className="g-pz-crest" aria-hidden="true" dangerouslySetInnerHTML={{ __html: useIds(crestSvg(r.current?.level ?? 1, 96, r.current ? { glow: true } : { locked: true })) }} />
-                <span className="g-tile-text"><span className="g-tile-name">The Prestiges</span>
+                <span className="g-tile-text"><span className="g-tile-name">The Ranks</span>
                   <span className="g-pz-rank" style={{ color: ink }}>{r.current ? r.current.name : 'Not yet ranked'}</span>
                   {won.length > 0 && <span className="g-pz-medals" aria-hidden="true">{won.slice(0, 3).map(({ trophy: t, tier }) => <span key={t.id} dangerouslySetInnerHTML={{ __html: useIds(trophySvg(t, 30, tier)) }} />)}{won.length > 3 && <span className="g-pz-more">+{won.length - 3}</span>}</span>}
                 </span>
@@ -724,7 +724,7 @@ export default function MembersApp() {
   }, []);
   useEffect(() => {
     if (!location.pathname.startsWith('/guild/members')) return;   // the Desk is showing
-    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Way' : route.view === 'following' ? 'Following' : route.view === 'library' ? 'Your library' : route.view === 'prestige' ? 'The Prestiges' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
+    document.title = `${route.p ? 'Reading' : route.m ? 'A member' : route.view === 'way' ? 'The Road' : route.view === 'following' ? 'Following' : route.view === 'library' ? 'Your library' : route.view === 'prestige' ? 'The Ranks' : route.view === 'trophies' ? 'The Trophies' : route.view === 'rules' ? 'The forum rules' : route.view === 'mine' ? 'Your conversations' : route.view === 'inbox' || route.dm ? 'Inbox' : route.view === 'forum' || route.board || route.t ? 'The Forum' : 'The Guild'} · Overgrown Altar`;
   }, [route]);
   // Whether the one signed in is the editor (who keeps the forum: pins, closes, takes down).
   const [isEditor, setIsEditor] = useState(false);

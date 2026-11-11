@@ -13,7 +13,7 @@ export interface CatalogItem {
 const FOUNDATIONS: CatalogItem[] = [
   {
     href: '/perimeter/untangling-mental-strongholds', title: 'Untangling Mental Strongholds',
-    standfirst: 'A recovery manual, step by step: five movements for bringing the thought that keeps winning under the obedience of Christ.',
+    standfirst: 'A recovery manual, step by step: five movements for taking the thought that keeps winning captive to obey Christ.',
     date: '2026-09-29', pillar: 'perimeter', medium: 'recovery', thinkers: [], minutes: 6,
     kicker: 'Recovery story', image: '/images/untangling-mental-strongholds-1200.jpg', author: { name: 'Ainslie Willson' },
   },

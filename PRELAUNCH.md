@@ -132,6 +132,9 @@ use still working:
 - [ ] A new Fellowship member: sign up, save to library, The Way, the forum.
 
 ## Words and pages to read once more
+- [ ] **Check every Scripture quotation against a printed ESV** (11 Nov 2026). They were changed from the King James to the ESV from memory, because the Bible text could not be looked up from where the work was done: What We Believe (seven verses), the Manifesto (Exodus 20:25), the Perimeter (Revelation 12:11), the Rule and the forum rules (1 Corinthians 12:12), the Guild page (Proverbs 27:17), and five verses in "Untangling Mental Strongholds". Crossway's notice is on What We Believe and the legal page; their terms allow quoting within limits without writing to them, but read them once.
+- [ ] **Have a pastor read What We Believe.** It was revised on 11 Nov 2026 (surrender to Christ; grace through faith; Christ's return; the Trinity as the one non-negotiable; the "true myth" line reworded).
+- [ ] The sample thesis and sample ideas on The Crafts were written for you as illustrations; read them as your own.
 - [ ] **About** (rewritten 11 Nov 2026): "Founded by Watchman" and the account of how the Guild works were drafted for you; read them as your own. The name Ainslie Willson no longer appears on About, but is still the byline and signature on "Untangling Mental Strongholds" in the Perimeter: decide whether that stays.
 - [ ] **The Rule of the House** (`/rule/`, written 11 Nov 2026): the conduct asked of everyone and the standard of the work were drafted for you. Read every line as your own before opening; change anything that is not how you would say it.
 - [ ] Send yourself one test Guild application after the next deploy: the form lost its reference field and gained a tick for the Rule, so check it still arrives in Arrivals with every answer.

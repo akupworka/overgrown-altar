@@ -20,7 +20,7 @@ const newestFirst: DispatchItem[] = await inPillar('watchtower');
 // so a piece keeps its picture as newer ones arrive) and no two neighbours on the page share one.
 const ROOM_PHOTO = '/images/watchtower-photo-1200.jpg';
 const HOUSE = [ROOM_PHOTO, '/images/tall-windows-dark-vault-1200.jpg', '/images/duomo-spires-1200.jpg', '/images/what-we-believe-1200.jpg', '/images/labyrinth-stained-light-1200.jpg',
-  '/images/cathedral-facade-and-rose-window-1200.jpg', '/images/format-guild-1200.jpg', '/images/manifesto-photo-1200.jpg', '/images/duomo-pigeons-1200.jpg'];
+  '/images/cathedral-facade-and-rose-window-1200.jpg', '/images/folios-photo-2-1200.jpg', '/images/manifesto-photo-1200.jpg', '/images/duomo-pigeons-1200.jpg'];
 [...newestFirst].reverse().filter((d) => d.image === ROOM_PHOTO).forEach((d, i) => { d.image = HOUSE[i % HOUSE.length]; });
 const newest = newestFirst.slice(0, 3);           // the three newest, under arched windows
 const alsoNew = newestFirst.slice(3, 9);           // six more, as picture cards like the Hearth's: the words on the picture, the writer beneath
@@ -43,9 +43,9 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'lon
     <div class="veil-l"></div>
     <SiteNav />
     <div class="pill-in wt-in">
-      <span class="eb">01 · Prophetic Audits</span>
+      <span class="eb">01 · Cultural Audits</span>
       <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Watchtower</h1>
-      <p class="body" style="color:#E6DFD0;max-width:640px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols, and Leviathan structures in art and philosophy.</p>
+      <p class="body" style="color:#E6DFD0;max-width:640px">Long-form dispatches and cultural essays unmasking psychological scripts, secular idols, and the structures of pride in art and philosophy.</p>
       <span class="lab wt-stats">{newestFirst.length} {newestFirst.length === 1 ? 'dispatch' : 'dispatches'}{writers.length ? ` · ${writers.length} ${writers.length === 1 ? 'writer' : 'writers'}` : ''}</span>
     </div>
   </section>

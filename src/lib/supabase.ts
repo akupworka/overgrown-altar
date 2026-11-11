@@ -84,7 +84,7 @@ export const STATUS_LABEL: Record<Status, string> = {
   draft: 'Draft', submitted: 'With the editor', returned: 'Returned with a note', approved: 'Published', declined: 'Declined', withdrawn: 'Taken down',
 };
 export const PILLARS = [
-  { value: 'watchtower', label: 'The Watchtower · Prophetic Audits' },
+  { value: 'watchtower', label: 'The Watchtower · Cultural Audits' },
   { value: 'hearth', label: 'The Hearth · Creative Guild' },
   { value: 'perimeter', label: 'The Perimeter · Testimony & the Unseen' },
 ] as const;

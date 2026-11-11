@@ -749,8 +749,8 @@ const RULES: { h: string; p: string[] }[] = [
     'Be honest, be generous, be kind. Disagree with ideas, never attack people.',
     'No insults, mockery, name-calling, or contempt for anyone’s faith, background, body, or story.' ] },
   { h: 'Honor the whole Body', p: [
-    'Members come from many traditions. Discuss doctrine honestly and charitably; never mock another denomination or question a member’s faith.',
-    'Hold fast to the essentials of the faith, and in everything else extend charity.' ] },
+    'Members come from many traditions. Discuss doctrine honestly and charitably; never mock another denomination. Bring any concern about a member’s faith to the editors, not to the thread.',
+    'One thing is not negotiable here: the Trinity, one God, Father, Son and Holy Spirit. In everything else, extend charity.' ] },
   { h: 'Keep each other safe', p: [
     'No harassment, threats, stalking, or repeated unwanted contact, here or elsewhere.',
     'No sexual content, and nothing sexual involving anyone under 18, ever. This is reported to the authorities.',
@@ -788,8 +788,8 @@ export function ForumRules() {
       {/* The ground under the rules: one Body, many members */}
       <section className="fr-pre">
         <span className="eb">One Body</span>
-        <p className="fr-pre-text">We are open to every denomination. The Church is one body in Christ, and each tradition is a member of it: a function given for the whole, and a roadway by which the gospel reaches people the others might not.</p>
-        <span className="lab fr-pre-ref">For as the body is one, and hath many members … so also is Christ. · 1 Corinthians 12:12</span>
+        <p className="fr-pre-text">We are open to every denomination. The Church is one body in Christ, and we believe each tradition has its part in it: a function given for the whole, and a roadway by which the gospel reaches people the others might not.</p>
+        <span className="lab fr-pre-ref">For just as the body is one and has many members … so it is with Christ. · 1 Corinthians 12:12</span>
       </section>
       <ol className="fr-list">
         {RULES.map((r, i) => (

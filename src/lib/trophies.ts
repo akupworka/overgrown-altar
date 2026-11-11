@@ -185,7 +185,7 @@ export const TROPHIES: Trophy[] = [
   { id: 'inkwell', name: 'The Inkwell', tier: 'bronze', glyph: G.inkwell, unit: 'words published', note: 'For every word published at the altar, in any room.', at: { bronze: 5000, silver: 25000, gold: 75000, rainbow: 200000 }, count: wordsIn, earned: (c) => wordsIn(c) >= 5000 },
   // The company kept: what a member gives to the others
   { id: 'good-word', name: 'The Good Word', tier: 'bronze', glyph: G.goodword, unit: 'reflections written', note: 'For reflections written to other writers about their work.', ...grow('reflections_out', 3, 15, 50, 150) },
-  { id: 'amen', name: 'The Amen', tier: 'bronze', glyph: G.heart, unit: 'amens', note: 'For each time you told a writer their work stayed with you.', ...grow('stayed_out', 10, 50, 150, 400) },
+  { id: 'amen', name: 'The Open Hand', tier: 'bronze', glyph: G.heart, unit: 'times said', note: 'For each time you told a writer their work stayed with you.', ...grow('stayed_out', 10, 50, 150, 400) },
   { id: 'workbench', name: 'The Workbench', tier: 'bronze', glyph: G.anvil, unit: 'workshop notes', note: 'For notes left on other members’ drafts in the Workshop.', ...grow('notes_out', 1, 5, 15, 40) },
   { id: 'readers-chair', name: 'The Reader’s Chair', tier: 'bronze', glyph: G.book, unit: 'pieces kept', note: 'For pieces and photographs saved or set on your shelves.', ...grow('kept', 5, 25, 75, 200) },
   // Time: they grow too, by themselves
@@ -222,7 +222,7 @@ export const TROPHIES: Trophy[] = [
   { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s first three months.', earned: isFounder },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as one of its editors.', earned: (c) => ['editor', 'staff'].includes(c.member.role ?? '') },
   { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every trophy for a kind of published work raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.craft).every((t) => t.count!(c) >= t.at!.gold) },
-  { id: 'encouragement', name: 'Son of Encouragement', tier: 'rainbow', glyph: G.shield, note: 'The Good Word, The Amen and The Workbench all raised to gold.', earned: (c) => ['good-word', 'amen', 'workbench'].every((id) => { const t = TROPHIES.find((x) => x.id === id)!; return t.count!(c) >= t.at!.gold; }) },
+  { id: 'encouragement', name: 'The Encourager', tier: 'rainbow', glyph: G.shield, note: 'The Good Word, The Open Hand and The Workbench all raised to gold.', earned: (c) => ['good-word', 'amen', 'workbench'].every((id) => { const t = TROPHIES.find((x) => x.id === id)!; return t.count!(c) >= t.at!.gold; }) },
   // The rarest: years of work, or all of it
   { id: 'lion', name: 'Bold as a Lion', tier: 'rainbow', glyph: G.shield, note: 'Fifteen dispatches published in The Watchtower.', earned: (c) => count(c, isSignal) >= 15 },
   { id: 'crown', name: 'The Hearth Crown', tier: 'rainbow', glyph: G.flame, note: 'Forty pieces of prose, poetry and fiction published in The Hearth.', earned: (c) => count(c, (p) => p.pillar === 'hearth' && !isPhoto(p)) >= 40 },
@@ -281,7 +281,7 @@ export function finestFirst<T extends { tier: Tier; n: number; trophy?: Trophy }
 const ONE: Record<string, string> = {
   dispatches: 'dispatch', testimonies: 'testimony', 'visual works': 'visual work', 'long-form pieces': 'long-form piece',
   poems: 'poem', photographs: 'photograph', 'short pieces': 'short piece', accounts: 'account', 'words published': 'word published',
-  'reflections written': 'reflection written', amens: 'amen', 'workshop notes': 'workshop note', 'pieces kept': 'piece kept', 'film photographs': 'film photograph', 'digital photographs': 'digital photograph', 'forum posts': 'forum post', 'threads started': 'thread started', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
+  'reflections written': 'reflection written', 'times said': 'time said', 'workshop notes': 'workshop note', 'pieces kept': 'piece kept', 'film photographs': 'film photograph', 'digital photographs': 'digital photograph', 'forum posts': 'forum post', 'threads started': 'thread started', 'years at the table': 'year at the table', 'months in a row': 'month in a row',
 };
 export const unitFor = (n: number, unit = '') => (n === 1 ? ONE[unit] ?? unit : unit);
 /** Counts as people read them: 25,000, and (for the small labels under each metal) 25k. */

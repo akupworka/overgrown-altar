@@ -1,5 +1,5 @@
 ---
-// The Perimeter: writing about the spirit world. Deliverance stories, testimonies, recovery, and personal accounts.
+// The Perimeter: writing about the spiritual realm. Deliverance stories, testimonies, recovery, and personal accounts.
 // Pieces come from the Guild Desk (members choose one of these four kinds when they pick The Perimeter).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteNav from '../../components/SiteNav.astro';
@@ -25,14 +25,14 @@ const HOUSE = [ROOM_PHOTO, '/images/untangling-mental-strongholds-1200.jpg', '/i
 [...items].sort((a, b) => a.date.localeCompare(b.date)).filter((d) => d.image === ROOM_PHOTO).forEach((d, i) => { d.image = HOUSE[i % HOUSE.length]; });
 const count = (k: string) => items.filter((i) => i.tag === k).length;
 ---
-<BaseLayout title="The Perimeter" description="Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world.">
+<BaseLayout title="The Perimeter" description="Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spiritual realm.">
   <section class="hero pill-h">
     <img src="/images/the-perimeter.jpg" srcset="/images/the-perimeter-1200.jpg 1200w, /images/the-perimeter.jpg 2880w" sizes="100vw" alt="The Perimeter" style="object-position:center 50%;" class="mono" fetchpriority="high" />
     <div class="veil-l"></div><SiteNav />
     <div class="pill-in">
       <span class="eb">03 · Testimony &amp; the Unseen</span>
       <h1 class="h1" style="text-transform:uppercase;letter-spacing:.04em">The Perimeter</h1>
-      <p class="body" style="color:#E6DFD0;max-width:720px">Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spirit world, told honestly and anchored in Christ.</p>
+      <p class="body" style="color:#E6DFD0;max-width:720px">Writing from the edge of the unseen: deliverance stories, testimonies, recovery and personal accounts of the spiritual realm, told honestly and anchored in Christ.</p>
     </div>
   </section>
 
@@ -73,7 +73,7 @@ const count = (k: string) => items.filter((i) => i.tag === k).length;
     <div class="veil-l"></div>
     <div class="hin sec pe-share-in">
       <span class="eb">Your testimony</span>
-      <p class="big-it pe-big">They overcame by the word of their testimony.</p>
+      <p class="big-it pe-big">They have conquered him by the blood of the Lamb and by the word of their testimony.</p>
       <span class="eb" style="font-size:11px">Revelation xii · xi</span>
       <p class="body" style="color:#E6DFD0;max-width:620px">If you have walked through it, write it down. Every story is read by the editor before it is published.</p>
       <div class="pe-cta">
