@@ -123,6 +123,20 @@ const G = {
   ten: 'M12 3a9 9 0 1 0 .01 0M8.5 8l7 8M15.5 8l-7 8',
 };
 
+/** The day the Guild opens its doors. The Founding Stone goes to everyone who takes a seat before that day or within
+ *  three months after it. Until the day is set here (at launch, as '2027-01-31'), everyone who joins is a founder. */
+export const GUILD_OPENED: string | null = null;
+const FOUNDING_MONTHS = 3;
+/** Did someone who joined on this day take a seat in time? (Before the opening counts: those are the first of all.) */
+export const isFoundingMember = (joinedAt?: string | null, opened: string | null = GUILD_OPENED) => {
+  const joined = Date.parse(joinedAt ?? '');
+  if (!Number.isFinite(joined)) return false;
+  if (!opened) return true;
+  const until = new Date(`${opened}T00:00:00Z`); until.setUTCMonth(until.getUTCMonth() + FOUNDING_MONTHS);
+  return joined < until.getTime();
+};
+const isFounder = (c: TrophyCtx) => isFoundingMember(c.member.created_at);
+
 const isSignal = (p: TrophyPiece) => p.pillar === 'watchtower';
 const isStone = (p: TrophyPiece) => p.pillar === 'perimeter' && ['testimony', 'deliverance'].includes(p.medium);
 const isRelic = (p: TrophyPiece) => p.medium === 'photograph';
@@ -205,11 +219,14 @@ export const TROPHIES: Trophy[] = [
   { id: 'writer-answers', name: 'The Writer Answers', tier: 'bronze', glyph: G.answer, note: 'Answered a reader’s reflection.', earned: (c) => gv(c, 'answers') >= 1 },
   { id: 'iron', name: 'Iron Sharpens Iron', tier: 'bronze', glyph: G.blades, note: 'Brought a draft to the Workshop for another member’s notes.', earned: (c) => gv(c, 'shared') >= 1 },
   { id: 'light-left-on', name: 'A Light Left On', tier: 'gold', glyph: G.lantern, note: 'Twenty-five times, a reader said their work stayed with them.', earned: (c) => gv(c, 'stayed_in') >= 25 },
-  { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s founding year.', earned: (c) => (c.member.created_at ?? '').startsWith('2026') },
+  { id: 'founder', name: 'Founding Stone', tier: 'rainbow', glyph: G.rose, note: 'Took a seat in the Guild’s first three months.', earned: isFounder },
   { id: 'keys', name: 'Keys of the House', tier: 'rainbow', glyph: G.keys, note: 'Keeps the house as its Editor in Chief.', earned: (c) => c.member.role === 'editor' },
   { id: 'living-stones', name: 'Living Stones', tier: 'rainbow', glyph: G.stones, note: 'Every trophy for a kind of published work raised to gold: built into a spiritual house.', earned: (c) => TROPHIES.filter((t) => t.craft).every((t) => t.count!(c) >= t.at!.gold) },
   { id: 'encouragement', name: 'Son of Encouragement', tier: 'rainbow', glyph: G.shield, note: 'The Good Word, The Amen and The Workbench all raised to gold.', earned: (c) => ['good-word', 'amen', 'workbench'].every((id) => { const t = TROPHIES.find((x) => x.id === id)!; return t.count!(c) >= t.at!.gold; }) },
   // The rarest: years of work, or all of it
+  { id: 'lion', name: 'Bold as a Lion', tier: 'rainbow', glyph: G.shield, note: 'Forty dispatches published in The Watchtower.', earned: (c) => count(c, isSignal) >= 40 },
+  { id: 'crown', name: 'The Hearth Crown', tier: 'rainbow', glyph: G.flame, note: 'Forty pieces of prose, poetry and fiction published in The Hearth.', earned: (c) => count(c, (p) => p.pillar === 'hearth' && !isPhoto(p)) >= 40 },
+  { id: 'serpent', name: 'The Serpent Underfoot', tier: 'rainbow', glyph: G.shield, note: 'Forty pieces published in The Perimeter: the serpent slain.', earned: (c) => count(c, (p) => p.pillar === 'perimeter') >= 40 },
   { id: 'hundredfold', name: 'The Hundredfold', tier: 'rainbow', glyph: G.wheat, note: 'A hundred pieces published: seed that fell on good ground.', earned: (c) => c.pieces.length >= 100 },
   { id: 'psalter', name: 'The Psalter', tier: 'rainbow', glyph: G.psalter, note: 'A hundred and fifty poems published: a psalter of their own.', earned: (c) => count(c, isLyre) >= 150 },
   { id: 'three-windows', name: 'Three Windows', tier: 'rainbow', glyph: G.roses, note: 'Three of the growing trophies raised all the way to rainbow glass.', earned: (c) => TROPHIES.filter((t) => t.count && t.at && t.count(c) >= t.at.rainbow).length >= 3 },
@@ -223,7 +240,7 @@ export const TROPHY_GROUPS: { name: string; ids: string[] }[] = [
   { name: 'Photography', ids: ['stained-glass', 'darkroom', 'daylight-lens', 'let-it-speak', 'field-notes', 'contact-sheet', 'thousand-words', 'grain-and-pixel'] },
   { name: 'The company kept', ids: ['common-table', 'open-door', 'good-word', 'amen', 'workbench', 'readers-chair', 'sitter', 'signed', 'first-word', 'company', 'letter', 'writer-answers', 'iron', 'kindled', 'every-room', 'burden-bearer', 'light-left-on'] },
   { name: 'Faithfulness', ids: ['years', 'unbroken'] },
-  { name: 'The rarest', ids: ['founder', 'keys', 'living-stones', 'encouragement', 'three-windows', 'hundredfold', 'psalter', 'decade', 'cathedral'] },
+  { name: 'The rarest', ids: ['founder', 'keys', 'living-stones', 'encouragement', 'lion', 'crown', 'serpent', 'three-windows', 'hundredfold', 'psalter', 'decade', 'cathedral'] },
 ];
 export const groupOf = (t: Trophy) => TROPHY_GROUPS.find((g) => g.ids.includes(t.id))?.name ?? TROPHY_GROUPS[TROPHY_GROUPS.length - 1].name;
 
@@ -314,6 +331,241 @@ function laurel() {   // two sprays of leaves, rising from the base around the e
   return d;
 }
 
+// The rarest trophies are each one of a kind: drawn on the same 80×80 field as the rest, in the same gold and glass,
+// but every one has a shape nothing else in the vault has. (Still to earn, each is the same shape in dark iron.)
+// They are meant to be quiet and fine, not loud: deep jewel glass that is lit from above and darkens toward its foot,
+// two or three colours to a piece, thin leading, and gold that is engraved rather than piled on.
+//   Founding Stone        a sunburst, a ring of glass turning in it, a cut cornerstone with glass at its heart
+//   Keys of the House     a great pointed doorway of sapphire and ruby lights, two keys crossed before it
+//   Living Stones         a castle of gold masonry, seven lit windows (one for each kind of work), a pennant on each tower
+//   Son of Encouragement  a heart of ruby glass, a flame kept at its centre
+//   Bold as a Lion        a lion's face cut in facets of gold, its mane a blaze of amber and ruby
+//   The Hearth Crown      a crown of five lancet points over a jewelled band
+//   The Serpent Underfoot a shield of sapphire glass, the serpent slain across it, a sword driven through
+//   Three Windows         a triptych: three lancets side by side
+//   The Hundredfold       a mandorla of harvest glass, an ear of wheat standing in it
+//   The Psalter           an open book whose pages are glass
+//   A Decade at the Table a ten-pointed star, a pane for every year, turning round the numeral X
+//   The Cathedral         the west front itself: two spires, a lit door, the rose window turning
+type RareCtx = { k: string; dk: string; lt: string; md: string; glass: string[]; locked: boolean; still: boolean };
+const LEAD = '#101210', NIGHT = '#0A0C0A';
+// Jewel glass, in the same order of hues as GLASS: sapphire, indigo, violet, purple, rose, ruby, vermilion, amber, olive, emerald, teal, azure.
+const JEWEL = ['#2152C4', '#3A42BE', '#6638C2', '#8432B0', '#B22C66', '#BC2432', '#C2521C', '#D69C2A', '#8AA230', '#1D9A66', '#1A8A92', '#2872C6'];
+const pts = (n: number, r: (i: number) => number, off = 0) => Array.from({ length: n }, (_, i) => polar(r(i), off + (i * 360) / n).map(f).join(',')).join(' ');
+const turning = (c: RareCtx, inner: string) => (c.locked || c.still ? inner : `<g class="tr-turn">${inner}</g>`);
+const gold = (c: RareCtx, d: string) => `<path d="${d}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="url(#s-${c.k})" stroke-width=".8" stroke-linejoin="round"/>`;
+// A pane of glass: its colour, then the light in it (bright at the head, deep at the foot), then its leading.
+const pane = (c: RareCtx, d: string, col: string, extra = '') => `<path d="${d}" fill="${col}"${extra}/><path d="${d}" fill="url(#gl-${c.k})" stroke="${LEAD}" stroke-width=".8" stroke-linejoin="round"${extra}/>`;
+const poly = (c: RareCtx, p: string, col: string) => `<polygon points="${p}" fill="${col}"/><polygon points="${p}" fill="url(#gl-${c.k})" stroke="${LEAD}" stroke-width=".8" stroke-linejoin="round"/>`;
+const bands = (c: RareCtx, cols: string[], x0: number, x1: number, y0: number, y1: number) => { const h = (y1 - y0) / cols.length;
+  return cols.map((col, i) => pane(c, `M${x0} ${f(y0 + i * h)}H${x1}V${f(y0 + (i + 1) * h)}H${x0}Z`, col)).join(''); };
+// A body that tapers (a serpent): cubic curves end to end, with a half-width that changes along the way.
+function ribbon(segs: number[][], w: (t: number) => number, n = 14) {
+  const P: number[][] = [];
+  segs.forEach((q, si) => { for (let i = si ? 1 : 0; i <= n; i++) { const t = i / n, u = 1 - t;
+    P.push([u * u * u * q[0] + 3 * u * u * t * q[2] + 3 * u * t * t * q[4] + t * t * t * q[6], u * u * u * q[1] + 3 * u * u * t * q[3] + 3 * u * t * t * q[5] + t * t * t * q[7]]); } });
+  const L: string[] = [], R: string[] = [], last = P.length - 1;
+  P.forEach((pt, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(last, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1, hw = w(i / last);
+    L.push(`${f(pt[0] - (dy / d) * hw)},${f(pt[1] + (dx / d) * hw)}`); R.unshift(`${f(pt[0] + (dy / d) * hw)},${f(pt[1] - (dx / d) * hw)}`); });
+  return { outline: [...L, ...R].join(' '), spine: 'M' + P.map((pt) => `${f(pt[0])},${f(pt[1])}`).join('L'), end: P[last], angle: (Math.atan2(P[last][1] - P[last - 2][1], P[last][0] - P[last - 2][0]) * 180) / Math.PI };
+}
+// Gold line-work. (Its gradient is measured against the whole field, not the line's own box: a perfectly upright or
+// level line has a box with no width, and a gradient measured against that draws nothing at all.)
+const line = (c: RareCtx, d: string, w = 1, extra = '') => `<path d="${d}" fill="none" stroke="url(#gu-${c.k})" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${extra}/>`;
+const engrave = (c: RareCtx, d: string, w = 0.4, o = 0.5) => `<path d="${d}" fill="none" stroke="${c.dk}" stroke-opacity="${o}" stroke-width="${w}" stroke-linecap="round"/>`;
+const shadow = (d: string, o = 0.2) => `<path d="${d}" fill="#000" fill-opacity="${o}"/>`;
+
+const RARE: Record<string, (c: RareCtx) => string> = {
+  founder: (c) => {
+    const burst = pts(32, (i) => (i % 2 ? 31.6 : i % 4 ? 35.4 : 39));          // long and short rays, turn about
+    const ring = c.glass.map((col, i) => pane(c, sector(21.6, 28.6, i * 30 + 1.2, (i + 1) * 30 - 1.2), col)).join('');
+    const hexO = Array.from({ length: 6 }, (_, i) => polar(18.4, i * 60)), hexI = Array.from({ length: 6 }, (_, i) => polar(9.6, i * 60));
+    // Six facets, lit from the upper left: the two that face the light are bright, the two that face away are dark.
+    const shade = c.locked ? ['#565B61', '#3A3E43', '#24272A', '#1B1D20', '#2C2F33', '#474B50'] : [c.lt, c.md, c.dk, '#5A3D06', c.md, '#FFF7D6'];
+    const facets = hexO.map((o, i) => { const o2 = hexO[(i + 1) % 6], i1 = hexI[i], i2 = hexI[(i + 1) % 6];
+      return `<path d="M${f(o[0])},${f(o[1])}L${f(o2[0])},${f(o2[1])}L${f(i2[0])},${f(i2[1])}L${f(i1[0])},${f(i1[1])}Z" fill="${shade[i]}" stroke="${c.dk}" stroke-width=".45" stroke-linejoin="round"/>`; }).join('');
+    const heart = hexI.map((a, i) => { const b = hexI[(i + 1) % 6];
+      return `<path d="M40,40L${f(a[0])},${f(a[1])}L${f(b[0])},${f(b[1])}Z" fill="${c.glass[(i * 2 + 1) % 12]}" stroke="${LEAD}" stroke-width=".7" stroke-linejoin="round"/>`; }).join('');
+    return `<polygon points="${burst}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/>`
+      + `<polygon points="${burst}" fill="none" stroke="url(#s-${c.k})" stroke-width=".9" stroke-linejoin="round"/>`
+      + engrave(c, Array.from({ length: 16 }, (_, i) => { const a = i * 22.5, r1 = polar(30.8, a), r2 = polar(i % 2 ? 34.2 : 37.6, a); return `M${f(r1[0])},${f(r1[1])}L${f(r2[0])},${f(r2[1])}`; }).join(''), 0.45, 0.55)
+      + `<circle cx="40" cy="40" r="30.2" fill="${LEAD}"/>` + turning(c, ring)
+      + `<circle cx="40" cy="40" r="30.2" fill="none" stroke="${c.md}" stroke-width=".9"/>`
+      + `<circle cx="40" cy="40" r="20.2" fill="${NIGHT}" stroke="${c.md}" stroke-width=".7"/>`
+      + facets + heart
+      + `<polygon points="${pts(6, () => 18.4)}" fill="none" stroke="${c.lt}" stroke-opacity=".7" stroke-width=".6" stroke-linejoin="round"/>`
+      + `<polygon points="${pts(8, (i) => (i % 2 ? 1.5 : 5.6))}" fill="${c.locked ? '#6F757C' : '#FFFBEA'}" filter="url(#glow-${c.k})"/>`;
+  },
+  keys: (c) => {
+    const inner = 'M19.5 70V37A28 28 0 0 1 40 11.5A28 28 0 0 1 60.5 37V70Z', g = c.glass;
+    const lights = [g[0], g[5], g[0], g[5], g[0]].map((col, i) => pane(c, `M${f(19.5 + i * 8.2)} 9H${f(27.7 + i * 8.2)}V47H${f(19.5 + i * 8.2)}Z`, col) + pane(c, `M${f(19.5 + i * 8.2)} 47H${f(27.7 + i * 8.2)}V72H${f(19.5 + i * 8.2)}Z`, col)).join('');
+    const key = `<circle cx="40" cy="26.5" r="4.6"/><circle cx="40" cy="26.5" r="1.3"/><path d="M40 31.2V65.4M37.8 33.4h4.4M40 56.6h5.2v3.2h-2.4v2.6h2.4v3H40"/>`;
+    const pair = (stroke: string, w: number) => `<g fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(33 40 46)">${key}</g><g transform="rotate(-33 40 46) translate(80 0) scale(-1 1)">${key}</g></g>`;
+    return `<clipPath id="cl-${c.k}"><path d="${inner}"/></clipPath>`
+      + gold(c, 'M14 74V36A34 34 0 0 1 40 5A34 34 0 0 1 66 36V74Z') + `<path d="${inner}" fill="${LEAD}"/>`
+      + `<g clip-path="url(#cl-${c.k})">${lights}</g>`
+      + `<path d="${inner}" fill="none" stroke="${c.lt}" stroke-opacity=".55" stroke-width=".5"/>`
+      + gold(c, 'M9 71.5H71V77.5H9Z') + pair(c.dk, 3.9) + pair(`url(#g-${c.k})`, 1.9);
+  },
+  'living-stones': (c) => {
+    const g = c.glass;
+    const flag = (x: number) => line(c, `M${x} 14.2V3.2`, 1) + `<path d="M${x} 3.6L${x + 7.4} 6L${x} 8.4Z" fill="${g[5]}" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/>`;
+    const slit = (x: number, y: number, w: number, h: number, col: string) => pane(c, `M${f(x - w)} ${y + h}V${f(y + w)}a${w} ${w} 0 0 1 ${f(w * 2)} 0V${y + h}Z`, col);
+    // Courses of stone in running bond: level beds every 6, upright joints every 8, each course shifted half a stone.
+    const bond = (x0: number, x1: number, y0: number, y1: number) => { let d = '';
+      for (let y = y0, r = 0; y < y1; y += 6, r++) { if (r) d += `M${x0} ${y}H${x1}`; for (let x = x0 + (r % 2 ? 4 : 8); x < x1 - 0.5; x += 8) d += `M${x} ${y}V${Math.min(y1, y + 6)}`; }
+      return d; };
+    const courses = bond(8.6, 23.4, 20, 72) + bond(56.6, 71.4, 20, 72) + bond(24.6, 55.4, 36, 72);
+    const ringStones = Array.from({ length: 7 }, (_, i) => { const a = -90 + i * 30, r1 = [40 + 6.9 * Math.sin((a * Math.PI) / 180), 56 - 6.9 * Math.cos((a * Math.PI) / 180)], r2 = [40 + 9.3 * Math.sin((a * Math.PI) / 180), 56 - 9.3 * Math.cos((a * Math.PI) / 180)];
+      return `M${f(r1[0])},${f(r1[1])}L${f(r2[0])},${f(r2[1])}`; }).join('');
+    return flag(16) + flag(64)
+      + gold(c, 'M8 74V14H12V18H14V14H18V18H20V14H24V30H28V34H31V30H35V34H38V30H42V34H45V30H49V34H52V30H56V14H60V18H62V14H66V18H68V14H72V74Z')
+      + shadow('M16 14H18V18H20V14H24V72H16Z', 0.14) + shadow('M64 14H66V18H68V14H72V72H64Z', 0.14) + shadow('M24 34H56V37H24Z', 0.16)
+      + engrave(c, courses, 0.35, 0.42) + engrave(c, 'M8.4 20H23.6M56.4 20H71.6M24.4 36H55.6', 0.6, 0.6)
+      + slit(16, 41, 2.3, 12, g[0]) + slit(16, 56, 2.3, 10, g[0]) + slit(64, 41, 2.3, 12, g[0]) + slit(64, 56, 2.3, 10, g[0])
+      + slit(31, 39, 1.7, 7, g[11]) + slit(40, 38, 1.7, 8, g[11]) + slit(49, 39, 1.7, 7, g[11])
+      + `<path d="M30.7 72V56A9.3 9.3 0 0 1 49.3 56V72Z" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/>` + engrave(c, ringStones + 'M30.9 62H33.4M30.9 67H33.4M46.6 62H49.1M46.6 67H49.1', 0.4, 0.6)
+      + pane(c, 'M33.5 72V56A6.5 6.5 0 0 1 46.5 56V72Z', g[7])
+      + `<path d="M36.6 51V72M40 49.6V72M43.4 51V72M33.8 57h12.4M33.8 62h12.4M33.8 67h12.4" fill="none" stroke="${LEAD}" stroke-width=".8"/>`
+      + gold(c, 'M4 72H76V77.5H4Z');
+  },
+  encouragement: (c) => {
+    const H = 'M40 72C22 58 8 46 8 29.5A16.5 16.5 0 0 1 40 22A16.5 16.5 0 0 1 72 29.5C72 46 58 58 40 72Z', inset = 'translate(40 44) scale(.84) translate(-40 -44)', g = c.glass;
+    const wedges = [g[5], g[4], g[5], g[4], g[5], g[4], g[5], g[4]].map((col, i) => pane(c, sector(0, 60, i * 45 + 22.5, (i + 1) * 45 + 22.5), col, ' transform="translate(0 2)"')).join('');
+    return `<clipPath id="cl-${c.k}"><path d="${H}" transform="${inset}"/></clipPath>`
+      + gold(c, H) + `<path d="${H}" transform="${inset}" fill="${LEAD}"/>`
+      + `<g clip-path="url(#cl-${c.k})">${wedges}</g>`
+      + `<path d="${H}" transform="${inset}" fill="none" stroke="${c.lt}" stroke-opacity=".55" stroke-width=".6"/>`
+      + `<circle cx="40" cy="42" r="10.2" fill="${NIGHT}" stroke="url(#m-${c.k})" stroke-width="1.3"/>`
+      + line(c, Array.from({ length: 24 }, (_, i) => { const a = (i * 15 * Math.PI) / 180; return `M${f(40 + 7.9 * Math.sin(a))},${f(42 - 7.9 * Math.cos(a))}L${f(40 + 9 * Math.sin(a))},${f(42 - 9 * Math.cos(a))}`; }).join(''), 0.35, ' stroke-opacity=".8"')
+      + `<g transform="translate(29.8 32) scale(.85)"><path d="${G.flame}" fill="url(#g-${c.k})" stroke="${c.dk}" stroke-width=".5" stroke-linejoin="round" filter="url(#glow-${c.k})"/></g>`;
+  },
+  lion: (c) => {
+    const g = c.glass, cy = 40;
+    const at = (r: number, deg: number) => [40 + r * Math.sin((deg * Math.PI) / 180), cy - r * Math.cos((deg * Math.PI) / 180)].map(f).join(',');
+    const N = 18, long = (i: number) => (i % 2 ? 33.5 : 38.4);
+    const rim = Array.from({ length: N }, (_, i) => { const a = (i * 360) / N; return `${at(29.5, a - 10)} ${at(long(i) + 1.4, a)} ${at(29.5, a + 10)}`; }).join(' ');
+    const mane = Array.from({ length: N }, (_, i) => { const a = (i * 360) / N;
+      const p = `${at(14, a - 8.5)} ${at(28.6, a - 8.2)} ${at(long(i), a)} ${at(28.6, a + 8.2)} ${at(14, a + 8.5)}`;
+      return `<polygon points="${p}" fill="${i % 2 ? g[5] : g[7]}"/><polygon points="${p}" fill="url(#gl-${c.k})" stroke="${LEAD}" stroke-width=".55" stroke-linejoin="round"/>`
+        + `<path d="M${at(17, a)}L${at(long(i) - 3.4, a)}" stroke="${LEAD}" stroke-opacity=".38" stroke-width=".4"/>`; }).join('');
+    // The face, cut like a stone: facets of gold, lit from the upper left (the far side a shade deeper).
+    const S = c.locked ? ['#6F757C', '#565B61', '#3F4348', '#2C2F33', '#202326', '#17191B'] : ['#FFF6D2', '#F4D680', '#D8AA42', '#B08220', '#84600F', '#5A3D06'];
+    const F: [string, number][] = [
+      ['40,21 31,22.5 35.5,30.5 40,31', 1], ['31,22.5 25.5,30 28.5,34.2 35.5,30.5', 2], ['31,22.5 24.6,15.8 25.5,30', 3], ['29.4,22.6 26.2,19 26.6,26.4', 5],
+      ['25.5,30 24,41 30,37.2 28.5,34.2', 3], ['40,31 35.5,30.5 35.8,36.6 37.4,39.5 36.4,46.5 40,46.5', 0],
+      ['24,41 29.5,52.5 36.4,46.5 37.4,39.5 34.6,39 30,37.2', 2], ['36.4,46.5 29.5,52.5 35,59.5 40,56.5 40,51.5', 1], ['35,59.5 40,62.5 40,56.5', 3],
+    ];
+    const side = (far: boolean) => `<g${far ? ' transform="translate(80 0) scale(-1 1)"' : ''}>`
+      + F.map(([p, sh]) => `<polygon points="${p}" fill="${S[Math.min(5, sh + (far ? 1 : 0))]}" stroke="${c.dk}" stroke-width=".35" stroke-linejoin="round"/>`).join('')
+      + `<polygon points="28.5,34.2 35.8,36.6 34.6,39 30,37.2" fill="${NIGHT}"/><polygon points="31.6,35.9 34.4,36.9 33.6,38 31.4,37.3" fill="${c.locked ? '#565B61' : g[7]}"/>`
+      + `<polygon points="36.4,46.5 40,46.5 40,51.5" fill="${NIGHT}"/></g>`;
+    return `<polygon points="${rim}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/>` + mane + side(false) + side(true)
+      + `<path d="M40 51.5V54.4M40 54.4c-1.6 1.6-3.6 1.8-5.2 1M40 54.4c1.6 1.6 3.6 1.8 5.2 1" fill="none" stroke="${c.dk}" stroke-width=".8" stroke-linecap="round"/>`
+      + `<g fill="${c.dk}" fill-opacity=".75"><circle cx="34.2" cy="51.4" r=".42"/><circle cx="32.6" cy="50" r=".42"/><circle cx="33.4" cy="53.2" r=".42"/><circle cx="45.8" cy="51.4" r=".42"/><circle cx="47.4" cy="50" r=".42"/><circle cx="46.6" cy="53.2" r=".42"/></g>`;
+  },
+  crown: (c) => {
+    const g = c.glass;
+    const point = (x: number, top: number, col: string) => { const a = `M${x - 4.6} 58V${top + 9.5}A9.6 9.6 0 0 1 ${x} ${top}A9.6 9.6 0 0 1 ${x + 4.6} ${top + 9.5}V58Z`, b = `M${x - 2.6} 58V${top + 10.2}A8 8 0 0 1 ${x} ${top + 4}A8 8 0 0 1 ${x + 2.6} ${top + 10.2}V58Z`;
+      return gold(c, a) + pane(c, b, col) + `<circle cx="${x}" cy="${f(top - 2.1)}" r="2" fill="${c.locked ? '#565B61' : '#FFF8E4'}" stroke="${c.dk}" stroke-width=".45"/>`; };
+    const gem = (x: number, r: number, col: string) => `<circle cx="${x}" cy="65" r="${f(r + 0.9)}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/><circle cx="${x}" cy="65" r="${r}" fill="${col}"/><circle cx="${x}" cy="65" r="${r}" fill="url(#gl-${c.k})"/>`;
+    const beads = (y: number) => Array.from({ length: 19 }, (_, i) => `<circle cx="${f(13 + i * 3)}" cy="${y}" r=".62"/>`).join('');
+    const lean = (x: number, deg: number, inner: string) => `<g transform="rotate(${deg} ${x} 58)">${inner}</g>`;
+    const pearl = (x: number, y: number) => line(c, `M${x} 54V${y + 1.4}`, 0.8) + `<circle cx="${x}" cy="${y}" r="1.5" fill="${c.locked ? '#565B61' : '#FFF8E4'}" stroke="${c.dk}" stroke-width=".4"/>`;
+    return pearl(22, 47.5) + pearl(34, 44.5) + pearl(46, 44.5) + pearl(58, 47.5)
+      + lean(16, -9, point(16, 34, g[0])) + lean(64, 9, point(64, 34, g[0])) + lean(28, -4, point(28, 25, g[0])) + lean(52, 4, point(52, 25, g[0])) + point(40, 15, g[5])
+      + gold(c, 'M9.6 52.6H70.4V58.4H9.6Z') + engrave(c, 'M10 55.5H70', 0.4, 0.5)
+      + gold(c, 'M10.5 58H69.5V72.5H10.5Z')
+      + `<g fill="${c.lt}" fill-opacity=".85">${beads(60.2)}${beads(70.3)}</g>`
+      + gem(18, 2, g[9]) + gem(29, 2, g[0]) + gem(40, 2.9, g[5]) + gem(51, 2, g[0]) + gem(62, 2, g[9])
+      + engrave(c, 'M23.5 62.6v4.8M34.5 62.6v4.8M45.5 62.6v4.8M56.5 62.6v4.8', 0.4, 0.5);
+  },
+  serpent: (c) => {
+    const g = c.glass, SH = 'M40 77C24 69 11 56 11 36V14L40 5L69 14V36C69 56 56 69 40 77Z', inset = 'translate(40 41) scale(.86) translate(-40 -41)';
+    // The serpent, slain: a heavy body thrown in loops across the field, thinning to the tail, the head hanging.
+    const sn = ribbon([[15.5, 41, 18.5, 31.5, 26.5, 31, 30.5, 40], [30.5, 40, 33.5, 47.5, 34, 57.5, 41, 58], [41, 58, 48.5, 58.5, 48.5, 47.5, 54.5, 46.5], [54.5, 46.5, 59.5, 45.8, 63.4, 49, 62.2, 54.5]],
+      (t) => 0.35 + 3.1 * Math.min(1, t * 2.4) - 0.5 * Math.max(0, (t - 0.8) * 5));
+    const steel = c.locked ? ['#565B61', '#2C2F33'] : ['#FFFFFF', '#AEB8C3'], scale = c.locked ? '#3A3E43' : '#0E5A3C';
+    const head = `<g transform="translate(${f(sn.end[0])} ${f(sn.end[1])}) rotate(${f(sn.angle)})">`
+      + `<path d="M11 0h2.4M13.4 0l1.8-1.4M13.4 0l1.8 1.4" fill="none" stroke="${g[5]}" stroke-width=".7" stroke-linecap="round"/>`
+      + poly(c, '-1.6,-2.5 1,-3.6 3.6,-4.2 6.2,-3.6 9,-2.2 11,-1 11.6,0 11,1 9,2.2 6.2,3.6 3.6,4.2 1,3.6 -1.6,2.5', g[9])
+      + `<path d="M3.2,-2.4l2 1.5M5.2,-2.4l-2 1.5" stroke="${LEAD}" stroke-width=".6" stroke-linecap="round"/><path d="M7.4 1.9L11 .5" stroke="${LEAD}" stroke-width=".5" stroke-linecap="round"/></g>`;
+    return `<clipPath id="cl-${c.k}"><path d="${SH}" transform="${inset}"/></clipPath>`
+      + `<linearGradient id="st-${c.k}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${steel[0]}"/><stop offset=".5" stop-color="${steel[0]}"/><stop offset=".5" stop-color="${steel[1]}"/><stop offset="1" stop-color="${steel[1]}"/></linearGradient>`
+      + gold(c, SH) + `<path d="${SH}" transform="${inset}" fill="${LEAD}"/>`
+      + `<g clip-path="url(#cl-${c.k})">${pane(c, 'M8 4H40V41H8Z', g[0])}${pane(c, 'M40 4H72V41H40Z', g[1])}${pane(c, 'M8 41H40V78H8Z', g[1])}${pane(c, 'M40 41H72V78H40Z', g[0])}</g>`
+      + `<path d="${SH}" transform="${inset}" fill="none" stroke="${c.lt}" stroke-opacity=".55" stroke-width=".6"/>`
+      + poly(c, sn.outline, g[9])
+      + `<clipPath id="sn-${c.k}"><polygon points="${sn.outline}"/></clipPath>`
+      + `<path d="${sn.spine}" fill="none" stroke="${scale}" stroke-width="8" stroke-dasharray="1 2.5" stroke-opacity=".6" clip-path="url(#sn-${c.k})"/>`
+      + `<polygon points="${sn.outline}" fill="none" stroke="${LEAD}" stroke-width=".8" stroke-linejoin="round"/>`
+      + head
+      // the sword
+      + `<path d="M38 23H42L41.1 61.5L40 67L38.9 61.5Z" fill="url(#st-${c.k})" stroke="${c.dk}" stroke-width=".5" stroke-linejoin="round"/>`
+      + `<path d="M40 24.5V52" stroke="${c.dk}" stroke-opacity=".45" stroke-width=".45" stroke-linecap="round"/>`
+      + gold(c, 'M30 19.8C33 18.6 37 19.6 40 19.6S47 18.6 50 19.8L50.6 22.6C47 21.8 43 22.8 40 22.8S33 21.8 29.4 22.6Z')
+      + `<path d="M38.5 11.6H41.5V19.6H38.5Z" fill="${c.dk}" stroke="${c.md}" stroke-width=".5"/><path d="M38.5 13.6h3M38.5 15.6h3M38.5 17.6h3" stroke="${c.md}" stroke-width=".45"/>`
+      + `<circle cx="40" cy="9.2" r="3" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".5"/><circle cx="40" cy="9.2" r="1.3" fill="${g[5]}"/>`;
+  },
+  'three-windows': (c) => {
+    const g = c.glass;
+    const A = 'M9.8 71V38.5A17 17 0 0 1 17 25.5A17 17 0 0 1 24.2 38.5V71Z', B = 'M31.8 71V30.5A21 21 0 0 1 40 13A21 21 0 0 1 48.2 30.5V71Z', C = 'M55.8 71V38.5A17 17 0 0 1 63 25.5A17 17 0 0 1 70.2 38.5V71Z';
+    const win = (id: string, d: string, inside: string) => `<clipPath id="cl-${c.k}-${id}"><path d="${d}"/></clipPath><path d="${d}" fill="${LEAD}"/><g clip-path="url(#cl-${c.k}-${id})">${inside}</g><path d="${d}" fill="none" stroke="${c.lt}" stroke-opacity=".5" stroke-width=".5"/>`;
+    const eye = (x: number, y: number, col: string) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${LEAD}"/><circle cx="${x}" cy="${y}" r="2.7" fill="${col}"/><circle cx="${x}" cy="${y}" r="2.7" fill="url(#gl-${c.k})"/><circle cx="${x}" cy="${y}" r="3.1" fill="none" stroke="url(#gu-${c.k})" stroke-width=".7"/>`;
+    const mullion = (x: number, y: number) => `<path d="M${x} ${y}V71" stroke="${LEAD}" stroke-width="1"/>`;
+    return gold(c, 'M7 74V38A20 20 0 0 1 17 21A20 20 0 0 1 27 38V74Z') + gold(c, 'M29 74V30A24 24 0 0 1 40 8A24 24 0 0 1 51 30V74Z') + gold(c, 'M53 74V38A20 20 0 0 1 63 21A20 20 0 0 1 73 38V74Z')
+      + win('a', A, bands(c, [g[11], g[0], g[11], g[0]], 9, 25, 25, 72) + mullion(17, 37)) + win('b', B, bands(c, [g[4], g[5], g[4], g[5], g[4]], 31, 49, 12, 72) + mullion(40, 28)) + win('c', C, bands(c, [g[11], g[0], g[11], g[0]], 55, 71, 25, 72) + mullion(63, 37))
+      + eye(17, 33.4, g[5]) + eye(40, 23.6, g[0]) + eye(63, 33.4, g[5]) + gold(c, 'M4 71.5H76V77.5H4Z') + engrave(c, 'M4.6 74.4H75.4', 0.4, 0.45);
+  },
+  hundredfold: (c) => {
+    const V = 'M40 3C58 18 62 30 62 40S58 62 40 77C22 62 18 50 18 40S22 18 40 3Z', inset = 'translate(40 40) scale(.85) translate(-40 -40)', g = c.glass;
+    const grain = (x: number, y: number, rot: number) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="4.2" transform="rotate(${rot} ${x} ${y})"/>`;
+    const ear = grain(40, 17, 0) + Array.from({ length: 6 }, (_, j) => grain(36.8, 23.4 + j * 5.4, -32) + grain(43.2, 23.4 + j * 5.4, 32)).join('');
+    const stem = 'M40 22V68M40 62c-3.6-1-6-3.6-6.6-7M40 66c3.6-1 6-3.6 6.6-7M40 12.6V6.5M37.8 18l-2.6-6M42.2 18l2.6-6';
+    return `<clipPath id="cl-${c.k}"><path d="${V}" transform="${inset}"/></clipPath>`
+      + gold(c, V) + `<path d="${V}" transform="${inset}" fill="${LEAD}"/>`
+      + `<g clip-path="url(#cl-${c.k})">${bands(c, [g[9], g[9], g[8], g[7], g[7], g[6]], 16, 64, 8, 72)}</g>`
+      + `<path d="${V}" transform="${inset}" fill="none" stroke="${c.lt}" stroke-opacity=".55" stroke-width=".6"/>`
+      + `<path d="${stem}" fill="none" stroke="${c.dk}" stroke-width="2.2" stroke-linecap="round"/>` + line(c, stem, 1)
+      + `<g fill="url(#g-${c.k})" stroke="${c.dk}" stroke-width=".5">${ear}</g>`;
+  },
+  psalter: (c) => {
+    const g = c.glass, L = 'M38.6 21.5C32 17 20 16 9 19.5V60C20 56.5 32 57.5 38.6 62Z', R = 'M41.4 21.5C48 17 60 16 71 19.5V60C60 56.5 48 57.5 41.4 62Z';
+    const page = (id: string, d: string, inside: string) => `<clipPath id="cl-${c.k}-${id}"><path d="${d}"/></clipPath><path d="${d}" fill="${LEAD}"/><g clip-path="url(#cl-${c.k}-${id})">${inside}</g><path d="${d}" fill="none" stroke="${c.lt}" stroke-opacity=".5" stroke-width=".5"/>`;
+    return gold(c, 'M40 23.5C32 17.5 18 16 5 20.5V66C18 61.5 32 62.5 40 68.5C48 62.5 62 61.5 75 66V20.5C62 16 48 17.5 40 23.5Z')
+      + page('a', L, bands(c, [g[0], g[1], g[0]], 8, 39, 15, 63)) + page('b', R, bands(c, [g[0], g[1], g[0]], 41, 72, 15, 63))
+      + engrave(c, 'M7 63.4C18 59.4 31 60.2 39 65.4M73 63.4C62 59.4 49 60.2 41 65.4M6.4 64.9C18 61 31 61.8 39.4 67M73.6 64.9C62 61 49 61.8 40.6 67', 0.35, 0.55)
+      + line(c, 'M40 22V65', 1.7)
+      + `<path d="M38.4 64V76.5l1.6-2.1 1.6 2.1V64Z" fill="${g[5]}" stroke="${c.dk}" stroke-width=".45" stroke-linejoin="round"/>`
+      + line(c, 'M24 29.5v10M20.6 33h6.8', 1.3) + line(c, 'M16 46.5h16M16 51h16M49 31.5h15M49 36h15M49 40.5h15M49 46.5h15M49 51h10', 0.75, ' stroke-opacity=".85"');
+  },
+  decade: (c) => {
+    const star = pts(20, (i) => (i % 2 ? 24.6 : 38.6)), inner = pts(20, (i) => (i % 2 ? 21.8 : 34.2));
+    const panes = Array.from({ length: 10 }, (_, i) => { const a = i * 36;
+      return poly(c, [polar(12, a - 18), polar(21.4, a - 18), polar(33.4, a), polar(21.4, a + 18), polar(12, a + 18)].map((q) => q.map(f).join(',')).join(' '), c.glass[i % 2 ? 2 : 0]); }).join('');
+    return turning(c, `<polygon points="${star}" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4" stroke-linejoin="round"/><polygon points="${inner}" fill="${LEAD}"/>${panes}`)
+      + `<polygon points="${star}" fill="none" stroke="url(#s-${c.k})" stroke-width=".8" stroke-linejoin="round"/>`
+      + `<circle cx="40" cy="40" r="12.2" fill="${NIGHT}" stroke="url(#m-${c.k})" stroke-width="1.5"/><circle cx="40" cy="40" r="9.9" fill="none" stroke="${c.md}" stroke-opacity=".6" stroke-width=".4"/>`
+      + line(c, 'M35.6 34.2l8.8 11.6M44.4 34.2l-8.8 11.6M33.6 34.2h4M42.4 34.2h4M33.6 45.8h4M42.4 45.8h4', 1.5, ` filter="url(#glow-${c.k})"`);
+  },
+  cathedral: (c) => {
+    const g = c.glass, rose = Array.from({ length: 8 }, (_, i) => pane(c, sector(2.8, 8.4, i * 45 + 1.5, (i + 1) * 45 - 1.5), i % 2 ? g[5] : g[0])).join('');
+    return gold(c, 'M8 74V31L17 9L26 31V35L40 19L54 35V31L63 9L72 31V74Z')
+      + shadow('M17 9L26 31V72H17Z', 0.16) + shadow('M63 9L72 31V72H63Z', 0.16) + shadow('M40 19L54 35V38H40Z', 0.1)
+      + line(c, 'M17 2.5V9M14.8 5h4.4M63 2.5V9M60.8 5h4.4', 1)
+      + engrave(c, 'M8.4 31H25.6M54.4 31H71.6M8.6 45.5H25.4M54.6 45.5H71.4M8.6 68.5H25.4M54.6 68.5H71.4M26.4 35.2H31.4M48.6 35.2H53.6M26.6 52.5H53.4M17 9.4V31M63 9.4V31', 0.4, 0.5)
+      + pane(c, 'M36.6 29.4V26.2a1.2 1.2 0 0 1 2.4 0V29.4Z', g[11]) + pane(c, 'M41 29.4V26.2a1.2 1.2 0 0 1 2.4 0V29.4Z', g[11])
+      + `<circle cx="40" cy="41" r="10.6" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/><circle cx="40" cy="41" r="9.4" fill="${LEAD}"/>`
+      + `<g transform="translate(0 1)">` + turning(c, rose) + `</g>`
+      + `<circle cx="40" cy="41" r="9.1" fill="none" stroke="${c.lt}" stroke-opacity=".7" stroke-width=".5"/><circle cx="40" cy="41" r="2" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".3"/>`
+      + pane(c, 'M13.8 66V50a3.2 3.2 0 0 1 6.4 0V66Z', g[0]) + pane(c, 'M59.8 66V50a3.2 3.2 0 0 1 6.4 0V66Z', g[0])
+      + pane(c, 'M15 42V35.6a2 2 0 0 1 4 0V42Z', g[11]) + pane(c, 'M61 42V35.6a2 2 0 0 1 4 0V42Z', g[11])
+      + `<path d="M32.6 72V62.6A8.6 8.6 0 0 1 40 54A8.6 8.6 0 0 1 47.4 62.6V72Z" fill="url(#m-${c.k})" stroke="${c.dk}" stroke-width=".4"/>`
+      + pane(c, 'M34.6 72V62.8A6.6 6.6 0 0 1 40 56.4A6.6 6.6 0 0 1 45.4 62.8V72Z', g[7]) + `<path d="M40 57V72" stroke="${LEAD}" stroke-width=".8"/>` + engrave(c, 'M36.4 64.5h2.2M41.4 64.5h2.2M36.4 68.5h2.2M41.4 68.5h2.2', 0.45, 0.7)
+      + gold(c, 'M6 72H74V75H6Z') + gold(c, 'M3.5 74.8H76.5V78H3.5Z');
+  },
+};
+
 /** The trophy as an SVG string (used by both the Astro pages and the members' app). */
 export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = false, still = false): string {
   const [dk, lt, md] = locked ? IRON : METAL[as];
@@ -323,6 +575,8 @@ export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = fals
     + `<linearGradient id="m-${k}" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="${lt}"/><stop offset=".45" stop-color="${md}"/><stop offset=".75" stop-color="${dk}"/><stop offset="1" stop-color="${md}"/></linearGradient>`
     + `<linearGradient id="s-${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/></linearGradient>`
     + `<linearGradient id="g-${k}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${k === 'rainbow' ? '#fff' : lt}"/><stop offset="1" stop-color="${k === 'rainbow' ? '#FFE7A3' : md}"/></linearGradient>`
+    + (RARE[t.id] ? `<linearGradient id="gu-${k}" gradientUnits="userSpaceOnUse" x1="10" y1="6" x2="70" y2="74"><stop offset="0" stop-color="${lt}"/><stop offset="1" stop-color="${md}"/></linearGradient>` : '')
+    + (RARE[t.id] ? `<linearGradient id="gl-${k}" x1="0" y1="0" x2=".25" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="${locked ? 0.08 : 0.34}"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${locked ? 0.2 : 0.42}"/></linearGradient>` : '')
     + `<radialGradient id="sh-${k}"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".6" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>`
     + (halo ? `<radialGradient id="h-${k}"><stop offset=".55" stop-color="${halo}" stop-opacity=".34"/><stop offset=".8" stop-color="${halo}" stop-opacity=".12"/><stop offset="1" stop-color="${halo}" stop-opacity="0"/></radialGradient>` : '')
     + `<radialGradient id="c-tr" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#2C3226"/><stop offset=".7" stop-color="#11140F"/><stop offset="1" stop-color="#080A07"/></radialGradient>`
@@ -331,6 +585,10 @@ export function trophySvg(t: Trophy, size = 76, as: Tier = t.tier, locked = fals
   const emblem = (x: number, y: number, sc: number, w = 1.15) =>
     `<g transform="translate(${x} ${y}) scale(${sc})" fill="none" stroke="url(#g-${k})" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow-${k})"><path d="${t.glyph}"/></g>`;
   let body = '';
+  // The rarest are each one of a kind (see RARE).
+  if (RARE[t.id]) return `<svg class="tr-svg${locked ? ' tr-iron' : ''}" width="${size}" height="${size}" viewBox="0 0 80 80" overflow="visible" aria-hidden="true">${defs}`
+    + `<ellipse cx="40" cy="80" rx="31" ry="9" fill="url(#sh-${k})"/>` + (halo ? `<circle cx="40" cy="40" r="54" fill="url(#h-${k})"/>` : '')
+    + RARE[t.id]({ k, dk, lt, md, locked, still, glass: locked ? JEWEL.map((_, i) => (i % 2 ? '#2B2E31' : '#202326')) : JEWEL }) + `</svg>`;
   // Beneath and behind: a soft shadow on the ground, and for gold and rainbow a halo of their own light.
   const under = `<ellipse cx="40" cy="80" rx="31" ry="9" fill="url(#sh-${k})"/>` + (halo ? `<circle cx="40" cy="40" r="52" fill="url(#h-${k})"/>` : '');
   const glass = locked ? GLASS.map((_, i) => (i % 2 ? '#2B2E31' : '#202326')) : GLASS;

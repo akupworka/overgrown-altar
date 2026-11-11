@@ -59,6 +59,9 @@ use still working:
       - Removed: the "My library" button on the vault (the Library tab stays); the menu links to the Dispatches
         letter (the sign-up box at the foot of the public pages still collects addresses).
 - [ ] Remove the owner's two test accounts ("Watchman (Guild)", "Watchman (Fellow)") with the sample data.
+- [ ] **Set the day the Guild opens** (one line, `GUILD_OPENED` in `src/lib/trophies.ts`). The Founding Stone goes to
+      everyone who took a seat before that day or within three months after it. Until the day is set, every new member
+      gets it.
 - [ ] Right after the sample data is removed, reset the trophy tallies so real members' trophies count only real
       members' reflections and marks (one database call: `select private.retally_everyone();`).
 - [ ] Turn on "leaked password protection" in Supabase's sign-in settings when moving to the paid plan (ask first).
@@ -102,7 +105,9 @@ use still working:
       traffic a month, 500 MB of text (far off). Members themselves are not a limit (50,000 active a month).
 
 ## Check on a real iPhone (built and tested in Chrome only)
-- [ ] The trophies (11 Nov 2026: 51 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
+- [ ] The twelve rarest trophies (each its own shape: castle, lion, crown, shield and serpent, cathedral...): on the
+      phone they should be crisp, with nothing drawn outside its shape and no boxes.
+- [ ] The trophies (11 Nov 2026: 54 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
       vault or at Prestiges → Trophies; trophies still to earn show in dark iron; gold and rainbow keep a soft halo;
       the coloured glass of an earned rainbow trophy turns slowly and smoothly (its centre and rim stay still).
 - [ ] The share sheet shows the OA mark beside a piece's title, not a compass.
