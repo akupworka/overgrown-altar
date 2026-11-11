@@ -14,7 +14,7 @@ export const PRESTIGES: Prestige[] = [
   { level: 7, numeral: 'VII', name: 'Illuminator', at: 40, color: '#4A7BEA', note: 'Gold and lapis on the page.' },
   { level: 8, numeral: 'VIII', name: 'Watchman', at: 60, color: '#33B07A', note: 'Keeps the wall and names the hour.' },
   { level: 9, numeral: 'IX', name: 'Luminary', at: 85, color: 'rainbow', note: 'A great light, gathered from every color.' },
-  { level: 10, numeral: 'X', name: 'Pillar', at: 120, color: 'gold', note: 'One who holds the house up.' },
+  { level: 10, numeral: 'X', name: 'Seraph', at: 120, color: 'gold', note: 'One of the burning ones.' },
 ];
 
 /** Where a member stands: their prestige (null before the first published piece) and how far to the next. */

@@ -1,6 +1,6 @@
 // The Way: the Fellowship's own path. The Guild climbs ten prestiges by what it publishes; the Fellowship walks
 // seven stations by its presence: what it keeps, reads, encourages and the company it keeps. Each station is
-// reached by earning pilgrim badges (pewter tokens, like those medieval pilgrims gathered at each shrine).
+// reached by earning pilgrim badges (pewter tokens, like those pilgrims once gathered at each stop on a long road).
 
 export interface WayCtx {
   saves: { pillar: string; medium: string }[];   // what they've kept (their collection)
@@ -33,7 +33,7 @@ export const BADGES: Badge[] = [
   { id: 'correspondent', group: 'Company', name: 'The Correspondent', note: 'Twenty-five words added to the Forum’s conversations.', glyph: 'letter', earned: (c) => c.posts >= 25, progress: (c) => [Math.min(c.posts, 25), 25] },
   { id: 'season', group: 'Faithfulness', name: 'A Season', note: 'Three months in the Fellowship.', glyph: 'leaf', earned: (c) => days(c) >= 90, progress: (c) => [Math.min(Math.floor(days(c)), 90), 90] },
   { id: 'year', group: 'Faithfulness', name: 'A Year at the Altar', note: 'A full year in the Fellowship.', glyph: 'sun', earned: (c) => days(c) >= 365, progress: (c) => [Math.min(Math.floor(days(c)), 365), 365] },
-  { id: 'lamp', group: 'Faithfulness', name: 'The Lamp Kept Lit', note: 'Every other badge on the Road (the rare ones aside).', glyph: 'lamp', earned: (c) => BADGES.filter((b) => b.id !== 'lamp' && !b.rare).every((b) => b.earned(c)) },
+  { id: 'lamp', group: 'Faithfulness', name: 'The Lamp Kept Lit', note: 'Every other badge on the Way (the rare ones aside).', glyph: 'lamp', earned: (c) => BADGES.filter((b) => b.id !== 'lamp' && !b.rare).every((b) => b.earned(c)) },
   // Rare: hard to earn, gilded and glazed in stained glass.
   { id: 'every-shrine', group: 'Rare', rare: true, name: 'Every Craft', note: 'Kept a piece of every craft the altar publishes: all nine.', glyph: 'rooms', earned: (c) => crafts(c) >= 9, progress: (c) => [Math.min(crafts(c), 9), 9] },
   { id: 'great-library', group: 'Rare', rare: true, name: 'The Great Library', note: 'Five hundred pieces kept.', glyph: 'shelf', earned: (c) => c.saves.length >= 500, progress: (c) => [Math.min(c.saves.length, 500), 500] },
@@ -51,8 +51,8 @@ export const STATIONS: Station[] = [
   { n: 3, name: 'Lamplighter', at: 3, line: 'Carrying a little light for others.' },
   { n: 4, name: 'Flamekeeper', at: 5, line: 'Faithful in reading and in encouragement.' },
   { n: 5, name: 'Companion', at: 7, line: 'Known at the table.' },
-  { n: 6, name: 'Steward', at: 10, line: 'One the Fellowship leans on.' },
-  { n: 7, name: 'Altar Friend', at: 13, line: 'The whole Road walked.' },
+  { n: 6, name: 'Elder', at: 10, line: 'One the Fellowship leans on.' },
+  { n: 7, name: 'Altar Friend', at: 13, line: 'The whole Way walked.' },
 ];
 
 export function wayFor(c: WayCtx) {

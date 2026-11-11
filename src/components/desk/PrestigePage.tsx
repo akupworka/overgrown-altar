@@ -1,7 +1,7 @@
 import { uniqueIds as useIds } from '../../lib/svgIds';
 // The ten prestiges, as a window of stained glass.
 //   Where you stand: your rank inside a ring that fills toward the next, in that rank's own glass.
-//   The climb: ten lancets, rising from Inkling to Pillar (side by side on a computer, a vertical climb on a phone);
+//   The climb: ten lancets, rising from Inkling to Seraph (side by side on a computer, a vertical climb on a phone);
 //     the ranks you've reached are lit, yours glows, the rest wait in shadow. Choose one to see what it takes and who holds it.
 //   The trophies: one set at a time (those that grow, those won once).
 // Used at /guild/members/?view=prestige (MembersApp). Open to visitors as well as members.
@@ -76,13 +76,13 @@ export function PrestigePage({ me, link, section = 'prestige' }: { me: string; l
       <header className="pzx-head">
         {me && link('/guild/members/', 'm-back lab', 'The Guild')}
         <span className="eb">The Guild</span>
-        <h1 className="h1">{section === 'trophies' ? 'The trophies' : 'The ten ranks'}</h1>
+        <h1 className="h1">{section === 'trophies' ? 'The trophies' : 'The ten prestiges'}</h1>
         <p className="it pzx-lead">{section === 'trophies'
-          ? 'Ranks count everything you publish. Trophies mark the particular things: the work in each craft, the company you keep with the other members, and the years, raised from bronze to silver, gold and rainbow glass as they grow, beside a few things done once and done well. Tap any trophy to see how to earn it.'
-          : 'Every published piece raises a member through the ranks of the Guild, from a first inkling to the pillars of the house. Each rank is a color of glass; badges change the moment the editor publishes.'}</p>
+          ? 'Prestiges count everything you publish. Trophies mark the particular things: the work in each craft, the company you keep with the other members, and the years, raised from bronze to silver, gold and rainbow glass as they grow, beside a few things done once and done well. Tap any trophy to see how to earn it.'
+          : 'Every published piece raises a member through the ranks of the Guild, from a first inkling to the burning ones. Each rank is a color of glass; badges change the moment the editor publishes.'}</p>
         {/* Two rooms of one page: the ranks, and the trophies */}
-        <nav className="pzx-sw" aria-label="Ranks or trophies">
-          {link('/guild/members/?view=prestige', `pzx-sw-b${section === 'prestige' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Ranks</>)}
+        <nav className="pzx-sw" aria-label="Prestiges or trophies">
+          {link('/guild/members/?view=prestige', `pzx-sw-b${section === 'prestige' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 8l2 3-2 3-2-3z" /></svg>Prestiges</>)}
           {link('/guild/members/?view=trophies', `pzx-sw-b${section === 'trophies' ? ' on' : ''}`, <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5" /><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5" /></svg>Trophies</>)}
         </nav>
         {chief && <PreviewSwitch on={preview} set={setPreview} />}

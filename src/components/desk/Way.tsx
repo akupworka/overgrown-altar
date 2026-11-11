@@ -53,7 +53,7 @@ export function WayPage({ me }: { me: string }) {
   return (
     <div className="wy">
       <header className="wy-head">
-        <span className="eb">The Fellowship · The Road</span>
+        <span className="eb">The Fellowship · The Way</span>
         <h1 className="h1 wy-h">{w.current.name}</h1>
         <p className="it wy-line">{w.current.line}</p>
         <span className="lab wy-count">Station {w.current.n} of 7 · {w.count} of {BADGES.length} badges{w.next ? ` · ${w.toNext} to ${w.next.name}` : ''}</span>
@@ -91,9 +91,9 @@ export function WayCard({ member, mine }: { member: string; mine: boolean }) {
   const w = useWay(member);
   if (!w) return null;
   return (
-    <a className="wy-card" href={mine ? '/guild/members/?view=way' : undefined} aria-label={mine ? 'Open The Road' : undefined}>
+    <a className="wy-card" href={mine ? '/guild/members/?view=way' : undefined} aria-label={mine ? 'Open The Way' : undefined}>
       <span className="wy-card-top">
-        <span><span className="eb">The Road</span><span className="wy-card-st">{w.current.name}</span>
+        <span><span className="eb">The Way</span><span className="wy-card-st">{w.current.name}</span>
           <span className="lab mut">Station {w.current.n} of 7{w.next && mine ? ` · ${w.toNext} to ${w.next.name}` : ''}</span></span>
         {mine && <span className="lab wy-card-go">Open →</span>}
       </span>
@@ -157,7 +157,7 @@ export function WaySide({ member }: { member: string }) {
         <span className="lab ss-k">Your badges <em>{w.count} of {BADGES.length}</em></span>
         {w.earned.length ? <span className="ss-medals">{w.earned.slice(0, 8).map((b) => <span key={b.id} title={b.name}><Token b={b} lit size={44} /></span>)}</span>
           : <span className="it mut ss-none">Your first comes with your first saved piece.</span>}
-        <a className="lab ss-link" href="/guild/members/?view=way">Walk The Road →</a>
+        <a className="lab ss-link" href="/guild/members/?view=way">Walk The Way →</a>
       </div>
     </>
   );

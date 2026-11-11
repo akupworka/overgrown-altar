@@ -331,7 +331,7 @@ function Desk({ session }: { session: Session }) {
             The Forum<span aria-hidden="true">→</span></a>
           <a className="d-side-link for-fellow" href="/guild/members/?view=way">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M12 18c-4 0-6.5-3.5-6.5-7 0 0 2.5-4 6.5-4s6.5 4 6.5 4c0 3.5-2.5 7-6.5 7z" /><path d="M12 18V7.5M9 17l-1.5-8M15 17l1.5-8" /></svg>
-            The Road<span aria-hidden="true">→</span></a>
+            The Way<span aria-hidden="true">→</span></a>
           <a className="d-side-link for-guild" href="/guild/members/">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 20v-7a2.5 2.5 0 0 1 5 0v7M9.5 20v-9a2.5 2.5 0 0 1 5 0v9M16 20v-7a2.5 2.5 0 0 1 5 0v7M2 20h20" /></svg>
             The Guild<span aria-hidden="true">→</span></a>
@@ -384,7 +384,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
   return (
     <div className="d-standing">
       <div className="d-standing-rank" style={{ '--ink': current ? inkOf(current) : '#CFC8B8' } as CSSProperties}>
-        <span className="lab d-standing-k">Your rank</span>
+        <span className="lab d-standing-k">Your prestige</span>
         <div className="d-pz">
           {/* The crest of your rank, in a ring that fills toward the next */}
           <div className="d-pz-ring" aria-hidden="true">
@@ -418,7 +418,7 @@ function Standing({ published, ctx, uid }: { published: number; ctx: TrophyCtx; 
             <li key={p.level} className={`${current && p.level <= current.level ? 'lit' : ''}${current?.level === p.level ? ' here' : ''}`} style={{ '--ink': inkOf(p) } as CSSProperties} title={`${p.numeral} · ${p.name} · ${p.at} ${p.at === 1 ? 'piece' : 'pieces'}`}><i /></li>
           ))}
         </ol>
-        <a className="lab d-standing-link" href="/guild/members/?view=prestige">The ten ranks →</a>
+        <a className="lab d-standing-link" href="/guild/members/?view=prestige">The ten prestiges →</a>
       </div>
       <div className="d-standing-vault">
         <span className="lab d-standing-k">Your vault</span>
