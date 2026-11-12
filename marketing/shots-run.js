@@ -20,7 +20,7 @@ const DESK = process.env.DEVICE === 'desk';
   await page.goto(BASE + '/');
   await page.evaluate(([s, fellow]) => { localStorage.setItem('oa_arrived', '1'); localStorage.setItem('sb-zblgggifysohxqtgvgxs-auth-token', JSON.stringify(s)); localStorage.setItem('oa_member', JSON.stringify({ name: 'Eden Albright', editor: false, chief: false, fellow })); }, [session, who === 'fellow']);
   const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
-  const night = (on) => page.evaluate((on) => localStorage.setItem('oa_read', JSON.stringify(on ? { night: true } : {})), on);
+  const night = (on) => page.evaluate((on) => localStorage.setItem('oa_comfort', JSON.stringify(on ? { night: true } : {})), on);
   // opts: prep (do something first), screen (one screen only, not the whole page), keepBar (leave what is pinned to the foot)
   const shot = async (name, url, opts = {}) => {
     if (only && !only.includes(name)) return;

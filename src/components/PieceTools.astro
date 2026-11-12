@@ -65,11 +65,11 @@ const { part, pieceId, authorId, first, isPhoto } = Astro.props;
 
 <script>
   import { supabase, portraitUrl } from '../lib/supabase';
+  import { loadComfort, saveComfort } from '../lib/comfort';
 
   // ---- Reading comfort (everyone): remembered on this device, set before paint by BaseLayout.
   const html = document.documentElement;
-  const read = () => { try { return JSON.parse(localStorage.getItem('oa_read') || '{}'); } catch { return {}; } };
-  const keep = (r: { size?: number; night?: boolean }) => { try { localStorage.setItem('oa_read', JSON.stringify(r)); } catch {} };
+  const read = loadComfort, keep = saveComfort;
   const paint = () => {
     const r = read();
     const size = Math.max(-1, Math.min(2, Number(r.size) || 0));

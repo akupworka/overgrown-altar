@@ -1,13 +1,13 @@
 import { useState } from 'react';
+import { loadComfort, saveComfort } from '../../lib/comfort';
 
 /** Reading comfort: smaller or larger text, and night reading. Remembered on this device and shared with the public
  *  piece pages (the same setting, kept under the same name), so a reader's choice follows them everywhere. */
 export function ReadComfort() {
-  const load = (): { size?: number; night?: boolean } => { try { return JSON.parse(localStorage.getItem('oa_read') || '{}'); } catch { return {}; } };
-  const [r, setR] = useState(load);
+  const [r, setR] = useState(loadComfort);
   const size = Math.max(-1, Math.min(2, Number(r.size) || 0));
   const set = (next: { size?: number; night?: boolean }) => {
-    try { localStorage.setItem('oa_read', JSON.stringify(next)); } catch {}
+    saveComfort(next);
     const html = document.documentElement, sz = Math.max(-1, Math.min(2, Number(next.size) || 0));
     sz ? html.setAttribute('data-rs', String(sz)) : html.removeAttribute('data-rs');
     html.toggleAttribute('data-night', !!next.night);

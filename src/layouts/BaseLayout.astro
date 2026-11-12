@@ -71,7 +71,9 @@ const imageUrl = new URL(image, site).toString();
           if (oaM.editor && oaV) document.documentElement.setAttribute('data-view-as', oaV);
         }
         // Reading comfort chosen on a piece (text size, night reading), before anything is drawn
-        var oaR = JSON.parse(localStorage.getItem('oa_read') || '{}');
+        // (kept under its own name, oa_comfort; a setting left under the old shared name is still honoured: lib/comfort.ts)
+        var oaR = JSON.parse(localStorage.getItem('oa_comfort') || 'null');
+        if (!oaR || typeof oaR !== 'object') { var oaO = JSON.parse(localStorage.getItem('oa_read') || 'null'); oaR = oaO && typeof oaO === 'object' && !Array.isArray(oaO) ? oaO : {}; }
         if (oaR.size) document.documentElement.setAttribute('data-rs', String(oaR.size));
         if (oaR.night) document.documentElement.setAttribute('data-night', '');
       } catch (e) {}
@@ -288,7 +290,7 @@ const imageUrl = new URL(image, site).toString();
       // Read ticks: reaching the end of a piece marks it read (on this device only; nothing is sent anywhere), and
       // wherever that piece is listed (the rooms, the Gallery, the Archive, Explore, writers' pages) a small tick shows.
       const KEY = 'oa_read';
-      const load = (): string[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+      const load = (): string[] => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } };
       const norm = (p: string) => (p.endsWith('/') ? p : p + '/');
       let read = new Set(load());
       const markRead = (el?: Element) => {
