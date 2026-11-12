@@ -22,3 +22,7 @@ real account or member is ever shown. The films have a silent sound track; add m
 ## Posts, set two
 `python3 posts2.py && node posts2.cjs` writes nine more 1080x1350 posts to `posts2/`, built on the real screens in `shots/`
 (phone, computer, crests, trophies, a forum reply, the reader, the library). Night and paper alternate.
+
+## Posts, set three
+`python3 posts3.py && node posts3.cjs` writes the nine cinematic posts to `posts3/`: photographs to the edge, a crest and a trophy
+as heroes with light behind them, the screens at an angle. Photograph and black alternate.
