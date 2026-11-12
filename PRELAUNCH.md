@@ -9,13 +9,16 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
       with an email service and a change to the sign-in email settings (ask the owner first; it touches auth).
 - [ ] **Backups.** The free Supabase plan keeps none. Move to Pro ($25 a month) before real members store real work.
       Pro also stops the project being paused after a quiet week.
-- [ ] **Take the sample data off.** 76 sample members (46 from before; 30 mock members of 11 Nov who wrote, posted,
-      tagged and messaged) and everything they made: about 100 published pieces, 24 forum threads and 170 replies,
-      messages, Workshop drafts, six pieces waiting, one pretend report
-      (`delete from auth.users where raw_app_meta_data->>'sample' = 'true'`, after fixing forum threads' last authors as
-      was done when half were removed), and the 25 mock pieces on the owner's own account
-      (`pieces.sanity_id like 'mock-desk-%'`). This also clears the test notifications and the sample Workshop drafts.
-      Sample members never get email (their daily letters are off, and both email functions skip their addresses).
+- [x] **The sample data is off** (cleared 12 Nov 2026, at the owner's word). Removed: 76 pretend members and everything
+      they made (226 pieces, their forum threads and replies, messages, follows, saves, marks, reflections), the 25 mock
+      pieces on the owner's own account, and all ten sample debates. Kept and checked: the owner's account and six real
+      pieces, the nine forums and their pinned threads, three accounts that were never marked as samples, the two test
+      accounts, and every uploaded file. The forum's counts and every trophy tally were counted afresh.
+- [ ] **Three accounts were kept because they were not marked as samples: Ainslie Willson, Eden and Killian.** They signed
+      in on 8 and 9 Nov. If any is a test of the owner's own, say so and it can be removed.
+- [ ] **A private copy of the database as it stood before the clearing is kept** (schema `kept_before_clearing`, reachable
+      only by the database owner). Once the owner is sure nothing real was lost, remove it:
+      `drop schema kept_before_clearing cascade;` (ask first; it is the only way back).
 - [ ] **Open the lock.** Set `SITE_PUBLIC=true` in Netlify's environment variables and redeploy. Then check the site is
       no longer hidden from search engines, and that the "Opening soon" door is no longer what visitors meet.
 - [ ] **Let search engines in.** `public/robots.txt` still says `Disallow: /`; change it to `Allow: /` on opening day.
@@ -62,7 +65,7 @@ use still working:
 - [ ] **Set the day the Guild opens** (one line, `GUILD_OPENED` in `src/lib/trophies.ts`). The Founding Stone goes to
       everyone who took a seat before that day or within three months after it. Until the day is set, every new member
       gets it.
-- [ ] Right after the sample data is removed, reset the trophy tallies so real members' trophies count only real
+- [x] (Done 12 Nov 2026, with the clearing.) Right after the sample data is removed, reset the trophy tallies so real members' trophies count only real
       members' reflections and marks (one database call: `select private.retally_everyone();`).
 - [ ] Turn on "leaked password protection" in Supabase's sign-in settings when moving to the paid plan (ask first).
 - [ ] If real members ever say a limit feels tight, the numbers above are easy to raise.
@@ -100,10 +103,10 @@ use still working:
 - [x] The Chamber's rules were tested against the real database on 11 Nov 2026, acting as pretend members (Saturday lock,
   turns, the clock, the closing concession, three motions a sitting, the chair's powers, the Fellowship kept to the gallery,
   direct writes refused). Every refusal held, and the test undid itself.
-- [ ] **Remove the sample disputations before opening** (11 Nov 2026: ten were added between pretend members, at the owner's
+- [x] (Done 12 Nov 2026: none are left.) **Remove the sample disputations before opening** (11 Nov 2026: ten were added between pretend members, at the owner's
   word, to fill the room: three concluded, three under way with an hour-long clock, four empty chairs; their dates were set
   three days ahead so they are not cleared before Saturday). Delete every row of `disputes` whose speakers are pretend members.
-- [ ] **The doors were opened by hand until Saturday night, 14 Nov 2026 (New York).** After that the Chamber keeps its own
+- [x] (Reset 12 Nov 2026: the Chamber keeps only its own Saturdays again.) **The doors were opened by hand until Saturday night, 14 Nov 2026 (New York).** After that the Chamber keeps its own
   Saturdays. To shut it sooner: the Chamber page, bottom, "Shut the doors".
 - [ ] Try a whole disputation with two accounts: as Editor in Chief, open the Chamber, press "Open the doors for three
   hours", lay down a motion; from a second account take the chair; speak in turn to the close. Watch from a third if you can.

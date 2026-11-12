@@ -18,6 +18,7 @@ Start by reading this file, then `README.md`.
   Brand rules: colour enters only through glass; never glow or colour the marks; quiet, editorial.
 
 ## Latest polish
+- **The sample data was cleared on 12 Nov 2026** (the owner: "You can clear out all the fake stuff"). The database now holds six accounts (Watchman the editor; Ainslie Willson, Eden, Killian, kept because never flagged; the owner's two test accounts) and the owner's six real pieces. Nothing is flagged `sample` any more, so notes below about sample or mock members describe the past. A private copy from before the clearing sits in schema `kept_before_clearing` until the owner says to drop it. `scripts/check.cjs` and the ads still use their own pretend data, which never touched the database.
 - `src/lib/catalog.ts`: one list of real pieces (2 complete design pieces + published Guild pieces) used by Home,
   The Watchtower, The Perimeter, Archive, Start Here and "More to read". Sample-only pieces were retired.
 - Retired: the design sample "Nietzsche Surrendered" (removed from lib/catalog.ts; `public/_redirects` forwards its old address to /watchtower/). Header is always solid inside /guild/desk and /guild/members. Spelling is American English site-wide.
