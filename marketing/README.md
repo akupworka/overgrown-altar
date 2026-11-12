@@ -18,3 +18,7 @@ Needs: Node with Playwright and Chromium, Python 3, ffmpeg. Run from this folder
 To change the words or timings, edit the text inside `build.py`, `posts.py` or `soon.py`: each element carries its own
 times (`data-r="in,out"` in milliseconds). The walkthrough uses the pretend Guild data from `scripts/check.cjs`, so no
 real account or member is ever shown. The films have a silent sound track; add music in the app you post from.
+
+## Posts, set two
+`python3 posts2.py && node posts2.cjs` writes nine more 1080x1350 posts to `posts2/`, built on the real screens in `shots/`
+(phone, computer, crests, trophies, a forum reply, the reader, the library). Night and paper alternate.
