@@ -311,15 +311,17 @@ RANKS=r"""
 <section class="ad" id="ranks" data-ms="25000">
   <div class="sc" data-r="0,3200,1,500" data-dy="0">
     <div class="in"><div class="stack" style="gap:2.4rem">
-      <div class="no sm" data-r="250,3000,600,400"><i>No follower counts.<span class="strike" data-draw="1300,3000,500" data-origin="left"></span></i></div>
-      <div class="big-it huge" data-r="1700,3000,800,400" style="color:#FFE3A3">Here, the work counts.</div>
+      <div class="eb" data-r="200,3000,600,400">Inside the Guild</div>
+      <div class="big-it huge" data-r="500,3000,800,400" style="color:#FFE3A3">Here, the work counts.</div>
+      <div class="thread" data-draw="1300,3000"></div>
+      <div class="sub" data-r="1600,3000,700,400">Ten prestiges. Fifty-four trophies.</div>
     </div></div>
   </div>
   PAGE1
   PAGE2
   <div class="sc" data-r="11700,15100,500,600" data-dy="0">
     <div class="glow"></div>
-    <div class="topline eb" data-r="11900,14900,600,400">None of them for followers</div>
+    <div class="topline eb" data-r="11900,14900,600,400">Every one earned</div>
     <div class="wall" data-wall="12000,14600">WALL</div>
   </div>
   <div class="sc" data-r="14800,18700,500,500" data-dy="0">
@@ -337,7 +339,7 @@ RANKS=r"""
     <div class="in">
       <div class="big" data-r="21600,25001,900,1">Earn your place.</div>
       <div class="thread" data-draw="22300,25001"></div>
-      <div class="sub" data-r="22600,25001,800,1">The Guild is open. By application.</div>
+      <div class="sub" data-r="22600,25001,800,1">The Guild is coming soon.</div>
       <div class="url" data-r="23100,25001,800,1">overgrownaltar.com</div>
     </div>
   </div>
