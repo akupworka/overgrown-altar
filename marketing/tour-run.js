@@ -22,7 +22,7 @@ function overlay(MONO, tall) {
       #t-cap { position: fixed; left: 0; right: 0; bottom: ${tall ? 96 : 44}px; z-index: 2147483640; pointer-events: none; display: flex; justify-content: center; opacity: 0; transform: translateY(12px); transition: opacity .5s, transform .6s cubic-bezier(.16,1,.3,1); }
       #t-cap.on { opacity: 1; transform: none; }
       #t-cap span { font-family: 'Cormorant', serif; font-style: italic; font-size: ${tall ? 25 : 34}px; line-height: 1.2; color: #F3ECDC; text-align: center; max-width: 88%; padding: ${tall ? '13px 22px 14px' : '14px 34px 16px'}; border-radius: 999px; background: rgba(6,8,6,.9); box-shadow: inset 0 0 0 1px rgba(255,227,163,.55), 0 18px 50px rgba(0,0,0,.7); }
-      #t-card { position: fixed; inset: 0; z-index: 2147483644; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: ${tall ? 20 : 24}px; text-align: center; padding: 0 8%; background: #060806; color: #F3ECDC; opacity: 0; transition: opacity .8s; }
+      #t-card { position: fixed; inset: 0; z-index: 2147483647; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: ${tall ? 20 : 24}px; text-align: center; padding: 0 8%; background: #060806; color: #F3ECDC; opacity: 0; transition: opacity .8s; }
       #t-card.on { opacity: 1; }
       #t-card svg { height: ${tall ? 120 : 150}px; width: auto; color: #F3ECDC; }
       #t-card .t-big { font-family: 'Cormorant', serif; font-weight: 500; font-size: ${tall ? 54 : 84}px; line-height: 1.02; }

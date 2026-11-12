@@ -72,6 +72,13 @@ body { font-family:'Cormorant',serif; color:#F3ECDC; -webkit-font-smoothing:anti
 .fmt-v .pane .lab { font-size:2rem; } .fmt-h .pane .lab { font-size:1.8rem; }
 .tri-top { position:absolute; left:0; right:0; top:9rem; text-align:center; }
 .fmt-v .tri-top { display:none; }
+.pg { position:absolute; overflow:hidden; border-radius:3.2rem; background:#060806; box-shadow:0 0 0 .3rem #23271F, 0 0 0 .5rem rgba(159,148,94,.8), 0 6rem 16rem rgba(0,0,0,.85), 0 0 24rem rgba(255,227,163,.13); display:none; }
+.pg img { position:absolute; left:0; top:0; width:100%; height:auto; display:block; will-change:transform; }
+.fmt-v .pg-v { display:block; left:6rem; right:6rem; top:37rem; bottom:31rem; }
+.fmt-s .pg-s { display:block; left:9rem; right:9rem; top:15rem; bottom:-6rem; }
+.fmt-h .pg-h { display:block; left:14rem; right:14rem; top:13rem; bottom:-6rem; border-radius:2rem; }
+.fmt-h .pg-h img { width:114%; left:-7%; }
+.cz.tr .nm { font-size:6.6rem; text-transform:none; letter-spacing:.01em; } .fmt-v .cz.tr .nm { font-size:8.4rem; } .fmt-h .cz.tr .nm { font-size:6.8rem; }
 .glow { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 48%, rgba(255,227,163,.13), rgba(6,8,6,0) 58%); }
 .stage { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
 .cz { position:absolute; display:flex; flex-direction:column; align-items:center; gap:2.2rem; text-align:center; }
@@ -300,52 +307,58 @@ BODY='''
 </section>
 '''
 RANKS=r"""
-<!-- 4 · EARN YOUR PLACE (20s): the prestiges and the trophies -->
-<section class="ad" id="ranks" data-ms="20000">
+<!-- 4 · EARN YOUR PLACE (25s): the real prestige and trophy pages scrolling by, then into the trophies -->
+<section class="ad" id="ranks" data-ms="25000">
   <div class="sc" data-r="0,3200,1,500" data-dy="0">
     <div class="in"><div class="stack" style="gap:2.4rem">
       <div class="no sm" data-r="250,3000,600,400"><i>No follower counts.<span class="strike" data-draw="1300,3000,500" data-origin="left"></span></i></div>
       <div class="big-it huge" data-r="1700,3000,800,400" style="color:#FFE3A3">Here, the work counts.</div>
     </div></div>
   </div>
-  <div class="sc" data-r="2900,10700,500,500" data-dy="0">
+  PAGE1
+  PAGE2
+  <div class="sc" data-r="11700,15100,500,600" data-dy="0">
     <div class="glow"></div>
-    <div class="topline eb" data-r="3000,10500,600,400">Ten prestiges</div>
-    <div class="stage">CRESTS</div>
-    <div class="pips" data-r="3000,10500,500,400" data-dy="0">PIPS</div>
+    <div class="topline eb" data-r="11900,14900,600,400">None of them for followers</div>
+    <div class="wall" data-wall="12000,14600">WALL</div>
   </div>
-  <div class="sc" data-r="10400,13900,500,600" data-dy="0">
+  <div class="sc" data-r="14800,18700,500,500" data-dy="0">
     <div class="glow"></div>
-    <div class="topline eb" data-r="10600,13700,600,400">Fifty-four trophies</div>
-    <div class="wall" data-wall="10700,13400">WALL</div>
+    <div class="topline eb" data-r="14900,18500,600,400">Each one for a thing done well</div>
+    <div class="stage">POPS</div>
   </div>
-  <div class="sc" data-r="13400,16500,600,600" data-dy="0">
+  <div class="sc" data-r="18400,21500,600,600" data-dy="0">
     <div class="glow"></div>
-    <div class="in"><div class="eb" data-r="13500,16300,600,400">The rarest are won once</div><div class="rare">RARE</div></div>
+    <div class="in"><div class="eb" data-r="18500,21300,600,400">The rarest are won once</div><div class="rare">RARE</div></div>
   </div>
-  <div class="sc" data-r="16200,20000,700,1" data-dy="0">
-    IMG(tall-windows-dark-vault||16200,20000,1.1,1.02,0,1,0,-1|center 44%)
+  <div class="sc" data-r="21200,25000,700,1" data-dy="0">
+    IMG(tall-windows-dark-vault||21200,25000,1.1,1.02,0,1,0,-1|center 44%)
     <div class="veil deep"></div>
     <div class="in">
-      <div class="big" data-r="16600,20001,900,1">Earn your place.</div>
-      <div class="thread" data-draw="17300,20001"></div>
-      <div class="sub" data-r="17600,20001,800,1">The Guild is open. By application.</div>
-      <div class="url" data-r="18100,20001,800,1">overgrownaltar.com</div>
+      <div class="big" data-r="21600,25001,900,1">Earn your place.</div>
+      <div class="thread" data-draw="22300,25001"></div>
+      <div class="sub" data-r="22600,25001,800,1">The Guild is open. By application.</div>
+      <div class="url" data-r="23100,25001,800,1">overgrownaltar.com</div>
     </div>
   </div>
 </section>
 """
-_t0=3000; _step=540; _c=''
-for _i,_m in enumerate(MARKS['crests']):
-    _tin=_t0+_i*_step
-    _r=('%d,%d,200,220' % (_tin,_tin+_step+180)) if _i<9 else ('%d,%d,450,450' % (_tin,10500))
-    _c+='<div class="cz" data-r="%s" data-dy="0" data-pop>%s<span class="num">%s</span><span class="nm">%s</span>%s</div>' % (_r,_m['svg'],_m['numeral'],_m['name'],('<span class="note">%s</span>' % _m['note']) if _i==9 else '')
-_p=''.join('<span class="pip"><i data-r="%d,10500,180,400" data-dy="0"></i></span>' % (_t0+_i*_step) for _i in range(10))
+_SH='file://'+HERE+'/shots'
+def _page(tin,tout,shot,label,yv,ys,yh):   # the real page, scrolling up inside a lit panel: a phone's page for the tall and square cuts, a computer's for the wide
+    pg=lambda cls,src,y: '<div class="pg %s" data-r="%d,%d,700,450" data-dy="6"><img src="%s/%s.jpg" data-k="%d,%d,1,1,0,0,0,%s"></div>' % (cls,tin+100,tout,_SH,src,tin+600,tout-100,y)
+    return ('<div class="sc" data-r="%d,%d,500,500" data-dy="0"><div class="glow"></div><div class="topline eb" data-r="%d,%d,600,400">%s</div>%s%s%s</div>'
+            % (tin,tout,tin+200,tout-200,label,pg('pg-v',shot,yv),pg('pg-s',shot,ys),pg('pg-h','desk-'+shot,yh)))
 _w=''.join('<div class="tw" data-wave="%d">%s</div>' % (_i,_t['svg']) for _i,_t in enumerate(MARKS['trophies']))
 _by={_t['id']:_t for _t in MARKS['trophies']}
 _pre=lambda svg,p: svg.replace('id="','id="'+p).replace('url(#','url(#'+p).replace('href="#','href="#'+p)
-_rare=''.join('<div data-r="%d,16300,700,500" data-pop>%s<span class="lab">%s</span></div>' % (13500+_k*350,_pre(_by[_i]['svg'],'r_'),_by[_i]['name']) for _k,_i in enumerate(['lion','cathedral','serpent']))
-BODY+=RANKS.replace('CRESTS',_c).replace('PIPS',_p).replace('WALL',_w).replace('RARE',_rare)
+_pp=''; _ids=['encouragement','crown','psalter','three-windows','hundredfold','keys']
+for _k,_i in enumerate(_ids):
+    _tin=14900+_k*540
+    _r=('%d,%d,200,220' % (_tin,_tin+540+180)) if _k<len(_ids)-1 else ('%d,%d,450,450' % (_tin,18500))
+    _pp+='<div class="cz tr" data-r="%s" data-dy="0" data-pop>%s<span class="nm">%s</span></div>' % (_r,_pre(_by[_i]['svg'],'p%d_' % _k),_by[_i]['name'])
+_rare=''.join('<div data-r="%d,21300,700,500" data-pop>%s<span class="lab">%s</span></div>' % (18500+_k*350,_pre(_by[_i]['svg'],'r_'),_by[_i]['name']) for _k,_i in enumerate(['lion','cathedral','serpent']))
+BODY+=(RANKS.replace('PAGE1',_page(2900,7600,'prestige','Ten prestiges to climb','-62','-66','-47')).replace('PAGE2',_page(7300,12000,'trophies','Fifty-four trophies to earn','-62','-66','-49'))
+       .replace('WALL',_w).replace('POPS',_pp).replace('RARE',_rare))
 # ---- the reels (vertical): the film cut with the real interface, framed as "coming soon" ----
 SHOTS='file://'+HERE+'/shots'
 _n=[0]
