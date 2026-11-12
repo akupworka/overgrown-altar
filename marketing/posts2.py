@@ -18,6 +18,9 @@ CSS=open(HERE+'/posts.py',encoding='utf-8').read().split("CSS='''")[1].split("''
 .paper .sub { color:#5A5045; }
 .paper .mono-mark { color:#2A2017; }
 .ph, .wn, .cu { z-index:2; }
+.solo { position:absolute; z-index:2; left:80.6rem; top:49.4rem; width:14.4rem; }
+.solo svg { width:100%; height:auto; display:block; }
+.ph, .wn { box-shadow:0 0 0 .3rem #23271F, 0 0 0 .5rem rgba(159,148,94,.9), 0 5rem 12rem rgba(0,0,0,.75); }
 .glow { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 62%, rgba(255,227,163,.13), rgba(6,8,6,0) 60%); }
 .top { position:absolute; left:0; right:0; top:8.6rem; display:flex; flex-direction:column; align-items:center; gap:2.2rem; text-align:center; padding:0 8rem; }
 .top .mono-mark { height:6rem; }
@@ -64,7 +67,7 @@ post('03-ten-prestiges','', '<div class="glow"></div>'+top('Ten prestiges','Ever
 post('04-the-reply','paper', top('The Forum','A comment section worth reading.',italic=True)+closeup('thread',661,49,34)+closeup('thread',1061,86,34))
 post('05-fifty-four-trophies','', '<div class="glow"></div>'+top('Fifty-four trophies','None of them for followers.')+'<div class="wall" style="top:84rem">'+''.join('<div>%s</div>' % uid(t['svg']) for t in MARKS['trophies'])+'</div>')
 post('06-read-or-listen','paper', top('Every piece','Read. Or listen.',italic=True)+phone('reading',150))
-post('07-on-your-desk','', top('The whole house','At your desk. In your pocket.')+window('prestige',0,top=50,h=58,left=-13)+phone('prestige',470,w=32,top=64,left=63,h=74))
+post('07-on-your-desk','', top('The whole house','At your desk. In your pocket.')+window('prestige',0,top=50,h=58,left=-13)+phone('prestige',470,w=32,top=64,left=63,h=74)+'<div class="solo">%s</div>' % uid(MARKS['crests'][5]['svg']))
 post('08-shelves-of-your-own','paper', top('The library','Shelves of your own.',italic=True)+phone('library',50))
 post('09-earn-your-place','', '<div class="glow"></div>'+top('The rarest are won once','Earn your place.')
      +'<div class="rare3">'+''.join('<div>%s<span class="lab">%s</span></div>' % (uid(by[i]['svg']),by[i]['name']) for i in ['lion','cathedral','serpent'])+'</div>'
