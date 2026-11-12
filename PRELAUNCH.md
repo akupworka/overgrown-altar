@@ -132,7 +132,7 @@ use still working:
 - [ ] The trophies (11 Nov 2026: 54 of them, redrawn without CSS filters): no dark boxes around any trophy, in the
       vault or at Prestiges → Trophies; trophies still to earn show in dark iron; gold and rainbow keep a soft halo;
       the coloured glass of an earned rainbow trophy turns slowly and smoothly (its centre and rim stay still).
-- [ ] The share sheet shows the OA mark beside a piece's title, not a compass.
+- [ ] The share sheet (the site's own Share button on a piece): the piece's share picture shows beside its title, not a compass. (12 Nov 2026: the owner saw a compass. Cause, as far as could be told without an iPhone: the button handed the phone a title, and an iPhone given a title looks nothing up. It now hands over the link alone. A plain OA logo in that square is not something a site can choose while a piece has a share picture.)
 - [ ] A link to the home page, and a link to a piece, each preview with the right card in Messages.
 - [ ] "Share as a social post": the preview opens, swiping shows the second picture, "Save to images" puts both in Photos.
 - [ ] Listen reads a piece aloud, the highlight follows, pause and skip respond. On a computer too (it stayed silent once).

@@ -673,7 +673,7 @@ function ReadTools({ piece, author, photo, isEditor = false }: { piece: Piece; a
   const shareLink = async () => {
     const url = `${location.origin}/guild/${piece.slug}/`;
     try {
-      if (navigator.share) await navigator.share({ title: `${piece.title}${author ? `, by ${author}` : ''}`, url });
+      if (navigator.share) await navigator.share({ url });   // (the link alone: an iPhone then shows the piece's own share card, not a compass; see BaseLayout)
       else { await navigator.clipboard.writeText(url); flash('link', 'Link copied'); }
     } catch { /* they closed the share sheet */ }
   };
