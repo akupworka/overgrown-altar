@@ -245,6 +245,9 @@ const makers = [...new Map(all.map((w) => [w.author.id, w.author] as [string, Gu
   @media (max-width: 700px) {
     .he-makers { display: flex; justify-content: flex-start; align-self: stretch; min-width: 0; max-width: none; gap: 18px; margin: 30px -22px 0; padding: 4px 22px 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .he-makers::-webkit-scrollbar { display: none; }
+    /* a short row sits in the middle; a long one still starts at the left edge and slides (the margins give way when the row is full) */
+    .he-makers > :first-child { margin-left: auto; }
+    .he-makers > :last-child { margin-right: auto; }
     .he-maker { flex: none; width: 96px; scroll-snap-align: start; }
     .he-maker-n { font-size: 16px; }
     .he-write { margin-top: 44px; padding: 30px 22px; }
