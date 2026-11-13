@@ -761,7 +761,7 @@ export default function MembersApp() {
   const page = route.t ? <ForumThread id={route.t} me={me} isEditor={isEditor} />
     : route.board ? <ForumBoard slug={route.board} me={me} isEditor={isEditor} />
     : route.view === 'forum' ? <ForumIndex me={me} isEditor={isEditor} />
-    : route.view === 'rules' ? <ForumRules />
+    : route.view === 'rules' ? <ForumRules me={me} />
     : route.view === 'mine' ? <ForumMine me={me} />
     : route.view === 'inbox' ? <InboxList me={me} />
     : route.view === 'following' ? <Following me={me} />

@@ -15,7 +15,12 @@ export function FellowHome({ profile }: { profile: Profile }) {
   const items = useCollection(profile.id);
   const tally = useForumTally(profile.id);
   const [following, setFollowing] = useState(0);
+  const [stayed, setStayed] = useState(false);   // has told a writer their work stayed with them, or left a reflection
   useEffect(() => { supabase.from('follows').select('followed').eq('follower', profile.id).then(({ data }) => setFollowing((data ?? []).length)); }, [profile.id]);
+  useEffect(() => {
+    Promise.all([supabase.from('piece_marks').select('piece_id').eq('member_id', profile.id).limit(1), supabase.from('piece_reflections').select('id').eq('author_id', profile.id).limit(1)])
+      .then(([m, r]) => setStayed(!!((m.data ?? []).length || (r.data ?? []).length)));
+  }, [profile.id]);
   const first = (profile.display_name || '').split(/\s+/)[0];
   return (
     <section className="d-section d-home fl-home">
@@ -29,7 +34,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
       <PillarTiles />
       <WayCard member={profile.id} mine />
       <Welcome fellow uid={profile.id} portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
-        sent={!!items?.length} onWrite={() => {}} />
+        sent={!!items?.length} followed={following > 0} stayed={stayed} onWrite={() => {}} />
       <section className="d-forum-panel">
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>
         <ForumMineLatest me={profile.id} />

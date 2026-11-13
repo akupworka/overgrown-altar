@@ -220,7 +220,9 @@ Build in two parts (1: sign-in, write, submit; 2: review + publish), checking wi
 - **Photographs**: the viewer in `BaseLayout` swipes through every `a[data-zoom]`; photo pages step/swipe to newer/older (Gallery order).
 - **Forum mentions**: `@Name` in replies → `forum_mentions`; highlighted by `inline()` in `Forum.tsx`.
 - **Search**: `/search/` reads `/search-index.json` (built) and, for members, profiles and thread titles live.
-- **Welcome**: `desk/Welcome.tsx`, first steps for members (not the editor); hidden once done or dismissed.
+- **Welcome**: `desk/Welcome.tsx`, first steps for members (not the editor); hidden once done or dismissed (kept per
+  account). The Fellowship has its own six: picture, keep a piece, follow a writer, tell a writer it stayed, hello in
+  the forum, home screen.
 - **Daily letter**: `netlify/functions/daily-letter.mts` (13:17 UTC). Messages, replies in your threads, mentions, marks/reflections on your pieces, new work from writers you follow. Off switch: `member_prefs.email_digest` on Edit my page. Uses the same Resend settings as the writer emails.
 
 ## The Fellowship (readers with accounts)

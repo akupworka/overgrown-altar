@@ -775,9 +775,9 @@ const RULES: { h: string; p: string[] }[] = [
     'Tell the Editor in Chief through Questions for the Editor or the Contact page. You will be taken seriously, and your name kept private.',
     'The editor may edit or remove posts, close threads, and pause or end a membership. Serious harm is reported to the proper authorities.' ] },
 ];
-export function ForumRules() {
+export function ForumRules({ me }: { me?: string }) {
   const NUM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-  useEffect(() => { try { localStorage.setItem('oa_rules_read', '1'); } catch {} }, []);   // ticks "Read the forum rules" on the Desk's welcome
+  useEffect(() => { if (me) try { localStorage.setItem(`oa_rules_read:${me}`, '1'); } catch {} }, [me]);   // ticks "Read the forum rules" on this person's welcome
   return (
     <div className="fo fo-rules">
       <Link to="/guild/members/?view=forum" className="fo-back lab">The Forum</Link>
