@@ -1503,6 +1503,11 @@ li.done .wl-note { display: none; }
 .wl-how p { margin: 0 0 10px; font-family: var(--serif); font-size: 16px; line-height: 1.5; color: #CFC8B8; }
 .wl-did, .wl-hide { background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--ember); font-size: 9.5px; }
 .wl-hide { align-self: flex-end; color: #8C8679; }
+.wl-fold { width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 0; border-radius: 14px; cursor: pointer; text-align: left; color: var(--bone);
+  background: rgba(255, 227, 163, .035); box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .2); transition: box-shadow .3s; }
+.wl-fold:hover { box-shadow: inset 0 0 0 1px rgba(255, 227, 163, .5); }
+.wl-fold .wl-n { margin-left: auto; }
+.wl-fold-go { color: #ABA597; font-size: 9.5px; white-space: nowrap; }
 @media (max-width: 700px) { .wl { padding: 20px 18px 14px; } .wl-h { font-size: 24px; } .wl-l { font-size: 17px; } .wl-note { font-size: 14px; } .wl-how { margin-left: 0; } }
 
 /* Collections (the Fellowship): one wall of saved photographs (tiles) and writing (cards) */

@@ -17,8 +17,15 @@ const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 const SITE = 'https://overgrownaltar.com';
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-// The same frame as the account emails (emails/build.py): the wordmark set in type over a darkened photograph
-// (it reads even where pictures are blocked), then the words.
+// The same frame as the account emails (emails/build.py): a paper-light letter from top to bottom, the wordmark in ink,
+// no dark band and no pictures. It is told to stay light where a mail app lets a sender say so.
+const STYLE = '<style>:root{color-scheme:light only;supported-color-schemes:light only;}'
+  + '@media (prefers-color-scheme:dark){.oa-page{background:#F4EFE6 !important;}.oa-card{background:#FCFAF5 !important;}.oa-box{background:#F3EDE1 !important;}'
+  + '.oa-ink{color:#1F1A14 !important;}.oa-soft{color:#4A4236 !important;}.oa-mute{color:#7A7062 !important;}.oa-ox{color:#7A3B2E !important;}.oa-brass{color:#9A7B2E !important;}'
+  + '.oa-btn{background:#1F1A14 !important;color:#FCFAF5 !important;}}'
+  + '[data-ogsb] .oa-page{background-color:#F4EFE6 !important;}[data-ogsb] .oa-card{background-color:#FCFAF5 !important;}[data-ogsb] .oa-box{background-color:#F3EDE1 !important;}[data-ogsb] .oa-btn{background-color:#1F1A14 !important;}'
+  + '[data-ogsc] .oa-ink{color:#1F1A14 !important;}[data-ogsc] .oa-soft{color:#4A4236 !important;}[data-ogsc] .oa-mute{color:#7A7062 !important;}[data-ogsc] .oa-ox{color:#7A3B2E !important;}[data-ogsc] .oa-brass{color:#9A7B2E !important;}[data-ogsc] .oa-btn{color:#FCFAF5 !important;}'
+  + '</style>';
 const SERIF = "Georgia,'Times New Roman',serif", SANS = 'Arial,Helvetica,sans-serif';
 // The same letter in plain words, sent beside the designed one: mail services trust a letter more when it carries both.
 export function plain(html: string): string {
@@ -34,38 +41,40 @@ export function plain(html: string): string {
 export function letter({ header, eyebrow, heading, lines, note, button, href, preview }: { header: 'published' | 'editor'; eyebrow: string; heading: string; lines: string; note?: string; button: string; href: string; preview: string }) {
   const noteHtml = note ? `
           <tr><td style="padding:30px 44px 0 44px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F1EBDF;border:1px solid #DED4C2;border-left:3px solid #9A7B2E;border-radius:4px;">
+            <table role="presentation" class="oa-box" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F3EDE1" style="background:#F3EDE1;border:1px solid #E2D9C8;border-left:3px solid #9A7B2E;border-radius:6px;">
               <tr><td style="padding:20px 22px;">
-                <div style="font-family:${SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#7A7062;padding-bottom:10px;">The editor&rsquo;s note</div>
-                <div style="font-family:${SERIF};font-size:17px;line-height:1.6;color:#2E2820;white-space:pre-wrap;">${esc(note)}</div>
+                <div class="oa-mute" style="font-family:${SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#7A7062;padding-bottom:10px;">The editor&rsquo;s note</div>
+                <div class="oa-ink" style="font-family:${SERIF};font-size:17px;line-height:1.6;color:#2E2820;white-space:pre-wrap;">${esc(note)}</div>
               </td></tr>
             </table>
           </td></tr>` : '';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><style>:root{color-scheme:light only;supported-color-schemes:light;}</style><title>Overgrown Altar</title></head>
-<body style="margin:0;padding:0;background:#ECE6DA;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preview)}</div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ECE6DA;">
-    <tr><td align="center" style="padding:32px 12px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#F8F4EC;border:1px solid #DED4C2;border-radius:8px;overflow:hidden;">
-        <tr><td align="center" background="${SITE}/images/email/bg-${header}.jpg" bgcolor="#16190F" style="background:#16190F url('${SITE}/images/email/bg-${header}.jpg') center center / cover no-repeat;padding:46px 20px 42px 20px;">
-          <div style="font-family:${SERIF};font-size:22px;line-height:1;color:#E9C77A;">&#8224;</div>
-          <div style="padding-top:14px;font-family:${SERIF};font-size:30px;line-height:1;letter-spacing:9px;color:#F3ECDC;">OVERGROWN</div>
-          <div style="padding-top:4px;font-family:${SERIF};font-style:italic;font-size:36px;line-height:1.1;color:#E9C77A;">Altar</div>
-          <div style="padding-top:16px;font-family:${SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#CFC8B8;">${header === 'published' ? 'Published' : 'From the editor'}</div>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${STYLE}<title>Overgrown Altar</title></head>
+<body class="oa-page" style="margin:0;padding:0;background:#F4EFE6;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preview)}</div>
+  <table role="presentation" class="oa-page" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F4EFE6" style="background:#F4EFE6;">
+    <tr><td align="center" style="padding:38px 12px 40px 12px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;">
+        <tr><td align="center" style="padding:0 20px 26px 20px;">
+          <div class="oa-brass" style="font-family:${SERIF};font-size:20px;line-height:1;color:#9A7B2E;">&#8224;</div>
+          <div class="oa-ink" style="padding-top:12px;font-family:${SERIF};font-size:24px;line-height:1;letter-spacing:8px;color:#1F1A14;">OVERGROWN</div>
+          <div class="oa-ox" style="padding-top:3px;font-family:${SERIF};font-style:italic;font-size:30px;line-height:1.1;color:#7A3B2E;">Altar</div>
+          <div class="oa-mute" style="padding-top:14px;font-family:${SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#7A7062;">${header === 'published' ? 'Published' : 'From the editor'}</div>
         </td></tr>
-        <tr><td style="height:1px;line-height:1px;font-size:0;background:#B8A05E;">&nbsp;</td></tr>
+      </table>
+      <table role="presentation" class="oa-card" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FCFAF5" style="max-width:560px;background:#FCFAF5;border:1px solid #E2D9C8;border-radius:10px;overflow:hidden;">
+        <tr><td style="height:3px;line-height:3px;font-size:0;background:#B8A05E;">&nbsp;</td></tr>
         <tr><td><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-          <tr><td align="center" style="padding:38px 44px 0 44px;font-family:${SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7A3B2E;">${esc(eyebrow)}</td></tr>
-          <tr><td align="center" style="padding:14px 40px 0 40px;font-family:${SERIF};font-size:38px;line-height:1.1;color:#1F1A14;">${esc(heading)}</td></tr>
-          <tr><td align="center" style="padding:18px 48px 0 48px;font-family:${SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#4A4236;">${lines}</td></tr>${noteHtml}
+          <tr><td align="center" class="oa-ox" style="padding:38px 44px 0 44px;font-family:${SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7A3B2E;">${esc(eyebrow)}</td></tr>
+          <tr><td align="center" class="oa-ink" style="padding:14px 40px 0 40px;font-family:${SERIF};font-size:38px;line-height:1.1;color:#1F1A14;">${esc(heading)}</td></tr>
+          <tr><td align="center" class="oa-soft" style="padding:18px 48px 0 48px;font-family:${SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#4A4236;">${lines}</td></tr>${noteHtml}
           <tr><td align="center" style="padding:32px 44px 40px 44px;">
-            <a href="${href}" style="display:inline-block;background:#1F1A14;color:#F8F4EC;text-decoration:none;font-family:${SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">${esc(button)}&nbsp;&rarr;</a>
+            <a href="${href}" class="oa-btn" style="display:inline-block;background:#1F1A14;color:#FCFAF5;text-decoration:none;font-family:${SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">${esc(button)}&nbsp;&rarr;</a>
           </td></tr>
         </table></td></tr>
       </table>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;">
-        <tr><td align="center" style="padding:26px 20px 0 20px;font-family:${SERIF};font-style:italic;font-size:15px;color:#7A7062;">We light the signal fires on the perimeter.</td></tr>
-        <tr><td align="center" style="padding:12px 20px 0 20px;font-family:${SANS};font-size:10px;letter-spacing:2px;text-transform:uppercase;">
-          <a href="${SITE}" style="color:#7A7062;text-decoration:none;">overgrownaltar.com</a><span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span><a href="${SITE}/guild/desk/" style="color:#7A7062;text-decoration:none;">Your Desk</a><span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span><a href="${SITE}/guild/members/?view=forum" style="color:#7A7062;text-decoration:none;">The Forum</a>
+        <tr><td align="center" class="oa-mute" style="padding:26px 20px 0 20px;font-family:${SERIF};font-style:italic;font-size:15px;color:#7A7062;">We light the signal fires on the perimeter.</td></tr>
+        <tr><td align="center" style="padding:12px 8px 0 8px;font-family:${SANS};font-size:10px;letter-spacing:1px;text-transform:uppercase;">
+          <a href="${SITE}" class="oa-mute" style="color:#7A7062;text-decoration:none;">overgrownaltar.com</a><span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span><a href="${SITE}/guild/desk/" class="oa-mute" style="color:#7A7062;text-decoration:none;">Your Desk</a><span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span><a href="${SITE}/guild/members/?view=forum" class="oa-mute" style="color:#7A7062;text-decoration:none;">The Forum</a>
         </td></tr>
       </table>
     </td></tr>
@@ -112,22 +121,22 @@ export default async (req: Request) => {
   const when = later ? new Date(p.published_at).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' }) : '';
   const mail = ask
     ? { subject: `A note from the editor: ${title}`, html: letter({ header: 'editor', eyebrow: 'A change, please', heading: 'One more pass.', preview: `The editor asks for a change to ${title}.`,
-        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> again and asks for a change. It stays on the site as it is while you work. Open your Desk, make the change, and send it back.`,
+        lines: `${esc(first)}, the editor has read <span class="oa-ink" style="color:#1F1A14;font-style:normal;">${esc(title)}</span> again and asks for a change. It stays on the site as it is while you work. Open your Desk, make the change, and send it back.`,
         note: ask.note || undefined, button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
     : later
     ? { subject: `Accepted: ${title}`, html: letter({ header: 'published', eyebrow: 'Accepted', heading: 'It has a date.', preview: `${title} goes live ${when}.`,
-        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and set it to go live on ${esc(when)}. Thank you for bringing it to the table.`,
+        lines: `${esc(first)}, the editor has read <span class="oa-ink" style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and set it to go live on ${esc(when)}. Thank you for bringing it to the table.`,
         button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
     : p.status === 'approved'
     ? { subject: `Published: ${title}`, html: letter({ header: 'published', eyebrow: 'Published', heading: 'It is on the altar.', preview: `${title} is now published at Overgrown Altar.`,
-        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and published it. Thank you for bringing it to the table.`,
+        lines: `${esc(first)}, the editor has read <span class="oa-ink" style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and published it. Thank you for bringing it to the table.`,
         button: 'Read it on the site', href: `${SITE}/guild/${p.slug}/` }) }
     : p.status === 'returned'
     ? { subject: `A note from the editor: ${title}`, html: letter({ header: 'editor', eyebrow: 'Returned with a note', heading: 'Nearly there.', preview: `The editor has read ${title} and sent it back with a note.`,
-        lines: `${esc(first)}, the editor has read <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and sent it back to your Desk with a note. Sharpen it, and send it again when it is ready.`,
+        lines: `${esc(first)}, the editor has read <span class="oa-ink" style="color:#1F1A14;font-style:normal;">${esc(title)}</span> and sent it back to your Desk with a note. Sharpen it, and send it again when it is ready.`,
         note: p.editor_note || undefined, button: 'Open your Desk', href: `${SITE}/guild/desk/` }) }
     : { subject: `About your piece: ${title}`, html: letter({ header: 'editor', eyebrow: 'From the editor', heading: 'Not this one.', preview: `The editor has read ${title}.`,
-        lines: `${esc(first)}, thank you for sending <span style="color:#1F1A14;font-style:normal;">${esc(title)}</span>. The editor has read it, and it is not one for the altar. Keep writing; the table is still yours.`,
+        lines: `${esc(first)}, thank you for sending <span class="oa-ink" style="color:#1F1A14;font-style:normal;">${esc(title)}</span>. The editor has read it, and it is not one for the altar. Keep writing; the table is still yours.`,
         note: p.editor_note || undefined, button: 'Open your Desk', href: `${SITE}/guild/desk/` }) };
 
   const res = await fetch('https://api.resend.com/emails', {

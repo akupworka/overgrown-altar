@@ -1,6 +1,9 @@
 # Guild emails
 
-Branded emails sent by Supabase. Paste each into **Supabase → Authentication → Emails → Templates**:
+Branded emails sent by Supabase. Paste each into **Supabase → Authentication → Emails → Templates**.
+The look (13 Nov 2026): a paper-light letter from top to bottom, the wordmark in ink, no dark band and no pictures.
+`python3 emails/build.py` rebuilds all six from one frame; the Resend letters in `netlify/functions/notify-writer.mts`
+use the same frame. `public/images/email/` is no longer used by any letter.
 
 | Template in Supabase | File | Subject |
 |---|---|---|

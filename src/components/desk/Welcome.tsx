@@ -35,7 +35,15 @@ export function Welcome({ uid, portrait, bio, posted, sent, onWrite, fellow = fa
     { done: sent, label: 'Send your first piece', note: 'The editor reads every one.', write: true },
   ];
   const done = steps.filter((s) => s.done).length;
-  if (hidden || done === steps.length) return null;
+  if (done === steps.length) return null;
+  // Set aside, not thrown away: a slim bar stays in its place, and opens the steps again.
+  if (hidden) return (
+    <button type="button" className="wl-fold" aria-expanded="false" onClick={() => { store(hideKey, '0'); setHidden(false); }}>
+      <span className="eb">Your first steps</span>
+      <span className="lab wl-n">{done} of {steps.length}</span>
+      <span className="lab wl-fold-go">Show <span aria-hidden="true">↓</span></span>
+    </button>
+  );
   return (
     <section className="wl" aria-label="Your first steps">
       <div className="wl-head">

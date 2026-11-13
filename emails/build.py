@@ -1,72 +1,82 @@
 # Builds the Guild's account emails (paste each into Supabase > Authentication > Emails > Templates).
 # Run:  python3 emails/build.py      The writer emails (netlify/functions/notify-writer.mts) use the same frame.
-# A dark stained-glass band at the top, then a paper-light letter (light on purpose: mail apps re-color dark emails).
-# Header photographs (backgrounds only; the words are real text) live in public/images/email/ (outside the site's password gate, so mail apps can load them).
+# A paper-light letter from top to bottom: the wordmark in ink, then the words. No dark band and no pictures
+# (the owner asked for the dark look gone, 13 Nov 2026; a letter without pictures is also trusted more by mail services).
 SITE = 'https://overgrownaltar.com'
 SERIF = "Georgia,'Times New Roman',serif"
 SANS = "Arial,Helvetica,sans-serif"
-# The header: the wordmark set in type over a darkened photograph, so it reads even where pictures are blocked.
+# Light on purpose, and told to stay light: the page says so (color-scheme), and for mail apps that darken a letter
+# anyway and let a sender answer (Apple Mail, Outlook), the same paper and ink are stated again.
+STYLE = ("<style>:root{color-scheme:light only;supported-color-schemes:light only;}"
+  "@media (prefers-color-scheme:dark){.oa-page{background:#F4EFE6 !important;}.oa-card{background:#FCFAF5 !important;}.oa-box{background:#F3EDE1 !important;}"
+  ".oa-ink{color:#1F1A14 !important;}.oa-soft{color:#4A4236 !important;}.oa-mute{color:#7A7062 !important;}.oa-ox{color:#7A3B2E !important;}.oa-brass{color:#9A7B2E !important;}"
+  ".oa-btn{background:#1F1A14 !important;color:#FCFAF5 !important;}}"
+  "[data-ogsb] .oa-page{background-color:#F4EFE6 !important;}[data-ogsb] .oa-card{background-color:#FCFAF5 !important;}[data-ogsb] .oa-box{background-color:#F3EDE1 !important;}[data-ogsb] .oa-btn{background-color:#1F1A14 !important;}"
+  "[data-ogsc] .oa-ink{color:#1F1A14 !important;}[data-ogsc] .oa-soft{color:#4A4236 !important;}[data-ogsc] .oa-mute{color:#7A7062 !important;}[data-ogsc] .oa-ox{color:#7A3B2E !important;}[data-ogsc] .oa-brass{color:#9A7B2E !important;}[data-ogsc] .oa-btn{color:#FCFAF5 !important;}"
+  "</style>")
 LABEL = {'welcome': 'The Guild', 'account': 'Your Guild Desk', 'published': 'Published', 'editor': 'From the editor'}
 
 def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, href=None, steps=None, code=None, fine=''):
     btn = f'''
           <tr><td align="center" style="padding:30px 44px 6px 44px;">
-            <a href="{href}" style="display:inline-block;background:#1F1A14;color:#F8F4EC;text-decoration:none;font-family:{SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">{button}&nbsp;&rarr;</a>
+            <a href="{href}" class="oa-btn" style="display:inline-block;background:#1F1A14;color:#FCFAF5;text-decoration:none;font-family:{SANS};font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:18px 36px;border-radius:3px;">{button}&nbsp;&rarr;</a>
           </td></tr>''' if button else ''
     codebox = f'''
           <tr><td align="center" style="padding:30px 44px 6px 44px;">
-            <div style="display:inline-block;padding:18px 30px;border:1px solid #B8A05E;border-radius:4px;background:#F1EBDF;font-family:'Courier New',Courier,monospace;font-size:34px;letter-spacing:10px;color:#1F1A14;">{code}</div>
+            <div class="oa-box oa-ink" style="display:inline-block;padding:18px 30px;border:1px solid #B8A05E;border-radius:6px;background:#F3EDE1;font-family:'Courier New',Courier,monospace;font-size:34px;letter-spacing:10px;color:#1F1A14;">{code}</div>
           </td></tr>''' if code else ''
     steps_html = ''
     if steps:
         rows = ''.join(f'''
                 <tr>
-                  <td valign="top" style="width:34px;padding:0 0 14px 0;font-family:{SERIF};font-size:18px;color:#9A7B2E;">{n}</td>
-                  <td valign="top" style="padding:0 0 14px 0;font-family:{SERIF};font-size:16px;line-height:1.5;color:#4A4236;"><span style="color:#1F1A14;">{a}</span> {b}</td>
+                  <td valign="top" class="oa-brass" style="width:34px;padding:0 0 14px 0;font-family:{SERIF};font-size:18px;color:#9A7B2E;">{n}</td>
+                  <td valign="top" class="oa-soft" style="padding:0 0 14px 0;font-family:{SERIF};font-size:16px;line-height:1.5;color:#4A4236;"><span class="oa-ink" style="color:#1F1A14;">{a}</span> {b}</td>
                 </tr>''' for n, (a, b) in zip(['I', 'II', 'III', 'IV'], steps))
         steps_html = f'''
           <tr><td style="padding:34px 44px 0 44px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F1EBDF;border:1px solid #DED4C2;border-radius:4px;">
+            <table role="presentation" class="oa-box" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F3EDE1" style="background:#F3EDE1;border:1px solid #E2D9C8;border-radius:6px;">
               <tr><td style="padding:22px 24px 8px 24px;">
-                <div style="font-family:{SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#7A7062;padding-bottom:16px;">What happens next</div>
+                <div class="oa-mute" style="font-family:{SANS};font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#7A7062;padding-bottom:16px;">What happens next</div>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">{rows}
                 </table>
               </td></tr>
             </table>
           </td></tr>'''
-    direct = f' If the button doesn&rsquo;t open, use <a href="{href}" style="color:#9A7B2E;text-decoration:underline;">this direct link</a>.' if button else ''
+    direct = f' If the button doesn&rsquo;t open, use <a href="{href}" class="oa-brass" style="color:#9A7B2E;text-decoration:underline;">this direct link</a>.' if button else ''
     return f'''<!doctype html>
 <!-- Subject: {subject} -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><style>:root{{color-scheme:light only;supported-color-schemes:light;}}</style><title>Overgrown Altar</title></head>
-<body style="margin:0;padding:0;background:#ECE6DA;">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">{STYLE}<title>Overgrown Altar</title></head>
+<body class="oa-page" style="margin:0;padding:0;background:#F4EFE6;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{preview}</div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ECE6DA;">
-    <tr><td align="center" style="padding:32px 12px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#F8F4EC;border:1px solid #DED4C2;border-radius:8px;overflow:hidden;">
-        <tr><td align="center" background="{SITE}/images/email/bg-{header}.jpg" bgcolor="#16190F" style="background:#16190F url('{SITE}/images/email/bg-{header}.jpg') center center / cover no-repeat;padding:46px 20px 42px 20px;">
-          <div style="font-family:{SERIF};font-size:22px;line-height:1;color:#E9C77A;">&#8224;</div>
-          <div style="padding-top:14px;font-family:{SERIF};font-size:30px;line-height:1;letter-spacing:9px;color:#F3ECDC;">OVERGROWN</div>
-          <div style="padding-top:4px;font-family:{SERIF};font-style:italic;font-size:36px;line-height:1.1;color:#E9C77A;">Altar</div>
-          <div style="padding-top:16px;font-family:{SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#CFC8B8;">{LABEL[header]}</div>
+  <table role="presentation" class="oa-page" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F4EFE6" style="background:#F4EFE6;">
+    <tr><td align="center" style="padding:38px 12px 40px 12px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;">
+        <tr><td align="center" style="padding:0 20px 26px 20px;">
+          <div class="oa-brass" style="font-family:{SERIF};font-size:20px;line-height:1;color:#9A7B2E;">&#8224;</div>
+          <div class="oa-ink" style="padding-top:12px;font-family:{SERIF};font-size:24px;line-height:1;letter-spacing:8px;color:#1F1A14;">OVERGROWN</div>
+          <div class="oa-ox" style="padding-top:3px;font-family:{SERIF};font-style:italic;font-size:30px;line-height:1.1;color:#7A3B2E;">Altar</div>
+          <div class="oa-mute" style="padding-top:14px;font-family:{SANS};font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#7A7062;">{LABEL[header]}</div>
         </td></tr>
-        <tr><td style="height:1px;line-height:1px;font-size:0;background:#B8A05E;">&nbsp;</td></tr>
+      </table>
+      <table role="presentation" class="oa-card" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FCFAF5" style="max-width:560px;background:#FCFAF5;border:1px solid #E2D9C8;border-radius:10px;overflow:hidden;">
+        <tr><td style="height:3px;line-height:3px;font-size:0;background:#B8A05E;">&nbsp;</td></tr>
         <tr><td>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-          <tr><td align="center" style="padding:38px 44px 0 44px;font-family:{SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7A3B2E;">{eyebrow}</td></tr>
-          <tr><td align="center" style="padding:14px 40px 0 40px;font-family:{SERIF};font-size:38px;line-height:1.1;color:#1F1A14;">{heading}</td></tr>
-          <tr><td align="center" style="padding:18px 48px 0 48px;font-family:{SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#4A4236;">{lines}</td></tr>{btn}{codebox}{steps_html}
-          <tr><td style="padding:30px 44px 34px 44px;font-family:{SANS};font-size:12px;line-height:1.7;color:#7A7062;">{fine}{direct}</td></tr>
+          <tr><td align="center" class="oa-ox" style="padding:38px 44px 0 44px;font-family:{SERIF};font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7A3B2E;">{eyebrow}</td></tr>
+          <tr><td align="center" class="oa-ink" style="padding:14px 40px 0 40px;font-family:{SERIF};font-size:38px;line-height:1.1;color:#1F1A14;">{heading}</td></tr>
+          <tr><td align="center" class="oa-soft" style="padding:18px 48px 0 48px;font-family:{SERIF};font-style:italic;font-size:19px;line-height:1.6;color:#4A4236;">{lines}</td></tr>{btn}{codebox}{steps_html}
+          <tr><td class="oa-mute" style="padding:30px 44px 34px 44px;font-family:{SANS};font-size:12px;line-height:1.7;color:#7A7062;">{fine}{direct}</td></tr>
           </table>
         </td></tr>
       </table>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;">
-        <tr><td align="center" style="padding:26px 20px 0 20px;font-family:{SERIF};font-style:italic;font-size:15px;color:#7A7062;">We light the signal fires on the perimeter.</td></tr>
-        <tr><td align="center" style="padding:12px 20px 0 20px;font-family:{SANS};font-size:10px;letter-spacing:2px;text-transform:uppercase;">
-          <a href="{SITE}" style="color:#7A7062;text-decoration:none;">overgrownaltar.com</a>
+        <tr><td align="center" class="oa-mute" style="padding:26px 20px 0 20px;font-family:{SERIF};font-style:italic;font-size:15px;color:#7A7062;">We light the signal fires on the perimeter.</td></tr>
+        <tr><td align="center" style="padding:12px 8px 0 8px;font-family:{SANS};font-size:10px;letter-spacing:1px;text-transform:uppercase;">
+          <a href="{SITE}" class="oa-mute" style="color:#7A7062;text-decoration:none;">overgrownaltar.com</a>
           <span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span>
-          <a href="{SITE}/guild/desk/" style="color:#7A7062;text-decoration:none;">Your Desk</a>
+          <a href="{SITE}/guild/desk/" class="oa-mute" style="color:#7A7062;text-decoration:none;">Your Desk</a>
           <span style="color:#B8AE9C;">&nbsp;&middot;&nbsp;</span>
-          <a href="{SITE}/contact" style="color:#7A7062;text-decoration:none;">Contact</a>
+          <a href="{SITE}/contact" class="oa-mute" style="color:#7A7062;text-decoration:none;">Contact</a>
         </td></tr>
       </table>
     </td></tr>
@@ -75,7 +85,7 @@ def frame(*, subject, preview, header, eyebrow, heading, lines, button=None, hre
 '''
 
 link = lambda t: f'{SITE}/guild/desk/?token_hash={{{{ .TokenHash }}}}&type={t}'
-B = lambda t: f'<span style="color:#1F1A14;font-style:normal;">{t}</span>'
+B = lambda t: f'<span class="oa-ink" style="color:#1F1A14;font-style:normal;">{t}</span>'
 
 EMAILS = {
   'invite.html': dict(subject='A seat at the table: welcome to the Guild', preview='Your application has been read, and there is a seat for you at the table.',
