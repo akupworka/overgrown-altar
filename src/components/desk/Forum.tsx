@@ -152,7 +152,7 @@ export function ForumIndex({ me, isEditor = false }: { me?: string; isEditor?: b
         <p className="it mut fo-sub">Where the Guild talks between pieces: ideas in progress, craft, photographs, books, and prayer. Only members can see it.</p>
         {boards && <span className="lab mut">{boards.length} {boards.length === 1 ? 'forum' : 'forums'} · {threads.length} {threads.length === 1 ? 'thread' : 'threads'} · {posts} {posts === 1 ? 'post' : 'posts'}</span>}
         {isEditor && <div className="fo-index-acts">
-          { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <span aria-hidden="true">+</span>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
+          { <button type="button" className="fo-glass-btn" onClick={() => setOpening((o) => !o)}>{!opening && <svg className="fo-plus" style={{ margin: 0 }} width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" fill="none" /></svg>}{opening ? 'Never mind' : 'Open a new forum'}</button>}
         </div>}
       </header>
       <ChamberDoor />
@@ -302,7 +302,7 @@ export function ForumBoard({ slug, me, isEditor }: { slug: string; me: string; i
         )}
         <div className="fo-head-acts">
           {canStart
-            ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{!writing && <span aria-hidden="true" className="fo-plus">+</span>}{writing ? 'Never mind' : 'Start a thread'}</button>
+            ? <button type="button" className="btn d-btn" onClick={() => setWriting((w) => !w)}>{!writing && <svg className="fo-plus" width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" fill="none" /></svg>}{writing ? 'Never mind' : 'Start a thread'}</button>
             : <span className="lab mut">Only the editor starts threads here. Everyone may reply.</span>}
           <span className="lab mut">{threads.length} {threads.length === 1 ? 'thread' : 'threads'} · keeps the {board.keep_threads} most active{pages > 1 ? ` · page ${cur} of ${pages}` : ''}</span>
         </div>

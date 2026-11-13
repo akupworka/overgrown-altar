@@ -358,7 +358,8 @@
   .fo-newforum { padding: 18px 16px; }
   .fo-pics-row { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 }
-.fo-plus { margin-right: 8px; font-size: 15px; letter-spacing: 0; }
+/* A drawn plus, centred on the capitals beside it (a typed + sits low on iPhones). */
+.fo-plus { display: inline-block; width: 11px; height: 11px; margin-right: 9px; vertical-align: -1.5px; }
 .fo-pics legend { font-family: var(--sans); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-dark); padding: 0; margin-bottom: 10px; }
 /* The rules, as a card above the forums */
 .fo-rules-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px 22px; margin: 4px 0 14px; border-radius: 14px; color: var(--bone);
