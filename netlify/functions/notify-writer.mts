@@ -20,6 +20,17 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 // The same frame as the account emails (emails/build.py): the wordmark set in type over a darkened photograph
 // (it reads even where pictures are blocked), then the words.
 const SERIF = "Georgia,'Times New Roman',serif", SANS = 'Arial,Helvetica,sans-serif';
+// The same letter in plain words, sent beside the designed one: mail services trust a letter more when it carries both.
+export function plain(html: string): string {
+  return html
+    .replace(/<head[\s\S]*?<\/head>/i, '').replace(/<div style="display:none[\s\S]*?<\/div>/i, '')
+    .replace(/<a\s[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, t: string) => `${t.replace(/<[^>]+>/g, '').replace(/&nbsp;&rarr;/g, '').trim()}: ${href}`)
+    .replace(/<\/(td|tr|div|p|table)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&middot;/g, '·').replace(/&rarr;/g, '').replace(/&rsquo;/g, '’').replace(/&#8224;/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+    .split('\n').map((l) => l.replace(/\s+/g, ' ').trim()).filter((l, i, a) => l || (a[i - 1] ?? '') !== '').join('\n')
+    .replace(/OVERGROWN\n+Altar/, 'Overgrown Altar').trim();
+}
 export function letter({ header, eyebrow, heading, lines, note, button, href, preview }: { header: 'published' | 'editor'; eyebrow: string; heading: string; lines: string; note?: string; button: string; href: string; preview: string }) {
   const noteHtml = note ? `
           <tr><td style="padding:30px 44px 0 44px;">
@@ -122,7 +133,7 @@ export default async (req: Request) => {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${resend}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: mail.subject, html: mail.html,
+      from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: mail.subject, html: mail.html, text: plain(mail.html),
       ...(process.env.EMAIL_REPLY_TO ? { reply_to: process.env.EMAIL_REPLY_TO } : {}),
     }),
   });

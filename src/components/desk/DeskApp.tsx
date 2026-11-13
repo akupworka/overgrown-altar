@@ -719,7 +719,7 @@ function Pieces({ name, profile, pieces, waiting = 0, arrivals = 0, isEditor = f
       {/* Phones: your standing (wide screens show it in the column beside) */}
       <Standing published={counts.published} ctx={{ pieces: pieces.filter((p) => p.status === 'approved'), member: profile ?? {}, forum: tally }} uid={profile?.id} />
       {profile && !isEditor && (
-        <Welcome portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
+        <Welcome uid={profile.id} portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
           sent={pieces.some((p) => p.status !== 'draft')} onWrite={() => onOpen(null)} />
       )}
       {/* The heart of the Desk: your pieces */}

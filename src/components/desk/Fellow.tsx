@@ -28,7 +28,7 @@ export function FellowHome({ profile }: { profile: Profile }) {
       </header>
       <PillarTiles />
       <WayCard member={profile.id} mine />
-      <Welcome fellow portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
+      <Welcome fellow uid={profile.id} portrait={!!profile.portrait_path} bio={!!profile.bio?.trim()} posted={!!(tally && ((tally as any).posts > 0 || (tally as any).threads > 0))}
         sent={!!items?.length} onWrite={() => {}} />
       <section className="d-forum-panel">
         <div className="d-forum-head"><span className="eb">Your conversations</span><a className="lab d-forum-link" href="/guild/members/?view=mine">See all →</a></div>

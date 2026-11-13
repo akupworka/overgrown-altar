@@ -2,11 +2,13 @@
 // the forum rules, a hello in the forum, the Guild on your home screen, and your first piece.
 import { useEffect, useState } from 'react';
 
-interface Props { portrait: boolean; bio: boolean; posted: boolean; sent: boolean; onWrite: () => void; fellow?: boolean }
+interface Props { uid: string; portrait: boolean; bio: boolean; posted: boolean; sent: boolean; onWrite: () => void; fellow?: boolean }
 const store = (k: string, v?: string) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch {} return null; };
 
-export function Welcome({ portrait, bio, posted, sent, onWrite, fellow = false }: Props) {
-  const [hidden, setHidden] = useState(() => store('oa_welcome_hidden') === '1');
+export function Welcome({ uid, portrait, bio, posted, sent, onWrite, fellow = false }: Props) {
+  // "Hide these steps" is remembered for this person, not for the whole browser: someone new on a shared phone or computer still gets theirs.
+  const hideKey = `oa_welcome_hidden:${uid}`;
+  const [hidden, setHidden] = useState(() => store(hideKey) === '1');
   const [rules] = useState(() => store('oa_rules_read') === '1');
   const [home, setHome] = useState(() => store('oa_home_added') === '1');
   const [howHome, setHowHome] = useState(false);
@@ -55,7 +57,7 @@ export function Welcome({ portrait, bio, posted, sent, onWrite, fellow = false }
           );
         })}
       </ol>
-      <button type="button" className="lab wl-hide" onClick={() => { store('oa_welcome_hidden', '1'); setHidden(true); }}>Hide these steps</button>
+      <button type="button" className="lab wl-hide" onClick={() => { store(hideKey, '1'); setHidden(true); }}>Hide these steps</button>
     </section>
   );
 }

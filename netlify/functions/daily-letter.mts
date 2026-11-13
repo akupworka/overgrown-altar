@@ -6,7 +6,7 @@
 // Needs, in Netlify > Site configuration > Environment variables (already set for the writer emails):
 //   SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, and optionally EMAIL_FROM / EMAIL_REPLY_TO.
 import { createClient } from '@supabase/supabase-js';
-import { letter } from './notify-writer.mts';
+import { letter, plain } from './notify-writer.mts';
 
 const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 const SITE = 'https://overgrownaltar.com';
@@ -96,7 +96,7 @@ export default async () => {
         button: 'Open the Guild', href: `${SITE}/guild/desk/` });
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST', headers: { Authorization: `Bearer ${resend}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: items.length === 1 ? 'Something is waiting at the Guild' : `${items.length} things are waiting at the Guild`, html,
+        body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [to], subject: items.length === 1 ? 'Something is waiting at the Guild' : `${items.length} things are waiting at the Guild`, html, text: plain(html),
           ...(process.env.EMAIL_REPLY_TO ? { reply_to: process.env.EMAIL_REPLY_TO } : {}) }),
       });
       if (res.ok) sent++;

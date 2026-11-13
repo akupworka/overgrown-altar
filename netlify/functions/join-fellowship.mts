@@ -4,7 +4,7 @@
 //
 // Needs SUPABASE_SERVICE_ROLE_KEY and RESEND_API_KEY (already set for the other emails); EMAIL_FROM optional.
 import { createClient } from '@supabase/supabase-js';
-import { letter } from './notify-writer.mts';
+import { letter, plain } from './notify-writer.mts';
 
 const SUPABASE_URL = 'https://zblgggifysohxqtgvgxs.supabase.co';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -45,7 +45,7 @@ export default async (req: Request) => {
   });
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${resend}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [email], subject: 'Welcome to the Fellowship', html,
+    body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Overgrown Altar <editor@overgrownaltar.com>', to: [email], subject: 'Welcome to the Fellowship', html, text: plain(html),
       ...(process.env.EMAIL_REPLY_TO ? { reply_to: process.env.EMAIL_REPLY_TO } : {}) }),
   });
   if (!res.ok) return json({ error: 'Your account is ready, but the welcome email didn’t send. Use “Forgot your password?” on the Desk to get in.' }, 502);

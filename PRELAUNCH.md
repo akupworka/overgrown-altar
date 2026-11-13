@@ -7,6 +7,13 @@ words, top to bottom, and tick things off here as they are done. (Started 11 Nov
 - [ ] **A proper sender for sign-in emails.** Supabase's built-in sender only delivers to the owner's own team addresses,
       a few an hour, so "Forgot your password?" and confirmation emails would not reach real members. Needs an account
       with an email service and a change to the sign-in email settings (ask the owner first; it touches auth).
+- [ ] **Our emails land in junk (reported 13 Nov 2026).** The site's letters go out through Resend from
+      editor@overgrownaltar.com, and now carry a plain-text copy beside the designed one. Still to do, by the owner:
+      in Resend > Domains, every record for overgrownaltar.com must read Verified (SPF and DKIM); add a DMARC record
+      at the domain's DNS (name `_dmarc`, type TXT, value `v=DMARC1; p=none;`); set `EMAIL_REPLY_TO` in Netlify to a
+      real inbox; ask the first few people to press "Not junk". Parked, ask first (it changes the invite link): the
+      Fellowship letter's button points at supabase.co, not overgrownaltar.com, which mail services distrust.
+      Guild invitations still go out through Supabase's own sender until the item above is done.
 - [ ] **Backups.** The free Supabase plan keeps none. Move to Pro ($25 a month) before real members store real work.
       Pro also stops the project being paused after a quiet week.
 - [x] **The sample data is off** (cleared 12 Nov 2026, at the owner's word). Removed: 76 pretend members and everything
