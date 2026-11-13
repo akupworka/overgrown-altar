@@ -158,6 +158,10 @@
   .ap-step { border: 0; padding: 0; margin: 0; min-width: 0; text-align: left; }
   .ap-step[hidden] { display: none; }
   .ap-hint { display: block; margin-top: 6px; font-family: var(--serif); font-style: italic; font-size: 14px; color: #8C8679; }
+  .ap-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-top: 6px; }
+  .ap-foot .ap-hint { margin-top: 0; }
+  .ap-count { margin-left: auto; flex: none; white-space: nowrap; font-family: var(--sans); font-size: 10px; letter-spacing: .14em; font-variant-numeric: lining-nums tabular-nums; color: #8A7B68; }
+  .ap-count.near { color: var(--oxblood); }
   .ap-pillars { justify-content: flex-start; margin: 6px 0 0; }
   .apply-card .ap-all { font-style: italic; }
   .ap-agree { display: flex; flex-direction: column; gap: 12px; margin: 6px 0 4px; }

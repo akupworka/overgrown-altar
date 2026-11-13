@@ -44,19 +44,18 @@
       <label class="dw-topic ap-all"><input type="checkbox" name="pillar-all" value="yes" />All three</label>
     </div>
   </div>
-  <label class="dw-field"><span class="dw-label">Where your work has appeared</span><span class="dw-line-row"><textarea name="experience" rows="3" placeholder="Publications, blogs, exhibitions, or “nowhere yet”: that is fine."></textarea></span></label>
-  <label class="dw-field"><span class="dw-label">A sample of your work<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="sample" rows="6" required placeholder="Paste 150 to 500 words, or a link to a piece or a gallery."></textarea></span><span class="ap-hint">Your best short piece, or an excerpt. Photographers and designers: a link to your images.</span></label>
+  <label class="dw-field"><span class="dw-label">Where your work has appeared</span><span class="dw-line-row"><textarea name="experience" rows="3" maxlength="600" placeholder="Publications, blogs, exhibitions, or “nowhere yet”: that is fine."></textarea></span><span class="ap-foot"><span class="ap-count" aria-hidden="true">0 / 600</span></span></label>
+  <label class="dw-field"><span class="dw-label">A sample of your work<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="sample" rows="6" required maxlength="4000" placeholder="Paste 150 to 500 words, or a link to a piece or a gallery."></textarea></span><span class="ap-foot"><span class="ap-hint">Your best short piece, or an excerpt. Photographers and designers: a link to your images.</span><span class="ap-count" aria-hidden="true">0 / 4,000</span></span></label>
 </fieldset>
 
 <fieldset class="ap-step" data-step="2" hidden>
   <legend class="ap-h"><span class="num">III</span><span class="ap-of">Step 3 of 3</span>Faith &amp; commitment</legend>
-  <label class="dw-field"><span class="dw-label">Your walk with Christ<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="faith" rows="4" required placeholder="A few honest lines, and where you worship."></textarea></span></label>
-  <label class="dw-field"><span class="dw-label">Why this table?<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="why" rows="3" required placeholder="What you hope to bring, and to be sharpened in."></textarea></span></label>
+  <label class="dw-field"><span class="dw-label">Your walk with Christ<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="faith" rows="4" required maxlength="1500" placeholder="A few honest lines, and where you worship."></textarea></span><span class="ap-foot"><span class="ap-count" aria-hidden="true">0 / 1,500</span></span></label>
+  <label class="dw-field"><span class="dw-label">Why this table?<i class="req" aria-hidden="true">*</i></span><span class="dw-line-row"><textarea name="why" rows="3" required maxlength="1000" placeholder="What you hope to bring, and to be sharpened in."></textarea></span><span class="ap-foot"><span class="ap-count" aria-hidden="true">0 / 1,000</span></span></label>
   <div class="dw-field"><span class="dw-label">How often you could bring work<i class="req" aria-hidden="true">*</i></span>
     <div class="dw-topics">
-      <label class="dw-topic"><input type="radio" name="commitment" value="Monthly" required />Monthly</label>
-      <label class="dw-topic"><input type="radio" name="commitment" value="Each season" />Each season</label>
-      <label class="dw-topic"><input type="radio" name="commitment" value="When something is ready" />When it is ready</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="Weekly" required />Weekly</label>
+      <label class="dw-topic"><input type="radio" name="commitment" value="Monthly" />Monthly</label>
     </div>
   </div>
   <div class="ap-agree">
@@ -114,6 +113,12 @@
     const all = form.querySelector<HTMLInputElement>('input[name="pillar-all"]');
     all?.addEventListener('change', () => rooms.forEach((r) => (r.checked = all.checked)));
     rooms.forEach((r) => r.addEventListener('change', () => { if (all) all.checked = rooms.every((x) => x.checked); }));
+    // Each long answer shows how much of its room is used; the count turns red near the end.
+    for (const ta of form.querySelectorAll<HTMLTextAreaElement>('textarea[maxlength]')) {
+      const out = ta.closest('.dw-field')?.querySelector<HTMLElement>('.ap-count'); if (!out) continue;
+      const tell = () => { out.textContent = `${ta.value.length.toLocaleString('en-US')} / ${ta.maxLength.toLocaleString('en-US')}`; out.classList.toggle('near', ta.value.length >= ta.maxLength * 0.9); };
+      ta.addEventListener('input', tell); tell();
+    }
     next.addEventListener('click', () => { if (ok(at)) show(at + 1); });
     back.addEventListener('click', () => show(at - 1));
     // Enter in a field moves to the next step; only the last step can send, and only when every step is complete.
